@@ -108,7 +108,7 @@ class AppTypography {
     fontSize: 13,
     fontWeight: FontWeight.w400,
     height: 1.4,
-    color: AppColors.subtitleGrey,
+    color: AppColors.flora,
   );
 
   /// Caption Medium — 13px w500 (balance visibility toggle, form hints)

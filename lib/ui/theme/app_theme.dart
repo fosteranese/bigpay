@@ -4,20 +4,20 @@ import 'package:google_fonts/google_fonts.dart';
 class AppColors {
   static const primary = Color(0xFF20428C);
   static const secondary = Color(0xFF78C143);
-  static const background = Color(0xFFF3F5FA);
   static const white = Color(0xFFFFFFFF);
   static const black = Color(0xFF010101);
   static const textDark = Color(0xFF242424);
   static const subtitleGrey = Color(0xFF919195);
   static const shade2 = Color(0xFF93B2F0);
-  static const tertiary = Color(0xFF55A11F);
-  static const offWhite = Color(0xFFF6FAFF);
+  static const offWhite = Color(0xFFF8F8F8);
   static const inactiveBorder = Color(0xFFD9DADB);
   static const danger = Color(0xFFDE0101);
   static const pending = Color(0xFFEA8406);
   static const fade = Color(0xFFD9D9D9);
   static const shade3 = Color(0xFFABBAC4);
   static const flora = Color(0xFF919195);
+  static const tertiary = Color(0xFFEDEDED);
+  static const background = Color(0xFFE0E3EF);
 }
 
 class AppTheme {
@@ -55,7 +55,7 @@ class AppTheme {
         ),
         bodyMedium: textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w400,
-          color: AppColors.subtitleGrey,
+          color: AppColors.flora,
         ),
         labelLarge: textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w500,
@@ -63,7 +63,7 @@ class AppTheme {
         ),
         labelSmall: textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w400,
-          color: AppColors.subtitleGrey,
+          color: AppColors.flora,
         ),
       ),
       appBarTheme: AppBarTheme(
@@ -80,7 +80,7 @@ class AppTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.offWhite,
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.subtitleGrey,
+        unselectedItemColor: AppColors.flora,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
         selectedLabelStyle: GoogleFonts.mulish(

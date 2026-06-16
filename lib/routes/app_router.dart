@@ -1,3 +1,4 @@
+import 'package:bigpay/ui/pages/auth/signin/new_login.pg.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,10 +8,20 @@ class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: WalkthroughPage.routeName,
+    initialLocation: NewLoginPage.routeName,
     routes: [
-      GoRoute(path: SplashScreenPage.routeName, builder: (context, state) => const SplashScreenPage()),
-      GoRoute(path: WalkthroughPage.routeName, builder: (context, state) => const WalkthroughPage()),
+      GoRoute(
+        path: SplashScreenPage.routeName,
+        builder: (context, state) => const SplashScreenPage(),
+      ),
+      GoRoute(
+        path: WalkthroughPage.routeName,
+        builder: (context, state) => const WalkthroughPage(),
+      ),
+      GoRoute(
+        path: NewLoginPage.routeName,
+        builder: (context, state) => const NewLoginPage(),
+      ),
     ],
   );
 }
