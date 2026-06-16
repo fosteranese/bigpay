@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
+
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/otp_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:flutter/material.dart';
 
 class OtpSignUpPage extends StatefulWidget {
   const OtpSignUpPage({super.key});
@@ -15,7 +15,13 @@ class OtpSignUpPage extends StatefulWidget {
 }
 
 class _OtpSignUpPageState extends State<OtpSignUpPage> {
-  final _phoneNumberFocusNode = FocusNode();
+  final _otp = ValueNotifier('');
+
+  @override
+  void dispose() {
+    _otp.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +45,30 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
           ),
         ],
       ),
-      bottomNav: FormButton(onPressed: () {}, text: 'Continue'),
+      bottomNav: ValueListenableBuilder(
+        valueListenable: _otp,
+        builder: (context, value, child) {
+          return FormButton(
+            onPressed: () {},
+            enabled: value.length == 6,
+            text: 'Continue',
+          );
+        },
+      ),
       child: Form(
         child: Column(
           children: [
-            FormOtpInput(),
+            FormOtpInput(
+              count: 6,
+              enableAutofill: true,
+              onChanged: (value) {
+                _otp.value = value;
+              },
+              onCompleted: (value) {
+                _otp.value = value;
+              },
+              onResend: () {},
+            ),
           ],
         ),
       ),

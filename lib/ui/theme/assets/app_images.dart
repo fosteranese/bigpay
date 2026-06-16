@@ -1,10 +1,13 @@
+const baseImageUrl = 'assets/img';
+
 class SvgImages {
   SvgImages._();
-  static const String icon = 'assets/img/icon.svg';
-  static const String splashBgIcon = 'assets/img/splash_screen_bg_icon.svg';
-  static const String biometric = 'assets/img/biometric.svg';
-  static const String visible = 'assets/img/visible.svg';
-  static const String invisible = 'assets/img/invisible.svg';
+  static const String icon = '$baseImageUrl/icon.svg';
+  static const String splashBgIcon = '$baseImageUrl/splash_screen_bg_icon.svg';
+  static const String biometric = '$baseImageUrl/biometric.svg';
+  static const String visible = '$baseImageUrl/visible.svg';
+  static const String invisible = '$baseImageUrl/invisible.svg';
+  static const String timer = '$baseImageUrl/timer.svg';
 }
 
 class PngImages {
@@ -13,5 +16,5 @@ class PngImages {
 
 class JpgImages {
   JpgImages._();
-  static const String walkthrough1 = 'assets/img/walkthrough-1.jpg';
+  static const String walkthrough1 = '$baseImageUrl/walkthrough-1.jpg';
 }

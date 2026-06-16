@@ -14,6 +14,7 @@ class FormInput extends StatefulWidget {
     this.next,
     this.keyboardType,
     this.textInputAction,
+    this.onChanged,
   });
   final TextEditingController controller;
   final String? label;
@@ -24,6 +25,7 @@ class FormInput extends StatefulWidget {
   final void Function(String value)? next;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final void Function(String value)? onChanged;
 
   @override
   State<FormInput> createState() => _FormInputState();
@@ -64,6 +66,9 @@ class _FormInputState extends State<FormInput> {
               textInputAction: _textInputAction,
               onFieldSubmitted: (value) {
                 widget.next?.call(value);
+              },
+              onChanged: (value) {
+                widget.onChanged?.call(value);
               },
               decoration: InputDecoration(
                 hintText: widget.placeholder,

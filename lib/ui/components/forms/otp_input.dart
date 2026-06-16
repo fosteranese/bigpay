@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class FormOtpInput extends StatefulWidget {
   const FormOtpInput({
@@ -12,7 +14,7 @@ class FormOtpInput extends StatefulWidget {
     this.count = 6,
     this.obscureText = false,
     this.enableAutofill = true,
-    this.resendDuration = 30,
+    this.resendDuration = 90,
     this.error,
     this.onChanged,
     this.onCompleted,
@@ -45,12 +47,16 @@ class FormOtpInputState extends State<FormOtpInput> {
     super.initState();
     _controllers = List.generate(widget.count, (i) {
       final c = TextEditingController();
-      c.addListener(() => _alignCursor(i));
+      c.addListener(() {
+        if (mounted) setState(() => _alignCursor(i));
+      });
       return c;
     });
     _focusNodes = List.generate(widget.count, (_) {
       final node = FocusNode();
-      node.addListener(_onFocusChange);
+      node.addListener(() {
+        if (mounted) setState(_onFocusChange);
+      });
       return node;
     });
     if (widget.enableAutofill) {
@@ -196,12 +202,12 @@ class FormOtpInputState extends State<FormOtpInput> {
                 border: const UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: AppColors.tertiary,
+                    color: _borderColor(index),
                   ),
                 ),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: AppColors.primary,
+                    color: AppColors.tint,
                     width: 2,
                   ),
                 ),
@@ -238,6 +244,12 @@ class FormOtpInputState extends State<FormOtpInput> {
         ],
       ),
     );
+  }
+
+  Color _borderColor(int index) {
+    if (_focusNodes[index].hasFocus) return AppColors.tint;
+    if (_controllers[index].text.isNotEmpty) return AppColors.primary;
+    return AppColors.tertiary;
   }
 
   void _onResendPressed() {
@@ -292,14 +304,24 @@ class FormOtpInputState extends State<FormOtpInput> {
             child: Text(
               'Resend Code',
               style: AppTypography.smallDetailsBold.copyWith(
-                color: AppColors.primary,
+                color: AppColors.black,
+                decoration: .underline,
               ),
             ),
           )
         else
-          Text(
-            'Resend code in ${_remainingSeconds}s',
-            style: AppTypography.smallDetails,
+          Row(
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
+            crossAxisAlignment: .center,
+            children: [
+              SvgPicture.asset(SvgImages.timer),
+              SizedBox(width: 5),
+              Text(
+                'Resend code in ${Duration(seconds: _remainingSeconds).toString().split('.').first.substring(2)}',
+                style: AppTypography.smallDetails,
+              ),
+            ],
           ),
       ],
     );

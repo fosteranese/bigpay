@@ -11,12 +11,14 @@ class MainLayout extends StatefulWidget {
     this.subtitleWidget,
     required this.child,
     this.bottomNav,
+    this.bottomSize = 100,
   });
   final String? title;
   final String? subtitle;
   final Widget? subtitleWidget;
   final Widget child;
   final Widget? bottomNav;
+  final double bottomSize;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -85,7 +87,7 @@ class _MainLayoutState extends State<MainLayout> {
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: Size(double.maxFinite, 100),
+                preferredSize: Size(double.maxFinite, widget.bottomSize),
                 child: Container(
                   width: double.maxFinite,
                   padding: .only(left: 20, right: 20, bottom: 10),

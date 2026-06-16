@@ -9,11 +9,15 @@ class FormPasswordInput extends StatefulWidget {
     this.label,
     this.placeholder,
     this.focusNode,
+    this.next,
+    this.onChanged,
   });
   final TextEditingController controller;
   final String? label;
   final String? placeholder;
   final FocusNode? focusNode;
+  final void Function(String value)? next;
+  final void Function(String value)? onChanged;
 
   @override
   State<FormPasswordInput> createState() => _FormPasswordInputState();
@@ -34,6 +38,8 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
           isPassword: value,
           focusNode: widget.focusNode,
           keyboardType: value ? null : .visiblePassword,
+          next: widget.next,
+          onChanged: widget.onChanged,
           suffix: IconButton(
             onPressed: () {
               _isPassword.value = !_isPassword.value;
