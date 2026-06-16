@@ -13,7 +13,7 @@ class FormButton extends StatelessWidget {
     this.labelSize,
     this.icon,
     this.buttonIconAlignment = ButtonIconAlignment.right,
-    this.backgroundColor = AppColors.secondary,
+    this.backgroundColor = AppColors.tint,
     this.foregroundColor = Colors.white,
     this.iconColor,
     this.height = 56,

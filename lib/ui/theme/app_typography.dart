@@ -87,10 +87,10 @@ class AppTypography {
     color: AppColors.subtitleGrey,
   );
 
-  /// Small details Medium — 14px w500
+  /// Small details Medium — 14px w600
   static TextStyle get smallDetailsMedium => GoogleFonts.mulish(
     fontSize: 14,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     height: 1.4,
     color: AppColors.black,
   );

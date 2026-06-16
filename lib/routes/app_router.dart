@@ -1,4 +1,7 @@
+import 'package:bigpay/ui/pages/auth/signin/biometric_login.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/new_login.pg.dart';
+import 'package:bigpay/ui/pages/auth/signup/otp_signup.pg.dart';
+import 'package:bigpay/ui/pages/auth/signup/start_signup.pg.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,7 +11,7 @@ class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: NewLoginPage.routeName,
+    initialLocation: OtpSignUpPage.routeName,
     routes: [
       GoRoute(
         path: SplashScreenPage.routeName,
@@ -21,6 +24,18 @@ class AppRouter {
       GoRoute(
         path: NewLoginPage.routeName,
         builder: (context, state) => const NewLoginPage(),
+      ),
+      GoRoute(
+        path: BiometricLoginPage.routeName,
+        builder: (context, state) => const BiometricLoginPage(),
+      ),
+      GoRoute(
+        path: StartSignUpPage.routeName,
+        builder: (context, state) => const StartSignUpPage(),
+      ),
+      GoRoute(
+        path: OtpSignUpPage.routeName,
+        builder: (context, state) => const OtpSignUpPage(),
       ),
     ],
   );
