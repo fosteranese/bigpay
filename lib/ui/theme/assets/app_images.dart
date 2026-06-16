@@ -17,4 +17,5 @@ class PngImages {
 class JpgImages {
   JpgImages._();
   static const String walkthrough1 = '$baseImageUrl/walkthrough-1.jpg';
+  static const String avatar = '$baseImageUrl/avatar.jpg';
 }

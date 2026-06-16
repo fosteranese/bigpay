@@ -15,6 +15,7 @@ class FormOtpInput extends StatefulWidget {
     this.obscureText = false,
     this.enableAutofill = true,
     this.resendDuration = 90,
+    this.autoFocus = true,
     this.error,
     this.onChanged,
     this.onCompleted,
@@ -25,6 +26,7 @@ class FormOtpInput extends StatefulWidget {
   final bool obscureText;
   final bool enableAutofill;
   final int resendDuration;
+  final bool autoFocus;
   final String? error;
   final void Function(String value)? onChanged;
   final void Function(String value)? onCompleted;
@@ -65,6 +67,11 @@ class FormOtpInputState extends State<FormOtpInput> {
     }
     _remainingSeconds = widget.resendDuration;
     _startTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.autoFocus) {
+        _focusNodes[0].requestFocus();
+      }
+    });
   }
 
   void _onAutoFillDetected() {

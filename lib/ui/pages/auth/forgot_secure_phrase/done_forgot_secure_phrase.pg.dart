@@ -7,22 +7,9 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class DoneSignUpPage extends StatefulWidget {
-  const DoneSignUpPage({super.key});
-  static String routeName = '/auth/done-signup';
-
-  @override
-  State<DoneSignUpPage> createState() => _DoneSignUpPageState();
-}
-
-class _DoneSignUpPageState extends State<DoneSignUpPage> {
-  final _otp = ValueNotifier('');
-
-  @override
-  void dispose() {
-    _otp.dispose();
-    super.dispose();
-  }
+class DoneForgotSecurePhrasePage extends StatelessWidget {
+  const DoneForgotSecurePhrasePage({super.key});
+  static String routeName = '/auth/done-forgot-secure-phrase';
 
   @override
   Widget build(BuildContext context) {
@@ -34,26 +21,28 @@ class _DoneSignUpPageState extends State<DoneSignUpPage> {
       ),
       bottomNav: FormButton(
         onPressed: () {},
-        text: 'Get Started',
+        text: 'Log In',
       ),
       child: Column(
         mainAxisSize: .max,
         crossAxisAlignment: .center,
         children: [
-          CircleAvatar(
-            radius: 70,
-            backgroundColor: AppColors.tintShade3,
-            backgroundImage: AssetImage(JpgImages.avatar),
+          Icon(
+            Icons.check,
+            size: 50,
+            color: AppColors.secondary,
           ),
           const SizedBox(height: 20),
           Text(
-            'Welcome aboard!',
-            style: AppTypography.display2,
+            'Phone Number Verified!',
+            style: AppTypography.display2.copyWith(
+              color: AppColors.secondary,
+            ),
             textAlign: .center,
           ),
           const SizedBox(height: 10),
           Text(
-            'Your account is ready. Welcome to a simpler, faster, and more secure way to manage your digital finances.',
+            'Your secret question has been sent to your phone number (+233********219) and email address t*****09@gmail.com',
             style: AppTypography.smallDetails.copyWith(
               color: AppColors.black,
             ),

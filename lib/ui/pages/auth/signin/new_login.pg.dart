@@ -5,6 +5,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class NewLoginPage extends StatefulWidget {
@@ -80,7 +81,7 @@ class _NewLoginPageState extends State<NewLoginPage> {
                     mainAxisAlignment: .start,
                     crossAxisAlignment: .center,
                     children: [
-                      SvgPicture.asset('assets/img/biometric.svg'),
+                      SvgPicture.asset(SvgImages.biometric),
                       SizedBox(width: 5),
                       Text(
                         'Biometric Login',

@@ -6,6 +6,7 @@ class FormPinInput extends StatelessWidget {
     super.key,
     this.formKey,
     this.count = 4,
+    this.autoFocus = true,
     this.error,
     this.onChanged,
     this.onCompleted,
@@ -13,6 +14,7 @@ class FormPinInput extends StatelessWidget {
 
   final GlobalKey<FormOtpInputState>? formKey;
   final int count;
+  final bool autoFocus;
   final String? error;
   final void Function(String value)? onChanged;
   final void Function(String value)? onCompleted;
@@ -24,6 +26,7 @@ class FormPinInput extends StatelessWidget {
       count: count,
       obscureText: true,
       enableAutofill: false,
+      autoFocus: autoFocus,
       error: error,
       onChanged: onChanged,
       onCompleted: onCompleted,

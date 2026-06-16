@@ -1,5 +1,11 @@
+import 'package:bigpay/ui/pages/auth/forgot_pwd/done_forgot_pwd.pg.dart';
+import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/done_forgot_secure_phrase.pg.dart';
+import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/start_forgot_secure_phrase.pg.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bigpay/ui/pages/auth/forgot_pwd/otp_forgot_pwd.pg.dart';
+import 'package:bigpay/ui/pages/auth/forgot_pwd/pwd_forgot_pwd.pg.dart';
+import 'package:bigpay/ui/pages/auth/forgot_pwd/start_forgot_pwd.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/biometric_login.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/new_login.pg.dart';
 import 'package:bigpay/ui/pages/auth/signup/done_signup.pg.dart';
@@ -15,7 +21,7 @@ class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: DoneSignUpPage.routeName,
+    initialLocation: DoneForgotSecurePhrasePage.routeName,
     routes: [
       GoRoute(
         path: SplashScreenPage.routeName,
@@ -56,6 +62,30 @@ class AppRouter {
       GoRoute(
         path: DoneSignUpPage.routeName,
         builder: (context, state) => const DoneSignUpPage(),
+      ),
+      GoRoute(
+        path: StartForgotPasswordPage.routeName,
+        builder: (context, state) => const StartForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: OtpForgotPasswordPage.routeName,
+        builder: (context, state) => const OtpForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: CreatePwdForgotPwdPage.routeName,
+        builder: (context, state) => const CreatePwdForgotPwdPage(),
+      ),
+      GoRoute(
+        path: DoneForgotPwdPage.routeName,
+        builder: (context, state) => const DoneForgotPwdPage(),
+      ),
+      GoRoute(
+        path: StartForgotSecurePhrasePage.routeName,
+        builder: (context, state) => const StartForgotSecurePhrasePage(),
+      ),
+      GoRoute(
+        path: DoneForgotSecurePhrasePage.routeName,
+        builder: (context, state) => const DoneForgotSecurePhrasePage(),
       ),
     ],
   );

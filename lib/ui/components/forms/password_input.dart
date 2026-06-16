@@ -1,5 +1,6 @@
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:flutter/material.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter_svg/svg.dart';
 
 class FormPasswordInput extends StatefulWidget {
@@ -45,7 +46,7 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
               _isPassword.value = !_isPassword.value;
             },
             icon: SvgPicture.asset(
-              'assets/img/${value ? 'visible' : 'invisible'}.svg',
+              value ? SvgImages.visible : SvgImages.invisible,
             ),
           ),
         );

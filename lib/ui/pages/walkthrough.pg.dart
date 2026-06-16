@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:bigpay/models/walkthrough_data.dart';
@@ -26,13 +27,13 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
       title: 'Securely Sent. Instantly.',
       subtitle:
           'Manage your virtual wallet with a futuristic interface designed for speed and complete peace of mind.',
-      image: 'assets/img/walkthrough-1.jpg',
+      image: JpgImages.walkthrough1,
     ),
     WalkthroughData(
       title: 'Securely Sent. Instantly.',
       subtitle:
           'Manage your virtual wallet with a futuristic interface designed for speed and complete peace of mind.',
-      image: 'assets/img/walkthrough-1.jpg',
+      image: JpgImages.walkthrough1,
     ),
   ];
 

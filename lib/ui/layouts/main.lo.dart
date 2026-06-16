@@ -13,6 +13,7 @@ class MainLayout extends StatefulWidget {
     this.bottomNav,
     this.bottomSize = 100,
     this.background,
+    this.showBackBtn = true,
   });
   final String? title;
   final String? subtitle;
@@ -21,6 +22,7 @@ class MainLayout extends StatefulWidget {
   final Widget? bottomNav;
   final double bottomSize;
   final Widget? background;
+  final bool showBackBtn;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -90,16 +92,18 @@ class _MainLayoutState extends State<MainLayout> {
             automaticallyImplyLeading: false,
             automaticallyImplyActions: false,
             leadingWidth: 70,
-            leading: IconButton.filled(
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.white,
-                fixedSize: Size(28, 28),
-              ),
-              onPressed: () {},
-              icon: Icon(
-                Icons.chevron_left_outlined,
-              ),
-            ),
+            leading: widget.showBackBtn
+                ? IconButton.filled(
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.white,
+                      fixedSize: Size(28, 28),
+                    ),
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.chevron_left_outlined,
+                    ),
+                  )
+                : null,
             bottom: PreferredSize(
               preferredSize: Size(double.maxFinite, widget.bottomSize),
               child: Container(
