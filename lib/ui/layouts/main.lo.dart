@@ -12,6 +12,7 @@ class MainLayout extends StatefulWidget {
     required this.child,
     this.bottomNav,
     this.bottomSize = 100,
+    this.background,
   });
   final String? title;
   final String? subtitle;
@@ -19,6 +20,7 @@ class MainLayout extends StatefulWidget {
   final Widget child;
   final Widget? bottomNav;
   final double bottomSize;
+  final Widget? background;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -60,101 +62,110 @@ class _MainLayoutState extends State<MainLayout> {
           ],
         ),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              floating: true,
-              snap: true,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              automaticallyImplyLeading: false,
-              automaticallyImplyActions: false,
-              leadingWidth: 70,
-              leading: IconButton.filled(
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.white,
-                  fixedSize: Size(28, 28),
-                ),
-                onPressed: () {},
-                icon: Icon(
-                  Icons.chevron_left_outlined,
-                ),
+      child: (widget.background == null)
+          ? _buildMainPage()
+          : Stack(
+              children: [
+                widget.background!,
+                _buildMainPage(),
+              ],
+            ),
+    );
+  }
+
+  Scaffold _buildMainPage() {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: true,
+            snap: true,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            automaticallyImplyLeading: false,
+            automaticallyImplyActions: false,
+            leadingWidth: 70,
+            leading: IconButton.filled(
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.white,
+                fixedSize: Size(28, 28),
               ),
-              bottom: PreferredSize(
-                preferredSize: Size(double.maxFinite, widget.bottomSize),
-                child: Container(
-                  width: double.maxFinite,
-                  padding: .only(left: 20, right: 20, bottom: 10),
-                  child: Column(
-                    mainAxisSize: .min,
-                    mainAxisAlignment: .center,
-                    crossAxisAlignment: .start,
-                    children: [
-                      SizedBox(height: 16),
-                      if (widget.title != null)
-                        Text(
-                          widget.title!,
-                          style: AppTypography.display1.copyWith(
-                            color: AppColors.black,
-                          ),
+              onPressed: () {},
+              icon: Icon(
+                Icons.chevron_left_outlined,
+              ),
+            ),
+            bottom: PreferredSize(
+              preferredSize: Size(double.maxFinite, widget.bottomSize),
+              child: Container(
+                width: double.maxFinite,
+                padding: .only(left: 20, right: 20, bottom: 10),
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .center,
+                  crossAxisAlignment: .start,
+                  children: [
+                    SizedBox(height: 16),
+                    if (widget.title != null)
+                      Text(
+                        widget.title!,
+                        style: AppTypography.display1.copyWith(
+                          color: AppColors.black,
                         ),
-                      if (widget.subtitle != null)
-                        Text(
-                          widget.subtitle!,
-                          style: AppTypography.display1.copyWith(
-                            color: AppColors.black,
-                          ),
-                        )
-                      else if (widget.subtitleWidget != null)
-                        widget.subtitleWidget!,
-                    ],
-                  ),
+                      ),
+                    if (widget.subtitle != null)
+                      Text(
+                        widget.subtitle!,
+                        style: AppTypography.smallDetails,
+                      )
+                    else if (widget.subtitleWidget != null)
+                      widget.subtitleWidget!,
+                  ],
                 ),
               ),
-              flexibleSpace: ClipRect(
-                child: BackdropFilter(
-                  filter: .blur(
-                    sigmaX: 12 * _blurOpacity,
-                    sigmaY: 12 * _blurOpacity,
-                  ),
-                  child: Container(
-                    color: AppColors.white.withValues(
-                      alpha: 0.15 * _blurOpacity,
-                    ),
+            ),
+            flexibleSpace: ClipRect(
+              child: BackdropFilter(
+                filter: .blur(
+                  sigmaX: 12 * _blurOpacity,
+                  sigmaY: 12 * _blurOpacity,
+                ),
+                child: Container(
+                  color: AppColors.white.withValues(
+                    alpha: 0.15 * _blurOpacity,
                   ),
                 ),
               ),
             ),
-            SliverFillRemaining(
-              fillOverscroll: true,
-              hasScrollBody: false,
-              child: Padding(
-                padding: const .all(20),
-                child: widget.child,
-              ),
+          ),
+          SliverFillRemaining(
+            fillOverscroll: true,
+            hasScrollBody: false,
+            child: Padding(
+              padding: const .all(20),
+              child: widget.child,
             ),
-          ],
-        ),
-        bottomNavigationBar: widget.bottomNav != null
-            ? Container(
-                padding: .only(
-                  right: 20,
-                  left: 20,
-                  top: 15,
-                  bottom: 10,
-                ),
-                child: SafeArea(
-                  child: widget.bottomNav!,
-                ),
-              )
-            : null,
+          ),
+        ],
       ),
+      bottomNavigationBar: widget.bottomNav != null
+          ? Container(
+              padding: .only(
+                right: 20,
+                left: 20,
+                top: 15,
+                bottom: 10,
+              ),
+              child: SafeArea(
+                child: widget.bottomNav!,
+              ),
+            )
+          : null,
     );
   }
 }

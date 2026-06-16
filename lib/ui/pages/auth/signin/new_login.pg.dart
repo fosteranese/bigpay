@@ -46,6 +46,9 @@ class _NewLoginPageState extends State<NewLoginPage> {
       bottomNav: FormButton(onPressed: () {}, text: 'Sign In'),
       child: Form(
         child: Column(
+          mainAxisSize: .min,
+          mainAxisAlignment: .start,
+          crossAxisAlignment: .center,
           children: [
             FormInput(
               label: 'Phone Number',

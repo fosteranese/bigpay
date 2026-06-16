@@ -1,19 +1,19 @@
-import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/password_input.dart';
-import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
-class CreatePasswordSignUpPage extends StatefulWidget {
-  const CreatePasswordSignUpPage({super.key});
-  static String routeName = '/auth/create-password-signup';
+import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/forms/select_input.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
+
+class CreateSecurePhrasePage extends StatefulWidget {
+  const CreateSecurePhrasePage({super.key});
+  static String routeName = '/auth/create-secure-phrase-signup';
 
   @override
-  State<CreatePasswordSignUpPage> createState() =>
-      _CreatePasswordSignUpPageState();
+  State<CreateSecurePhrasePage> createState() => _CreateSecurePhrasePageState();
 }
 
-class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
+class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
 
@@ -32,42 +32,47 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: 'Create Password',
-      bottomSize: 60,
+      title: 'Create a secure phrase',
+      subtitle:
+          'Customize your private Q&A for faster verification and safer digital payments.',
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
         builder: (context, value, child) {
           return FormButton(
             enabled: value,
             onPressed: () {},
-            text: 'Save Password',
+            text: 'Continue',
           );
         },
       ),
       child: Form(
         child: Column(
+          mainAxisSize: .min,
+          mainAxisAlignment: .start,
+          crossAxisAlignment: .center,
           children: [
-            FormPasswordInput(
-              label: 'Password',
+            FormSelectInput(
+              label: 'Choose a Question',
+              placeholder: 'Select...',
               focusNode: _passwordFocusNode,
               controller: _passwordController,
               next: (_) {
                 _confirmPasswordFocusNode.requestFocus();
               },
               onChanged: _onChanged,
+              options: [
+                FormSelectOption(
+                  id: 'id',
+                  label: 'label',
+                ),
+              ],
             ),
             const SizedBox(height: 15),
-            FormPasswordInput(
-              label: 'Confirm Password',
+            FormInput(
+              label: 'Answer to the Question',
               focusNode: _confirmPasswordFocusNode,
               controller: _confirmPasswordController,
               onChanged: _onChanged,
-            ),
-            const SizedBox(height: 25),
-            Text(
-              'Password must be at least 6 characters and include letters, numbers, and special characters (e.g. !\$@%).',
-              style: AppTypography.caption,
-              textAlign: .center,
             ),
           ],
         ),

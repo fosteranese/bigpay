@@ -1,12 +1,14 @@
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class FormInput extends StatefulWidget {
   const FormInput({
     super.key,
     required this.controller,
     this.label,
+    this.readOnly = false,
     this.placeholder,
     this.suffix,
     this.isPassword = false,
@@ -14,9 +16,12 @@ class FormInput extends StatefulWidget {
     this.next,
     this.keyboardType,
     this.textInputAction,
+    this.maxLength,
+    this.inputFormatters,
     this.onChanged,
   });
   final TextEditingController controller;
+  final bool readOnly;
   final String? label;
   final String? placeholder;
   final Widget? suffix;
@@ -25,6 +30,8 @@ class FormInput extends StatefulWidget {
   final void Function(String value)? next;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
   final void Function(String value)? onChanged;
 
   @override
@@ -59,11 +66,14 @@ class _FormInputState extends State<FormInput> {
                 ),
               ),
             TextFormField(
+              readOnly: widget.readOnly,
               focusNode: widget.focusNode,
               obscureText: widget.isPassword,
               controller: widget.controller,
               keyboardType: widget.keyboardType,
               textInputAction: _textInputAction,
+              maxLength: widget.maxLength,
+              inputFormatters: widget.inputFormatters,
               onFieldSubmitted: (value) {
                 widget.next?.call(value);
               },
@@ -73,6 +83,7 @@ class _FormInputState extends State<FormInput> {
               decoration: InputDecoration(
                 hintText: widget.placeholder,
                 hintStyle: AppTypography.caption,
+                counterText: '',
                 enabledBorder: OutlineInputBorder(
                   borderRadius: .circular(10),
                   borderSide: BorderSide(
