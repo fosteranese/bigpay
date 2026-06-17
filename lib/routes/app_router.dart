@@ -3,13 +3,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
-import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/forgot_secure_phrase.dart';
+import 'package:bigpay/ui/pages/dashboard.pg.dart';
 
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: DoneForgotSecurePhrasePage.route.path,
+    initialLocation: DashboardPage.route.path,
     routes: [
       ...rootRoutes,
       authRoute,
@@ -26,8 +26,8 @@ class PageRouteDefinition {
     required this.path,
     String? subPath,
     String? name,
-  })  : subPath = subPath ?? path.split('/').last,
-        name = name ?? path.split('/').last;
+  }) : subPath = subPath ?? path.split('/').last,
+       name = name ?? path.split('/').last;
 }
 
 extension GoRouteX on PageRouteDefinition {

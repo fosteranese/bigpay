@@ -7,6 +7,8 @@ class AppColors {
   static const tint = Color(0xFF55A11F);
   static const tintShade3 = Color(0xffD8F3C5);
   static const white = Color(0xFFFFFFFF);
+  static const white11 = Color(0x1CFFFFFF);
+  static const white20 = Color(0x33E2ECFF);
   static const black = Color(0xFF010101);
   static const textDark = Color(0xFF242424);
   static const subtitleGrey = Color(0xFF919195);

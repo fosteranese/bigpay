@@ -1,7 +1,8 @@
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 
 enum ButtonIconAlignment { left, right }
 
