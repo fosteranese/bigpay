@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class DoneForgotSecurePhrasePage extends StatelessWidget {
   const DoneForgotSecurePhrasePage({super.key});
-  static String routeName = '/auth/done-forgot-secure-phrase';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/done-forgot-secure-phrase');
 
   @override
   Widget build(BuildContext context) {

@@ -3,11 +3,12 @@ import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 class StartSignUpPage extends StatefulWidget {
   const StartSignUpPage({super.key});
-  static String routeName = '/auth/start-signup';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/start-signup');
 
   @override
   State<StartSignUpPage> createState() => _StartSignUpPageState();

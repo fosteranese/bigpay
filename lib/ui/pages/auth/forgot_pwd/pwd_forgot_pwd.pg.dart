@@ -2,11 +2,12 @@ import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 class CreatePwdForgotPwdPage extends StatefulWidget {
   const CreatePwdForgotPwdPage({super.key});
-  static String routeName = '/auth/create-pwd-forgot-pwd';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-pwd-forgot-pwd');
 
   @override
   State<CreatePwdForgotPwdPage> createState() => _CreatePwdForgotPwdPageState();

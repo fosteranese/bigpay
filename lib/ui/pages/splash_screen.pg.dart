@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -5,7 +6,7 @@ import 'package:bigpay/ui/theme/assets/app_images.dart';
 
 class SplashScreenPage extends StatelessWidget {
   const SplashScreenPage({super.key});
-  static String routeName = '/splash-screen';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/splash-screen');
 
   @override
   Widget build(BuildContext context) {

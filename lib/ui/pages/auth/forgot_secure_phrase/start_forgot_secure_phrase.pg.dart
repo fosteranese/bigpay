@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -6,7 +7,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 
 class StartForgotSecurePhrasePage extends StatefulWidget {
   const StartForgotSecurePhrasePage({super.key});
-  static String routeName = '/auth/start-forgot-secure-phrase';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/start-forgot-secure-phrase');
 
   @override
   State<StartForgotSecurePhrasePage> createState() =>

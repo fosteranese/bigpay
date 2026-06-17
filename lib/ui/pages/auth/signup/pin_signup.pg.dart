@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -6,7 +7,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 
 class PinSignUpPage extends StatefulWidget {
   const PinSignUpPage({super.key});
-  static String routeName = '/auth/create-pin-signup';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-pin-signup');
 
   @override
   State<PinSignUpPage> createState() => _PinSignUpPageState();

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:bigpay/models/walkthrough_data.dart';
 
 class WalkthroughPage extends StatefulWidget {
   const WalkthroughPage({super.key});
-  static String routeName = '/walkthrough';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/walkthrough');
 
   @override
   State<WalkthroughPage> createState() => _WalkthroughPageState();

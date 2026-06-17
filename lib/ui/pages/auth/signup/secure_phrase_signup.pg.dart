@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -7,7 +8,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 
 class CreateSecurePhrasePage extends StatefulWidget {
   const CreateSecurePhrasePage({super.key});
-  static String routeName = '/auth/create-secure-phrase-signup';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-secure-phrase-signup');
 
   @override
   State<CreateSecurePhrasePage> createState() => _CreateSecurePhrasePageState();

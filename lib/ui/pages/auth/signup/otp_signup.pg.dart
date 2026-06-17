@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -8,7 +9,7 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 
 class OtpSignUpPage extends StatefulWidget {
   const OtpSignUpPage({super.key});
-  static String routeName = '/auth/otp-signup';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/otp-signup');
 
   @override
   State<OtpSignUpPage> createState() => _OtpSignUpPageState();

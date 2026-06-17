@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class DoneSignUpPage extends StatefulWidget {
   const DoneSignUpPage({super.key});
-  static String routeName = '/auth/done-signup';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/done-signup');
 
   @override
   State<DoneSignUpPage> createState() => _DoneSignUpPageState();

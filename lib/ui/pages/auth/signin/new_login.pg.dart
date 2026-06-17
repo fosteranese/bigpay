@@ -5,12 +5,13 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class NewLoginPage extends StatefulWidget {
   const NewLoginPage({super.key});
-  static String routeName = '/auth/new-login';
+  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/new-login');
 
   @override
   State<NewLoginPage> createState() => _NewLoginPageState();
