@@ -18,6 +18,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffF5F5F5),
       body: Container(
         alignment: .topCenter,
         width: double.maxFinite,
@@ -108,8 +109,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     Align(
                       alignment: .topRight,
-                      child: SvgPicture.asset(
-                        'assets/img/card-corner-icon.svg',
+                      child: ClipRRect(
+                        borderRadius: .circular(12),
+                        child: SvgPicture.asset(
+                          'assets/img/card-corner-icon.svg',
+                        ),
                       ),
                     ),
                     Padding(
@@ -204,8 +208,156 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             ),
+
+            SliverToBoxAdapter(
+              child: Column(
+                mainAxisSize: .min,
+                mainAxisAlignment: .start,
+                crossAxisAlignment: .start,
+                children: [
+                  Padding(
+                    padding: const .symmetric(horizontal: 20),
+                    child: Text(
+                      'Most used services',
+                      style: AppTypography.smallDetailsBold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 60,
+                    child: PageView(
+                      scrollDirection: .horizontal,
+                      pageSnapping: true,
+                      controller: PageController(
+                        viewportFraction: 0.60,
+                        keepPage: true,
+                      ),
+                      padEnds: false,
+                      children: [
+                        FrequentServiceItem(),
+                        FrequentServiceItem(),
+                        FrequentServiceItem(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const .only(
+                  top: 20,
+                  left: 15,
+                  right: 15,
+                ),
+                child: Text(
+                  'Services',
+                  style: AppTypography.header3,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: .all(15),
+              sliver: SliverGrid.count(
+                childAspectRatio: 1.3,
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+
+                children: [
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ActionButton extends StatelessWidget {
+  const ActionButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: .all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: .circular(14),
+      ),
+      child: Column(
+        mainAxisSize: .max,
+        crossAxisAlignment: .start,
+        children: [
+          SvgPicture.asset('assets/img/transfer.svg'),
+          const Spacer(),
+          Text(
+            'Transfer Money',
+            overflow: .ellipsis,
+            maxLines: 1,
+            style: AppTypography.header4,
+          ),
+          Text(
+            'Send funds anywhere securely',
+            overflow: .ellipsis,
+            maxLines: 2,
+            style: AppTypography.caption,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FrequentServiceItem extends StatelessWidget {
+  const FrequentServiceItem({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: .centerLeft,
+      margin: .only(left: 10),
+      padding: .all(5),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: .circular(30),
+      ),
+      child: Row(
+        mainAxisSize: .max,
+        children: [
+          CircleAvatar(
+            backgroundColor: AppColors.tintShade3,
+          ),
+          const SizedBox(width: 5),
+          Column(
+            mainAxisSize: .max,
+            mainAxisAlignment: .center,
+            crossAxisAlignment: .start,
+            children: [
+              Text(
+                'Airtime Purchase',
+                textAlign: .start,
+                overflow: .ellipsis,
+                style: AppTypography.captionSemibold,
+              ),
+              Text(
+                'Airtime / Data',
+                textAlign: .start,
+                overflow: .ellipsis,
+                style: AppTypography.caption,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
