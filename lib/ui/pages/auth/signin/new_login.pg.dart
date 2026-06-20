@@ -11,7 +11,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class NewLoginPage extends StatefulWidget {
   const NewLoginPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/new-login');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/new-login',
+  );
 
   @override
   State<NewLoginPage> createState() => _NewLoginPageState();
@@ -25,6 +27,7 @@ class _NewLoginPageState extends State<NewLoginPage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Sign In',
+      titleStyle: AppTypography.display1,
       subtitleWidget: Row(
         children: [
           Text(

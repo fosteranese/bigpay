@@ -1,4 +1,5 @@
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -8,7 +9,9 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 
 class CreateSecurePhrasePage extends StatefulWidget {
   const CreateSecurePhrasePage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-secure-phrase-signup');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/create-secure-phrase-signup',
+  );
 
   @override
   State<CreateSecurePhrasePage> createState() => _CreateSecurePhrasePageState();
@@ -34,6 +37,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Create a secure phrase',
+      titleStyle: AppTypography.display1,
       subtitle:
           'Customize your private Q&A for faster verification and safer digital payments.',
       bottomNav: ValueListenableBuilder(

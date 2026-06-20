@@ -1,4 +1,5 @@
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -15,33 +16,64 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  int _selectedIndex = 0;
+
+  final _scrollController = ScrollController();
+  double _blurOpacity = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      final opacity = (_scrollController.offset / 80).clamp(0.0, 1.0);
+      if (opacity != _blurOpacity) {
+        setState(() => _blurOpacity = opacity);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xffF5F5F5),
-      body: Container(
-        alignment: .topCenter,
-        width: double.maxFinite,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment(-0.11, -1.0), // Calculates the 176.94° angle
-            end: Alignment(0.11, 1.0),
-            colors: [
-              Color(0xFF385BA9),
-              Color(0xFFC5D8FF),
-              Color(0xFFF8F8F8),
-            ],
-            stops: [
-              0.0829, // 8.29%
-              0.2292, // 22.92%
-              0.3634, // 36.34%
-            ],
-          ),
+    return Container(
+      alignment: .topCenter,
+      width: double.maxFinite,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment(-0.11, -1.0), // Calculates the 176.94° angle
+          end: Alignment(0.11, 1.0),
+          colors: [
+            Color(0xFF385BA9),
+            Color(0xFFC5D8FF),
+            Color(0xFFF8F8F8),
+          ],
+          stops: [
+            0.0829, // 8.29%
+            0.2292, // 22.92%
+            0.3634, // 36.34%
+          ],
         ),
-        child: CustomScrollView(
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverAppBar(
+              pinned: true,
+              floating: true,
+              snap: true,
               backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+              automaticallyImplyActions: false,
               actionsPadding: .only(right: 15),
               leadingWidth: 15 + 36,
               leading: Padding(
@@ -79,8 +111,20 @@ class _DashboardPageState extends State<DashboardPage> {
                   icon: SvgPicture.asset('assets/img/new-notification.svg'),
                 ),
               ],
-
               centerTitle: false,
+              flexibleSpace: ClipRect(
+                child: BackdropFilter(
+                  filter: .blur(
+                    sigmaX: 12 * _blurOpacity,
+                    sigmaY: 12 * _blurOpacity,
+                  ),
+                  child: Container(
+                    color: AppColors.white.withValues(
+                      alpha: 0.15 * _blurOpacity,
+                    ),
+                  ),
+                ),
+              ),
             ),
             SliverToBoxAdapter(
               child: Container(
@@ -208,7 +252,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             ),
-
             SliverToBoxAdapter(
               child: Column(
                 mainAxisSize: .min,
@@ -258,21 +301,44 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             SliverPadding(
               padding: .all(15),
-              sliver: SliverGrid.count(
-                childAspectRatio: 1.3,
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-
-                children: [
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  mainAxisExtent: 124, // 💡 Forces the exact height of 124
+                ),
+                delegate: SliverChildListDelegate([
                   ActionButton(),
                   ActionButton(),
                   ActionButton(),
                   ActionButton(),
-                ],
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                  ActionButton(),
+                ]),
               ),
             ),
           ],
+        ),
+
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: NeumorphicBottomNav(
+            selectedIndex: _selectedIndex,
+            onTap: (i) => setState(() => _selectedIndex = i),
+          ),
         ),
       ),
     );
@@ -297,13 +363,14 @@ class ActionButton extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           SvgPicture.asset('assets/img/transfer.svg'),
-          const Spacer(),
+          const Spacer(flex: 4),
           Text(
             'Transfer Money',
             overflow: .ellipsis,
             maxLines: 1,
             style: AppTypography.header4,
           ),
+          const Spacer(flex: 1),
           Text(
             'Send funds anywhere securely',
             overflow: .ellipsis,

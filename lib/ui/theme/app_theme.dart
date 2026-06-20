@@ -5,6 +5,7 @@ class AppColors {
   static const primary = Color(0xFF20428C);
   static const secondary = Color(0xFF78C143);
   static const tint = Color(0xFF55A11F);
+  static const tintShade1 = Color(0x36ABBAC4);
   static const tintShade3 = Color(0xffD8F3C5);
   static const white = Color(0xFFFFFFFF);
   static const white11 = Color(0x1CFFFFFF);
@@ -15,9 +16,10 @@ class AppColors {
   static const shade2 = Color(0xFF93B2F0);
   static const offWhite = Color(0xFFF8F8F8);
   static const inactiveBorder = Color(0xFFD9DADB);
+  static const border = Color(0xFFF5F5F5);
   static const danger = Color(0xFFDE0101);
   static const pending = Color(0xFFEA8406);
-  static const fade = Color(0xFFD9D9D9);
+  static const fade = Color(0xFFD9DADB);
   static const shade3 = Color(0xFFABBAC4);
   static const flora = Color(0xFF919195);
   static const tertiary = Color(0xFFEDEDED);

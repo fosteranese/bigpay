@@ -10,7 +10,9 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 
 class StartForgotPasswordPage extends StatefulWidget {
   const StartForgotPasswordPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/start-forgot-pwd');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/start-forgot-pwd',
+  );
 
   @override
   State<StartForgotPasswordPage> createState() =>
@@ -37,6 +39,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Forgot Password',
+      titleStyle: AppTypography.display1,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,

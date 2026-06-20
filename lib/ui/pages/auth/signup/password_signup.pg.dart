@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 
 class CreatePasswordSignUpPage extends StatefulWidget {
   const CreatePasswordSignUpPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-password-signup');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/create-password-signup',
+  );
 
   @override
   State<CreatePasswordSignUpPage> createState() =>
@@ -34,6 +36,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Create Password',
+      titleStyle: AppTypography.display1,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,

@@ -1,4 +1,5 @@
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -7,7 +8,9 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 
 class PinSignUpPage extends StatefulWidget {
   const PinSignUpPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-pin-signup');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/create-pin-signup',
+  );
 
   @override
   State<PinSignUpPage> createState() => _PinSignUpPageState();
@@ -33,6 +36,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Set Security PIN',
+      titleStyle: AppTypography.display1,
       subtitle:
           'Set a 6-digit code to authorize payments and keep your wallet secure.',
       bottomNav: ValueListenableBuilder(

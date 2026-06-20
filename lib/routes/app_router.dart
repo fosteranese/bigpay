@@ -1,15 +1,15 @@
+import 'package:bigpay/ui/pages/wallets/momo/otp_momo.pg.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
-import 'package:bigpay/ui/pages/dashboard.pg.dart';
 
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: DashboardPage.route.path,
+    initialLocation: OtpMoMoPage.route.path,
     routes: [
       ...rootRoutes,
       authRoute,

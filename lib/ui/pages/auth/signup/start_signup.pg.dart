@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 
 class StartSignUpPage extends StatefulWidget {
   const StartSignUpPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/start-signup');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/start-signup',
+  );
 
   @override
   State<StartSignUpPage> createState() => _StartSignUpPageState();
@@ -21,6 +23,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Sign Up',
+      titleStyle: AppTypography.display1,
       subtitleWidget: Row(
         children: [
           Text(

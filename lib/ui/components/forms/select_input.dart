@@ -1,4 +1,5 @@
 import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -260,26 +261,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
         onTap: () => _onSelect(option),
         title: Text(option.label),
         contentPadding: .symmetric(horizontal: 10),
-        trailing: Container(
-          width: 17,
-          height: 17,
-          decoration: BoxDecoration(
-            borderRadius: .circular(17),
-            border: Border.all(
-              color: !selected ? AppColors.flora : AppColors.tint,
-              width: 1.5,
-            ),
-          ),
-          child: selected
-              ? Container(
-                  margin: const .all(2.5),
-                  decoration: BoxDecoration(
-                    color: AppColors.tint,
-                    borderRadius: .circular(10),
-                  ),
-                )
-              : null,
-        ),
+        trailing: FormRadioButton(selected: selected),
       ),
     );
   }

@@ -25,6 +25,10 @@ class FormButton extends StatelessWidget {
     this.fontWeight,
     this.borderRadius,
     this.enabled = true,
+    this.padding = const .symmetric(
+      horizontal: 8,
+      vertical: 8,
+    ),
   });
 
   final void Function() onPressed;
@@ -43,6 +47,7 @@ class FormButton extends StatelessWidget {
   final FontWeight? fontWeight;
   final BorderRadius? borderRadius;
   final bool enabled;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +59,7 @@ class FormButton extends StatelessWidget {
           backgroundColor: loading || !enabled
               ? AppColors.tintShade3
               : backgroundColor,
-          padding: .symmetric(
-            horizontal: 8,
-            vertical: 8,
-          ),
+          padding: padding,
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? .circular(height),
           ),

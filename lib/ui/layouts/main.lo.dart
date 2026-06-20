@@ -14,6 +14,9 @@ class MainLayout extends StatefulWidget {
     this.bottomSize = 100,
     this.background,
     this.showBackBtn = true,
+    this.actions,
+    this.miniTitle,
+    this.titleStyle,
   });
   final String? title;
   final String? subtitle;
@@ -23,6 +26,9 @@ class MainLayout extends StatefulWidget {
   final double bottomSize;
   final Widget? background;
   final bool showBackBtn;
+  final Widget? actions;
+  final String? miniTitle;
+  final TextStyle? titleStyle;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -92,6 +98,12 @@ class _MainLayoutState extends State<MainLayout> {
             automaticallyImplyLeading: false,
             automaticallyImplyActions: false,
             leadingWidth: 70,
+            title: (widget.miniTitle?.isNotEmpty ?? false)
+                ? Text(
+                    widget.miniTitle!,
+                    style: AppTypography.p1,
+                  )
+                : null,
             leading: widget.showBackBtn
                 ? IconButton.filled(
                     style: IconButton.styleFrom(
@@ -115,12 +127,31 @@ class _MainLayoutState extends State<MainLayout> {
                   crossAxisAlignment: .start,
                   children: [
                     SizedBox(height: 16),
-                    if (widget.title != null)
-                      Text(
-                        widget.title!,
-                        style: AppTypography.display1.copyWith(
-                          color: AppColors.black,
+                    if (widget.title != null && widget.actions == null)
+                      FittedBox(
+                        child: Text(
+                          widget.title!,
+                          style: (widget.titleStyle ?? AppTypography.display2)
+                              .copyWith(
+                                color: AppColors.black,
+                              ),
                         ),
+                      )
+                    else if (widget.title != null && widget.actions != null)
+                      Row(
+                        mainAxisSize: .max,
+                        crossAxisAlignment: .center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.title!,
+                              style: AppTypography.display1.copyWith(
+                                color: AppColors.black,
+                              ),
+                            ),
+                          ),
+                          if (widget.actions != null) widget.actions!,
+                        ],
                       ),
                     if (widget.subtitle != null)
                       Text(

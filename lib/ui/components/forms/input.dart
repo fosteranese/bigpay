@@ -58,12 +58,8 @@ class _FormInputState extends State<FormInput> {
           crossAxisAlignment: .start,
           children: [
             if (widget.label != null)
-              Padding(
-                padding: const .only(bottom: 5),
-                child: Text(
-                  widget.label!,
-                  style: AppTypography.formLabels,
-                ),
+              FormLabel(
+                label: widget.label!,
               ),
             TextFormField(
               readOnly: widget.readOnly,
@@ -113,5 +109,25 @@ class _FormInputState extends State<FormInput> {
   @override
   void dispose() {
     super.dispose();
+  }
+}
+
+class FormLabel extends StatelessWidget {
+  const FormLabel({
+    super.key,
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const .only(bottom: 5),
+      child: Text(
+        label,
+        style: AppTypography.formLabels,
+      ),
+    );
   }
 }

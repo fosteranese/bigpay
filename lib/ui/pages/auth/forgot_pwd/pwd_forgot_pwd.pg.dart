@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 
 class CreatePwdForgotPwdPage extends StatefulWidget {
   const CreatePwdForgotPwdPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/create-pwd-forgot-pwd');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/create-pwd-forgot-pwd',
+  );
 
   @override
   State<CreatePwdForgotPwdPage> createState() => _CreatePwdForgotPwdPageState();
@@ -33,6 +35,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Create Password',
+      titleStyle: AppTypography.display1,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
