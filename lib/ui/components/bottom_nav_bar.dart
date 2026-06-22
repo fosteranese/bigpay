@@ -1,6 +1,5 @@
 // ─── Neumorphic Bottom Nav ────────────────────────────────────────────────────
 
-import 'package:bigpay/ui/components/bottom_nav_bar.1.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 

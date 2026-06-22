@@ -5,3 +5,5 @@ export 'password_input.dart';
 export 'pin_input.dart';
 export 'pin_unified_input.dart';
 export 'select_input.dart';
+export 'date_input.dart';
+export 'textarea_input.dart';

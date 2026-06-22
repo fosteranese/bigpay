@@ -305,7 +305,7 @@ class FormOtpInputState extends State<FormOtpInput> {
             ),
           ),
         const SizedBox(height: 16),
-        if (_canResend)
+        if (widget.onResend != null && _canResend)
           GestureDetector(
             onTap: _onResendPressed,
             child: Text(
@@ -316,7 +316,7 @@ class FormOtpInputState extends State<FormOtpInput> {
               ),
             ),
           )
-        else
+        else if (widget.onResend != null)
           Row(
             mainAxisSize: .min,
             mainAxisAlignment: .center,

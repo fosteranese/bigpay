@@ -1,4 +1,4 @@
-import 'package:bigpay/ui/pages/wallets/momo/otp_momo.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +9,7 @@ class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: OtpMoMoPage.route.path,
+    initialLocation: FeedbackPage.route.path,
     routes: [
       ...rootRoutes,
       authRoute,

@@ -17,6 +17,11 @@ class MainLayout extends StatefulWidget {
     this.actions,
     this.miniTitle,
     this.titleStyle,
+    this.appBarColor,
+    this.bodyColor = Colors.transparent,
+    this.bottom,
+    this.appBarBottomColor = 0,
+    this.flexibleSpace,
   });
   final String? title;
   final String? subtitle;
@@ -29,6 +34,11 @@ class MainLayout extends StatefulWidget {
   final Widget? actions;
   final String? miniTitle;
   final TextStyle? titleStyle;
+  final Color? appBarColor;
+  final Color bodyColor;
+  final PreferredSizeWidget? bottom;
+  final double appBarBottomColor;
+  final Widget? flexibleSpace;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -116,72 +126,84 @@ class _MainLayoutState extends State<MainLayout> {
                     ),
                   )
                 : null,
-            bottom: PreferredSize(
-              preferredSize: Size(double.maxFinite, widget.bottomSize),
-              child: Container(
-                width: double.maxFinite,
-                padding: .only(left: 20, right: 20, bottom: 10),
-                child: Column(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: .center,
-                  crossAxisAlignment: .start,
-                  children: [
-                    SizedBox(height: 16),
-                    if (widget.title != null && widget.actions == null)
-                      FittedBox(
-                        child: Text(
-                          widget.title!,
-                          style: (widget.titleStyle ?? AppTypography.display2)
-                              .copyWith(
-                                color: AppColors.black,
-                              ),
-                        ),
-                      )
-                    else if (widget.title != null && widget.actions != null)
-                      Row(
-                        mainAxisSize: .max,
-                        crossAxisAlignment: .center,
-                        children: [
-                          Expanded(
+            bottom:
+                widget.bottom ??
+                PreferredSize(
+                  preferredSize: Size(double.maxFinite, widget.bottomSize),
+                  child: Container(
+                    width: double.maxFinite,
+                    padding: .only(left: 20, right: 20, bottom: 10),
+                    child: Column(
+                      mainAxisSize: .min,
+                      mainAxisAlignment: .center,
+                      crossAxisAlignment: .start,
+                      children: [
+                        SizedBox(height: 16),
+                        if (widget.title != null && widget.actions == null)
+                          FittedBox(
                             child: Text(
                               widget.title!,
-                              style: AppTypography.display1.copyWith(
-                                color: AppColors.black,
-                              ),
+                              style:
+                                  (widget.titleStyle ?? AppTypography.display2)
+                                      .copyWith(
+                                        color: AppColors.black,
+                                      ),
                             ),
+                          )
+                        else if (widget.title != null && widget.actions != null)
+                          Row(
+                            mainAxisSize: .max,
+                            crossAxisAlignment: .center,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  widget.title!,
+                                  style: AppTypography.display1.copyWith(
+                                    color: AppColors.black,
+                                  ),
+                                ),
+                              ),
+                              if (widget.actions != null) widget.actions!,
+                            ],
                           ),
-                          if (widget.actions != null) widget.actions!,
-                        ],
-                      ),
-                    if (widget.subtitle != null)
-                      Text(
-                        widget.subtitle!,
-                        style: AppTypography.smallDetails,
-                      )
-                    else if (widget.subtitleWidget != null)
-                      widget.subtitleWidget!,
-                  ],
-                ),
-              ),
-            ),
-            flexibleSpace: ClipRect(
-              child: BackdropFilter(
-                filter: .blur(
-                  sigmaX: 12 * _blurOpacity,
-                  sigmaY: 12 * _blurOpacity,
-                ),
-                child: Container(
-                  color: AppColors.white.withValues(
-                    alpha: 0.15 * _blurOpacity,
+                        if (widget.subtitle != null)
+                          Text(
+                            widget.subtitle!,
+                            style: AppTypography.smallDetails,
+                          )
+                        else if (widget.subtitleWidget != null)
+                          widget.subtitleWidget!,
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+            flexibleSpace:
+                widget.flexibleSpace ??
+                ClipRect(
+                  child: BackdropFilter(
+                    filter: .blur(
+                      sigmaX: 12 * _blurOpacity,
+                      sigmaY: 12 * _blurOpacity,
+                    ),
+                    child: Container(
+                      margin: .only(
+                        bottom: widget.appBarBottomColor,
+                      ),
+                      color:
+                          widget.appBarColor ??
+                          AppColors.white.withValues(
+                            alpha: 0.15 * _blurOpacity,
+                          ),
+                    ),
+                  ),
+                ),
           ),
+
           SliverFillRemaining(
             fillOverscroll: true,
             hasScrollBody: false,
-            child: Padding(
+            child: Container(
+              color: widget.bodyColor,
               padding: const .all(20),
               child: widget.child,
             ),

@@ -19,6 +19,8 @@ class FormInput extends StatefulWidget {
     this.maxLength,
     this.inputFormatters,
     this.onChanged,
+    this.height = 48,
+    this.maxLines,
   });
   final TextEditingController controller;
   final bool readOnly;
@@ -33,6 +35,8 @@ class FormInput extends StatefulWidget {
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String value)? onChanged;
+  final double height;
+  final int? maxLines;
 
   @override
   State<FormInput> createState() => _FormInputState();
@@ -61,43 +65,47 @@ class _FormInputState extends State<FormInput> {
               FormLabel(
                 label: widget.label!,
               ),
-            TextFormField(
-              readOnly: widget.readOnly,
-              focusNode: widget.focusNode,
-              obscureText: widget.isPassword,
-              controller: widget.controller,
-              keyboardType: widget.keyboardType,
-              textInputAction: _textInputAction,
-              maxLength: widget.maxLength,
-              inputFormatters: widget.inputFormatters,
-              onFieldSubmitted: (value) {
-                widget.next?.call(value);
-              },
-              onChanged: (value) {
-                widget.onChanged?.call(value);
-              },
-              decoration: InputDecoration(
-                hintText: widget.placeholder,
-                hintStyle: AppTypography.caption,
-                counterText: '',
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: .circular(10),
-                  borderSide: BorderSide(
-                    color: AppColors.tertiary,
-                    style: .solid,
+            SizedBox(
+              height: widget.height,
+              child: TextFormField(
+                readOnly: widget.readOnly,
+                focusNode: widget.focusNode,
+                obscureText: widget.isPassword,
+                controller: widget.controller,
+                keyboardType: widget.keyboardType,
+                textInputAction: _textInputAction,
+                maxLength: widget.maxLength,
+                maxLines: widget.maxLines,
+                inputFormatters: widget.inputFormatters,
+                onFieldSubmitted: (value) {
+                  widget.next?.call(value);
+                },
+                onChanged: (value) {
+                  widget.onChanged?.call(value);
+                },
+                decoration: InputDecoration(
+                  hintText: widget.placeholder,
+                  hintStyle: AppTypography.caption,
+                  counterText: '',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: .circular(10),
+                    borderSide: BorderSide(
+                      color: AppColors.tertiary,
+                      style: .solid,
+                    ),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: .circular(10),
-                  borderSide: BorderSide(
-                    color: AppColors.primary,
-                    style: .solid,
-                    width: 2,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: .circular(10),
+                    borderSide: BorderSide(
+                      color: AppColors.primary,
+                      style: .solid,
+                      width: 2,
+                    ),
                   ),
+                  filled: true,
+                  fillColor: AppColors.offWhite,
+                  suffixIcon: widget.suffix,
                 ),
-                filled: true,
-                fillColor: AppColors.offWhite,
-                suffixIcon: widget.suffix,
               ),
             ),
           ],

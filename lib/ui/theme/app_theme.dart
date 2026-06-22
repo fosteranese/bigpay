@@ -22,8 +22,11 @@ class AppColors {
   static const fade = Color(0xFFD9DADB);
   static const shade3 = Color(0xFFABBAC4);
   static const flora = Color(0xFF919195);
+  static const fiat = Color(0xFF54534A);
   static const tertiary = Color(0xFFEDEDED);
   static const background = Color(0xFFE0E3EF);
+  static const success = Color(0xFF007E13);
+  static const backgroundPale = Color(0xFFF1F4FB);
 }
 
 class AppTheme {
