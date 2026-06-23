@@ -41,6 +41,7 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
           keyboardType: value ? null : .visiblePassword,
           next: widget.next,
           onChanged: widget.onChanged,
+          maxLines: 1,
           suffix: IconButton(
             onPressed: () {
               _isPassword.value = !_isPassword.value;

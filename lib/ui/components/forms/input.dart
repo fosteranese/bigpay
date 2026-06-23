@@ -21,6 +21,7 @@ class FormInput extends StatefulWidget {
     this.onChanged,
     this.height = 48,
     this.maxLines,
+    this.padding = const .symmetric(horizontal: 15),
   });
   final TextEditingController controller;
   final bool readOnly;
@@ -37,6 +38,7 @@ class FormInput extends StatefulWidget {
   final void Function(String value)? onChanged;
   final double height;
   final int? maxLines;
+  final EdgeInsetsGeometry padding;
 
   @override
   State<FormInput> createState() => _FormInputState();
@@ -84,6 +86,7 @@ class _FormInputState extends State<FormInput> {
                   widget.onChanged?.call(value);
                 },
                 decoration: InputDecoration(
+                  contentPadding: widget.padding,
                   hintText: widget.placeholder,
                   hintStyle: AppTypography.caption,
                   counterText: '',

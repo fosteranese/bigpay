@@ -3,6 +3,9 @@ import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
+import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/intro-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/start-kyc.pg.dart';
 import 'package:bigpay/ui/pages/more/account.pg.dart';
 import 'package:bigpay/ui/pages/more/account_details.pg.dart';
 import 'package:bigpay/ui/pages/more/security.pg.dart';
@@ -40,4 +43,7 @@ List<GoRoute> get rootRoutes => [
   ServicesPage.route.toGoRoute(() => const ServicesPage()),
   ServicePage.route.toGoRoute(() => const ServicePage()),
   SummaryPage.route.toGoRoute(() => const SummaryPage()),
+  IntroKycPage.route.toGoRoute(() => const IntroKycPage()),
+  StartKycPage.route.toGoRoute(() => const StartKycPage()),
+  InfoKycPage.route.toGoRoute(() => const InfoKycPage()),
 ];

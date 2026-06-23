@@ -2,12 +2,10 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/utils/app_modal.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class SummaryPage extends StatefulWidget {
   const SummaryPage({super.key});
