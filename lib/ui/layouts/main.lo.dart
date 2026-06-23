@@ -9,7 +9,7 @@ class MainLayout extends StatefulWidget {
     this.title,
     this.subtitle,
     this.subtitleWidget,
-    required this.child,
+    this.child,
     this.bottomNav,
     this.bottomSize = 100,
     this.background,
@@ -22,11 +22,13 @@ class MainLayout extends StatefulWidget {
     this.bottom,
     this.appBarBottomColor = 0,
     this.flexibleSpace,
+    this.builder,
+    this.backgroundColor = Colors.transparent,
   });
   final String? title;
   final String? subtitle;
   final Widget? subtitleWidget;
-  final Widget child;
+  final Widget? child;
   final Widget? bottomNav;
   final double bottomSize;
   final Widget? background;
@@ -38,7 +40,9 @@ class MainLayout extends StatefulWidget {
   final Color bodyColor;
   final PreferredSizeWidget? bottom;
   final double appBarBottomColor;
+  final Color backgroundColor;
   final Widget? flexibleSpace;
+  final Widget Function(ScrollController scrollController)? builder;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -93,7 +97,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   Scaffold _buildMainPage() {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: widget.backgroundColor,
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
@@ -199,15 +203,18 @@ class _MainLayoutState extends State<MainLayout> {
                 ),
           ),
 
-          SliverFillRemaining(
-            fillOverscroll: true,
-            hasScrollBody: false,
-            child: Container(
-              color: widget.bodyColor,
-              padding: const .all(20),
-              child: widget.child,
+          if (widget.builder != null)
+            widget.builder!(_scrollController)
+          else if (widget.child != null)
+            SliverFillRemaining(
+              fillOverscroll: true,
+              hasScrollBody: false,
+              child: Container(
+                color: widget.bodyColor,
+                padding: const .all(20),
+                child: widget.child,
+              ),
             ),
-          ),
         ],
       ),
       bottomNavigationBar: widget.bottomNav != null

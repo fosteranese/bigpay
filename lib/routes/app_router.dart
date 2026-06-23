@@ -1,15 +1,15 @@
-import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
+import 'package:bigpay/ui/pages/process_flow/summary.pg.dart';
 
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: FeedbackPage.route.path,
+    initialLocation: SummaryPage.route.path,
     routes: [
       ...rootRoutes,
       authRoute,

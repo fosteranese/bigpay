@@ -230,21 +230,27 @@ class TransactionDetailsItem extends StatelessWidget {
         mainAxisAlignment: .spaceBetween,
         crossAxisAlignment: .center,
         children: [
-          Text(
-            title,
-            style: title.toLowerCase().contains('total')
-                ? AppTypography.header4.copyWith(
-                    color: AppColors.black,
-                  )
-                : AppTypography.caption.copyWith(
-                    color: AppColors.fiat,
-                  ),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: .left,
+              style: title.toLowerCase().contains('total')
+                  ? AppTypography.header4.copyWith(
+                      color: AppColors.black,
+                    )
+                  : AppTypography.caption.copyWith(
+                      color: AppColors.fiat,
+                    ),
+            ),
           ),
-
-          Text(
-            value,
-            style: AppTypography.header4.copyWith(
-              color: AppColors.black,
+          const SizedBox(width: 20),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: .right,
+              style: AppTypography.header4.copyWith(
+                color: AppColors.black,
+              ),
             ),
           ),
         ],

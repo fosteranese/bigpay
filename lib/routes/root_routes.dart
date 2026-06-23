@@ -1,4 +1,5 @@
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
@@ -7,6 +8,9 @@ import 'package:bigpay/ui/pages/more/account_details.pg.dart';
 import 'package:bigpay/ui/pages/more/security.pg.dart';
 import 'package:bigpay/ui/pages/pin_auth.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/services.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/summary.pg.dart';
 import 'package:bigpay/ui/pages/splash_screen.pg.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/pages/wallets/add_card.pg.dart';
@@ -32,4 +36,8 @@ List<GoRoute> get rootRoutes => [
   PinAuthPage.route.toGoRoute(() => const PinAuthPage()),
   SecurityPage.route.toGoRoute(() => const SecurityPage()),
   FeedbackPage.route.toGoRoute(() => const FeedbackPage()),
+  BeneficiariesPage.route.toGoRoute(() => const BeneficiariesPage()),
+  ServicesPage.route.toGoRoute(() => const ServicesPage()),
+  ServicePage.route.toGoRoute(() => const ServicePage()),
+  SummaryPage.route.toGoRoute(() => const SummaryPage()),
 ];
