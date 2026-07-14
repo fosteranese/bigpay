@@ -1,16 +1,16 @@
-import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 
 class InfoKycPage extends StatefulWidget {
   const InfoKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/info-kyc',
+    path: '/kyc/info',
   );
 
   @override

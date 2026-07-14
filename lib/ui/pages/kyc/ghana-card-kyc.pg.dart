@@ -8,7 +8,7 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 class GhanaCardKycPage extends StatefulWidget {
   const GhanaCardKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/ghana-card-kyc',
+    path: '/kyc/ghana-card',
   );
 
   @override

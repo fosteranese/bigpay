@@ -10,7 +10,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 class PicturePreviewKycPage extends StatefulWidget {
   const PicturePreviewKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/picture-preview-kyc',
+    path: '/kyc/picture-preview',
   );
 
   @override

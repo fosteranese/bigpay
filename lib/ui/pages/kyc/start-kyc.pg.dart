@@ -8,7 +8,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 class StartKycPage extends StatefulWidget {
   const StartKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/start-kyc',
+    path: '/kyc/start',
   );
 
   @override

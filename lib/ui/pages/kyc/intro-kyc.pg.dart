@@ -10,7 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class IntroKycPage extends StatefulWidget {
   const IntroKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/intro-kyc',
+    path: '/kyc',
   );
 
   @override

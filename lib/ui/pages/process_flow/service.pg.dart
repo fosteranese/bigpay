@@ -11,7 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class ServicePage extends StatefulWidget {
   const ServicePage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/service',
+    path: '/services/service',
   );
 
   @override

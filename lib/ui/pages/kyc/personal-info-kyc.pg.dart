@@ -8,7 +8,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 class PersonalInfoKycPage extends StatefulWidget {
   const PersonalInfoKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/personal-info-kyc',
+    path: '/kyc/personal',
   );
 
   @override

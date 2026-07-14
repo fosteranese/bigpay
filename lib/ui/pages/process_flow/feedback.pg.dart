@@ -1,15 +1,15 @@
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/feedback',
+    path: '/services/feedback',
   );
 
   @override

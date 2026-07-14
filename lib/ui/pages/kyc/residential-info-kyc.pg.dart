@@ -8,7 +8,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 class ResidentialInfoKycPage extends StatefulWidget {
   const ResidentialInfoKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/residential-info-kyc',
+    path: '/kyc/residential',
   );
 
   @override
@@ -91,7 +91,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _districtFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             FormInput(
               focusNode: _districtFocusNode,
               controller: _districtController,
@@ -101,7 +101,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _cityFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             FormInput(
               focusNode: _cityFocusNode,
               controller: _cityController,
@@ -111,7 +111,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _digitalAddressFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             FormInput(
               focusNode: _digitalAddressFocusNode,
               controller: _digitalAddressController,
@@ -121,7 +121,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _countryFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             FormSelectInput(
               focusNode: _countryFocusNode,
               controller: _countryController,
