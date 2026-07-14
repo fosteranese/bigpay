@@ -1,4 +1,4 @@
-import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/ghana-card-kyc.pg.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +9,7 @@ class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: InfoKycPage.route.path,
+    initialLocation: GhanaCardKycPage.route.path,
     routes: [
       ...rootRoutes,
       authRoute,

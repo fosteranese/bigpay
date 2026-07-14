@@ -55,6 +55,7 @@ class _FormPinUnifiedInputState extends State<FormPinUnifiedInput> {
           ],
           next: widget.next,
           onChanged: widget.onChanged,
+          maxLines: 1,
           suffix: IconButton(
             onPressed: () {
               _isPassword.value = !_isPassword.value;

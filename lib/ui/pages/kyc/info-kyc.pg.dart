@@ -102,6 +102,7 @@ class InfoItem extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
+        // overflow: .ellipsis,
         style: AppTypography.smallDetails,
       ),
     );

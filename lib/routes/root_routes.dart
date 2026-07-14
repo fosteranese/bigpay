@@ -1,10 +1,16 @@
+import 'package:go_router/go_router.dart';
+
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
+import 'package:bigpay/ui/pages/kyc/ghana-card-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/intro-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/personal-info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/preview-picture-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/residential-info-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/start-kyc.pg.dart';
 import 'package:bigpay/ui/pages/more/account.pg.dart';
 import 'package:bigpay/ui/pages/more/account_details.pg.dart';
@@ -21,7 +27,6 @@ import 'package:bigpay/ui/pages/wallets/momo/add_momo.pg.dart';
 import 'package:bigpay/ui/pages/wallets/momo/otp_momo.pg.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/ui/pages/wallets/wallets.pg.dart';
-import 'package:go_router/go_router.dart';
 
 List<GoRoute> get rootRoutes => [
   SplashScreenPage.route.toGoRoute(() => const SplashScreenPage()),
@@ -46,4 +51,8 @@ List<GoRoute> get rootRoutes => [
   IntroKycPage.route.toGoRoute(() => const IntroKycPage()),
   StartKycPage.route.toGoRoute(() => const StartKycPage()),
   InfoKycPage.route.toGoRoute(() => const InfoKycPage()),
+  PicturePreviewKycPage.route.toGoRoute(() => const PicturePreviewKycPage()),
+  PersonalInfoKycPage.route.toGoRoute(() => const PersonalInfoKycPage()),
+  ResidentialInfoKycPage.route.toGoRoute(() => const ResidentialInfoKycPage()),
+  GhanaCardKycPage.route.toGoRoute(() => const GhanaCardKycPage()),
 ];

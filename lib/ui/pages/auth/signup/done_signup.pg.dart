@@ -10,7 +10,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class DoneSignUpPage extends StatefulWidget {
   const DoneSignUpPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/done-signup');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/done-signup',
+  );
 
   @override
   State<DoneSignUpPage> createState() => _DoneSignUpPageState();
