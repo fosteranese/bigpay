@@ -1,9 +1,9 @@
-import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 
 class ContactInfoKycPage extends StatefulWidget {
   const ContactInfoKycPage({super.key});
@@ -51,7 +51,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: 'Personal Information',
+      title: 'Contact Information',
       titleStyle: AppTypography.display2,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(

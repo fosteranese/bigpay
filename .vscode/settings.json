@@ -3,12 +3,19 @@
         "editor.formatOnSave": true,
         "editor.formatOnType": true,
         "editor.defaultFormatter": "Dart-Code.dart-code",
-        "editor.rulers": [80]
+        "editor.rulers": [
+            80
+        ]
     },
     "dart.completion.trailingCommas": true,
     "cSpell.words": [
         "bigpay",
         "momo",
+        "Talsec",
         "Telecel"
-    ]
+    ],
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.dart": "${capture}.g.dart, ${capture}.freezed.dart"
+    }
 }

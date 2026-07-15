@@ -6,17 +6,17 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
-class ProfileDetailsPage extends StatefulWidget {
-  const ProfileDetailsPage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/profile-details',
+    path: '/more/profile',
   );
 
   @override
-  State<ProfileDetailsPage> createState() => _ProfileDetailsPageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(

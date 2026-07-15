@@ -4,6 +4,11 @@
 *.pyc
 *.swp
 .DS_Store
+
+# Generated code (build_runner: freezed / json_serializable).
+# Regenerate with `dart run build_runner build` — never edit by hand.
+*.g.dart
+*.freezed.dart
 .atom/
 .build/
 .buildlog/

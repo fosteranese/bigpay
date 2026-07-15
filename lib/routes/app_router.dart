@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/more_routes.dart';
 import 'package:bigpay/routes/wallet_routes.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +20,7 @@ class AppRouter {
       kycRoute,
       processFlowRoute,
       walletRoute,
+      moreRoute,
     ],
   );
 }

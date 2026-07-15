@@ -5,17 +5,17 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
-class MyProfilePage extends StatefulWidget {
-  const MyProfilePage({super.key});
+class MorePage extends StatefulWidget {
+  const MorePage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/profile',
+    path: '/more',
   );
 
   @override
-  State<MyProfilePage> createState() => _MyProfilePageState();
+  State<MorePage> createState() => _MorePageState();
 }
 
-class _MyProfilePageState extends State<MyProfilePage> {
+class _MorePageState extends State<MorePage> {
   final _otp = ValueNotifier('');
 
   @override

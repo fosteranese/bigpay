@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/more/account.pg.dart';
+import 'package:bigpay/ui/pages/more/more.pg.dart';
 
 class SecurityPage extends StatefulWidget {
   const SecurityPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/security',
+    path: '/more/security',
   );
 
   @override
