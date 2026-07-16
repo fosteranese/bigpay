@@ -1,3 +1,4 @@
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/utils/remote.util.dart';
@@ -13,19 +14,66 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
     on(_onExecuteProcess);
   }
 
+  final Map<String, dynamic> _processInputs = {};
+  final Map<String, dynamic> _processResponses = {};
+
   Future<void> _onExecuteProcess(
     ExecuteProcessEvent event,
     Emitter<ProcessState> emit,
   ) async {
+    bool isCachedData = false;
     try {
-      emit(ExecutingProcess(event: event));
+      isCachedData =
+          event.returnSavedResponse &&
+          _processResponses.containsKey(event.action.endpoint);
+      if (isCachedData) {
+        emit(
+          ProcessExecuted(
+            event: event,
+            data: _processResponses[event.action.endpoint],
+            isCachedData: isCachedData,
+          ),
+        );
+        emit(
+          ExecutingProcess(
+            event: event,
+            isCachedData: isCachedData,
+          ),
+        );
+      } else {
+        emit(
+          ExecutingProcess(
+            event: event,
+            isCachedData: isCachedData,
+          ),
+        );
+      }
 
-      final data = await RemoteUtil.makeCall(event.action);
+      if (event.saveActionPayload) {
+        _processInputs[event.action.endpoint] = event.action.payload;
+      }
 
-      emit(ProcessExecuted(event: event, data: data));
+      final response = await RemoteUtil.makeCall(event.action);
+
+      if (event.saveActionResponse &&
+          response.status == StatusConstants.success) {
+        _processResponses[event.action.endpoint] = response.data;
+      }
+
+      emit(
+        ProcessExecuted(
+          event: event,
+          data: response,
+          isCachedData: isCachedData,
+        ),
+      );
     } catch (ex) {
       emit(
-        ExecuteProcessError(event: event, error: ResponseUtil.mapException(ex)),
+        ExecuteProcessError(
+          event: event,
+          error: ResponseUtil.mapException(ex),
+          isCachedData: isCachedData,
+        ),
       );
     }
   }
