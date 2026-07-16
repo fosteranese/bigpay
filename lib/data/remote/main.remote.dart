@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bigpay/constants/response.const.dart';
-import 'package:bigpay/data/models/response/response.md.dart';
+import 'package:bigpay/utils/app.util.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter/services.dart';
 import 'package:http/io_client.dart';
 
+import 'package:bigpay/constants/response.const.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/env/env.dart';
 import 'package:bigpay/logger.dart';
 import 'package:bigpay/utils/encryption.util.dart';
@@ -17,7 +19,7 @@ class MainRemote {
     void Function() onRejected,
   ) async {
     final sslCert = await rootBundle.load(
-      'assets/certificate.pem',
+      'assets/cert/main.pem',
     );
     SecurityContext securityContext = SecurityContext(
       withTrustedRoots: false,
@@ -44,21 +46,20 @@ class MainRemote {
     required bool isAuthenticated,
     bool encrypt = true,
   }) async {
-    // final appInfo = AppUtil.info;
+    final appInfo = AppUtil.info;
     Map<String, dynamic> data = {
-      // 'meta': appInfo.toMap(),
-      // 'EndPoint': path,
+      'meta': appInfo.toMap(),
     };
 
     if (body != null) {
-      // body["channel"] = appInfo.channel;
-      // body["deviceId"] = appInfo.deviceId;
-
-      data['payLoad'] = body;
+      final finalBody = Map<String, dynamic>.from(body);
+      finalBody.putIfAbsent('channel', () => appInfo.channel);
+      finalBody.putIfAbsent('deviceId', () => appInfo.deviceId);
+      data['payLoad'] = finalBody;
     }
 
     if (isAuthenticated) {
-      // data['meta']['sessionId'] = AppState.currentUser.sessionId;
+      data['meta']['sessionId'] = AppState.currentUser.sessionId;
     }
 
     if (encrypt) {
@@ -69,8 +70,6 @@ class MainRemote {
       );
 
       final finalCipher = json.encode(cipher);
-      logger.i('Encrypted payload');
-      logger.i(finalCipher);
       return {
         'payload': finalCipher,
         'key': key,
@@ -158,7 +157,7 @@ class MainRemote {
       });
       var url = Uri.https(
         Env.mainBaseUrl,
-        "${Env.mainRootPath}/$path",
+        "${Env.mainRootPath}/$path".replaceAll('//', '/'),
       );
       var rsaAv = await EncryptionUtil.encryptRSA(
         iv?.base64 ?? '',
@@ -182,7 +181,6 @@ class MainRemote {
         iv: iv,
         key: key,
       );
-      logger.i(result);
 
       return result;
     } on SocketException catch (e) {

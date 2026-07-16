@@ -16,7 +16,7 @@ class RemoteUtil {
       body: action.payload.toMap(),
     );
 
-    if (response.code != StatusConstants.success) {
+    if (response.status != StatusConstants.success) {
       return Future.error(
         DataError(
           code: response.code,

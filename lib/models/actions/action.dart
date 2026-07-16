@@ -38,3 +38,11 @@ abstract class Action<T extends ActionPayloadSerializable, T1>
     responseDataFunc,
   ];
 }
+
+/// Payload for actions that send no body.
+final class NoPayload implements ActionPayloadSerializable {
+  const NoPayload();
+
+  @override
+  Map<String, dynamic> toJson() => const {};
+}

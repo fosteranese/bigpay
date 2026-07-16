@@ -1,5 +1,6 @@
 import 'package:bigpay/routes/more_routes.dart';
 import 'package:bigpay/routes/wallet_routes.dart';
+import 'package:bigpay/ui/pages/splash_screen.pg.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,13 +8,12 @@ import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/kyc_routes.dart';
 import 'package:bigpay/routes/process_flow_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
-import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: ContactInfoKycPage.route.path,
+    initialLocation: SplashScreenPage.route.path,
     routes: [
       ...rootRoutes,
       authRoute,
@@ -44,6 +44,18 @@ extension GoRouteX on PageRouteDefinition {
       name: name,
       path: nested ? subPath : path,
       builder: (context, state) => page(),
+    );
+  }
+
+  /// Variant for pages that need routing data — e.g. reading `state.extra`.
+  GoRoute toGoRouteWithState(
+    Widget Function(GoRouterState state) page, {
+    bool nested = false,
+  }) {
+    return GoRoute(
+      name: name,
+      path: nested ? subPath : path,
+      builder: (context, state) => page(state),
     );
   }
 }

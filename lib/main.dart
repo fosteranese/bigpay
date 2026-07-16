@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'app.dart';
+import 'app_setup.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const BigPayApp());
-}
+void main() => bootstrap();

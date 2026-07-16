@@ -11,26 +11,34 @@ part 'process_state.dart';
 
 class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
   ProcessBloc() : super(const InitialProcess(event: ZeroProcessEvent())) {
-    on(_onExecuteProcess);
+    on<ExecuteProcessEvent>(_onExecuteProcess);
   }
 
-  final Map<String, dynamic> _processInputs = {};
-  final Map<String, dynamic> _processResponses = {};
+  final Map<String, ActionPayloadSerializable> _processInputs = {};
+  final Map<String, DataResponse> _processResponses = {};
+
+  /// Identity of a cached response.
+  ///
+  /// The endpoint alone is not enough: two calls to the same endpoint with
+  /// different inputs would share a key and serve each other's data, so the
+  /// payload is part of the identity.
+  static String _responseCacheKey(Action action) =>
+      '${action.endpoint}:${action.payload.toJsonString()}';
 
   Future<void> _onExecuteProcess(
     ExecuteProcessEvent event,
     Emitter<ProcessState> emit,
   ) async {
     bool isCachedData = false;
+    final cacheKey = _responseCacheKey(event.action);
     try {
       isCachedData =
-          event.returnSavedResponse &&
-          _processResponses.containsKey(event.action.endpoint);
+          event.returnSavedResponse && _processResponses.containsKey(cacheKey);
       if (isCachedData) {
         emit(
           ProcessExecuted(
             event: event,
-            data: _processResponses[event.action.endpoint],
+            data: _processResponses[cacheKey]!,
             isCachedData: isCachedData,
           ),
         );
@@ -57,7 +65,10 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
 
       if (event.saveActionResponse &&
           response.status == StatusConstants.success) {
-        _processResponses[event.action.endpoint] = response.data;
+        // Cache the whole DataResponse — ProcessExecuted.data is a
+        // DataResponse, so storing response.data (the inner value) here would
+        // blow up on the cache-hit emit and lose the response metadata.
+        _processResponses[cacheKey] = response;
       }
 
       emit(
