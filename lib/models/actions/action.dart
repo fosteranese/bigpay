@@ -31,12 +31,39 @@ abstract class Action<T extends ActionPayloadSerializable, T1>
   Map<String, dynamic> toJson() => payload.toJson();
   String encode() => payload.toJsonString();
 
+  /// A copy of this action with individual fields replaced.
+  ///
+  /// Chiefly for swapping in a different [payload] — e.g. re-running an action
+  /// with an earlier, saved input. [Action] is abstract, so the copy is a
+  /// concrete carrier of the same three fields the request path reads
+  /// (endpoint, payload, responseDataFunc); it is not the original subclass.
+  Action<T, T1> copyWith({
+    String? endpoint,
+    T? payload,
+    T1 Function(dynamic data)? responseDataFunc,
+  }) => _ActionCopy<T, T1>(
+    endpoint: endpoint ?? this.endpoint,
+    payload: payload ?? this.payload,
+    responseDataFunc: responseDataFunc ?? this.responseDataFunc,
+  );
+
   @override
   List<Object?> get props => [
     endpoint,
     payload,
     responseDataFunc,
   ];
+}
+
+/// Concrete [Action] produced by [Action.copyWith]. Private — callers only ever
+/// see it as an [Action].
+final class _ActionCopy<T extends ActionPayloadSerializable, T1>
+    extends Action<T, T1> {
+  const _ActionCopy({
+    required super.endpoint,
+    required super.payload,
+    super.responseDataFunc,
+  });
 }
 
 /// Payload for actions that send no body.

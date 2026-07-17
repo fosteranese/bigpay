@@ -2,6 +2,8 @@ import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/auth/forgot_pwd/start_forgot_pwd.pg.dart';
+import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +40,11 @@ class _NewLoginPageState extends State<NewLoginPage> {
             style: TextButton.styleFrom(
               tapTargetSize: .shrinkWrap,
             ),
-            onPressed: () {},
+            onPressed: () {
+              AppRouter.router.push(
+                StartSignUpPage.route.path,
+              );
+            },
             child: Text(
               'Sign up',
               style: AppTypography.buttons.copyWith(
@@ -48,7 +54,10 @@ class _NewLoginPageState extends State<NewLoginPage> {
           ),
         ],
       ),
-      bottomNav: FormButton(onPressed: () {}, text: 'Sign In'),
+      bottomNav: FormButton(
+        onPressed: () {},
+        text: 'Sign In',
+      ),
       child: Form(
         child: Column(
           mainAxisSize: .min,
@@ -98,7 +107,11 @@ class _NewLoginPageState extends State<NewLoginPage> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(padding: .zero),
-                  onPressed: () {},
+                  onPressed: () {
+                    AppRouter.router.push(
+                      StartForgotPasswordPage.route.path,
+                    );
+                  },
                   child: Text(
                     'Forgot Password ?',
                     style: AppTypography.smallDetails.copyWith(

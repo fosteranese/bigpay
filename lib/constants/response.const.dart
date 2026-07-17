@@ -42,4 +42,10 @@ class GeneralResponseConst {
     status: 'FAILED',
     message: 'You have disabled GPS Location on your device',
   );
+
+  static const absentPayload = DataError(
+    code: 'ABSENT_PAYLOAD',
+    status: 'failed',
+    message: 'No Payload Currently  Available',
+  );
 }

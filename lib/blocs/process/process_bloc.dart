@@ -1,4 +1,7 @@
+import 'package:bigpay/constants/response.const.dart';
 import 'package:bigpay/constants/status.const.dart';
+import 'package:bigpay/data/cache/process_store.dart';
+import 'package:bigpay/data/cache/response_cache.dart';
 import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/utils/remote.util.dart';
@@ -10,72 +13,103 @@ part 'process_event.dart';
 part 'process_state.dart';
 
 class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
-  ProcessBloc() : super(const InitialProcess(event: ZeroProcessEvent())) {
+  ProcessBloc({
+    required this.store,
+  }) : super(const InitialProcess(event: ZeroProcessEvent())) {
     on<ExecuteProcessEvent>(_onExecuteProcess);
   }
 
-  final Map<String, ActionPayloadSerializable> _processInputs = {};
-  final Map<String, DataResponse> _processResponses = {};
+  final ProcessStore store;
 
-  /// Identity of a cached response.
-  ///
-  /// The endpoint alone is not enough: two calls to the same endpoint with
-  /// different inputs would share a key and serve each other's data, so the
-  /// payload is part of the identity.
-  static String _responseCacheKey(Action action) =>
-      '${action.endpoint}:${action.payload.toJsonString()}';
+  /// Applies the action's parser to a raw envelope, turning cached or freshly
+  /// fetched JSON into the action's typed result. Runs on every path so cache
+  /// and network produce identical, typed [ProcessExecuted] data.
+  DataResponse _parsed(Action action, DataResponse raw) {
+    final parse = action.responseDataFunc;
+    return DataResponse(
+      code: raw.code,
+      status: raw.status,
+      message: raw.message,
+      data: parse != null ? parse(raw.data) : raw.data,
+      imageBaseUrl: raw.imageBaseUrl,
+      imageDirectory: raw.imageDirectory,
+      timeStamp: raw.timeStamp,
+    );
+  }
 
   Future<void> _onExecuteProcess(
     ExecuteProcessEvent event,
     Emitter<ProcessState> emit,
   ) async {
-    bool isCachedData = false;
-    final cacheKey = _responseCacheKey(event.action);
+    bool isSilent = false;
+
+    var action = event.action;
+    if (event.useSaveActionPayload) {
+      final saved = store.inputs.read(event.action.endpoint);
+      if (saved == null) {
+        emit(
+          ExecuteProcessError(
+            event: event,
+            error: GeneralResponseConst.absentPayload,
+            isCachedData: false,
+            isSilent: isSilent,
+          ),
+        );
+        return;
+      }
+      action = event.action.copyWith(payload: saved.payload);
+    }
+
+    final cacheKey = ResponseCache.keyFor(action);
     try {
-      isCachedData =
-          event.returnSavedResponse && _processResponses.containsKey(cacheKey);
-      if (isCachedData) {
+      final cached = event.returnSavedResponse
+          ? await store.cache.read(cacheKey)
+          : null;
+
+      if (cached != null) {
         emit(
           ProcessExecuted(
             event: event,
-            data: _processResponses[cacheKey]!,
-            isCachedData: isCachedData,
+            data: _parsed(action, cached),
+            isCachedData: true,
+            isSilent: false,
           ),
         );
+        isSilent = true;
         emit(
           ExecutingProcess(
             event: event,
-            isCachedData: isCachedData,
+            isCachedData: true,
+            isSilent: isSilent,
           ),
         );
       } else {
         emit(
           ExecutingProcess(
             event: event,
-            isCachedData: isCachedData,
+            isCachedData: false,
+            isSilent: isSilent,
           ),
         );
       }
 
       if (event.saveActionPayload) {
-        _processInputs[event.action.endpoint] = event.action.payload;
+        store.inputs.write(event.action);
       }
 
-      final response = await RemoteUtil.makeCall(event.action);
+      final response = await RemoteUtil.makeCall(action);
 
       if (event.saveActionResponse &&
           response.status == StatusConstants.success) {
-        // Cache the whole DataResponse — ProcessExecuted.data is a
-        // DataResponse, so storing response.data (the inner value) here would
-        // blow up on the cache-hit emit and lose the response metadata.
-        _processResponses[cacheKey] = response;
+        store.cache.write(cacheKey, response, endpoint: action.endpoint);
       }
 
       emit(
         ProcessExecuted(
           event: event,
-          data: response,
-          isCachedData: isCachedData,
+          data: _parsed(action, response),
+          isCachedData: false,
+          isSilent: isSilent,
         ),
       );
     } catch (ex) {
@@ -83,7 +117,8 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
         ExecuteProcessError(
           event: event,
           error: ResponseUtil.mapException(ex),
-          isCachedData: isCachedData,
+          isCachedData: false,
+          isSilent: isSilent,
         ),
       );
     }

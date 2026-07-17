@@ -11,6 +11,36 @@ final class DataResponse<T> extends Response<T> {
     super.data,
   });
 
+  /// Rebuilds a response previously written by [toMap].
+  ///
+  /// This is the inverse of [toMap] — the shape of the cache, not the shape of
+  /// the wire. A raw backend envelope carries an int `status` and no `code` at
+  /// all, and is turned into a [Response] by `MainRemote._decodeResponse`;
+  /// feeding one of those to this factory will not work.
+  factory DataResponse.fromMap(Map<String, dynamic> map) => DataResponse<T>(
+    code: map['code'] as String,
+    status: map['status'] as String,
+    message: map['message'] as String,
+    timeStamp: map['timeStamp'] as String?,
+    imageBaseUrl: map['imageBaseUrl'] as String?,
+    imageDirectory: map['imageDirectory'] as String?,
+    data: map['data'] as T?,
+  );
+
+  /// The persisted form, for [Database.add].
+  ///
+  /// `data` is whatever `_decodeResponse` produced — decoded JSON — so it is
+  /// already encodable and goes through as-is.
+  Map<String, dynamic> toMap() => {
+    'code': code,
+    'status': status,
+    'message': message,
+    'timeStamp': timeStamp,
+    'imageBaseUrl': imageBaseUrl,
+    'imageDirectory': imageDirectory,
+    'data': data,
+  };
+
   DataResponse<T> copyWith({
     String? code,
     String? status,

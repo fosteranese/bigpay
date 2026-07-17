@@ -1,6 +1,7 @@
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/routes/app_router.dart';
@@ -34,7 +35,11 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
             style: TextButton.styleFrom(
               tapTargetSize: .shrinkWrap,
             ),
-            onPressed: () {},
+            onPressed: () {
+              AppRouter.router.push(
+                NewLoginPage.route.path,
+              );
+            },
             child: Text(
               'Sign in',
               style: AppTypography.buttons.copyWith(

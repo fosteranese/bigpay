@@ -1,3 +1,5 @@
+import 'package:bigpay/data/cache/process_store.dart';
+import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/models/device_info.dart';
 import 'package:bigpay/models/user_response.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
@@ -12,7 +14,11 @@ class AppState {
   static late CountryWithPhoneCode gh;
   // static InitializationResponse? data;
   static late UserResponse currentUser;
-  // static final db = Database();
+  static final db = Database();
+  // Shared response cache + request-input store, one instance so the bloc and
+  // any outside caller share the same tiers. Reach the parts via `store.cache`
+  // and `store.inputs`.
+  static final store = ProcessStore.of(db);
   // static final auth = AuthRepo();
   static bool isLinkedMoMoWalletClosed = false;
 }

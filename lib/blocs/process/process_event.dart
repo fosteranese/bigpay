@@ -6,12 +6,14 @@ sealed class ProcessEvent extends Equatable {
     this.saveActionPayload = false,
     this.saveActionResponse = false,
     this.returnSavedResponse = false,
+    this.useSaveActionPayload = false,
   });
 
   final String id;
   final bool saveActionPayload;
   final bool saveActionResponse;
   final bool returnSavedResponse;
+  final bool useSaveActionPayload;
 
   @override
   List<Object> get props => [
@@ -19,6 +21,7 @@ sealed class ProcessEvent extends Equatable {
     saveActionPayload,
     saveActionResponse,
     returnSavedResponse,
+    useSaveActionPayload,
   ];
 }
 
@@ -33,6 +36,7 @@ final class ExecuteProcessEvent extends ProcessEvent {
     super.saveActionPayload = false,
     super.saveActionResponse = false,
     super.returnSavedResponse = false,
+    super.useSaveActionPayload = false,
   });
 
   final Action action;
@@ -44,5 +48,6 @@ final class ExecuteProcessEvent extends ProcessEvent {
     saveActionPayload,
     saveActionResponse,
     returnSavedResponse,
+    useSaveActionPayload,
   ];
 }

@@ -7,10 +7,14 @@ class RemoteUtil {
   RemoteUtil._();
   static final remote = MainRemote();
 
-  static Future<DataResponse<T1>>
-  makeCall<T extends ActionPayloadSerializable, T1>(
-    Action<T, T1> action,
-  ) async {
+  /// Makes the call and returns the raw envelope — `data` is the decoded JSON,
+  /// not the action's typed result.
+  ///
+  /// Parsing via `Action.responseDataFunc` is deferred to emit time in
+  /// [ProcessBloc], so a response can be cached as plain JSON and re-parsed on
+  /// read. Parsing here instead would put non-serializable typed objects into
+  /// the cache, which then fails to persist.
+  static Future<DataResponse<dynamic>> makeCall(Action action) async {
     final response = await remote.post(
       path: action.endpoint,
       body: action.payload.toMap(),
@@ -26,15 +30,11 @@ class RemoteUtil {
       );
     }
 
-    final parse = action.responseDataFunc;
-    final T1 data = parse != null ? parse(response.data) : response.data as T1;
-
-    return DataResponse<T1>(
+    return DataResponse<dynamic>(
       code: response.code,
       status: response.status,
       message: response.message,
-      data: data,
-
+      data: response.data,
       imageBaseUrl: response.imageBaseUrl,
       imageDirectory: response.imageDirectory,
       timeStamp: response.timeStamp,

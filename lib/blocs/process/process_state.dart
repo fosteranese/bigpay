@@ -4,15 +4,18 @@ sealed class ProcessState extends Equatable {
   const ProcessState({
     required this.event,
     this.isCachedData = false,
+    this.isSilent = false,
   });
 
   final ProcessEvent event;
   final bool isCachedData;
+  final bool isSilent;
 
   @override
   List<Object> get props => [
     event,
     isCachedData,
+    isSilent,
   ];
 }
 
@@ -26,12 +29,14 @@ final class ExecutingProcess extends ProcessState {
   const ExecutingProcess({
     required super.event,
     required super.isCachedData,
+    required super.isSilent,
   });
 
   @override
   List<Object> get props => [
     event,
     isCachedData,
+    isSilent,
   ];
 }
 
@@ -40,6 +45,7 @@ final class ProcessExecuted extends ProcessState {
     required super.event,
     required this.data,
     required super.isCachedData,
+    required super.isSilent,
   });
 
   final DataResponse data;
@@ -49,6 +55,7 @@ final class ProcessExecuted extends ProcessState {
     event,
     data,
     isCachedData,
+    isSilent,
   ];
 }
 
@@ -57,6 +64,7 @@ final class ExecuteProcessError extends ProcessState {
     required super.event,
     required this.error,
     required super.isCachedData,
+    required super.isSilent,
   });
 
   final DataError error;
@@ -66,5 +74,6 @@ final class ExecuteProcessError extends ProcessState {
     event,
     error,
     isCachedData,
+    isSilent,
   ];
 }

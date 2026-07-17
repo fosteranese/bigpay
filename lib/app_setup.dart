@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import 'package:bigpay/app.dart';
+import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/logger.dart';
 import 'package:bigpay/utils/app.util.dart';
 
@@ -16,6 +18,9 @@ void bootstrap() {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
+
+      await Hive.initFlutter();
+      await Database.init();
 
       // `init` populates CountryManager, which AppUtil.getInfo reads to resolve
       // the country list. Without it the list is empty.

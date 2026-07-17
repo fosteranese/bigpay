@@ -1,4 +1,5 @@
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/forgot_secure_phrase.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -76,7 +77,11 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
             Align(
               alignment: .topCenter,
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  AppRouter.router.push(
+                    StartForgotSecurePhrasePage.route.path,
+                  );
+                },
                 child: Text(
                   'Forgot Secret Answer?',
                   style: AppTypography.smallDetails.copyWith(

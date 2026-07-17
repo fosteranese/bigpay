@@ -1,6 +1,12 @@
 import 'dart:async';
 
+import 'package:bigpay/ui/pages/auth/signin/signin.dart';
+import 'package:bigpay/ui/pages/auth/signup/signup.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
@@ -17,30 +23,17 @@ class WalkthroughPage extends StatefulWidget {
 }
 
 class _WalkthroughPageState extends State<WalkthroughPage> {
-  final PageController _pageController = PageController(
+  final _pageController = PageController(
     initialPage: 0,
   );
   int _currentPage = 0;
-  // InitializationResponse? data;
-
-  static const walkThrough = [
-    WalkthroughData(
-      title: 'Securely Sent. Instantly.',
-      subtitle:
-          'Manage your virtual wallet with a futuristic interface designed for speed and complete peace of mind.',
-      image: JpgImages.walkthrough1,
-    ),
-    WalkthroughData(
-      title: 'Securely Sent. Instantly.',
-      subtitle:
-          'Manage your virtual wallet with a futuristic interface designed for speed and complete peace of mind.',
-      image: JpgImages.walkthrough1,
-    ),
-  ];
+  List<WalkthroughData> _walkThrough = const [];
+  Timer? _timer;
+  bool _pause = false;
 
   Widget _buildPageIndicator() {
     List<Widget> list = [];
-    for (int i = 0; i < walkThrough.length; i++) {
+    for (int i = 0; i < _walkThrough.length; i++) {
       list.add(
         i == _currentPage ? _indicator(true) : _indicator(false),
       );
@@ -54,9 +47,6 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     );
   }
 
-  Timer? _timer;
-  bool _pause = false;
-
   @override
   void initState() {
     _slide();
@@ -68,15 +58,14 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
       timer,
     ) {
       try {
-        // final data = (context.read<AppBloc>().data);
-        // if (data == null) {
-        //   return;
-        // }
+        if (_walkThrough.isEmpty) {
+          return;
+        }
 
         if (_pause) {
           return;
         }
-        if (_currentPage == walkThrough.length - 1) {
+        if (_currentPage == _walkThrough.length - 1) {
           // _currentPage = 0;
           // _pageController.jumpToPage(_currentPage);
         } else {
@@ -118,25 +107,63 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     });
   }
 
+  /// The slide image, falling back to the bundled asset.
+  ///
+  /// The payload names a file (`Walkthrough_2.jpg`) and the host arrives with
+  /// it, so the URL is only as good as what the backend reports — an
+  /// unreachable one has to degrade to the asset rather than leave a hole in
+  /// the first screen of the app. Both the loading and error states show the
+  /// bundled image, so there is never a blank frame on this screen.
+  Widget _slideImage(WalkthroughData item) {
+    final fallback = Image.asset(
+      JpgImages.walkthrough1,
+      alignment: .center,
+      fit: .cover,
+    );
+
+    final url = item.imageUrl;
+    if (url == null) {
+      return fallback;
+    }
+
+    return CachedNetworkImage(
+      imageUrl: url,
+      placeholder: (context, url) => fallback,
+      errorWidget: (context, url, error) => fallback,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    return ProcessBuilder<List<WalkthroughData>>(
+      event: startUpEvent,
+      builder: (context, snapshot) {
+        _walkThrough = snapshot.data ?? _walkThrough;
+
+        return _buildContent();
+      },
+    );
+  }
+
+  Widget _buildContent() {
     return Scaffold(
       body: Stack(
         fit: .expand,
         alignment: .center,
         children: [
           PageView(
+            physics: ClampingScrollPhysics(),
             dragStartBehavior: .start,
             controller: _pageController,
             onPageChanged: _nextPage,
             pageSnapping: true,
             padEnds: false,
-            scrollDirection: Axis.horizontal,
-            children: walkThrough
+            scrollDirection: .horizontal,
+            children: _walkThrough
                 .map(
                   (item) => Stack(
                     children: [
-                      Image.asset(item.image),
+                      _slideImage(item),
                       Align(
                         alignment: .topCenter,
                         child: SafeArea(
@@ -199,11 +226,19 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                   children: [
                     _buildPageIndicator(),
                     FormButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        AppRouter.router.push(
+                          StartSignUpPage.route.path,
+                        );
+                      },
                       text: 'Create a New Account',
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        AppRouter.router.push(
+                          NewLoginPage.route.path,
+                        );
+                      },
                       child: RichText(
                         text: TextSpan(
                           children: [

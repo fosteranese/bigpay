@@ -149,9 +149,6 @@ abstract class Env {
   @EnviedField(varName: 'IOS_APP_STORE_ID', obfuscate: true)
   static final String iosAppStoreId = _Env.iosAppStoreId;
 
-  @EnviedField(varName: 'LOKI', obfuscate: true)
-  static final String loki = _Env.loki;
-
   @EnviedField(varName: 'BUILD_NUMBER', obfuscate: true)
   static final String buildNumber = _Env.buildNumber;
 }
