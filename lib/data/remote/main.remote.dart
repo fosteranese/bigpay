@@ -15,9 +15,36 @@ import 'package:bigpay/utils/encryption.util.dart';
 import 'package:bigpay/utils/response.util.dart';
 
 class MainRemote {
-  Future<IOClient> _createPinnedClient(
-    void Function() onRejected,
-  ) async {
+  /// One pinned client for the whole app.
+  ///
+  /// `HttpClient` owns the connection pool, so building and closing one per
+  /// request costs a full TLS handshake on every call. Held as a Future so
+  /// concurrent callers share a single build rather than racing to make one
+  /// client each.
+  static Future<IOClient>? _pinnedClientFuture;
+
+  /// Hosts that have failed certificate pinning, used to tell a pinning
+  /// rejection apart from an ordinary handshake failure. The client's callback
+  /// is bound once at construction, so this can't be a per-request flag.
+  static final Set<String> _pinningViolatedHosts = {};
+
+  static Future<IOClient> get _pinnedClient async {
+    final pending = _pinnedClientFuture;
+    if (pending != null) return pending;
+
+    final built = _createPinnedClient();
+    _pinnedClientFuture = built;
+    try {
+      return await built;
+    } catch (_) {
+      // Never cache a failed build — doing so would serve the same error to
+      // every later request for the life of the process.
+      _pinnedClientFuture = null;
+      rethrow;
+    }
+  }
+
+  static Future<IOClient> _createPinnedClient() async {
     final sslCert = await rootBundle.load(
       'assets/cert/main.pem',
     );
@@ -34,7 +61,7 @@ class MainRemote {
     client.badCertificateCallback =
         (X509Certificate cert, String host, int port) {
           // if (kDebugMode) return true;
-          onRejected();
+          _pinningViolatedHosts.add(host);
           return false;
         };
     return IOClient(client);
@@ -135,8 +162,7 @@ class MainRemote {
     bool isAuthenticated = false,
     bool encrypt = true,
   }) async {
-    var pinningViolated = false;
-    IOClient? client;
+    Uri? url;
     try {
       logger.i('url: $path');
       var request = await _formatRequestPayload(
@@ -152,10 +178,8 @@ class MainRemote {
       final key = request.containsKey('key') ? (request['key'] as Key) : null;
 
       // SSL Pinned client for api calls
-      client = await _createPinnedClient(() {
-        pinningViolated = true;
-      });
-      var url = Uri.https(
+      final client = await _pinnedClient;
+      url = Uri.https(
         Env.mainBaseUrl,
         "${Env.mainRootPath}/$path".replaceAll('//', '/'),
       );
@@ -188,7 +212,8 @@ class MainRemote {
       // SecurityUtil.deviceStatus = GeneralResponseConst.offline;
       return GeneralResponseConst.offline;
     } on HandshakeException catch (_) {
-      if (pinningViolated) {
+      final host = url?.host;
+      if (host != null && _pinningViolatedHosts.contains(host)) {
         // SecurityUtil.deviceStatus = GeneralResponseConst.forceUpdate;
         return GeneralResponseConst.forceUpdate;
       }
@@ -198,8 +223,6 @@ class MainRemote {
       logger.e(e);
       // SecurityUtil.deviceStatus = GeneralResponseConst.unknown;
       return GeneralResponseConst.unknown;
-    } finally {
-      client?.close();
     }
   }
 }

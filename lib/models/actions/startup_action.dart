@@ -18,4 +18,5 @@ final class StartupAction extends Action<NoPayload, String> {
 final startUpEvent = ExecuteProcessEvent(
   id: Uuid().v4(),
   action: StartupAction(),
+  returnSavedResponse: true,
 );

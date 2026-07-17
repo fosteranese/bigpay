@@ -1,6 +1,7 @@
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/ui/pages/app_error.pg.dart';
+import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'routes/app_router.dart';
@@ -21,14 +22,23 @@ class BigPayApp extends StatelessWidget {
       child: BlocListener<ProcessBloc, ProcessState>(
         listenWhen: (previous, current) => current.event == startUpEvent,
         listener: (context, state) {
-          if (state is ExecuteProcessError) {
-            // The GoRouter is installed by the MaterialApp.router *below* this
-            // listener, so `context.go` can't find it looking upwards. Drive
-            // the router instance directly instead.
-            AppRouter.router.go(
-              AppErrorPage.route.path,
-              extra: state.error,
-            );
+          // ProcessState is sealed, so the states that route nowhere are listed
+          // rather than defaulted: adding a new one breaks the build here
+          // instead of silently falling through.
+          switch (state) {
+            case ProcessExecuted(:final data):
+              AppRouter.router.go(
+                WalkthroughPage.route.path,
+                extra: data,
+              );
+            case ExecuteProcessError(:final error):
+              AppRouter.router.go(
+                AppErrorPage.route.path,
+                extra: error,
+              );
+            case InitialProcess():
+            case ExecutingProcess():
+              break;
           }
         },
         child: MaterialApp.router(

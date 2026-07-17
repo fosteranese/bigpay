@@ -4,51 +4,51 @@ import 'dart:typed_data';
 import 'package:cryptography/cryptography.dart' as crypt;
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart';
-import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:convert/convert.dart';
 
 import '../env/env.dart';
 
 class EncryptionUtil {
-  static Future<(enc.Key, enc.IV)> get _keys async {
-    // Generate a random password
-    final pwd1 = const Uuid().v4();
+  /// A fresh AES-GCM key and nonce for a single request.
+  ///
+  /// Both are drawn straight from a CSPRNG. Deriving them through a KDF would
+  /// only stretch an already-random value: the key never leaves the client
+  /// unencrypted and is handed to the server via RSA rather than re-derived
+  /// there, so there is nothing low-entropy to strengthen.
+  static (enc.Key, enc.IV) get _keys {
     final random = Random.secure();
 
-    // Generate a 32-byte salt
-    // Generate a 16-byte salt
-    final salt1 = Uint8List(16);
-    for (int i = 0; i < salt1.length; i++) {
-      salt1[i] = random.nextInt(128);
+    // 16 bytes — AesGcm.with128bits.
+    final key = Uint8List(16);
+    for (int i = 0; i < key.length; i++) {
+      key[i] = random.nextInt(256);
     }
 
-    // Generate a key from the password and salt
-    final keyGen = crypt.Pbkdf2(
-      macAlgorithm: crypt.Hmac.sha256(),
-      iterations: 10000,
-      bits: 128,
-    );
-
-    final secretKey = await keyGen.deriveKey(
-      secretKey: crypt.SecretKey(utf8.encode(pwd1)),
-      nonce: salt1,
-    );
-
-    final key = await secretKey.extractBytes();
-
-    // Generate a 12-byte IV
+    // 12 bytes — the standard AES-GCM nonce length.
     final iv = Uint8List(12);
     for (int i = 0; i < iv.length; i++) {
-      iv[i] = random.nextInt(128);
+      iv[i] = random.nextInt(256);
     }
 
-    final key64 = base64Encode(key);
-    final iv64 = base64Encode(iv);
-    return (enc.Key.fromBase64(key64), enc.IV.fromBase64(iv64));
+    return (enc.Key(key), enc.IV(iv));
   }
 
-  static RSAPublicKey get _rsaPublicKey {
+  /// Built once, on first use.
+  ///
+  /// The key is a compile-time constant, but parsing it walks an XML document
+  /// and rebuilds two BigInts from hex, and the RSA engine behind the encrypter
+  /// is not cheap to construct either. `encryptRSA` runs twice per request, so
+  /// deriving this per call repeated all of that work for an unchanging result.
+  /// Reuse is safe: `RSA.encrypt` resets and re-initialises its cipher on every
+  /// call and never yields, so calls cannot interleave or inherit state.
+  static final enc.Encrypter _rsaEncrypter = enc.Encrypter(
+    enc.RSA(
+      publicKey: _parseRsaPublicKey(),
+    ),
+  );
+
+  static RSAPublicKey _parseRsaPublicKey() {
     var xmlDocument = xml.XmlDocument.parse(Env.rsaPublicKey);
     var modulus = _getData(xmlDocument, 'Modulus');
     var exponent = _getData(xmlDocument, 'Exponent');
@@ -76,7 +76,7 @@ class EncryptionUtil {
   }
 
   static Future<(String, enc.Key, enc.IV)> encrypt(String clearText) async {
-    final (key, iv) = await _keys;
+    final (key, iv) = _keys;
     final plaintextBytes = utf8.encode(clearText);
 
     // Encrypt using AES-GCM
@@ -147,12 +147,7 @@ class EncryptionUtil {
   }
 
   static Future<String> encryptRSA(String clearText) async {
-    final encrypter = enc.Encrypter(
-      enc.RSA(
-        publicKey: _rsaPublicKey,
-      ),
-    );
-    final encrypted = encrypter.encrypt(clearText);
+    final encrypted = _rsaEncrypter.encrypt(clearText);
 
     return encrypted.base64;
   }
