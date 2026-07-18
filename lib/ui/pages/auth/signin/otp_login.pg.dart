@@ -1,38 +1,39 @@
+import 'package:bigpay/data/models/response/response.md.dart';
+import 'package:bigpay/models/auth_data.dart';
+import 'package:bigpay/ui/pages/dashboard.pg.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/models/actions/signup/resend_otp_signup_action.dart';
-import 'package:bigpay/models/actions/signup/verify_otp_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/otp_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/auth/signup/signup.dart';
+import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
 
-class OtpSignUpPage extends StatefulWidget {
-  const OtpSignUpPage({
+class OtpLoginPage extends StatefulWidget {
+  const OtpLoginPage({
     super.key,
-    required this.data,
   });
 
-  final VerifyUserData data;
-
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/auth/otp-signup',
+    path: '/auth/otp-login',
   );
 
   @override
-  State<OtpSignUpPage> createState() => _OtpSignUpPageState();
+  State<OtpLoginPage> createState() => _OtpLoginPageState();
 }
 
-class _OtpSignUpPageState extends State<OtpSignUpPage> {
+class _OtpLoginPageState extends State<OtpLoginPage> {
   final _otp = ValueNotifier('');
-  late VerifyUserData _data = widget.data;
+  final _error = ValueNotifier<DataError?>(null);
   ExecuteProcessEvent? mainEvent;
   ExecuteProcessEvent? resentOtpEvent;
 
@@ -40,6 +41,10 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
   void dispose() {
     _otp.dispose();
     super.dispose();
+  }
+
+  int get _length {
+    return (SignIn.verifyUserData?.otpData?.length ?? 6);
   }
 
   @override
@@ -57,7 +62,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
             }
 
             if (snapshot.hasData) {
-              _data = snapshot.data!;
+              SignIn.verifyUserData = snapshot.data!;
               return;
             }
 
@@ -70,7 +75,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
             }
           },
         ),
-        ProcessListenerConfig<String>(
+        ProcessListenerConfig<AuthData>(
           event: () => mainEvent,
           listener: (context, snapshot) {
             if (snapshot.isLoading) {
@@ -81,19 +86,16 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
             }
 
             if (snapshot.hasData) {
-              SignUp.registrationId = snapshot.data!;
+              AppState.currentUser = snapshot.data!;
               AppRouter.router.push(
-                CreatePasswordSignUpPage.route.path,
+                DashboardPage.route.path,
               );
 
               return;
             }
 
             if (snapshot.hasError) {
-              MessageUtil.displayErrorDialog(
-                context,
-                message: snapshot.error!.message,
-              );
+              _error.value = snapshot.error;
               return;
             }
           },
@@ -113,7 +115,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
               ),
             ),
             Text(
-              _data.otpData?.message ?? '',
+              SignIn.verifyUserData?.otpData?.message ?? '',
               textAlign: .center,
               style: AppTypography.p1,
             ),
@@ -124,7 +126,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
           builder: (context, value, child) {
             return FormButton(
               onPressed: _onVerify,
-              enabled: value.length == 6,
+              enabled: value.length == _length,
               text: 'Continue',
             );
           },
@@ -132,17 +134,26 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
         child: Form(
           child: Column(
             children: [
-              FormOtpInput(
-                count: _data.otpData?.length ?? 6,
-                enableAutofill: true,
-                onChanged: (value) {
-                  _otp.value = value;
+              ValueListenableBuilder(
+                valueListenable: _error,
+                builder: (context, error, child) {
+                  return FormOtpInput(
+                    error: error?.message,
+                    count: _length,
+                    enableAutofill: true,
+                    onChanged: (otp) {
+                      _otp.value = otp;
+                      if (otp.length < _length && _error.value != null) {
+                        _error.value = null;
+                      }
+                    },
+                    onCompleted: (value) {
+                      _otp.value = value;
+                      _onVerify();
+                    },
+                    onResend: _resentOtp,
+                  );
                 },
-                onCompleted: (value) {
-                  _otp.value = value;
-                  _onVerify();
-                },
-                onResend: _resentOtp,
               ),
             ],
           ),
@@ -157,7 +168,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
     resentOtpEvent = context.dispatchProcess(
       ResendOtpSignUpAction(
         payload: ResendOtpSignUpActionPayload(
-          otpId: _data.otpData?.otpId ?? '',
+          otpId: SignIn.verifyUserData?.otpData?.otpId ?? '',
         ),
       ),
     );
@@ -167,9 +178,9 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
     FocusScope.of(context).unfocus();
 
     mainEvent = context.dispatchProcess(
-      VerifyOtpSignUpAction(
-        payload: VerifyOtpSignUpActionPayload(
-          otpId: _data.otpData?.otpId ?? '',
+      VerifyOtpLoginAction(
+        payload: VerifyOtpLoginActionPayload(
+          otpId: SignIn.verifyUserData?.otpData?.otpId ?? '',
           otpValue: _otp.value,
         ),
       ),

@@ -7,7 +7,7 @@ import 'package:bigpay/data/cache/process_store.dart';
 import 'package:bigpay/data/cache/request_input_store.dart';
 import 'package:bigpay/data/cache/response_cache.dart';
 import 'package:bigpay/data/database/db.dart';
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/ui/pages/auth/signup/otp_signup.pg.dart';
 
 /// The OTP page subscribes to [ProcessBloc] (for OTP resend), so it needs one
@@ -15,7 +15,10 @@ import 'package:bigpay/ui/pages/auth/signup/otp_signup.pg.dart';
 Widget _wrap(Widget child) {
   return BlocProvider<ProcessBloc>(
     create: (_) => ProcessBloc(
-      store: ProcessStore(cache: ResponseCache(Database()), inputs: RequestInputStore()),
+      store: ProcessStore(
+        cache: ResponseCache(Database()),
+        inputs: RequestInputStore(),
+      ),
     ),
     child: MaterialApp(home: child),
   );
@@ -25,7 +28,7 @@ void main() {
   testWidgets('masks all but the last 3 digits of the number', (tester) async {
     await tester.pumpWidget(
       _wrap(
-        const OtpSignUpPage(phoneNumber: '0244123219', data: StartSignUpData()),
+        const OtpSignUpPage(phoneNumber: '0244123219', data: VerifyUserData()),
       ),
     );
     await tester.pump();
@@ -36,7 +39,9 @@ void main() {
     );
   });
 
-  testWidgets('falls back to generic copy for a too-short number', (tester) async {
+  testWidgets('falls back to generic copy for a too-short number', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(const OtpSignUpPage(phoneNumber: '', data: StartSignUpData())),
     );

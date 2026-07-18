@@ -49,19 +49,26 @@ class _FormSelectInputState extends State<FormSelectInput> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: _onTap,
-      highlightColor: Colors.transparent,
-      child: AbsorbPointer(
-        child: FormInput(
-          readOnly: true,
-          label: widget.label,
-          placeholder: widget.placeholder,
-          controller: _controller,
-          focusNode: widget.focusNode,
-          next: widget.next,
-          onChanged: widget.onChanged,
-          suffix: const Icon(Icons.expand_more_outlined),
+    return Tooltip(
+      message: _controller.text,
+      child: InkWell(
+        onTap: _onTap,
+        highlightColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        child: AbsorbPointer(
+          child: FormInput(
+            readOnly: true,
+            label: widget.label,
+            placeholder: widget.placeholder,
+            controller: _controller,
+            focusNode: widget.focusNode,
+            next: widget.next,
+            onChanged: widget.onChanged,
+            suffix: const Icon(Icons.expand_more_outlined),
+            maxLines: 1,
+          ),
         ),
       ),
     );
@@ -70,7 +77,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void _onTap() {
     FocusScope.of(context).unfocus();
     widget.focusNode?.requestFocus();
-    if (widget.options.length <= 5) {
+    if (widget.options.length <= 3) {
       _onShortList();
     } else {
       _onLongList();
@@ -149,13 +156,15 @@ class _FormSelectInputState extends State<FormSelectInput> {
       isScrollControlled: true,
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: .vertical(
+          top: .circular(20),
+        ),
       ),
       builder: (_) => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
+        margin: const .symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: .circular(20),
         ),
         child: DraggableScrollableSheet(
           initialChildSize: 0.6,
@@ -163,41 +172,70 @@ class _FormSelectInputState extends State<FormSelectInput> {
           maxChildSize: 0.9,
           expand: false,
           builder: (_, scrollController) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const .symmetric(vertical: 24),
             child: Column(
               children: [
-                Text(
-                  widget.label ?? 'Select',
-                  style: AppTypography.formLabels,
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      hintStyle: AppTypography.caption,
-                      prefixIcon: const Icon(Icons.search),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: AppColors.tertiary,
-                          style: BorderStyle.solid,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          style: BorderStyle.solid,
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.offWhite,
+                Row(
+                  mainAxisSize: .max,
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    Text(
+                      widget.label ?? 'Select',
+                      style: AppTypography.header1,
                     ),
-                    onChanged: _onSearch,
+                    IconButton.filled(
+                      style: IconButton.styleFrom(
+                        alignment: .center,
+                        tapTargetSize: .shrinkWrap,
+                        backgroundColor: AppColors.offWhite,
+                        fixedSize: Size(35, 35),
+                        minimumSize: Size(35, 35),
+                        maximumSize: Size(35, 35),
+                      ),
+                      onPressed: () {
+                        context.pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        size: 17,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const .only(
+                    top: 5,
+                    bottom: 10,
+                  ),
+                  child: SizedBox(
+                    height: 45,
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        hintStyle: AppTypography.caption,
+                        prefixIcon: const Icon(Icons.search),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: .circular(10),
+                          borderSide: const BorderSide(
+                            color: AppColors.tertiary,
+                            style: .solid,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: .circular(10),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            style: .solid,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: AppColors.offWhite,
+                      ),
+                      onChanged: _onSearch,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -250,6 +288,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   Widget _buildOption(FormSelectOption option) {
     final selected = widget.controller.text == option.id;
     return Container(
+      margin: const .only(bottom: 10),
       decoration: BoxDecoration(
         borderRadius: .circular(10),
         border: .all(
@@ -257,11 +296,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
           width: 1,
         ),
       ),
-      child: ListTile(
-        onTap: () => _onSelect(option),
-        title: Text(option.label),
-        contentPadding: .symmetric(horizontal: 10),
-        trailing: FormRadioButton(selected: selected),
+      child: Material(
+        borderRadius: .circular(10),
+        child: ListTile(
+          onTap: () => _onSelect(option),
+          title: Text(option.label),
+          contentPadding: .symmetric(horizontal: 10),
+          trailing: FormRadioButton(selected: selected),
+        ),
       ),
     );
   }

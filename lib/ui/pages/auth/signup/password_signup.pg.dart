@@ -95,7 +95,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
 
   void _continue() {
     FocusScope.of(context).unfocus();
-    SignUp.registrationId = _passwordController.text;
+    SignUp.password = _passwordController.text;
 
     AppRouter.router.push(CreateSecurePhrasePage.route.path);
   }

@@ -1,4 +1,4 @@
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -6,7 +6,7 @@ part 'start_signup_action.freezed.dart';
 part 'start_signup_action.g.dart';
 
 final class StartSignUpAction
-    extends Action<StartSignUpActionPayload, StartSignUpData> {
+    extends Action<StartSignUpActionPayload, VerifyUserData> {
   /// The endpoint, reachable without an instance (see [StartupAction.path]).
   static const path = '/UserAccess/signUpCustomer';
 
@@ -17,8 +17,8 @@ final class StartSignUpAction
          responseDataFunc: _responseDataFunc,
        );
 
-  static StartSignUpData _responseDataFunc(dynamic response) {
-    return StartSignUpData.fromMap(response as Map<String, dynamic>);
+  static VerifyUserData _responseDataFunc(dynamic response) {
+    return VerifyUserData.fromMap(response as Map<String, dynamic>);
   }
 }
 

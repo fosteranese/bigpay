@@ -7,14 +7,14 @@ enum UserType {
   nonCustomer,
 }
 
-class UserResponse extends Equatable {
+class AuthData extends Equatable {
   final UserType? userType;
   final String? sessionId;
   final String? imageBaseUrl;
   final String? imageDirectory;
   final String? profilePicture;
 
-  const UserResponse({
+  const AuthData({
     this.userType,
     this.sessionId,
     this.imageBaseUrl,
@@ -22,7 +22,7 @@ class UserResponse extends Equatable {
     this.profilePicture,
   });
 
-  factory UserResponse.fromMap(Map<String, dynamic> data) => UserResponse(
+  factory AuthData.fromMap(Map<String, dynamic> data) => AuthData(
     userType: (data['userType'] as String?) == 'CUSTOMER'
         ? UserType.customer
         : UserType.nonCustomer,
@@ -42,24 +42,24 @@ class UserResponse extends Equatable {
 
   /// `dart:convert`
   ///
-  /// Parses the string and returns the resulting Json object as [UserResponse].
-  factory UserResponse.fromJson(String data) {
-    return UserResponse.fromMap(json.decode(data) as Map<String, dynamic>);
+  /// Parses the string and returns the resulting Json object as [AuthData].
+  factory AuthData.fromJson(String data) {
+    return AuthData.fromMap(json.decode(data) as Map<String, dynamic>);
   }
 
   /// `dart:convert`
   ///
-  /// Converts [UserResponse] to a JSON string.
+  /// Converts [AuthData] to a JSON string.
   String toJson() => json.encode(toMap());
 
-  UserResponse copyWith({
+  AuthData copyWith({
     UserType? userType,
     String? sessionId,
     String? imageBaseUrl,
     String? imageDirectory,
     String? profilePicture,
   }) {
-    return UserResponse(
+    return AuthData(
       userType: userType ?? this.userType,
       sessionId: sessionId ?? this.sessionId,
       imageBaseUrl: imageBaseUrl ?? this.imageBaseUrl,

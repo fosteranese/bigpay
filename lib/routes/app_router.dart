@@ -1,13 +1,15 @@
-import 'package:bigpay/routes/more_routes.dart';
-import 'package:bigpay/routes/wallet_routes.dart';
-import 'package:bigpay/ui/pages/splash_screen.pg.dart';
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/kyc_routes.dart';
+import 'package:bigpay/routes/more_routes.dart';
 import 'package:bigpay/routes/process_flow_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
+import 'package:bigpay/routes/wallet_routes.dart';
+import 'package:bigpay/ui/pages/splash_screen.pg.dart';
 
 class AppRouter {
   AppRouter._();
@@ -39,11 +41,16 @@ class PageRouteDefinition {
 }
 
 extension GoRouteX on PageRouteDefinition {
-  GoRoute toGoRoute(Widget Function() page, {bool nested = false}) {
+  GoRoute toGoRoute(
+    Widget Function() page, {
+    bool nested = false,
+    FutureOr<bool> Function(BuildContext, GoRouterState)? onExit,
+  }) {
     return GoRoute(
       name: name,
       path: nested ? subPath : path,
       builder: (context, state) => page(),
+      onExit: onExit,
     );
   }
 
@@ -51,11 +58,13 @@ extension GoRouteX on PageRouteDefinition {
   GoRoute toGoRouteWithState(
     Widget Function(GoRouterState state) page, {
     bool nested = false,
+    FutureOr<bool> Function(BuildContext, GoRouterState)? onExit,
   }) {
     return GoRoute(
       name: name,
       path: nested ? subPath : path,
       builder: (context, state) => page(state),
+      onExit: onExit,
     );
   }
 }

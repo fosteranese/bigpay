@@ -132,7 +132,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   @override
   Widget build(BuildContext context) {
     return ProcessBuilder<InitializationData>(
-      event: startUpEvent,
+      event: () => startUpEvent,
       builder: (context, snapshot) {
         baseUrl = snapshot.data?.imageBaseUrl ?? '';
         imageDirectory = snapshot.data?.imageDirectory ?? '';

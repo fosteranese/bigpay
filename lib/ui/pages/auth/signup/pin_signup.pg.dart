@@ -1,19 +1,20 @@
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/models/actions/signup/complete_signup_action.dart';
+import 'package:bigpay/models/auth_data.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/pin_unified_input.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 class PinSignUpPage extends StatefulWidget {
   const PinSignUpPage({super.key});
@@ -26,7 +27,6 @@ class PinSignUpPage extends StatefulWidget {
 }
 
 class _PinSignUpPageState extends State<PinSignUpPage> {
-  final _id = Uuid().v4();
   ExecuteProcessEvent? mainEvent;
 
   final _pinFocusNode = FocusNode();
@@ -46,17 +46,18 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProcessBloc, ProcessState>(
-      listenWhen: (previous, current) => current.event == mainEvent,
-      listener: (context, state) {
-        if (state is ExecutingProcess) {
+    return ProcessListener<AuthData>(
+      event: () => mainEvent,
+      listener: (context, snapshot) {
+        if (snapshot.isLoading) {
           MessageUtil.displayLoading(context);
           return;
         } else {
           MessageUtil.close(context);
         }
 
-        if (state is ProcessExecuted) {
+        if (snapshot.hasData) {
+          AppState.currentUser = snapshot.data!;
           MessageUtil.displaySuccessFullDialog(
             context,
             successIcon: CircleAvatar(
@@ -65,7 +66,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
               backgroundImage: AssetImage(JpgImages.avatar),
             ),
             title: 'Welcome aboard!',
-            message: state.result.message,
+            message: snapshot.message ?? '',
             btnText: 'Get Started',
             onOk: () {
               AppRouter.router.go(DashboardPage.route.path);
@@ -74,10 +75,10 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
           return;
         }
 
-        if (state is ExecuteProcessError) {
+        if (snapshot.hasError) {
           MessageUtil.displayErrorDialog(
             context,
-            message: state.error.message,
+            message: snapshot.error!.message,
           );
           return;
         }
@@ -86,7 +87,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
         title: 'Set Security PIN',
         titleStyle: AppTypography.display1,
         subtitle:
-            'Set a 6-digit code to authorize payments and keep your wallet secure.',
+            'Set a 4-digit code to authorize payments and keep your wallet secure.',
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
           builder: (context, value, child) {
@@ -137,9 +138,8 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
   void _onSave() {
     FocusScope.of(context).unfocus();
 
-    mainEvent = ExecuteProcessEvent(
-      id: _id,
-      action: CompleteSignUpAction(
+    mainEvent = context.dispatchProcess(
+      CompleteSignUpAction(
         payload: CompleteSignUpActionPayload(
           password: SignUp.password,
           pin: _pinController.text.trim(),
@@ -149,7 +149,5 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
         ),
       ),
     );
-
-    context.read<ProcessBloc>().add(mainEvent!);
   }
 }

@@ -2,7 +2,7 @@ import 'package:bigpay/data/cache/process_store.dart';
 import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
 import 'package:bigpay/models/device_info.dart';
-import 'package:bigpay/models/user_response.dart';
+import 'package:bigpay/models/auth_data.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
 import 'package:package_info_plus/package_info_plus.dart' as pip;
 
@@ -14,7 +14,7 @@ class AppState {
   static late CountryWithPhoneCode currentCountry;
   static late CountryWithPhoneCode gh;
   static InitializationData? data;
-  static late UserResponse currentUser;
+  static late AuthData currentUser;
   static final db = Database();
   // Shared response cache + request-input store, one instance so the bloc and
   // any outside caller share the same tiers. Reach the parts via `store.cache`

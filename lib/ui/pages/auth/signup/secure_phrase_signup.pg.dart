@@ -61,8 +61,8 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
             FormSelectInput(
               label: 'Choose a Question',
               placeholder: 'Select...',
-              focusNode: _answerFocusNode,
-              controller: _answerController,
+              focusNode: _questionFocusNode,
+              controller: _questionController,
               next: (_) {
                 _questionFocusNode.requestFocus();
               },
@@ -79,8 +79,8 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
             const SizedBox(height: 15),
             FormInput(
               label: 'Answer to the Question',
-              focusNode: _questionFocusNode,
-              controller: _questionController,
+              focusNode: _answerFocusNode,
+              controller: _answerController,
               onChanged: _onChanged,
             ),
           ],
@@ -101,6 +101,6 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
     SignUp.secretQuestion = _questionController.text.trim();
     SignUp.secretAnswer = _answerController.text.trim();
 
-    AppRouter.router.push(CreateSecurePhrasePage.route.path);
+    AppRouter.router.push(PinSignUpPage.route.path);
   }
 }

@@ -1,4 +1,3 @@
-export 'done_signup.pg.dart';
 export 'otp_signup.pg.dart';
 export 'password_signup.pg.dart';
 export 'pin_signup.pg.dart';

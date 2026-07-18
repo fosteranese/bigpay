@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 
 import 'otp_data.dart';
 
-class StartSignUpData extends Equatable {
+class VerifyUserData extends Equatable {
   final OtpData? otpData;
   final String? ghCardUrl;
   final String? registrationId;
@@ -12,7 +12,7 @@ class StartSignUpData extends Equatable {
   final dynamic externalUrl;
   final dynamic accessType;
 
-  const StartSignUpData({
+  const VerifyUserData({
     this.otpData,
     this.ghCardUrl,
     this.registrationId,
@@ -21,8 +21,8 @@ class StartSignUpData extends Equatable {
     this.accessType,
   });
 
-  factory StartSignUpData.fromMap(Map<String, dynamic> data) {
-    return StartSignUpData(
+  factory VerifyUserData.fromMap(Map<String, dynamic> data) {
+    return VerifyUserData(
       otpData: data['otpData'] == null
           ? null
           : OtpData.fromMap(data['otpData'] as Map<String, dynamic>),
@@ -45,17 +45,17 @@ class StartSignUpData extends Equatable {
 
   /// `dart:convert`
   ///
-  /// Parses the string and returns the resulting Json object as [StartSignUpData].
-  factory StartSignUpData.fromJson(String data) {
-    return StartSignUpData.fromMap(json.decode(data) as Map<String, dynamic>);
+  /// Parses the string and returns the resulting Json object as [VerifyUserData].
+  factory VerifyUserData.fromJson(String data) {
+    return VerifyUserData.fromMap(json.decode(data) as Map<String, dynamic>);
   }
 
   /// `dart:convert`
   ///
-  /// Converts [StartSignUpData] to a JSON string.
+  /// Converts [VerifyUserData] to a JSON string.
   String toJson() => json.encode(toMap());
 
-  StartSignUpData copyWith({
+  VerifyUserData copyWith({
     OtpData? otpData,
     String? ghCardUrl,
     String? registrationId,
@@ -63,7 +63,7 @@ class StartSignUpData extends Equatable {
     dynamic externalUrl,
     dynamic accessType,
   }) {
-    return StartSignUpData(
+    return VerifyUserData(
       otpData: otpData ?? this.otpData,
       ghCardUrl: ghCardUrl ?? this.ghCardUrl,
       registrationId: registrationId ?? this.registrationId,

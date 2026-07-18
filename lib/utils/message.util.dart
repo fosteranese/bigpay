@@ -1,15 +1,15 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/components/glass_panel.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 
 final class MessageUtil {
   static void displayLoading(

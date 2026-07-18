@@ -27,13 +27,18 @@ class BigPayApp extends StatelessWidget {
         ),
       ],
       child: ProcessListener<InitializationData>(
-        event: startUpEvent,
+        event: () => startUpEvent,
         listener: (context, snapshot) {
           if (snapshot.hasData) {
             AppState.data = snapshot.data!;
-            final returning = snapshot.isCached || snapshot.isSilent;
+            // The silent half of cache-then-refresh: we already routed off the
+            // cached result, so keep the fresh data but don't navigate again —
+            // otherwise the background refresh yanks the user back here.
+            if (snapshot.isSilent) return;
             AppRouter.router.go(
-              returning ? NewLoginPage.route.path : WalkthroughPage.route.path,
+              snapshot.isCached
+                  ? NewLoginPage.route.path
+                  : WalkthroughPage.route.path,
               extra: snapshot.data,
             );
           } else if (snapshot.hasError &&
