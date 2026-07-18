@@ -10,7 +10,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class DoneForgotSecurePhrasePage extends StatelessWidget {
   const DoneForgotSecurePhrasePage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/done-forgot-secure-phrase');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/done-forgot-secure-phrase',
+  );
 
   @override
   Widget build(BuildContext context) {

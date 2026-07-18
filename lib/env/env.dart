@@ -17,29 +17,25 @@ abstract class Env {
     varName: 'RESEND_OTP_AFTER_IN_SECONDS',
     obfuscate: true,
   )
-  static final int resendOtpAfterInSeconds =
-      _Env.resendOtpAfterInSeconds;
+  static final int resendOtpAfterInSeconds = _Env.resendOtpAfterInSeconds;
 
   @EnviedField(
     varName: 'COUNTRY_FLAG_BASE_URL',
     obfuscate: true,
   )
-  static final String countryFlagBaseUrl =
-      _Env.countryFlagBaseUrl;
+  static final String countryFlagBaseUrl = _Env.countryFlagBaseUrl;
 
   @EnviedField(
     varName: 'GOOGLE_MAP_API_KEY',
     obfuscate: true,
   )
-  static final String googleMapApiKey =
-      _Env.googleMapApiKey;
+  static final String googleMapApiKey = _Env.googleMapApiKey;
 
   @EnviedField(
     varName: 'GOOGLE_MAP_BASE_URL',
     obfuscate: true,
   )
-  static final String googleMapBaseUrl =
-      _Env.googleMapBaseUrl;
+  static final String googleMapBaseUrl = _Env.googleMapBaseUrl;
 
   @EnviedField(
     varName: 'GOOGLE_MAP_PLACE_BASE_PATH_URL',
@@ -52,8 +48,7 @@ abstract class Env {
     varName: 'GOOGLE_SHARE_LOCATION_URL',
     obfuscate: true,
   )
-  static final String googleShareLocationUrl =
-      _Env.googleShareLocationUrl;
+  static final String googleShareLocationUrl = _Env.googleShareLocationUrl;
 
   @EnviedField(varName: 'RSA_PUBLIC_KEY', obfuscate: true)
   static final String rsaPublicKey = _Env.rsaPublicKey;
@@ -68,8 +63,7 @@ abstract class Env {
     varName: 'ANDROID_SIGNING_CERT_HASHES',
     obfuscate: true,
   )
-  static final String androidSigningCertHashes =
-      _Env.androidSigningCertHashes;
+  static final String androidSigningCertHashes = _Env.androidSigningCertHashes;
 
   @EnviedField(
     varName: 'ANDROID_SIGNING_CERT_HASH_UPLOAD',
@@ -96,32 +90,27 @@ abstract class Env {
     varName: 'ANDROID_MESSAGING_SENDER_ID',
     obfuscate: true,
   )
-  static final String androidMessagingSenderId =
-      _Env.androidMessagingSenderId;
+  static final String androidMessagingSenderId = _Env.androidMessagingSenderId;
   @EnviedField(
     varName: 'ANDROID_PROJECT_ID',
     obfuscate: true,
   )
-  static final String androidProjectId =
-      _Env.androidProjectId;
+  static final String androidProjectId = _Env.androidProjectId;
   @EnviedField(
     varName: 'ANDROID_DATABASE_URL',
     obfuscate: true,
   )
-  static final String androidDatabaseUrl =
-      _Env.androidDatabaseUrl;
+  static final String androidDatabaseUrl = _Env.androidDatabaseUrl;
   @EnviedField(
     varName: 'ANDROID_STORAGE_BUCKET',
     obfuscate: true,
   )
-  static final String androidStorageBucket =
-      _Env.androidStorageBucket;
+  static final String androidStorageBucket = _Env.androidStorageBucket;
   @EnviedField(
     varName: 'ANDROID_BUNDLE_ID',
     obfuscate: true,
   )
-  static final String androidBundleId =
-      _Env.androidBundleId;
+  static final String androidBundleId = _Env.androidBundleId;
 
   @EnviedField(varName: 'IOS_API_KEY', obfuscate: true)
   static final String iosApiKey = _Env.iosApiKey;
@@ -131,8 +120,7 @@ abstract class Env {
     varName: 'IOS_MESSAGING_SENDER_ID',
     obfuscate: true,
   )
-  static final String iosMessagingSenderId =
-      _Env.iosMessagingSenderId;
+  static final String iosMessagingSenderId = _Env.iosMessagingSenderId;
   @EnviedField(varName: 'IOS_PROJECT_ID', obfuscate: true)
   static final String iosProjectId = _Env.iosProjectId;
   @EnviedField(varName: 'IOS_DATABASE_URL', obfuscate: true)
@@ -141,8 +129,7 @@ abstract class Env {
     varName: 'IOS_STORAGE_BUCKET',
     obfuscate: true,
   )
-  static final String iosStorageBucket =
-      _Env.iosStorageBucket;
+  static final String iosStorageBucket = _Env.iosStorageBucket;
   @EnviedField(varName: 'IOS_BUNDLE_ID', obfuscate: true)
   static final String iosBundleId = _Env.iosBundleId;
 

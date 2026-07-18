@@ -1,11 +1,13 @@
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/select_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/auth/signup/signup.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
 
 class CreateSecurePhrasePage extends StatefulWidget {
   const CreateSecurePhrasePage({super.key});
@@ -18,18 +20,18 @@ class CreateSecurePhrasePage extends StatefulWidget {
 }
 
 class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
-  final _passwordFocusNode = FocusNode();
-  final _confirmPasswordFocusNode = FocusNode();
+  final _answerFocusNode = FocusNode();
+  final _questionFocusNode = FocusNode();
 
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final _answerController = TextEditingController();
+  final _questionController = TextEditingController();
 
   final _canSubmit = ValueNotifier(false);
 
   @override
   void dispose() {
-    _passwordFocusNode.dispose();
-    _confirmPasswordFocusNode.dispose();
+    _answerFocusNode.dispose();
+    _questionFocusNode.dispose();
     super.dispose();
   }
 
@@ -45,7 +47,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
         builder: (context, value, child) {
           return FormButton(
             enabled: value,
-            onPressed: () {},
+            onPressed: _continue,
             text: 'Continue',
           );
         },
@@ -59,24 +61,26 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
             FormSelectInput(
               label: 'Choose a Question',
               placeholder: 'Select...',
-              focusNode: _passwordFocusNode,
-              controller: _passwordController,
+              focusNode: _answerFocusNode,
+              controller: _answerController,
               next: (_) {
-                _confirmPasswordFocusNode.requestFocus();
+                _questionFocusNode.requestFocus();
               },
               onChanged: _onChanged,
-              options: [
-                FormSelectOption(
-                  id: 'id',
-                  label: 'label',
-                ),
-              ],
+              options:
+                  AppState.data?.secretQuestions?.map((item) {
+                    return FormSelectOption(
+                      id: item.questionId ?? '',
+                      label: item.title ?? '',
+                    );
+                  }).toList() ??
+                  [],
             ),
             const SizedBox(height: 15),
             FormInput(
               label: 'Answer to the Question',
-              focusNode: _confirmPasswordFocusNode,
-              controller: _confirmPasswordController,
+              focusNode: _questionFocusNode,
+              controller: _questionController,
               onChanged: _onChanged,
             ),
           ],
@@ -87,7 +91,16 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
 
   void _onChanged(_) {
     _canSubmit.value =
-        _passwordController.text.isNotEmpty &&
-        _confirmPasswordController.text.isNotEmpty;
+        _answerController.text.isNotEmpty &&
+        _questionController.text.isNotEmpty;
+  }
+
+  void _continue() {
+    FocusScope.of(context).unfocus();
+
+    SignUp.secretQuestion = _questionController.text.trim();
+    SignUp.secretAnswer = _answerController.text.trim();
+
+    AppRouter.router.push(CreateSecurePhrasePage.route.path);
   }
 }

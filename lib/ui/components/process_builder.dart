@@ -59,7 +59,7 @@ ProcessSnapshot<T> _snapshotOf<T>(ProcessState state, ProcessEvent event) {
 
   switch (state) {
     case ProcessExecuted():
-      final payload = state.data.data;
+      final payload = state.result.data;
       // A type mismatch means the Action's responseDataFunc and this T
       // disagree; drop it rather than throw inside a build/listener.
       if (payload is T) {

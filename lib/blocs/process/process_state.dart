@@ -43,17 +43,17 @@ final class ExecutingProcess extends ProcessState {
 final class ProcessExecuted extends ProcessState {
   const ProcessExecuted({
     required super.event,
-    required this.data,
+    required this.result,
     required super.isCachedData,
     required super.isSilent,
   });
 
-  final DataResponse data;
+  final DataResponse result;
 
   @override
   List<Object> get props => [
     event,
-    data,
+    result,
     isCachedData,
     isSilent,
   ];

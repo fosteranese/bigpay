@@ -6,7 +6,9 @@ import 'package:bigpay/ui/theme/assets/app_images.dart';
 
 class SplashScreenPage extends StatelessWidget {
   const SplashScreenPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/splash-screen');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/splash-screen',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,10 @@ class SplashScreenPage extends StatelessWidget {
         fit: .expand,
         alignment: .bottomCenter,
         children: [
-          Align(alignment: .bottomCenter, child: SvgPicture.asset(SvgImages.splashBgIcon)),
+          Align(
+            alignment: .bottomCenter,
+            child: SvgPicture.asset(SvgImages.splashBgIcon),
+          ),
           Align(alignment: .center, child: SvgPicture.asset(SvgImages.icon)),
         ],
       ),

@@ -9,7 +9,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class BiometricLoginPage extends StatefulWidget {
   const BiometricLoginPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/biometric-login');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/biometric-login',
+  );
 
   @override
   State<BiometricLoginPage> createState() => _BiometricLoginPageState();

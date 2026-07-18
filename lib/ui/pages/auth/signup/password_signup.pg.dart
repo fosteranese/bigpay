@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
+
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/routes/app_router.dart';
-import 'package:flutter/material.dart';
 
 class CreatePasswordSignUpPage extends StatefulWidget {
   const CreatePasswordSignUpPage({super.key});
@@ -43,7 +45,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
         builder: (context, value, child) {
           return FormButton(
             enabled: value,
-            onPressed: () {},
+            onPressed: _continue,
             text: 'Save Password',
           );
         },
@@ -69,6 +71,9 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
               focusNode: _confirmPasswordFocusNode,
               controller: _confirmPasswordController,
               onChanged: _onChanged,
+              next: (value) {
+                _continue();
+              },
             ),
             const SizedBox(height: 25),
             Text(
@@ -86,5 +91,12 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
     _canSubmit.value =
         _passwordController.text.isNotEmpty &&
         _confirmPasswordController.text.isNotEmpty;
+  }
+
+  void _continue() {
+    FocusScope.of(context).unfocus();
+    SignUp.registrationId = _passwordController.text;
+
+    AppRouter.router.push(CreateSecurePhrasePage.route.path);
   }
 }

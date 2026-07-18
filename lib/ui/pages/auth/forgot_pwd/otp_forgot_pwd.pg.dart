@@ -9,7 +9,9 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 
 class OtpForgotPasswordPage extends StatefulWidget {
   const OtpForgotPasswordPage({super.key});
-  static PageRouteDefinition route = PageRouteDefinition(path: '/auth/otp-forgot-pwd');
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/auth/otp-forgot-pwd',
+  );
 
   @override
   State<OtpForgotPasswordPage> createState() => _OtpForgotPasswordPageState();

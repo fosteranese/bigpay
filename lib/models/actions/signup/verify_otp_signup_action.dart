@@ -1,0 +1,36 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:bigpay/models/actions/action.dart';
+
+part 'verify_otp_signup_action.freezed.dart';
+part 'verify_otp_signup_action.g.dart';
+
+final class VerifyOtpSignUpAction
+    extends Action<VerifyOtpSignUpActionPayload, String> {
+  static const path = '/UserAccess/validateSignUpOtp';
+
+  const VerifyOtpSignUpAction({
+    required super.payload,
+  }) : super(
+         endpoint: path,
+         responseDataFunc: _responseDataFunc,
+       );
+
+  static String _responseDataFunc(dynamic response) {
+    final result = response as Map<String, dynamic>;
+    return result['requestId'] as String;
+  }
+}
+
+@freezed
+abstract class VerifyOtpSignUpActionPayload
+    with _$VerifyOtpSignUpActionPayload
+    implements ActionPayloadSerializable {
+  const factory VerifyOtpSignUpActionPayload({
+    required String otpId,
+    required String otpValue,
+  }) = _VerifyOtpSignUpActionPayload;
+
+  factory VerifyOtpSignUpActionPayload.fromJson(Map<String, dynamic> json) =>
+      _$VerifyOtpSignUpActionPayloadFromJson(json);
+}

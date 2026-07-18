@@ -1,18 +1,19 @@
 import 'dart:async';
 
-import 'package:bigpay/ui/pages/auth/signin/signin.dart';
-import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 
+import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
+import 'package:bigpay/data/models/initialization_data/walk_through.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/pages/auth/signin/signin.dart';
+import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:flutter/material.dart';
-import 'package:bigpay/models/walkthrough_data.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 
 class WalkthroughPage extends StatefulWidget {
   const WalkthroughPage({super.key});
@@ -27,9 +28,11 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     initialPage: 0,
   );
   int _currentPage = 0;
-  List<WalkthroughData> _walkThrough = const [];
+  List<WalkThrough> _walkThrough = const [];
   Timer? _timer;
   bool _pause = false;
+  String baseUrl = '';
+  String imageDirectory = '';
 
   Widget _buildPageIndicator() {
     List<Widget> list = [];
@@ -107,22 +110,15 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     });
   }
 
-  /// The slide image, falling back to the bundled asset.
-  ///
-  /// The payload names a file (`Walkthrough_2.jpg`) and the host arrives with
-  /// it, so the URL is only as good as what the backend reports — an
-  /// unreachable one has to degrade to the asset rather than leave a hole in
-  /// the first screen of the app. Both the loading and error states show the
-  /// bundled image, so there is never a blank frame on this screen.
-  Widget _slideImage(WalkthroughData item) {
+  Widget _slideImage(WalkThrough item) {
     final fallback = Image.asset(
       JpgImages.walkthrough1,
       alignment: .center,
       fit: .cover,
     );
 
-    final url = item.imageUrl;
-    if (url == null) {
+    final url = '$baseUrl/$imageDirectory/${item.picture}';
+    if (item.picture == null) {
       return fallback;
     }
 
@@ -135,10 +131,12 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ProcessBuilder<List<WalkthroughData>>(
+    return ProcessBuilder<InitializationData>(
       event: startUpEvent,
       builder: (context, snapshot) {
-        _walkThrough = snapshot.data ?? _walkThrough;
+        baseUrl = snapshot.data?.imageBaseUrl ?? '';
+        imageDirectory = snapshot.data?.imageDirectory ?? '';
+        _walkThrough = snapshot.data?.walkThrough ?? [];
 
         return _buildContent();
       },
@@ -178,11 +176,11 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                               crossAxisAlignment: .start,
                               children: [
                                 Text(
-                                  item.title,
+                                  item.title ?? '',
                                   style: AppTypography.display1,
                                 ),
                                 Text(
-                                  item.subtitle,
+                                  item.description ?? '',
                                   style: AppTypography.smallDetails.copyWith(
                                     color: AppColors.white,
                                   ),

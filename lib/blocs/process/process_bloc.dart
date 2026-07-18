@@ -70,7 +70,7 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
         emit(
           ProcessExecuted(
             event: event,
-            data: _parsed(action, cached),
+            result: _parsed(action, cached),
             isCachedData: true,
             isSilent: false,
           ),
@@ -107,7 +107,7 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
       emit(
         ProcessExecuted(
           event: event,
-          data: _parsed(action, response),
+          result: _parsed(action, response),
           isCachedData: false,
           isSilent: isSilent,
         ),

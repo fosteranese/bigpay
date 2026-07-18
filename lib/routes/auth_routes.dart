@@ -1,3 +1,4 @@
+import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/forgot_secure_phrase.dart';
@@ -19,7 +20,14 @@ GoRoute get authRoute => GoRoute(
       () => const StartSignUpPage(),
       nested: true,
     ),
-    OtpSignUpPage.route.toGoRoute(() => const OtpSignUpPage(), nested: true),
+    OtpSignUpPage.route.toGoRouteWithState(
+      (state) {
+        return OtpSignUpPage(
+          data: state.extra as StartSignUpData,
+        );
+      },
+      nested: true,
+    ),
     CreatePasswordSignUpPage.route.toGoRoute(
       () => const CreatePasswordSignUpPage(),
       nested: true,

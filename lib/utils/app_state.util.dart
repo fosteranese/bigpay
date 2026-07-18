@@ -1,5 +1,6 @@
 import 'package:bigpay/data/cache/process_store.dart';
 import 'package:bigpay/data/database/db.dart';
+import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
 import 'package:bigpay/models/device_info.dart';
 import 'package:bigpay/models/user_response.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
@@ -12,7 +13,7 @@ class AppState {
   static List<CountryWithPhoneCode> countries = [];
   static late CountryWithPhoneCode currentCountry;
   static late CountryWithPhoneCode gh;
-  // static InitializationResponse? data;
+  static InitializationData? data;
   static late UserResponse currentUser;
   static final db = Database();
   // Shared response cache + request-input store, one instance so the bloc and

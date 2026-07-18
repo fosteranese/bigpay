@@ -36,38 +36,38 @@ class DeviceInfo extends Equatable {
   });
 
   factory DeviceInfo.fromMap(Map<String, dynamic> data) => DeviceInfo(
-        version: data['version'] as String?,
-        build: data['build'] as String?,
-        channel: data['channel'] as String?,
-        deviceId: data['deviceId'] as String?,
-        deviceName: data['deviceName'] as String?,
-        description: data['description'] as String?,
-        deviceType: data['deviceType'] as String?,
-        ipAddress: data['ipAddress'] as String?,
-        macAddress: data['macAddress'] as String?,
-        longitude: data['longitude'] as String?,
-        latitude: data['latitude'] as String?,
-        userAgent: data['userAgent'] as String?,
-        fcmToken: data['fcmToken'] as String?,
-        isPhysicalDevice: data['isPhysicalDevice'] as bool?,
-      );
+    version: data['version'] as String?,
+    build: data['build'] as String?,
+    channel: data['channel'] as String?,
+    deviceId: data['deviceId'] as String?,
+    deviceName: data['deviceName'] as String?,
+    description: data['description'] as String?,
+    deviceType: data['deviceType'] as String?,
+    ipAddress: data['ipAddress'] as String?,
+    macAddress: data['macAddress'] as String?,
+    longitude: data['longitude'] as String?,
+    latitude: data['latitude'] as String?,
+    userAgent: data['userAgent'] as String?,
+    fcmToken: data['fcmToken'] as String?,
+    isPhysicalDevice: data['isPhysicalDevice'] as bool?,
+  );
 
   Map<String, dynamic> toMap() => {
-        'version': version,
-        'build': build,
-        'channel': channel,
-        'deviceId': deviceId,
-        'deviceName': deviceName,
-        'description': description,
-        'deviceType': deviceType,
-        'ipAddress': ipAddress,
-        'macAddress': macAddress,
-        'longitude': longitude,
-        'latitude': latitude,
-        'userAgent': userAgent,
-        'fcmToken': fcmToken,
-        'isPhysicalDevice': isPhysicalDevice,
-      };
+    'version': version,
+    'build': build,
+    'channel': channel,
+    'deviceId': deviceId,
+    'deviceName': deviceName,
+    'description': description,
+    'deviceType': deviceType,
+    'ipAddress': ipAddress,
+    'macAddress': macAddress,
+    'longitude': longitude,
+    'latitude': latitude,
+    'userAgent': userAgent,
+    'fcmToken': fcmToken,
+    'isPhysicalDevice': isPhysicalDevice,
+  };
 
   /// `dart:convert`
   ///

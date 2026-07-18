@@ -23,22 +23,22 @@ class UserResponse extends Equatable {
   });
 
   factory UserResponse.fromMap(Map<String, dynamic> data) => UserResponse(
-        userType: (data['userType'] as String?) == 'CUSTOMER'
-            ? UserType.customer
-            : UserType.nonCustomer,
-        sessionId: data['sessionId'] as String?,
-        imageBaseUrl: data['imageBaseUrl'] as String?,
-        imageDirectory: data['imageDirectory'] as String?,
-        profilePicture: data['profilePicture'] as String?,
-      );
+    userType: (data['userType'] as String?) == 'CUSTOMER'
+        ? UserType.customer
+        : UserType.nonCustomer,
+    sessionId: data['sessionId'] as String?,
+    imageBaseUrl: data['imageBaseUrl'] as String?,
+    imageDirectory: data['imageDirectory'] as String?,
+    profilePicture: data['profilePicture'] as String?,
+  );
 
   Map<String, dynamic> toMap() => {
-        'userType': userType == UserType.customer ? 'CUSTOMER' : 'NONCUSTOMER',
-        'sessionId': sessionId,
-        'imageBaseUrl': imageBaseUrl,
-        'imageDirectory': imageDirectory,
-        'profilePicture': profilePicture,
-      };
+    'userType': userType == UserType.customer ? 'CUSTOMER' : 'NONCUSTOMER',
+    'sessionId': sessionId,
+    'imageBaseUrl': imageBaseUrl,
+    'imageDirectory': imageDirectory,
+    'profilePicture': profilePicture,
+  };
 
   /// `dart:convert`
   ///

@@ -1,3 +1,4 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -118,13 +119,15 @@ class _MainLayoutState extends State<MainLayout> {
                     style: AppTypography.p1,
                   )
                 : null,
-            leading: widget.showBackBtn
+            leading: AppRouter.router.canPop() && widget.showBackBtn
                 ? IconButton.filled(
                     style: IconButton.styleFrom(
                       backgroundColor: AppColors.white,
                       fixedSize: Size(28, 28),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      AppRouter.router.pop();
+                    },
                     icon: Icon(
                       Icons.chevron_left_outlined,
                     ),
