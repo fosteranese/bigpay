@@ -28,6 +28,12 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
   final _isPassword = ValueNotifier(true);
 
   @override
+  void dispose() {
+    _isPassword.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: _isPassword,

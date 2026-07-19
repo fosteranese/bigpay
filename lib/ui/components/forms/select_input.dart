@@ -328,6 +328,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   @override
   void dispose() {
     _searchController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 }

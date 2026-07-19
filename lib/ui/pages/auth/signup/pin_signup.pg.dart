@@ -41,6 +41,9 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
   void dispose() {
     _pinFocusNode.dispose();
     _confirmPinFocusNode.dispose();
+    _pinController.dispose();
+    _confirmPinController.dispose();
+    _canSubmit.dispose();
     super.dispose();
   }
 

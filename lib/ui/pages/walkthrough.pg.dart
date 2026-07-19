@@ -269,6 +269,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   @override
   dispose() {
     _timer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 }

@@ -32,6 +32,9 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
   void dispose() {
     _answerFocusNode.dispose();
     _questionFocusNode.dispose();
+    _answerController.dispose();
+    _questionController.dispose();
+    _canSubmit.dispose();
     super.dispose();
   }
 

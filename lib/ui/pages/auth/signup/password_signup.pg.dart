@@ -31,6 +31,9 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
   void dispose() {
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _canSubmit.dispose();
     super.dispose();
   }
 

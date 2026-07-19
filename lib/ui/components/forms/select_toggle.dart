@@ -33,6 +33,12 @@ class _FormSelectToggleInputState extends State<FormSelectToggleInput> {
   }
 
   @override
+  void dispose() {
+    _selected.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: .min,

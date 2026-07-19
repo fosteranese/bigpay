@@ -35,6 +35,7 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
   void dispose() {
     _answerFocusNode.dispose();
     _answerController.dispose();
+    _canSubmit.dispose();
     super.dispose();
   }
 

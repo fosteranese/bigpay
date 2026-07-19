@@ -39,6 +39,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
 
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }
