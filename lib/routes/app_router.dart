@@ -5,10 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/kyc_routes.dart';
-import 'package:bigpay/routes/more_routes.dart';
-import 'package:bigpay/routes/process_flow_routes.dart';
+import 'package:bigpay/routes/main_shell_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
-import 'package:bigpay/routes/wallet_routes.dart';
 import 'package:bigpay/ui/pages/splash_screen.pg.dart';
 
 /// Lets a page react to being revealed again after a route above it is popped
@@ -26,9 +24,8 @@ class AppRouter {
       ...rootRoutes,
       authRoute,
       kycRoute,
-      processFlowRoute,
-      walletRoute,
-      moreRoute,
+      // Home / Wallets / Services / History / More live inside this shell.
+      mainShellRoute,
     ],
   );
 }

@@ -1,5 +1,4 @@
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -16,8 +15,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
-
   final _scrollController = ScrollController();
   double _blurOpacity = 0.0;
 
@@ -330,15 +327,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 ]),
               ),
             ),
+            // Clear the floating bottom nav so the last cards aren't hidden.
+            const SliverToBoxAdapter(child: SizedBox(height: 110)),
           ],
-        ),
-
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          child: NeumorphicBottomNav(
-            selectedIndex: _selectedIndex,
-            onTap: (i) => setState(() => _selectedIndex = i),
-          ),
         ),
       ),
     );
