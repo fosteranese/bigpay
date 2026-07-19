@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
+import 'package:bigpay/data/models/response/response.md.dart';
+
 /// Contract for action payloads.
 ///
 /// Any `@freezed` class satisfies this automatically through its generated
@@ -20,16 +22,16 @@ abstract class Action<T extends ActionPayloadSerializable, T1>
     extends Equatable {
   final String endpoint;
   final T payload;
-  final T1 Function(dynamic data)? responseDataFunc;
+  final T1 Function(DataResponse response)? responseDataFunc;
+  final DataResponse<T1> Function(dynamic response)? noRemoteFunc;
   final bool isAuthenticated;
-  final bool makeRemoteCall;
 
   const Action({
     required this.endpoint,
     required this.payload,
     this.responseDataFunc,
+    this.noRemoteFunc,
     this.isAuthenticated = true,
-    this.makeRemoteCall = true,
   });
 
   Map<String, dynamic> toJson() => payload.toJson();

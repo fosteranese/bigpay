@@ -19,7 +19,7 @@ final class NewLoginAction
        );
 
   static NewDeviceLoginData _responseDataFunc(dynamic response) {
-    return NewDeviceLoginData.fromMap(response as Map<String, dynamic>);
+    return NewDeviceLoginData.fromMap(response.data as Map<String, dynamic>);
   }
 }
 

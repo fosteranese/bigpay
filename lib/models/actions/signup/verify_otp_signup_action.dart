@@ -18,7 +18,7 @@ final class VerifyOtpSignUpAction
        );
 
   static String _responseDataFunc(dynamic response) {
-    final result = response as Map<String, dynamic>;
+    final result = response.data as Map<String, dynamic>;
     return result['requestId'] as String;
   }
 }

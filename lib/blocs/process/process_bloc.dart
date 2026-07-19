@@ -42,23 +42,6 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
     ExecuteProcessEvent event,
     Emitter<ProcessState> emit,
   ) async {
-    if (!event.action.makeRemoteCall) {
-      emit(
-        ProcessExecuted(
-          event: event,
-          result: DataResponse(
-            code: StatusCodeConstants.success,
-            status: StatusConstants.success,
-            message: '',
-            data: event.action.responseDataFunc?.call(event.action.payload),
-          ),
-          isCachedData: true,
-          isSilent: false,
-        ),
-      );
-      return;
-    }
-
     bool isSilent = false;
 
     var action = event.action;
@@ -115,17 +98,19 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
         store.inputs.write(event.action);
       }
 
-      final response = await RemoteUtil.makeCall(action);
+      final response = event.action.noRemoteFunc == null
+          ? await RemoteUtil.makeCall(action)
+          : event.action.noRemoteFunc?.call(event.action.payload);
 
       if (event.saveActionResponse &&
-          response.status == StatusConstants.success) {
+          response!.status == StatusConstants.success) {
         store.cache.write(cacheKey, response, endpoint: action.endpoint);
       }
 
       emit(
         ProcessExecuted(
           event: event,
-          result: _parsed(action, response),
+          result: _parsed(action, response!),
           isCachedData: false,
           isSilent: isSilent,
         ),

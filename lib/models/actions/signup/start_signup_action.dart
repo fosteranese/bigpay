@@ -19,7 +19,7 @@ final class StartSignUpAction
        );
 
   static VerifyUserData _responseDataFunc(dynamic response) {
-    return VerifyUserData.fromMap(response as Map<String, dynamic>);
+    return VerifyUserData.fromMap(response.data as Map<String, dynamic>);
   }
 }
 

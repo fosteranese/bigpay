@@ -16,7 +16,7 @@ final class StartupAction extends Action<NoPayload, InitializationData> {
        );
 
   static InitializationData _responseDataFunc(dynamic response) {
-    return InitializationData.fromMap(response as Map<String, dynamic>);
+    return InitializationData.fromMap(response.data as Map<String, dynamic>);
   }
 }
 

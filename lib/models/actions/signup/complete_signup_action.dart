@@ -19,7 +19,7 @@ final class CompleteSignUpAction
        );
 
   static AuthData _responseDataFunc(dynamic response) {
-    return AuthData.fromMap(response as Map<String, dynamic>);
+    return AuthData.fromMap(response.data as Map<String, dynamic>);
   }
 }
 

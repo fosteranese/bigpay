@@ -46,23 +46,25 @@ extension ProcessDispatch on BuildContext {
 /// retain it itself (`snapshot.data ?? _held`).
 class ProcessSnapshot<T> {
   const ProcessSnapshot({
-    this.data,
-    this.message,
+    this.response,
     this.error,
+    this.isSuccessful = false,
     this.isLoading = false,
     this.isCached = false,
     this.isSilent = false,
   });
 
-  /// The parsed payload when the current state is a success, else null.
-  final T? data;
-
-  /// The server-supplied message on a success, else null. Useful for success
-  /// dialogs/toasts that echo the backend's wording.
-  final String? message;
+  /// The full response envelope on success — code, status, message, data,
+  /// imageBaseUrl, … — else null. [data] and [message] are shortcuts into it.
+  final DataResponse<T>? response;
 
   /// The failure when the current state is an error, else null.
   final DataError? error;
+
+  /// The process finished successfully. True even when [data] is null — for
+  /// actions that return no payload (logout, mark-as-read, a local-only
+  /// process). Prefer this over [hasData] when a result isn't expected.
+  final bool isSuccessful;
 
   /// A request for this event is in flight.
   final bool isLoading;
@@ -74,6 +76,12 @@ class ProcessSnapshot<T> {
   /// and the network refresh is running behind it. Side effects (navigation,
   /// snackbars) usually want to skip these to avoid firing twice per event.
   final bool isSilent;
+
+  /// The parsed payload on success, else null.
+  T? get data => response?.data;
+
+  /// The server-supplied message on success, else null.
+  String? get message => response?.message;
 
   bool get hasData => data != null;
   bool get hasError => error != null;
@@ -92,19 +100,26 @@ ProcessSnapshot<T> _snapshotOf<T>(ProcessState state, ProcessEvent? event) {
     return ProcessSnapshot<T>();
   }
 
-  T? data;
-  String? message;
+  DataResponse<T>? response;
   DataError? error;
+  var isSuccessful = false;
 
   switch (state) {
     case ProcessExecuted():
-      message = state.result.message;
-      final payload = state.result.data;
-      // A type mismatch means the Action's responseDataFunc and this T
-      // disagree; drop it rather than throw inside a build/listener.
-      if (payload is T) {
-        data = payload;
-      }
+      isSuccessful = true;
+      final raw = state.result;
+      final payload = raw.data;
+      response = DataResponse<T>(
+        code: raw.code,
+        status: raw.status,
+        message: raw.message,
+        // A type mismatch means the Action's responseDataFunc and this T
+        // disagree; drop the payload rather than throw in a build/listener.
+        data: payload is T ? payload : null,
+        imageBaseUrl: raw.imageBaseUrl,
+        imageDirectory: raw.imageDirectory,
+        timeStamp: raw.timeStamp,
+      );
     case ExecuteProcessError():
       error = state.error;
     case ExecutingProcess():
@@ -113,9 +128,9 @@ ProcessSnapshot<T> _snapshotOf<T>(ProcessState state, ProcessEvent? event) {
   }
 
   return ProcessSnapshot<T>(
-    data: data,
-    message: message,
+    response: response,
     error: error,
+    isSuccessful: isSuccessful,
     isLoading: state is ExecutingProcess,
     isCached: state.isCachedData,
     isSilent: state.isSilent,
