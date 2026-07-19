@@ -15,6 +15,7 @@ final class NewLoginAction
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
   static NewDeviceLoginData _responseDataFunc(dynamic response) {

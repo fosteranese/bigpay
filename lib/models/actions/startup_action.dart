@@ -12,6 +12,7 @@ final class StartupAction extends Action<NoPayload, InitializationData> {
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
   static InitializationData _responseDataFunc(dynamic response) {

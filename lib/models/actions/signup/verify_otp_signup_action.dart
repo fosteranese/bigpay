@@ -14,6 +14,7 @@ final class VerifyOtpSignUpAction
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
   static String _responseDataFunc(dynamic response) {

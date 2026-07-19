@@ -18,6 +18,7 @@ class RemoteUtil {
     final response = await remote.post(
       path: action.endpoint,
       body: action.payload.toMap(),
+      isAuthenticated: action.isAuthenticated,
     );
 
     if (response.status != StatusConstants.success) {

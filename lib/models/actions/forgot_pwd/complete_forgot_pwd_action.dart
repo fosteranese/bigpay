@@ -14,6 +14,7 @@ final class CompleteForgotPwdAction
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
   static Null _responseDataFunc(_) {

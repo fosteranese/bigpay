@@ -1,3 +1,7 @@
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
+import 'package:bigpay/models/actions/auth_action.dart';
+import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
+import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,30 +30,67 @@ class BigPayApp extends StatelessWidget {
           )..add(startUpEvent),
         ),
       ],
-      child: ProcessListener<InitializationData>(
-        event: () => startUpEvent,
-        listener: (context, snapshot) {
-          if (snapshot.hasData) {
-            AppState.data = snapshot.data!;
-            // The silent half of cache-then-refresh: we already routed off the
-            // cached result, so keep the fresh data but don't navigate again —
-            // otherwise the background refresh yanks the user back here.
-            if (snapshot.isSilent) return;
-            AppRouter.router.go(
-              snapshot.isCached
-                  ? NewLoginPage.route.path
-                  : WalkthroughPage.route.path,
-              extra: snapshot.data,
-            );
-          } else if (snapshot.hasError &&
-              !snapshot.isSilent &&
-              !snapshot.isCached) {
-            AppRouter.router.go(
-              AppErrorPage.route.path,
-              extra: snapshot.error,
-            );
-          }
-        },
+      child: MultiProcessListener(
+        listeners: [
+          ProcessListenerConfig<InitializationData>(
+            event: () => startUpEvent,
+            listener: (context, snapshot) {
+              if (snapshot.hasData) {
+                AppState.data = snapshot.data!;
+                // The silent half of cache-then-refresh: we already routed off the
+                // cached result, so keep the fresh data but don't navigate again —
+                // otherwise the background refresh yanks the user back here.
+                if (snapshot.isSilent) return;
+
+                AppState.store.cache
+                    .latestForEndpoint<AuthData>(
+                      VerifyOtpLoginAction.path,
+                      AuthData.fromMap,
+                    )
+                    .then((result) {
+                      if (result?.data == null) {
+                        return;
+                      }
+
+                      AppState.currentUser = result!.data!;
+                      SignIn.clear();
+                      AppRouter.router.go(
+                        snapshot.isCached
+                            ? NewLoginPage.route.path
+                            : WalkthroughPage.route.path,
+                        extra: snapshot.data,
+                      );
+                    });
+              } else if (snapshot.hasError &&
+                  !snapshot.isSilent &&
+                  !snapshot.isCached) {
+                AppRouter.router.go(
+                  AppErrorPage.route.path,
+                  extra: snapshot.error,
+                );
+              }
+            },
+          ),
+          ProcessListenerConfig<AuthData>(
+            event: () => AuthAction.event,
+            listener: (context, snapshot) {
+              if (snapshot.hasData) {
+                AppState.currentUser = snapshot.data!;
+                SignIn.clear();
+                AppRouter.router.go(
+                  DashboardPage.route.path,
+                );
+              } else if (snapshot.hasError &&
+                  !snapshot.isSilent &&
+                  !snapshot.isCached) {
+                AppRouter.router.go(
+                  AppErrorPage.route.path,
+                  extra: snapshot.error,
+                );
+              }
+            },
+          ),
+        ],
         child: MaterialApp.router(
           title: 'BigPay',
           debugShowCheckedModeBanner: false,

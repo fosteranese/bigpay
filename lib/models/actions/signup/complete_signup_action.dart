@@ -1,4 +1,4 @@
-import 'package:bigpay/models/auth_data.dart';
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:bigpay/models/actions/action.dart';
@@ -15,6 +15,7 @@ final class CompleteSignUpAction
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
   static AuthData _responseDataFunc(dynamic response) {

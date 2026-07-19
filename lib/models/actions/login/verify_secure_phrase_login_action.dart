@@ -15,6 +15,7 @@ final class VerifySecurePhraseLoginAction
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
   static VerifyUserData _responseDataFunc(dynamic response) {

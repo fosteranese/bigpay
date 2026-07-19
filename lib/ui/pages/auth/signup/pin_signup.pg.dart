@@ -1,20 +1,19 @@
-import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/models/actions/signup/complete_signup_action.dart';
-import 'package:bigpay/models/auth_data.dart';
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/pages/auth/signup/signup.dart';
-import 'package:bigpay/ui/pages/dashboard.pg.dart';
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
-import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/models/actions/auth_action.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
+import 'package:bigpay/models/actions/signup/complete_signup_action.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/pin_unified_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/auth/signup/signup.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/utils/message.util.dart';
 
 class PinSignUpPage extends StatefulWidget {
   const PinSignUpPage({super.key});
@@ -60,7 +59,13 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
         }
 
         if (snapshot.hasData) {
-          AppState.currentUser = snapshot.data!;
+          AuthAction.event = context.dispatchProcess(
+            AuthAction(
+              payload: AuthActionPayload(
+                authData: snapshot.data!,
+              ),
+            ),
+          );
           MessageUtil.displaySuccessFullDialog(
             context,
             successIcon: CircleAvatar(
@@ -71,9 +76,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
             title: 'Welcome aboard!',
             message: snapshot.message ?? '',
             btnText: 'Get Started',
-            onOk: () {
-              AppRouter.router.go(DashboardPage.route.path);
-            },
+            onOk: () {},
           );
           return;
         }

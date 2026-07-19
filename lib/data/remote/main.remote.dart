@@ -85,8 +85,8 @@ class MainRemote {
       data['payLoad'] = finalBody;
     }
 
-    if (isAuthenticated) {
-      data['meta']['sessionId'] = AppState.currentUser.sessionId;
+    if (isAuthenticated && AppState.currentUser != null) {
+      data['meta']['sessionId'] = AppState.currentUser!.sessionId;
     }
 
     if (encrypt) {

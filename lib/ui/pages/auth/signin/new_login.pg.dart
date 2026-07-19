@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/status.const.dart';
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/new_device_login_data.dart';
+import 'package:bigpay/models/actions/auth_action.dart';
+import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
+import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/auth/forgot_pwd/start_forgot_pwd.pg.dart';
+import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 class NewLoginPage extends StatefulWidget {
@@ -34,7 +40,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
 
-  ExecuteProcessEvent? mainEvent;
+  ExecuteProcessEvent? newLoginEvent;
+  ExecuteProcessEvent? existingLoginEvent;
 
   @override
   void initState() {
@@ -57,6 +64,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   @override
   void didPopNext() {
     _phoneNumberController.text = SignIn.phoneNumber;
+    ForgotPwd.clear();
   }
 
   @override
@@ -72,34 +80,75 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return ProcessListener<NewDeviceLoginData>(
-      event: () => mainEvent,
-      listener: (context, snapshot) {
-        if (snapshot.isLoading) {
-          MessageUtil.displayLoading(context);
-          return;
-        } else {
-          MessageUtil.close(context);
-        }
+    return MultiProcessListener(
+      listeners: [
+        ProcessListenerConfig<NewDeviceLoginData>(
+          event: () => newLoginEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
 
-        if (snapshot.hasData) {
-          SignIn.phoneNumber = _phoneNumberController.text.trim();
-          SignIn.password = _passwordController.text.trim();
-          SignIn.newDeviceLoginData = snapshot.data!;
-          AppRouter.router.push(
-            SecurePhraseLoginPage.route.path,
-          );
-          return;
-        }
+            if (snapshot.hasData) {
+              SignIn.phoneNumber = _phoneNumberController.text.trim();
+              SignIn.password = _passwordController.text.trim();
+              SignIn.newDeviceLoginData = snapshot.data!;
+              AppRouter.router.push(
+                SecurePhraseLoginPage.route.path,
+              );
+              return;
+            }
 
-        if (snapshot.hasError) {
-          MessageUtil.displayErrorDialog(
-            context,
-            message: snapshot.error!.message,
-          );
-          return;
-        }
-      },
+            if (snapshot.hasError) {
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+              return;
+            }
+          },
+        ),
+        ProcessListenerConfig<AuthData>(
+          event: () => existingLoginEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.hasData) {
+              AuthAction.event = context.dispatchProcess(
+                AuthAction(
+                  payload: AuthActionPayload(
+                    authData: snapshot.data!,
+                  ),
+                ),
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              if (snapshot.error?.code == StatusCodeConstants.newLogin) {
+                AppState.store.cache.remove(VerifyOtpLoginAction.path);
+                AppState.currentUser = null;
+                _passwordController.text = '';
+                SignIn.clear();
+              }
+
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+              return;
+            }
+          },
+        ),
+      ],
       child: MainLayout(
         title: 'Sign In',
         titleStyle: AppTypography.display1,
@@ -145,6 +194,9 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                 next: (_) {
                   _passwordFocusNode.requestFocus();
                 },
+                onChanged: (value) {
+                  SignIn.phoneNumber = value.trim();
+                },
               ),
 
               SizedBox(height: 15),
@@ -181,6 +233,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                   TextButton(
                     style: TextButton.styleFrom(padding: .zero),
                     onPressed: () {
+                      ForgotPwd.phoneNumber = SignIn.phoneNumber;
                       AppRouter.router.push(
                         StartForgotPasswordPage.route.path,
                       );
@@ -204,7 +257,20 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   void _onSave() {
     FocusScope.of(context).unfocus();
 
-    mainEvent = context.dispatchProcess(
+    if (_phoneNumberController.text.trim() ==
+        AppState.currentUser?.user?.shortName?.replaceAll('233', '0')) {
+      existingLoginEvent = context.dispatchProcess(
+        ExistingLoginAction(
+          payload: ExistingLoginActionPayload(
+            phoneNumber: _phoneNumberController.text,
+            password: _passwordController.text,
+          ),
+        ),
+      );
+      return;
+    }
+
+    newLoginEvent = context.dispatchProcess(
       NewLoginAction(
         payload: NewLoginActionPayload(
           phoneNumber: _phoneNumberController.text,

@@ -21,11 +21,15 @@ abstract class Action<T extends ActionPayloadSerializable, T1>
   final String endpoint;
   final T payload;
   final T1 Function(dynamic data)? responseDataFunc;
+  final bool isAuthenticated;
+  final bool makeRemoteCall;
 
   const Action({
     required this.endpoint,
     required this.payload,
     this.responseDataFunc,
+    this.isAuthenticated = true,
+    this.makeRemoteCall = true,
   });
 
   Map<String, dynamic> toJson() => payload.toJson();

@@ -53,7 +53,34 @@ class ResponseCache {
     );
   }
 
-  Future<DataResponse?> latestForEndpoint(String endpoint) async {
+  /// The latest cached response for [endpoint], with its raw JSON `data` parsed
+  /// into [T] via [parse].
+  ///
+  /// The cache stores responses as raw JSON (parsing is deferred to emit time in
+  /// ProcessBloc), so callers pass the model's `fromMap`, e.g.
+  /// `latestForEndpoint<AuthData>(VerifyOtpLoginAction.path, AuthData.fromMap)`.
+  /// Returns null if nothing is cached; `data` is null if the cached payload
+  /// wasn't a JSON object.
+  Future<DataResponse<T>?> latestForEndpoint<T>(
+    String endpoint,
+    T Function(Map<String, dynamic> data) parse,
+  ) async {
+    final raw = await _latestRawForEndpoint(endpoint);
+    if (raw == null) return null;
+
+    final data = raw.data;
+    return DataResponse<T>(
+      code: raw.code,
+      status: raw.status,
+      message: raw.message,
+      data: data is Map<String, dynamic> ? parse(data) : null,
+      imageBaseUrl: raw.imageBaseUrl,
+      imageDirectory: raw.imageDirectory,
+      timeStamp: raw.timeStamp,
+    );
+  }
+
+  Future<DataResponse?> _latestRawForEndpoint(String endpoint) async {
     final inMemoryKey = _latestKeyByEndpoint[endpoint];
     if (inMemoryKey != null) {
       final cached = await read(inMemoryKey);

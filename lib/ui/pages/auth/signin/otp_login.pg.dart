@@ -1,10 +1,9 @@
-import 'package:bigpay/data/models/response/response.md.dart';
-import 'package:bigpay/models/auth_data.dart';
-import 'package:bigpay/ui/pages/dashboard.pg.dart';
-import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/models/actions/auth_action.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/models/actions/signup/resend_otp_signup_action.dart';
@@ -87,11 +86,13 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
             }
 
             if (snapshot.hasData) {
-              AppState.currentUser = snapshot.data!;
-              AppRouter.router.push(
-                DashboardPage.route.path,
+              AuthAction.event = context.dispatchProcess(
+                AuthAction(
+                  payload: AuthActionPayload(
+                    authData: snapshot.data!,
+                  ),
+                ),
               );
-
               return;
             }
 
@@ -179,6 +180,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
     FocusScope.of(context).unfocus();
 
     mainEvent = context.dispatchProcess(
+      saveActionResponse: true,
       VerifyOtpLoginAction(
         payload: VerifyOtpLoginActionPayload(
           otpId: SignIn.verifyUserData?.otpData?.otpId ?? '',
