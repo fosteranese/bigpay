@@ -35,6 +35,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
     _emailAddressController.dispose();
     _streetAddressController.dispose();
     _digitalAddressController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }

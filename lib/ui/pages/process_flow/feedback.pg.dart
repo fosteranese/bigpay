@@ -21,6 +21,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
   final _passwordFocusNode = FocusNode();
 
   @override
+  void dispose() {
+    _phoneNumberFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MainLayout(
       bottomSize: 112,

@@ -45,6 +45,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
     _cityController.dispose();
     _digitalAddressController.dispose();
     _countryController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }

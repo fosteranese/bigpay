@@ -51,6 +51,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
     _birthDateController.dispose();
     _genderController.dispose();
     _nationalityController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }

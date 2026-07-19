@@ -24,6 +24,8 @@ class _StartKycPageState extends State<StartKycPage> {
   @override
   void dispose() {
     _phoneNumberFocusNode.dispose();
+    _phoneNumberController.dispose();
+    _canSubmit.dispose();
     super.dispose();
   }
 

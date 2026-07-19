@@ -35,6 +35,7 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
     _ghanaCardController.dispose();
     _issueDateController.dispose();
     _expiryDateController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }
