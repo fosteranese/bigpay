@@ -40,6 +40,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
   @override
   void dispose() {
     _otp.dispose();
+    _error.dispose();
     super.dispose();
   }
 

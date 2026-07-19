@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart';
+
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
@@ -5,7 +7,6 @@ import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/forgot_secure_phrase.d
 import 'package:bigpay/ui/pages/auth/signin/otp_login.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
-import 'package:go_router/go_router.dart';
 
 GoRoute get authRoute => GoRoute(
   name: 'auth',
@@ -63,10 +64,6 @@ GoRoute get authRoute => GoRoute(
     ),
     CreatePwdForgotPwdPage.route.toGoRoute(
       () => const CreatePwdForgotPwdPage(),
-      nested: true,
-    ),
-    DoneForgotPwdPage.route.toGoRoute(
-      () => const DoneForgotPwdPage(),
       nested: true,
     ),
     StartForgotSecurePhrasePage.route.toGoRoute(

@@ -1,18 +1,17 @@
-import 'package:bigpay/data/models/new_device_login_data.dart';
-import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/models/new_device_login_data.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/start_forgot_pwd.pg.dart';
-import 'package:bigpay/ui/pages/auth/signin/secure_phrase_login.pg.dart';
+import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -29,7 +28,7 @@ class NewLoginPage extends StatefulWidget {
   State<NewLoginPage> createState() => _NewLoginPageState();
 }
 
-class _NewLoginPageState extends State<NewLoginPage> {
+class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   final _phoneNumberController = TextEditingController();
   final _phoneNumberFocusNode = FocusNode();
   final _passwordController = TextEditingController();
@@ -38,7 +37,31 @@ class _NewLoginPageState extends State<NewLoginPage> {
   ExecuteProcessEvent? mainEvent;
 
   @override
+  void initState() {
+    _phoneNumberController.text = SignIn.phoneNumber;
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  /// Revealed again after a pushed route (e.g. the forgot-password flow) pops.
+  /// initState already ran on the first build, so refresh the phone field from
+  /// the latest [SignIn.phoneNumber] here.
+  @override
+  void didPopNext() {
+    _phoneNumberController.text = SignIn.phoneNumber;
+  }
+
+  @override
   dispose() {
+    appRouteObserver.unsubscribe(this);
     _phoneNumberController.dispose();
     _passwordController.dispose();
 
@@ -60,6 +83,8 @@ class _NewLoginPageState extends State<NewLoginPage> {
         }
 
         if (snapshot.hasData) {
+          SignIn.phoneNumber = _phoneNumberController.text.trim();
+          SignIn.password = _passwordController.text.trim();
           SignIn.newDeviceLoginData = snapshot.data!;
           AppRouter.router.push(
             SecurePhraseLoginPage.route.path,

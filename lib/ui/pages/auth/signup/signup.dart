@@ -5,6 +5,8 @@ export 'secure_phrase_signup.pg.dart';
 export 'start_signup.pg.dart';
 
 class SignUp {
+  SignUp._();
+
   static String registrationId = '';
   static String secretQuestion = '';
   static String secretAnswer = '';

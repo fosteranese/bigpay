@@ -1,14 +1,15 @@
-import 'package:bigpay/data/models/new_device_login_data.dart';
-import 'package:bigpay/models/actions/action.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/models/actions/action.dart';
 
 part 'start_forgot_pwd_action.freezed.dart';
 part 'start_forgot_pwd_action.g.dart';
 
 final class StartForgotPwdAction
-    extends Action<StartForgotPwdActionPayload, NewDeviceLoginData> {
+    extends Action<StartForgotPwdActionPayload, VerifyUserData> {
   /// The endpoint, reachable without an instance (see [StartupAction.path]).
-  static const path = '/SignIn/newDevice';
+  static const path = '/Forgot/initiateForgotPassword';
 
   const StartForgotPwdAction({
     required super.payload,
@@ -17,8 +18,8 @@ final class StartForgotPwdAction
          responseDataFunc: _responseDataFunc,
        );
 
-  static NewDeviceLoginData _responseDataFunc(dynamic response) {
-    return NewDeviceLoginData.fromMap(response as Map<String, dynamic>);
+  static VerifyUserData _responseDataFunc(dynamic response) {
+    return VerifyUserData.fromMap(response as Map<String, dynamic>);
   }
 }
 
@@ -28,7 +29,7 @@ abstract class StartForgotPwdActionPayload
     implements ActionPayloadSerializable {
   const factory StartForgotPwdActionPayload({
     required String phoneNumber,
-    required String password,
+    required String securityAnswer,
   }) = _StartForgotPwdActionPayload;
 
   factory StartForgotPwdActionPayload.fromJson(Map<String, dynamic> json) =>
