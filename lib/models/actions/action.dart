@@ -22,7 +22,7 @@ abstract class Action<T extends ActionPayloadSerializable, T1>
     extends Equatable {
   final String endpoint;
   final T payload;
-  final T1 Function(DataResponse response)? responseDataFunc;
+  final T1 Function(dynamic response)? responseDataFunc;
   final DataResponse<T1> Function(dynamic response)? noRemoteFunc;
   final bool isAuthenticated;
 

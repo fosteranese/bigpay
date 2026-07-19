@@ -18,8 +18,8 @@ final class ResendOtpSignUpAction
          isAuthenticated: false,
        );
 
-  static VerifyUserData _responseDataFunc(dynamic response) {
-    return VerifyUserData.fromMap(response.data as Map<String, dynamic>);
+  static VerifyUserData _responseDataFunc(dynamic data) {
+    return VerifyUserData.fromMap(data as Map<String, dynamic>);
   }
 }
 

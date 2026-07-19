@@ -17,8 +17,8 @@ final class VerifyOtpForgotPwdAction
          isAuthenticated: false,
        );
 
-  static String _responseDataFunc(dynamic response) {
-    final result = response.data as Map<String, dynamic>;
+  static String _responseDataFunc(dynamic data) {
+    final result = data as Map<String, dynamic>;
     return result['requestId'] as String;
   }
 }

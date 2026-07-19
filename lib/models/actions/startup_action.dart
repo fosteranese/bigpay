@@ -15,8 +15,8 @@ final class StartupAction extends Action<NoPayload, InitializationData> {
          isAuthenticated: false,
        );
 
-  static InitializationData _responseDataFunc(dynamic response) {
-    return InitializationData.fromMap(response.data as Map<String, dynamic>);
+  static InitializationData _responseDataFunc(dynamic data) {
+    return InitializationData.fromMap(data as Map<String, dynamic>);
   }
 }
 

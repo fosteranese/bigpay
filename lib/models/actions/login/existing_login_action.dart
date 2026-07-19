@@ -18,8 +18,8 @@ final class ExistingLoginAction
          //  isAuthenticated: false,
        );
 
-  static AuthData _responseDataFunc(dynamic response) {
-    return AuthData.fromMap(response.data as Map<String, dynamic>);
+  static AuthData _responseDataFunc(dynamic data) {
+    return AuthData.fromMap(data as Map<String, dynamic>);
   }
 }
 

@@ -18,8 +18,8 @@ final class NewLoginAction
          isAuthenticated: false,
        );
 
-  static NewDeviceLoginData _responseDataFunc(dynamic response) {
-    return NewDeviceLoginData.fromMap(response.data as Map<String, dynamic>);
+  static NewDeviceLoginData _responseDataFunc(dynamic data) {
+    return NewDeviceLoginData.fromMap(data as Map<String, dynamic>);
   }
 }
 

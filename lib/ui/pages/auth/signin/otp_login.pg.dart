@@ -89,7 +89,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
               AuthAction.event = context.dispatchProcess(
                 AuthAction(
                   payload: AuthActionPayload(
-                    authData: snapshot.data!,
+                    dataResponse: snapshot.response!,
                   ),
                 ),
               );
