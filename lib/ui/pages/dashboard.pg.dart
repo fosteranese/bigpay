@@ -1,8 +1,12 @@
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/auth_data/recent_activity.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -92,7 +96,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                   Text(
-                    'Tom Dockery',
+                    AppState.currentUser?.user?.name ?? '',
                     style: AppTypography.p1Medium.copyWith(
                       color: AppColors.white,
                     ),
@@ -249,40 +253,41 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Column(
-                mainAxisSize: .min,
-                mainAxisAlignment: .start,
-                crossAxisAlignment: .start,
-                children: [
-                  Padding(
-                    padding: const .symmetric(horizontal: 20),
-                    child: Text(
-                      'Most used services',
-                      style: AppTypography.smallDetailsBold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 60,
-                    child: PageView(
-                      scrollDirection: .horizontal,
-                      pageSnapping: true,
-                      controller: PageController(
-                        viewportFraction: 0.60,
-                        keepPage: true,
+            if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
+              SliverToBoxAdapter(
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .start,
+                  crossAxisAlignment: .start,
+                  children: [
+                    Padding(
+                      padding: const .symmetric(horizontal: 20),
+                      child: Text(
+                        'Most used services',
+                        style: AppTypography.smallDetailsBold,
                       ),
-                      padEnds: false,
-                      children: [
-                        FrequentServiceItem(),
-                        FrequentServiceItem(),
-                        FrequentServiceItem(),
-                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 60,
+                      child: PageView(
+                        scrollDirection: .horizontal,
+                        pageSnapping: true,
+                        controller: PageController(
+                          viewportFraction: 0.60,
+                          keepPage: true,
+                        ),
+                        padEnds: false,
+                        children:
+                            AppState.currentUser?.recentActivity?.map((item) {
+                              return FrequentServiceItem(data: item);
+                            }).toList() ??
+                            [],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const .only(
@@ -303,28 +308,16 @@ class _DashboardPageState extends State<DashboardPage> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 15,
-                  mainAxisExtent: 124, // 💡 Forces the exact height of 124
+                  mainAxisExtent: 124,
                 ),
-                delegate: SliverChildListDelegate([
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                ]),
+                delegate: SliverChildListDelegate(
+                  AppState.currentUser?.activities?.map((item) {
+                        return ActionButton(
+                          data: item,
+                        );
+                      }).toList() ??
+                      [],
+                ),
               ),
             ),
             // Clear the floating bottom nav so the last cards aren't hidden.
@@ -339,7 +332,10 @@ class _DashboardPageState extends State<DashboardPage> {
 class ActionButton extends StatelessWidget {
   const ActionButton({
     super.key,
+    required this.data,
   });
+
+  final ActivityDatum data;
 
   @override
   Widget build(BuildContext context) {
@@ -353,17 +349,32 @@ class ActionButton extends StatelessWidget {
         mainAxisSize: .max,
         crossAxisAlignment: .start,
         children: [
-          SvgPicture.asset('assets/img/transfer.svg'),
+          CachedNetworkImage(
+            imageUrl:
+                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.activity?.icon}',
+            width: 24,
+            height: 24,
+            placeholder: (context, url) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+              size: 24,
+            ),
+            errorWidget: (context, url, error) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+              size: 24,
+            ),
+          ),
           const Spacer(flex: 4),
           Text(
-            'Transfer Money',
+            data.activity?.activityName ?? 'N/A',
             overflow: .ellipsis,
             maxLines: 1,
             style: AppTypography.header4,
           ),
           const Spacer(flex: 1),
           Text(
-            'Send funds anywhere securely',
+            data.activity?.description ?? '',
             overflow: .ellipsis,
             maxLines: 2,
             style: AppTypography.caption,
@@ -377,7 +388,10 @@ class ActionButton extends StatelessWidget {
 class FrequentServiceItem extends StatelessWidget {
   const FrequentServiceItem({
     super.key,
+    required this.data,
   });
+
+  final RecentActivity data;
 
   @override
   Widget build(BuildContext context) {
@@ -392,9 +406,29 @@ class FrequentServiceItem extends StatelessWidget {
       child: Row(
         mainAxisSize: .max,
         children: [
-          CircleAvatar(
-            backgroundColor: AppColors.tintShade3,
+          CachedNetworkImage(
+            imageUrl:
+                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
+            width: 35,
+            height: 35,
+            imageBuilder: (context, imageProvider) {
+              return CircleAvatar(
+                backgroundColor: AppColors.tintShade3,
+                backgroundImage: imageProvider,
+              );
+            },
+            placeholder: (context, url) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+              size: 24,
+            ),
+            errorWidget: (context, url, error) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+              size: 24,
+            ),
           ),
+
           const SizedBox(width: 5),
           Column(
             mainAxisSize: .max,
@@ -402,13 +436,13 @@ class FrequentServiceItem extends StatelessWidget {
             crossAxisAlignment: .start,
             children: [
               Text(
-                'Airtime Purchase',
+                data.formName ?? '',
                 textAlign: .start,
                 overflow: .ellipsis,
                 style: AppTypography.captionSemibold,
               ),
               Text(
-                'Airtime / Data',
+                data.activityName ?? '',
                 textAlign: .start,
                 overflow: .ellipsis,
                 style: AppTypography.caption,
