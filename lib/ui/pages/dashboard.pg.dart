@@ -409,8 +409,8 @@ class FrequentServiceItem extends StatelessWidget {
           CachedNetworkImage(
             imageUrl:
                 '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
-            width: 35,
-            height: 35,
+            // width: 24,
+            // height: 24,
             imageBuilder: (context, imageProvider) {
               return CircleAvatar(
                 backgroundColor: AppColors.tintShade3,
