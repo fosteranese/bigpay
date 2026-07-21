@@ -370,18 +370,18 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_libphonenumber
-      sha256: "753ffee50eeb7fe9816d353dc2f29ddf418c2bd817f8f357abd3d231c97d3aeb"
+      sha256: "3164ca32e06d37f349e36967f6a3d26a1ba509b36ed9bf02aa8515b30b9a546f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.3"
+    version: "2.8.4"
   flutter_libphonenumber_android:
     dependency: transitive
     description:
       name: flutter_libphonenumber_android
-      sha256: "1a7affd578db870cc455e8d3a154e7c95301f1eddedc0405de47ad02c2728855"
+      sha256: bc58bf37a0a47e7abb51a42d0183f08e52266429ba8b9fa72fae684503be26bd
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   flutter_libphonenumber_darwin:
     dependency: transitive
     description:
@@ -548,10 +548,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_fonts
-      sha256: "4e9391085e524954a51e3625b7c9c7e9851dc3f376603208bb45c24b9a66255d"
+      sha256: d3f251381df389f7418d4dff416bd27c0a23138df22969aafd28c4a4b1bb3cd6
       url: "https://pub.dev"
     source: hosted
-    version: "8.1.0"
+    version: "8.2.0"
   graphs:
     dependency: transitive
     description:

@@ -1,31 +1,48 @@
+import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_modal.dart';
-import 'package:flutter/material.dart';
-
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/forms.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class ServicePage extends StatefulWidget {
-  const ServicePage({super.key});
+  const ServicePage({
+    super.key,
+    required this.activityDatum,
+    required this.category,
+  });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/service',
   );
+  final ActivityDatum activityDatum;
+  final GeneralFlowCategory category;
 
   @override
   State<ServicePage> createState() => _ServicePageState();
 }
 
 class _ServicePageState extends State<ServicePage> {
+  ExecuteProcessEvent? mainEvent;
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
       bottomSize: 50,
-      title: 'Transfer Money',
+      title: widget.activityDatum.activity?.activityName ?? '',
       builder: (_) => SliverList.builder(
+        itemCount: widget.category.forms?.length ?? 0,
         itemBuilder: (context, index) {
+          final item = widget.category.forms![index];
           return Padding(
             padding: const .symmetric(
               horizontal: 20,
@@ -103,13 +120,28 @@ class _ServicePageState extends State<ServicePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: .circular(14),
               ),
-              leading: SvgPicture.asset('assets/img/transfer.svg'),
+              leading: CachedNetworkImage(
+                imageUrl:
+                    '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${item.icon}',
+                width: 24,
+                height: 24,
+                placeholder: (context, url) => Icon(
+                  Icons.circle_outlined,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.circle_outlined,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+              ),
               title: Text(
-                'Transfer Money',
+                item.formName ?? '',
                 style: AppTypography.header4,
               ),
               subtitle: Text(
-                'Send funds anywhere securely',
+                item.description ?? '',
                 style: AppTypography.caption,
               ),
               trailing: Icon(Icons.chevron_right_outlined),

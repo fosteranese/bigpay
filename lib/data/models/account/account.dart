@@ -25,22 +25,20 @@ class Account extends Equatable {
     this.sources,
   });
 
-  factory Account.fromMap(Map<String, dynamic> data) =>
-      Account(
-        mode: data['mode'] as String?,
-        title: data['title'] as String?,
-        icon: data['icon'] as String?,
-        formId: data['formId'] as String?,
-        activityId: data['activityId'] as String?,
-        hasMiniStatement: data['hasMiniStatement'] as bool?,
-        activityType: data['activityType'] as String?,
-        sources: (data['sources'] as List<dynamic>?)
-            ?.map(
-              (e) =>
-                  Source.fromMap(e as Map<String, dynamic>),
-            )
-            .toList(),
-      );
+  factory Account.fromMap(Map<String, dynamic> data) => Account(
+    mode: data['mode'] as String?,
+    title: data['title'] as String?,
+    icon: data['icon'] as String?,
+    formId: data['formId'] as String?,
+    activityId: data['activityId'] as String?,
+    hasMiniStatement: data['hasMiniStatement'] as bool?,
+    activityType: data['activityType'] as String?,
+    sources: (data['sources'] as List<dynamic>?)
+        ?.map(
+          (e) => Source.fromMap(e as Map<String, dynamic>),
+        )
+        .toList(),
+  );
 
   Map<String, dynamic> toMap() => {
     'mode': mode,
@@ -83,8 +81,7 @@ class Account extends Equatable {
       icon: icon ?? this.icon,
       formId: formId ?? this.formId,
       activityId: activityId ?? this.activityId,
-      hasMiniStatement:
-          hasMiniStatement ?? this.hasMiniStatement,
+      hasMiniStatement: hasMiniStatement ?? this.hasMiniStatement,
       activityType: activityType ?? this.activityType,
       sources: sources ?? this.sources,
     );

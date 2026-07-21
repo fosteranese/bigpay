@@ -1,3 +1,4 @@
+import 'package:bigpay/data/models/account/source.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/recent_activity.dart';
 import 'package:bigpay/routes/app_router.dart';
@@ -37,6 +38,16 @@ class _DashboardPageState extends State<DashboardPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Source? get _virtualBalance {
+    return AppState.currentUser?.customerData
+        ?.where((item) {
+          return item.mode?.toUpperCase() == 'VIRTUAL_WALLET';
+        })
+        .firstOrNull
+        ?.sources
+        ?.firstOrNull;
   }
 
   @override
@@ -128,130 +139,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
             SliverToBoxAdapter(
-              child: Container(
-                width: double.maxFinite,
-                height: 177,
-                margin: const .all(15),
-                decoration: BoxDecoration(
-                  borderRadius: .circular(12),
-                  gradient: LinearGradient(
-                    begin: Alignment(
-                      0.84,
-                      0.44,
-                    ), // Calculates the 293.59° angle
-                    end: Alignment(-0.84, -0.44),
-                    colors: [
-                      Color(0xFF221E55),
-                      Color(0xFF20428C),
-                    ],
-                    stops: [
-                      0.17, // 17%
-                      0.5109, // 51.09%
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: .topRight,
-                      child: ClipRRect(
-                        borderRadius: .circular(12),
-                        child: SvgPicture.asset(
-                          'assets/img/card-corner-icon.svg',
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const .symmetric(
-                        vertical: 22,
-                        horizontal: 18,
-                      ),
-                      child: Column(
-                        mainAxisSize: .max,
-                        crossAxisAlignment: .start,
-                        children: [
-                          Text(
-                            'Virtual Wallet Balance',
-                            style: AppTypography.smallDetails.copyWith(
-                              color: AppColors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisSize: .max,
-                            mainAxisAlignment: .start,
-                            crossAxisAlignment: .center,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: 'GHS ',
-                                      style: AppTypography.display1.copyWith(
-                                        color: AppColors.secondary,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: '20,000.00',
-                                      style: AppTypography.display1,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              IconButton.filled(
-                                style: IconButton.styleFrom(
-                                  alignment: .center,
-                                  padding: .all(5),
-                                  backgroundColor: AppColors.white11,
-                                  fixedSize: Size(25, 25),
-                                  minimumSize: Size(25, 25),
-                                  maximumSize: Size(25, 25),
-                                ),
-                                onPressed: () {},
-                                icon: SvgPicture.asset(
-                                  SvgImages.invisible,
-                                  colorFilter: .mode(AppColors.white, .srcIn),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FormButton(
-                                  backgroundColor: AppColors.white11,
-                                  height: 46,
-                                  onPressed: () {},
-                                  text: 'Fund Wallet',
-                                  labelSize: 13,
-                                  svgIcon: 'assets/img/wallet.svg',
-                                  iconSize: 15,
-                                  buttonIconAlignment: .left,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: FormButton(
-                                  backgroundColor: AppColors.white11,
-                                  height: 46,
-                                  onPressed: () {},
-                                  text: 'View Details',
-                                  labelSize: 13,
-                                  svgIcon: 'assets/img/trending-up.svg',
-                                  iconSize: 15,
-                                  buttonIconAlignment: .left,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: VirtualWalletCard(virtualBalance: _virtualBalance),
             ),
             if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
               SliverToBoxAdapter(
@@ -324,6 +212,154 @@ class _DashboardPageState extends State<DashboardPage> {
             const SliverToBoxAdapter(child: SizedBox(height: 110)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class VirtualWalletCard extends StatelessWidget {
+  VirtualWalletCard({
+    super.key,
+    required this._virtualBalance,
+  });
+
+  final Source? _virtualBalance;
+  final _visible = ValueNotifier(false);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.maxFinite,
+      height: 177,
+      margin: const .all(15),
+      decoration: BoxDecoration(
+        borderRadius: .circular(12),
+        gradient: LinearGradient(
+          begin: Alignment(
+            0.84,
+            0.44,
+          ), // Calculates the 293.59° angle
+          end: Alignment(-0.84, -0.44),
+          colors: [
+            Color(0xFF221E55),
+            Color(0xFF20428C),
+          ],
+          stops: [
+            0.17, // 17%
+            0.5109, // 51.09%
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Align(
+            alignment: .topRight,
+            child: ClipRRect(
+              borderRadius: .circular(12),
+              child: SvgPicture.asset(
+                'assets/img/card-corner-icon.svg',
+              ),
+            ),
+          ),
+          Padding(
+            padding: const .symmetric(
+              vertical: 22,
+              horizontal: 18,
+            ),
+            child: Column(
+              mainAxisSize: .max,
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  _virtualBalance?.tile ?? 'Virtual Wallet Balance',
+                  style: AppTypography.smallDetails.copyWith(
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ValueListenableBuilder(
+                  valueListenable: _visible,
+                  builder: (context, visible, child) {
+                    return Row(
+                      mainAxisSize: .max,
+                      mainAxisAlignment: .start,
+                      crossAxisAlignment: .center,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'GHS ',
+                                style: AppTypography.display1.copyWith(
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                              TextSpan(
+                                text: visible
+                                    ? _virtualBalance?.balance ?? '0.00'
+                                    : '* *** **',
+                                style: AppTypography.display1,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        IconButton.filled(
+                          style: IconButton.styleFrom(
+                            alignment: .center,
+                            padding: .all(5),
+                            backgroundColor: AppColors.white11,
+                            fixedSize: Size(25, 25),
+                            minimumSize: Size(25, 25),
+                            maximumSize: Size(25, 25),
+                          ),
+                          onPressed: () {
+                            _visible.value = !_visible.value;
+                          },
+                          icon: SvgPicture.asset(
+                            visible ? SvgImages.invisible : SvgImages.visible,
+                            colorFilter: .mode(AppColors.white, .srcIn),
+                            width: 24,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                Spacer(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FormButton(
+                        backgroundColor: AppColors.white11,
+                        height: 46,
+                        onPressed: () {},
+                        text: 'Fund Wallet',
+                        labelSize: 13,
+                        svgIcon: 'assets/img/wallet.svg',
+                        iconSize: 15,
+                        buttonIconAlignment: .left,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FormButton(
+                        backgroundColor: AppColors.white11,
+                        height: 46,
+                        onPressed: () {},
+                        text: 'View Details',
+                        labelSize: 13,
+                        svgIcon: 'assets/img/trending-up.svg',
+                        iconSize: 15,
+                        buttonIconAlignment: .left,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

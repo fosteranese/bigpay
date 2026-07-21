@@ -44,9 +44,13 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
   ) async {
     bool isSilent = false;
 
-    var action = event.action;
+    var action = event.action.copyWith(
+      endpoint: event.action.endpointFunc == null
+          ? event.action.endpoint
+          : event.action.endpointFunc!.call(),
+    );
     if (event.useSaveActionPayload) {
-      final saved = store.inputs.read(event.action.endpoint);
+      final saved = store.inputs.read(action.endpoint);
       if (saved == null) {
         emit(
           ExecuteProcessError(

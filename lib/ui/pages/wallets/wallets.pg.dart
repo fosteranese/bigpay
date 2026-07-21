@@ -1,12 +1,20 @@
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/radio_button.dart';
+import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/logger.dart';
+import 'package:bigpay/models/wallet/get_wallets_action.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/ui/components/forms/radio_button.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:uuid/uuid.dart';
 
 class WalletsPage extends StatefulWidget {
   const WalletsPage({super.key});
@@ -20,6 +28,7 @@ class WalletsPage extends StatefulWidget {
 
 class _WalletsPageState extends State<WalletsPage> {
   final _buttonKey = GlobalKey();
+  ExecuteProcessEvent? mainEvent;
   void _showContextMenu(BuildContext context) {
     // 2. Find the RenderBox of the button
     final RenderBox renderBox =
@@ -43,8 +52,16 @@ class _WalletsPageState extends State<WalletsPage> {
         const PopupMenuItem(value: 'archive', child: Text('Archive')),
       ],
     ).then((value) {
-      if (value != null) print('Selected: $value');
+      if (value != null) logger.i('Selected: $value');
     });
+  }
+
+  @override
+  initState() {
+    mainEvent = context.dispatchProcess(
+      GetWalletsAction(),
+    );
+    super.initState();
   }
 
   @override
@@ -68,36 +85,19 @@ class _WalletsPageState extends State<WalletsPage> {
           iconSize: 16,
         ),
       ),
-      child: Column(
-        children: [
-          WalletListItem(
-            id: '1',
-          ),
-          WalletListItem(
-            id: '2',
-          ),
-          WalletListItem(
-            id: '3',
-          ),
-          WalletListItem(
-            id: '4',
-          ),
-          WalletListItem(
-            id: '5',
-          ),
-          WalletListItem(
-            id: '6',
-          ),
-          WalletListItem(
-            id: '7',
-          ),
-          WalletListItem(
-            id: '8',
-          ),
-          WalletListItem(
-            id: '9',
-          ),
-        ],
+      child: ProcessBuilder<List<Account>>(
+        event: () => mainEvent,
+        builder: (context, snapshot) {
+          return Column(
+            children:
+                snapshot.data?.map((item) {
+                  return WalletListItem(
+                    data: item,
+                  );
+                }).toList() ??
+                [],
+          );
+        },
       ),
     );
   }
@@ -106,9 +106,9 @@ class _WalletsPageState extends State<WalletsPage> {
 class WalletListItem extends StatelessWidget {
   const WalletListItem({
     super.key,
-    required this.id,
+    required this.data,
   });
-  final String id;
+  final Account data;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +123,7 @@ class WalletListItem extends StatelessWidget {
         ),
       ),
       child: Dismissible(
-        key: ValueKey(id),
+        key: ValueKey(data.formId ?? data.activityId ?? Uuid().v4()),
         direction: DismissDirection.endToStart,
         dismissThresholds: const {
           DismissDirection.endToStart: 1,
@@ -155,15 +155,26 @@ class WalletListItem extends StatelessWidget {
 
         child: ListTile(
           contentPadding: .symmetric(horizontal: 15),
-          leading: SvgPicture.asset('assets/img/bigpay-icon.svg'),
+          leading: CachedNetworkImage(
+            imageUrl:
+                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
+            placeholder: (context, url) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+            ),
+            errorWidget: (context, url, error) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
           title: Text(
-            'BigPay Virtual Wallet',
+            data.sources?.first.tile ?? '',
             style: AppTypography.caption.copyWith(
               color: AppColors.black,
             ),
           ),
           subtitle: Text(
-            'Balance - GHS 20,000.00',
+            data.sources?.first.balance ?? '0.00',
             style: AppTypography.caption,
           ),
           trailing: FormRadioButton(selected: false),
