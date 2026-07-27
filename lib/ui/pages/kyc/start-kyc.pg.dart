@@ -1,4 +1,6 @@
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/kyc.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
@@ -40,7 +42,7 @@ class _StartKycPageState extends State<StartKycPage> {
         builder: (context, value, child) {
           return FormButton(
             enabled: value,
-            onPressed: () {},
+            onPressed: _continue,
             text: 'Continue',
           );
         },
@@ -54,9 +56,10 @@ class _StartKycPageState extends State<StartKycPage> {
             GhanaCardInput(
               focusNode: _phoneNumberFocusNode,
               controller: _phoneNumberController,
-              next: (_) {},
-              onInvalid: (value) {},
-              onSuccess: _onChanged,
+              next: (_) => _continue,
+              onInvalid: _onInvalid,
+              onSuccess: _onSuccess,
+              textInputAction: .done,
             ),
           ],
         ),
@@ -64,7 +67,18 @@ class _StartKycPageState extends State<StartKycPage> {
     );
   }
 
-  void _onChanged(_) {
-    _canSubmit.value = _phoneNumberController.text.isNotEmpty;
+  void _onSuccess(_) {
+    _canSubmit.value = true;
+  }
+
+  void _onInvalid(_) {
+    _canSubmit.value = false;
+  }
+
+  void _continue() {
+    Kyc.ghanaCardNumber = _phoneNumberController.text.trim();
+    FocusScope.of(context).unfocus();
+
+    AppRouter.router.push(InfoKycPage.route.path);
   }
 }

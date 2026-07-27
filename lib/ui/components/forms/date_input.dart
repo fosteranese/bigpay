@@ -11,6 +11,8 @@ class FormDateInput extends StatefulWidget {
     this.focusNode,
     this.next,
     this.onChanged,
+    this.firstDate,
+    this.lastDate,
   });
   final TextEditingController controller;
   final String? label;
@@ -18,6 +20,11 @@ class FormDateInput extends StatefulWidget {
   final FocusNode? focusNode;
   final void Function(DateTime? value)? next;
   final void Function(DateTime? value)? onChanged;
+
+  /// Earliest / latest selectable dates, e.g. to force a date after or up to
+  /// today. Default to an effectively unbounded range.
+  final DateTime? firstDate;
+  final DateTime? lastDate;
 
   @override
   State<FormDateInput> createState() => _FormDateInputState();
@@ -38,12 +45,6 @@ class _FormDateInputState extends State<FormDateInput> {
           placeholder: widget.placeholder,
           controller: widget.controller,
           focusNode: widget.focusNode,
-          next: (value) {
-            widget.next?.call(_date);
-          },
-          onChanged: (value) {
-            _onSelect(_date);
-          },
           suffix: Column(
             mainAxisAlignment: .center,
             crossAxisAlignment: .center,
@@ -59,21 +60,34 @@ class _FormDateInputState extends State<FormDateInput> {
     );
   }
 
-  void _onTap() {
+  Future<void> _onTap() async {
     FocusScope.of(context).unfocus();
-    widget.focusNode?.requestFocus();
 
-    showDatePicker(
+    final first =
+        widget.firstDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final last =
+        widget.lastDate ?? DateTime.now().add(const Duration(days: 365 * 100));
+
+    // The initial date must sit within [first, last].
+    var initial = _date ?? DateTime.now();
+    if (initial.isBefore(first)) initial = first;
+    if (initial.isAfter(last)) initial = last;
+
+    final picked = await showDatePicker(
       context: context,
-      firstDate: DateTime.fromMillisecondsSinceEpoch(0),
-      lastDate: DateTime.now().add(Duration(days: 365 * 100)),
+      initialDate: initial,
+      firstDate: first,
+      lastDate: last,
     );
+
+    if (picked != null) _onSelect(picked);
   }
 
-  void _onSelect(DateTime? date) {
-    widget.controller.text = date.toString();
+  void _onSelect(DateTime date) {
+    setState(() => _date = date);
+    // ISO date (yyyy-MM-dd) — no intl dependency.
+    widget.controller.text = date.toIso8601String().split('T').first;
     widget.onChanged?.call(date);
     widget.next?.call(date);
-    Navigator.pop(context);
   }
 }

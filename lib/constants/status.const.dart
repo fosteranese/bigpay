@@ -9,5 +9,6 @@ class StatusConstants {
 class StatusCodeConstants {
   static const success = '1';
   static const newLogin = '5000';
+  static const verifyIdentify = '6000';
   static const networkUnavailable = 'unavailable_network';
 }

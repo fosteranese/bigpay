@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -26,7 +27,9 @@ class _InfoKycPageState extends State<InfoKycPage> {
         child: SizedBox.shrink(),
       ),
       bottomNav: FormButton(
-        onPressed: () {},
+        onPressed: () {
+          AppRouter.router.push(ContactInfoKycPage.route.path);
+        },
         text: 'Continue',
       ),
       child: Column(

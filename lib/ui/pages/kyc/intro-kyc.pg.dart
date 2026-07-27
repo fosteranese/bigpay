@@ -1,4 +1,5 @@
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/kyc/start-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,9 @@ class _IntroKycPageState extends State<IntroKycPage> {
         ],
       ),
       bottomNav: FormButton(
-        onPressed: () {},
+        onPressed: () {
+          AppRouter.router.push(StartKycPage.route.path);
+        },
         text: 'Continue',
       ),
       builder: (_) => SliverFillRemaining(

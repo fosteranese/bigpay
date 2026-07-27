@@ -14,10 +14,12 @@ GoRoute get moreRoute => GoRoute(
     ProfilePage.route.toGoRoute(
       () => const ProfilePage(),
       nested: true,
+      rootNavigator: true,
     ),
     SecurityPage.route.toGoRoute(
       () => const SecurityPage(),
       nested: true,
+      rootNavigator: true,
     ),
   ],
 );

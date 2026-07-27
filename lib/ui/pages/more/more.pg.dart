@@ -1,9 +1,21 @@
+import 'dart:convert';
+
+import 'package:bigpay/models/actions/action.dart';
+import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/models/actions/logout_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/pages/more/profile.pg.dart';
+import 'package:bigpay/ui/pages/more/security.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MorePage extends StatefulWidget {
   const MorePage({super.key});
@@ -31,7 +43,9 @@ class _MorePageState extends State<MorePage> {
       title: 'Account',
       subtitleWidget: InkWell(
         borderRadius: .circular(12),
-        onTap: () {},
+        onTap: () {
+          AppRouter.router.push(ProfilePage.route.path);
+        },
         child: Container(
           margin: .only(top: 20),
           padding: .symmetric(horizontal: 16, vertical: 18),
@@ -42,12 +56,32 @@ class _MorePageState extends State<MorePage> {
           child: ListTile(
             dense: false,
             contentPadding: .zero,
-            leading: CircleAvatar(
-              radius: 25,
-              backgroundColor: AppColors.white,
+            leading: ProcessBuilder<String>(
+              event: () => GetProfilePictureAction.event,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  AppState.currentUser = AppState.currentUser!.copyWith(
+                    profilePicture: snapshot.data ?? '',
+                  );
+                  return CircleAvatar(
+                    radius: 25,
+                    backgroundColor: AppColors.white,
+                    backgroundImage: MemoryImage(
+                      base64Decode(
+                        AppState.currentUser?.profilePicture ?? '',
+                      ),
+                    ),
+                  );
+                }
+
+                return CircleAvatar(
+                  radius: 25,
+                  backgroundColor: AppColors.white,
+                );
+              },
             ),
             title: Text(
-              'Tom Dockery Adjei Mensah',
+              AppState.currentUser?.user?.name ?? '',
               maxLines: 1,
               style: AppTypography.p1.copyWith(
                 color: AppColors.white,
@@ -63,30 +97,71 @@ class _MorePageState extends State<MorePage> {
       child: Column(
         children: [
           ProfileItem(
+            onPressed: () {
+              AppRouter.router.push(SecurityPage.route.path);
+            },
             title: 'Security',
             icon: Icons.admin_panel_settings_outlined,
           ),
           ProfileItem(
+            onPressed: () {
+              AppRouter.router.push(FeedbackPage.route.path);
+            },
             title: 'Submit a Complaint',
             icon: Icons.send_outlined,
           ),
           ProfileItem(
+            onPressed: () {
+              final url = Uri.parse(
+                'tel:${AppState.data?.help?.phoneNumber}',
+              );
+              launchUrl(url);
+            },
             title: 'Call Us',
             icon: Icons.phone_outlined,
           ),
           ProfileItem(
+            onPressed: () {
+              final url = Uri.parse(
+                'mailto:${AppState.data?.help?.email}',
+              );
+              launchUrl(url);
+            },
             title: 'Email Us',
             icon: Icons.email_outlined,
           ),
           ProfileItem(
+            onPressed: () {
+              final contact = AppState.data?.help?.whatsApp ?? '';
+              if (contact.isEmpty) return;
+              final url = contact.startsWith('http')
+                  ? Uri.parse(contact)
+                  : Uri.parse(
+                      'https://wa.me/${contact.replaceAll(RegExp(r'[^0-9]'), '')}',
+                    );
+              launchUrl(url, mode: LaunchMode.externalApplication);
+            },
             title: 'Contact us via WhatsApp',
-            icon: Icons.help_outlined,
+            iconSvg: 'assets/img/whatsapp.svg',
           ),
           ProfileItem(
+            onPressed: () {
+              final url = Uri.parse(
+                AppState.data?.help?.privacyUrl ?? '',
+              );
+              launchUrl(url);
+            },
             title: 'Privacy Statement',
             icon: Icons.privacy_tip_outlined,
           ),
           ProfileItem(
+            onPressed: () {
+              LogoutAction.event = context.dispatchProcess(
+                LogoutAction(
+                  payload: NoPayload(),
+                ),
+              );
+            },
             backgroundColor: AppColors.danger.withValues(alpha: 0.2),
             iconColor: AppColors.danger,
             title: 'Sign Out',
@@ -104,28 +179,35 @@ class ProfileItem extends StatelessWidget {
     this.backgroundColor = AppColors.tintShade3,
     this.iconColor = AppColors.secondary,
     required this.title,
-    required this.icon,
+    this.icon,
+    this.iconSvg,
     this.trailing,
+    this.onPressed,
   });
 
   final Color backgroundColor;
   final Color iconColor;
   final String title;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconSvg;
   final Widget? trailing;
+  final void Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: onPressed,
       dense: false,
       contentPadding: .zero,
       leading: CircleAvatar(
         radius: 20.5,
         backgroundColor: backgroundColor,
-        child: Icon(
-          icon,
-          color: iconColor,
-        ),
+        child: icon != null
+            ? Icon(
+                icon,
+                color: iconColor,
+              )
+            : SvgPicture.asset(iconSvg ?? ''),
       ),
       title: Text(
         title,

@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
@@ -26,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Stack(
           children: [
             Container(
-              height: 153,
+              height: 175,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -44,20 +49,40 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       subtitleWidget: Row(
         children: [
-          CircleAvatar(
-            radius: 36,
-            backgroundColor: AppColors.white,
-            child: CircleAvatar(
-              radius: 33,
-              backgroundColor: AppColors.tintShade3,
-            ),
+          ProcessBuilder<String>(
+            event: () => GetProfilePictureAction.event,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                AppState.currentUser = AppState.currentUser!.copyWith(
+                  profilePicture: snapshot.data ?? '',
+                );
+                return CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.tintShade3,
+                  backgroundImage: MemoryImage(
+                    base64Decode(
+                      AppState.currentUser?.profilePicture ?? '',
+                    ),
+                  ),
+                );
+              }
+
+              return CircleAvatar(
+                radius: 36,
+                backgroundColor: AppColors.white,
+                child: CircleAvatar(
+                  radius: 33,
+                  backgroundColor: AppColors.tintShade3,
+                ),
+              );
+            },
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Padding(
               padding: const .only(bottom: 30),
               child: Text(
-                'Tom Dockery Adjei Mensah',
+                AppState.currentUser?.user?.name ?? '',
                 style: AppTypography.formLabels.copyWith(
                   color: AppColors.white,
                 ),
@@ -73,31 +98,41 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           FormInput(
             label: 'First Name *',
-            controller: TextEditingController(),
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.firstName ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
             label: 'Middle Name',
-            controller: TextEditingController(),
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.middleName ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
             label: 'Last Name *',
-            controller: TextEditingController(),
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.lastName ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
             label: 'Email Address *',
-            controller: TextEditingController(),
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.email ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
             label: 'Date of Birth *',
-            controller: TextEditingController(),
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.birthDate ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
@@ -106,7 +141,9 @@ class _ProfilePageState extends State<ProfilePage> {
               Expanded(
                 child: FormInput(
                   label: 'Gender *',
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                    text: AppState.currentUser?.user?.gender ?? '',
+                  ),
                   readOnly: true,
                 ),
               ),
@@ -114,7 +151,9 @@ class _ProfilePageState extends State<ProfilePage> {
               Expanded(
                 child: FormInput(
                   label: 'Nationality',
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                    text: AppState.currentUser?.user?.nationality ?? '',
+                  ),
                   readOnly: true,
                 ),
               ),

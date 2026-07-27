@@ -11,10 +11,16 @@ import 'package:bigpay/ui/pages/splash_screen.pg.dart';
 
 final appRouteObserver = RouteObserver<PageRoute<dynamic>>();
 
+/// The app's top-level navigator — the one the bottom-nav shell lives inside.
+/// A route pushed onto it (via `rootNavigator: true`) covers the shell, so it
+/// shows full-screen with no bottom nav bar.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: SplashScreenPage.route.path,
     observers: [appRouteObserver],
     routes: [
@@ -28,9 +34,9 @@ class AppRouter {
 
 extension AppRouterNavigation on GoRouter {
   void popUntilNamed(String name) {
-    routerDelegate.navigatorKey.currentState?.popUntil(
-      (route) => route.settings.name == name,
-    );
+    while (name != AppRouter.router.state.path && AppRouter.router.canPop()) {
+      AppRouter.router.pop();
+    }
   }
 }
 
@@ -51,11 +57,14 @@ extension GoRouteX on PageRouteDefinition {
   GoRoute toGoRoute(
     Widget Function() page, {
     bool nested = false,
+    bool rootNavigator = false,
     FutureOr<bool> Function(BuildContext, GoRouterState)? onExit,
   }) {
     return GoRoute(
       name: name,
       path: nested ? subPath : path,
+      // Pushed onto the root navigator, so it covers the bottom-nav shell.
+      parentNavigatorKey: rootNavigator ? rootNavigatorKey : null,
       builder: (context, state) => page(),
       onExit: onExit,
     );
@@ -65,11 +74,13 @@ extension GoRouteX on PageRouteDefinition {
   GoRoute toGoRouteWithState(
     Widget Function(GoRouterState state) page, {
     bool nested = false,
+    bool rootNavigator = false,
     FutureOr<bool> Function(BuildContext, GoRouterState)? onExit,
   }) {
     return GoRoute(
       name: name,
       path: nested ? subPath : path,
+      parentNavigatorKey: rootNavigator ? rootNavigatorKey : null,
       builder: (context, state) => page(state),
       onExit: onExit,
     );

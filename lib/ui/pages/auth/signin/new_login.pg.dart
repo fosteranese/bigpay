@@ -186,18 +186,60 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
-              FormInput(
-                label: 'Phone Number',
-                keyboardType: .phone,
-                focusNode: _phoneNumberFocusNode,
-                controller: _phoneNumberController,
-                next: (_) {
-                  _passwordFocusNode.requestFocus();
-                },
-                onChanged: (value) {
-                  SignIn.phoneNumber = value.trim();
-                },
-              ),
+              if (SignIn.phoneNumber.isNotEmpty)
+                Row(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .spaceBetween,
+                  crossAxisAlignment: .center,
+                  children: [
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Welcome back, ',
+                            ),
+                            TextSpan(
+                              text: AppState.currentUser?.user?.name ?? '',
+                              style: AppTypography.p1Bold,
+                            ),
+                            TextSpan(
+                              text: '. \nEnter your password to continue.',
+                            ),
+                          ],
+                          style: AppTypography.p1.copyWith(
+                            // color: AppColors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 90,
+                      child: FormButton(
+                        height: 40,
+                        onPressed: () {
+                          setState(() {
+                            SignIn.phoneNumber = '';
+                          });
+                        },
+                        text: 'Change',
+                      ),
+                    ),
+                  ],
+                )
+              else
+                FormInput(
+                  label: 'Phone Number',
+                  keyboardType: .phone,
+                  focusNode: _phoneNumberFocusNode,
+                  controller: _phoneNumberController,
+                  next: (_) {
+                    _passwordFocusNode.requestFocus();
+                  },
+                  onChanged: (value) {
+                    SignIn.phoneNumber = value.trim();
+                  },
+                ),
 
               SizedBox(height: 15),
               FormPasswordInput(

@@ -9,7 +9,7 @@ class Validator {
   }
 
   static bool ghanaCard(String identificationNumber) {
-    var regex = RegExp(r'^[0-9]{9}-{1}[0-9]{1}$');
+    var regex = RegExp(r'^[A-Za-z]{3}-[0-9]{9}-[0-9]{1}$');
     return regex.firstMatch(identificationNumber) != null;
   }
 }

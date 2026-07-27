@@ -1,3 +1,11 @@
+import 'dart:convert';
+
+import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:bigpay/data/models/account/source.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/recent_activity.dart';
@@ -7,9 +15,6 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/app_state.util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -90,9 +95,29 @@ class _DashboardPageState extends State<DashboardPage> {
               leadingWidth: 15 + 36,
               leading: Padding(
                 padding: const .only(left: 15),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: AppColors.tintShade3,
+                child: ProcessBuilder<String>(
+                  event: () => GetProfilePictureAction.event,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      AppState.currentUser = AppState.currentUser!.copyWith(
+                        profilePicture: snapshot.data ?? '',
+                      );
+                      return CircleAvatar(
+                        radius: 18,
+                        backgroundColor: AppColors.tintShade3,
+                        backgroundImage: MemoryImage(
+                          base64Decode(
+                            AppState.currentUser?.profilePicture ?? '',
+                          ),
+                        ),
+                      );
+                    }
+
+                    return CircleAvatar(
+                      radius: 18,
+                      backgroundColor: AppColors.tintShade3,
+                    );
+                  },
                 ),
               ),
               title: Column(
