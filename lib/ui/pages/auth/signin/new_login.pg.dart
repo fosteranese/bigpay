@@ -22,6 +22,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 class NewLoginPage extends StatefulWidget {
@@ -122,6 +123,9 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
             }
 
             if (snapshot.hasData) {
+              // The password verified — keep it for biometric sign-in if the
+              // user has that enabled.
+              _rememberPasswordForBiometric(_passwordController.text);
               AuthAction.event = context.dispatchProcess(
                 AuthAction(
                   payload: AuthActionPayload(
@@ -255,7 +259,11 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                 children: [
                   TextButton(
                     style: TextButton.styleFrom(padding: .zero),
-                    onPressed: () {},
+                    onPressed: () {
+                      AppRouter.router.push(
+                        BiometricLoginPage.route.path,
+                      );
+                    },
                     child: Row(
                       mainAxisSize: .min,
                       mainAxisAlignment: .start,
@@ -294,6 +302,15 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
         ),
       ),
     );
+  }
+
+  /// Stores the just-used password for biometric sign-in, but only when the
+  /// user has enabled it on the security screen.
+  Future<void> _rememberPasswordForBiometric(String password) async {
+    if (password.isEmpty) return;
+    if (await BiometricUtil.isLoginEnabled) {
+      await BiometricUtil.saveLoginPassword(password);
+    }
   }
 
   void _onSave() {

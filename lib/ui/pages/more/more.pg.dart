@@ -9,6 +9,7 @@ import 'package:bigpay/ui/pages/more/profile.pg.dart';
 import 'package:bigpay/ui/pages/more/security.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -180,6 +181,7 @@ class ProfileItem extends StatelessWidget {
     this.iconColor = AppColors.secondary,
     required this.title,
     this.icon,
+    this.iconUrl,
     this.iconSvg,
     this.trailing,
     this.onPressed,
@@ -189,6 +191,7 @@ class ProfileItem extends StatelessWidget {
   final Color iconColor;
   final String title;
   final IconData? icon;
+  final String? iconUrl;
   final String? iconSvg;
   final Widget? trailing;
   final void Function()? onPressed;
@@ -202,12 +205,47 @@ class ProfileItem extends StatelessWidget {
       leading: CircleAvatar(
         radius: 20.5,
         backgroundColor: backgroundColor,
-        child: icon != null
-            ? Icon(
+        child: Builder(
+          builder: (context) {
+            if (iconSvg?.isNotEmpty ?? false) {
+              return SvgPicture.asset(iconSvg ?? '');
+            }
+
+            if (iconUrl?.isNotEmpty ?? false) {
+              return CircleAvatar(
+                radius: 20.5,
+                backgroundColor: AppColors.tintShade3,
+                child: CachedNetworkImage(
+                  imageUrl: iconUrl!,
+                  width: 22,
+                  height: 22,
+                  placeholder: (context, url) => Icon(
+                    Icons.shield_outlined,
+                    color: AppColors.secondary,
+                    size: 22,
+                  ),
+                  errorWidget: (context, url, error) => Icon(
+                    Icons.shield_outlined,
+                    color: AppColors.secondary,
+                    size: 22,
+                  ),
+                ),
+              );
+            }
+
+            if (icon != null) {
+              return Icon(
                 icon,
                 color: iconColor,
-              )
-            : SvgPicture.asset(iconSvg ?? ''),
+              );
+            }
+
+            return Icon(
+              Icons.circle_outlined,
+              color: iconColor,
+            );
+          },
+        ),
       ),
       title: Text(
         title,

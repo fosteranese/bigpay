@@ -18,6 +18,7 @@ import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/biometric.util.dart';
 
 class BigPayApp extends StatelessWidget {
   const BigPayApp({super.key});
@@ -47,7 +48,7 @@ class BigPayApp extends StatelessWidget {
                       VerifyOtpLoginAction.path,
                       AuthData.fromMap,
                     )
-                    .then((result) {
+                    .then((result) async {
                       final savedUser = result?.data;
                       if (savedUser != null) {
                         AppState.currentUser = savedUser;
@@ -55,16 +56,25 @@ class BigPayApp extends StatelessWidget {
                       SignIn.clear();
 
                       // A returning user (a saved login surfaced on the cached
-                      // startup emission) gets the quick re-login screen;
-                      // everyone else — including a first launch with no saved
-                      // login — goes through onboarding. Without navigating in
-                      // the no-saved-user case, the app stayed on the splash.
-                      AppRouter.router.go(
-                        savedUser != null && snapshot.isCached
-                            ? NewLoginPage.route.path
-                            : WalkthroughPage.route.path,
-                        extra: snapshot.data,
-                      );
+                      // startup emission) gets the quick re-login screen —
+                      // biometric unlock when it's set up, otherwise the
+                      // password screen. Everyone else — including a first
+                      // launch with no saved login — goes through onboarding.
+                      // Without navigating in the no-saved-user case, the app
+                      // stayed on the splash.
+                      var target = WalkthroughPage.route.path;
+                      if (savedUser != null && snapshot.isCached) {
+                        final enabled = await BiometricUtil.isLoginEnabled;
+                        final password =
+                            await BiometricUtil.readLoginPassword();
+                        final biometricReady =
+                            enabled && (password?.isNotEmpty ?? false);
+                        target = biometricReady
+                            ? BiometricLoginPage.route.path
+                            : NewLoginPage.route.path;
+                      }
+
+                      AppRouter.router.go(target, extra: snapshot.data);
                     });
               } else if (snapshot.hasError &&
                   !snapshot.isSilent &&
