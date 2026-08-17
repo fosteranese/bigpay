@@ -13,6 +13,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/more/complaints/complaints.pg.dart';
+import 'package:bigpay/ui/pages/more/help.pg.dart';
 import 'package:bigpay/ui/pages/more/profile.pg.dart';
 import 'package:bigpay/ui/pages/more/security.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
@@ -132,37 +133,10 @@ class _MorePageState extends State<MorePage> {
           ),
           ProfileItem(
             onPressed: () {
-              final url = Uri.parse(
-                'tel:${AppState.data?.help?.phoneNumber}',
-              );
-              launchUrl(url);
+              AppRouter.router.push(HelpPage.route.path);
             },
-            title: 'Call Us',
-            icon: Icons.phone_outlined,
-          ),
-          ProfileItem(
-            onPressed: () {
-              final url = Uri.parse(
-                'mailto:${AppState.data?.help?.email}',
-              );
-              launchUrl(url);
-            },
-            title: 'Email Us',
-            icon: Icons.email_outlined,
-          ),
-          ProfileItem(
-            onPressed: () {
-              final contact = AppState.data?.help?.whatsApp ?? '';
-              if (contact.isEmpty) return;
-              final url = contact.startsWith('http')
-                  ? Uri.parse(contact)
-                  : Uri.parse(
-                      'https://wa.me/${contact.replaceAll(RegExp(r'[^0-9]'), '')}',
-                    );
-              launchUrl(url, mode: LaunchMode.externalApplication);
-            },
-            title: 'Contact us via WhatsApp',
-            iconSvg: 'assets/img/whatsapp.svg',
+            title: 'Help',
+            icon: Icons.help_outline,
           ),
           ProfileItem(
             onPressed: () {
