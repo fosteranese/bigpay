@@ -48,14 +48,19 @@ class BigPayApp extends StatelessWidget {
                       AuthData.fromMap,
                     )
                     .then((result) {
-                      if (result?.data == null) {
-                        return;
+                      final savedUser = result?.data;
+                      if (savedUser != null) {
+                        AppState.currentUser = savedUser;
                       }
-
-                      AppState.currentUser = result!.data!;
                       SignIn.clear();
+
+                      // A returning user (a saved login surfaced on the cached
+                      // startup emission) gets the quick re-login screen;
+                      // everyone else — including a first launch with no saved
+                      // login — goes through onboarding. Without navigating in
+                      // the no-saved-user case, the app stayed on the splash.
                       AppRouter.router.go(
-                        snapshot.isCached
+                        savedUser != null && snapshot.isCached
                             ? NewLoginPage.route.path
                             : WalkthroughPage.route.path,
                         extra: snapshot.data,

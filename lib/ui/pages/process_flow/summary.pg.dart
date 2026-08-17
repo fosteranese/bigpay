@@ -5,25 +5,33 @@ import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/form_verification_response.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/general_flow/request_response.dart';
+import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/services/process_request_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/process_flow/done.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/utils/app_modal.dart';
+import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 /// Confirmation screen shown after a form is verified: it renders the
-/// verification's `previewData` (amount, charges, total, entered fields).
+/// verification's `previewData` (amount, charges, total, entered fields) and —
+/// mirroring umb's `ConfirmationFormPage` — any remaining editable fields the
+/// user still has to complete here.
 ///
-/// Continue processes the request — collecting an OTP first when the
-/// verification says a second factor is required.
+/// The form screen only collects the fields needed to verify
+/// (`requiredForVerification == 1`); the rest of the visible, editable fields
+/// are gathered on this screen, then merged with the verified data into the
+/// process request.
+///
+/// Continue processes the request — collecting an OTP/PIN first when the
+/// verification says an auth factor is required.
 class SummaryPage extends StatefulWidget {
   const SummaryPage({
     super.key,
@@ -51,47 +59,159 @@ class SummaryPage extends StatefulWidget {
 class _SummaryPageState extends State<SummaryPage> {
   ExecuteProcessEvent? _processEvent;
 
+  final _canContinue = ValueNotifier(true);
+
+  /// Visible, editable fields that weren't needed for verification — collected
+  /// on this screen. Matches umb's `ConfirmationFormPage._setupFormData`.
+  late final List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)>
+  _editableItems;
+
+  /// Every other field (hidden, read-only, or already used for verification).
+  /// Their values come from the verified data, not user input.
+  late final List<GeneralFlowFieldsDatum> _preFields;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final fields = widget.formData?.fieldsDatum ?? const [];
+
+    bool isEditable(GeneralFlowFieldsDatum f) =>
+        f.field?.fieldVisible == 1 &&
+        f.field?.readOnly != 1 &&
+        f.field?.requiredForVerification != 1;
+
+    final editable = fields.where(isEditable).toList();
+    _preFields = fields.where((f) => !isEditable(f)).toList();
+
+    // Keep the amount at the top when it happens to be an editable field, to
+    // match the form screen's ordering.
+    final amountIndex = editable.indexWhere((f) => f.field?.isAmount == 1);
+    if (amountIndex > 0) {
+      editable.insert(0, editable.removeAt(amountIndex));
+    }
+
+    final verified = widget.verification?.formData ?? const {};
+    _editableItems = editable.map((item) {
+      final name = item.field?.fieldName;
+      final existing = (name == null ? null : verified[name])?.toString();
+      final text = (existing != null && existing.isNotEmpty)
+          ? existing
+          : (item.field?.defaultValue ?? '');
+      final controller = TextEditingController(text: text)
+        ..addListener(_recomputeCanContinue);
+      return (item, controller, FocusNode());
+    }).toList();
+
+    _recomputeCanContinue();
+  }
+
+  @override
+  void dispose() {
+    for (final (_, controller, focusNode) in _editableItems) {
+      controller.removeListener(_recomputeCanContinue);
+      controller.dispose();
+      focusNode.dispose();
+    }
+    _canContinue.dispose();
+    super.dispose();
+  }
+
+  /// Continue stays enabled while every mandatory editable field has a value.
+  void _recomputeCanContinue() {
+    _canContinue.value = _editableItems.every((item) {
+      final mandatory = item.$1.field?.fieldMandatory == 1;
+      return !mandatory || item.$2.text.trim().isNotEmpty;
+    });
+  }
+
+  /// Prefills the other editable fields from a selected payee's saved values,
+  /// matching on field name (the backend stores the keys lower-camel).
+  void _prefillFromPayee(Payee payee) {
+    final saved = payee.formData;
+    if (saved == null) return;
+
+    for (final (datum, controller, _) in _editableItems) {
+      final name = datum.field?.fieldName;
+      if (name == null) continue;
+      final value = saved[name] ?? saved[_lowerCamel(name)];
+      if (value != null) controller.text = value.toString();
+    }
+
+    _recomputeCanContinue();
+  }
+
+  String _lowerCamel(String value) =>
+      value.isEmpty ? value : '${value[0].toLowerCase()}${value.substring(1)}';
+
+  /// The full form data for the process request: the verified data, with the
+  /// pre-filled fields keyed by field name and the editable fields overlaid
+  /// with what the user entered here. Mirrors umb's `getFormData`.
+  Map<String, dynamic> _buildPayload() {
+    final verified = widget.verification?.formData ?? const {};
+    final payload = <String, dynamic>{};
+
+    for (final datum in _preFields) {
+      final name = datum.field?.fieldName;
+      if (name == null) continue;
+      payload[name] = verified[name] ?? datum.field?.defaultValue;
+    }
+
+    for (final (datum, controller, _) in _editableItems) {
+      final name = datum.field?.fieldName;
+      if (name == null) continue;
+      payload[name] = controller.text.trim();
+    }
+
+    return {...verified, ...payload};
+  }
+
   void _continue() {
-    if (widget.verification?.requireSecondFactor == true) {
-      _promptOtp();
+    FocusScope.of(context).unfocus();
+
+    final payload = _buildPayload();
+    final authModes = widget.verification?.authMode ?? const [];
+
+    if (authModes.isNotEmpty) {
+      AuthenticationUtil.start(
+        authModes: authModes,
+        payload: payload,
+        complete: ({otp, required payload, pin, secretAnswer}) {
+          // Dismiss the auth dialog before processing.
+          AppRouter.router.pop();
+          _process(
+            otp: otp,
+            payload: payload,
+            pin: pin,
+            secretAnswer: secretAnswer,
+          );
+        },
+      );
       return;
     }
-    _process();
+
+    _process(payload: payload);
   }
 
-  void _promptOtp() {
-    AppModal.showBottomModal(
-      context,
-      label: 'Enter OTP',
-      padding: const .all(20),
-      children: [
-        Text(
-          'Enter the code sent to you to authorise this transaction.',
-          style: AppTypography.smallDetails.copyWith(color: AppColors.black),
-        ),
-        const SizedBox(height: 20),
-        FormOtpInput(
-          count: 6,
-          onCompleted: (otp) {
-            Navigator.pop(context);
-            _process(otp: otp);
-          },
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
+  void _process({
+    String? otp,
+    required Map<String, dynamic> payload,
+    String? pin,
+    String? secretAnswer,
+  }) {
+    final paymentMode =
+        (payload['SourceAccount'] ?? payload['sourceAccount'] ?? '').toString();
 
-  void _process({String? otp}) {
-    final data = widget.verification?.formData ?? const {};
     _processEvent = context.dispatchProcess(
       ProcessRequestAction(
         payload: ProcessRequestActionPayload(
           activityId: widget.activityDatum?.activity?.activityId,
           formId: widget.formData?.form?.formId,
-          formData: data,
-          paymentMode: (data['SourceAccount'] as String?) ?? '',
+          formData: payload,
+          paymentMode: paymentMode,
           otp: otp,
+          pin: pin,
+          secretAnswer: secretAnswer,
         ),
         endpointFunc: _processEndpoint,
       ),
@@ -152,7 +272,7 @@ class _SummaryPageState extends State<SummaryPage> {
         if (snapshot.isSuccessful) {
           _processEvent = null;
           AppRouter.router.push(
-            DonePage.route.path,
+            TransactionDetailsPage.route.path,
             extra: snapshot.data,
           );
           return;
@@ -182,30 +302,74 @@ class _SummaryPageState extends State<SummaryPage> {
             ),
           ],
         ),
-        bottomNav: FormButton(
-          onPressed: _continue,
-          text: 'Continue',
+        bottomNav: ValueListenableBuilder(
+          valueListenable: _canContinue,
+          builder: (context, canContinue, child) {
+            return FormButton(
+              enabled: canContinue,
+              onPressed: _continue,
+              text: 'Continue',
+            );
+          },
         ),
-        child: Container(
-          padding: .all(20),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: .circular(12),
-          ),
-          child: Column(
-            mainAxisSize: .min,
-            mainAxisAlignment: .start,
-            crossAxisAlignment: .center,
-            children: [
-              for (final (index, (title, value)) in rows.indexed) ...[
-                TransactionDetailsItem(title: title, value: value),
-                if (index != rows.length - 1)
-                  Divider(color: AppColors.offWhite),
-              ],
+        child: Column(
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
+          children: [
+            Container(
+              padding: .all(20),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: .circular(12),
+              ),
+              child: Column(
+                mainAxisSize: .min,
+                mainAxisAlignment: .start,
+                crossAxisAlignment: .center,
+                children: [
+                  for (final (index, (title, value)) in rows.indexed) ...[
+                    TransactionDetailsItem(title: title, value: value),
+                    if (index != rows.length - 1)
+                      Divider(color: AppColors.offWhite),
+                  ],
+                ],
+              ),
+            ),
+            if (_editableItems.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              ..._buildEditableFields,
             ],
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  List<Widget> get _buildEditableFields {
+    final items = <Widget>[];
+    for (final (index, (datum, controller, focusNode))
+        in _editableItems.indexed) {
+      final isLast = index == _editableItems.length - 1;
+      items.add(
+        Padding(
+          padding: const .only(bottom: 15),
+          child: FormFieldInput(
+            datum: datum,
+            controller: controller,
+            focusNode: focusNode,
+            isLast: isLast,
+            onPayeeSelected: _prefillFromPayee,
+            next: (_) {
+              if (isLast) {
+                FocusScope.of(context).unfocus();
+              } else {
+                _editableItems[index + 1].$3.requestFocus();
+              }
+            },
+          ),
+        ),
+      );
+    }
+    return items;
   }
 }

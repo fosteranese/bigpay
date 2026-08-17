@@ -17,6 +17,7 @@ void main() {
 
     test('payload carries formId and formData', () {
       expect(action.payload.toJson(), {
+        'insId': null,
         'formId': 'f1',
         'formData': {'amount': '10'},
       });

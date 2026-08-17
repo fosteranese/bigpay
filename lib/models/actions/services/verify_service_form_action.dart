@@ -26,15 +26,18 @@ final class VerifyServiceFormAction
 
 class VerifyServiceFormActionPayload implements ActionPayloadSerializable {
   const VerifyServiceFormActionPayload({
+    this.insId,
     this.formId,
     this.formData = const {},
   });
 
+  final String? insId;
   final String? formId;
   final Map<String, dynamic> formData;
 
   @override
   Map<String, dynamic> toJson() => {
+    'insId': insId,
     'formId': formId,
     'formData': formData,
   };

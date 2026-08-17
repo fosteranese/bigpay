@@ -1,12 +1,12 @@
+import 'package:bigpay/routes/history_routes.dart';
+import 'package:bigpay/routes/more_routes.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/routes/more_routes.dart';
 import 'package:bigpay/routes/process_flow_routes.dart';
 import 'package:bigpay/routes/wallet_routes.dart';
 import 'package:bigpay/ui/components/main_shell.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
-import 'package:bigpay/ui/pages/history/history.pg.dart';
 
 /// The tabbed main area — Home · Wallets · Services · History · More — wired the
 /// umb way: a [StatefulShellRoute.indexedStack] with one branch per tab, each
@@ -30,10 +30,14 @@ final mainShellRoute = StatefulShellRoute.indexedStack(
     // 3 · History
     StatefulShellBranch(
       routes: [
-        HistoryPage.route.toGoRoute(() => const HistoryPage()),
+        historyRoute,
       ],
     ),
     // 4 · More
-    StatefulShellBranch(routes: [moreRoute]),
+    StatefulShellBranch(
+      routes: [
+        moreRoute,
+      ],
+    ),
   ],
 );

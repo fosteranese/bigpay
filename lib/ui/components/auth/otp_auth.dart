@@ -1,23 +1,30 @@
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-class PinAuthPage extends StatefulWidget {
-  const PinAuthPage({super.key});
+class OtpAuthenticator extends StatefulWidget {
+  const OtpAuthenticator({
+    super.key,
+    required this.onSuccess,
+    this.allowBiometric = false,
+    required this.end,
+  });
   static PageRouteDefinition route = PageRouteDefinition(
-    path: '/pin-auth',
+    path: '/otp-auth',
   );
+  final void Function(String) onSuccess;
+  final bool allowBiometric;
+  final void Function() end;
 
   @override
-  State<PinAuthPage> createState() => _PinAuthPageState();
+  State<OtpAuthenticator> createState() => _OtpAuthenticatorState();
 }
 
-class _PinAuthPageState extends State<PinAuthPage> {
+class _OtpAuthenticatorState extends State<OtpAuthenticator> {
   final _otp = ValueNotifier('');
 
   @override
@@ -35,14 +42,14 @@ class _PinAuthPageState extends State<PinAuthPage> {
         crossAxisAlignment: .center,
         children: [
           Text(
-            'Enter Security PIN',
+            'Enter OTP',
             textAlign: .center,
             style: AppTypography.display1.copyWith(
               color: AppColors.black,
             ),
           ),
           Text(
-            'Please provide your 6-digit PIN to authorize this action and keep your account secure.',
+            'Please provide your 6-digit shortcode send to your phone number to authorize this transaction',
             textAlign: .center,
             style: AppTypography.caption,
           ),
@@ -60,20 +67,6 @@ class _PinAuthPageState extends State<PinAuthPage> {
                   text: 'Continue',
                 );
               },
-            ),
-          ),
-          const SizedBox(width: 10),
-          IconButton(
-            style: IconButton.styleFrom(
-              side: BorderSide(
-                color: AppColors.secondary,
-              ),
-              fixedSize: Size(48, 48),
-            ),
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              'assets/img/biometric.svg',
-              colorFilter: .mode(AppColors.black, .srcIn),
             ),
           ),
         ],

@@ -37,6 +37,7 @@ class ServiceFormPage extends StatefulWidget {
 class _ServiceFormPageState extends State<ServiceFormPage> {
   final _canSubmit = ValueNotifier(false);
   ExecuteProcessEvent? _submitEvent;
+  Map<String, dynamic> _formData = {};
 
   late final List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)>
   _formItems;
@@ -45,10 +46,18 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   void initState() {
     super.initState();
 
-    // Only visible fields are rendered, and — matching the umb flow — the
-    // amount field is floated to the top when present.
+    // Matching umb's `_generateField`: when the form needs verification, only
+    // the fields required for it are collected here — the rest are gathered on
+    // the summary/confirmation screen. Otherwise every visible, editable field
+    // is shown. The amount field is floated to the top when present.
+    final requireVerification = widget.formData.form?.requireVerification == 1;
     final visible = (widget.formData.fieldsDatum ?? [])
-        .where((f) => f.field?.fieldVisible == 1)
+        .where(
+          (f) =>
+              f.field?.fieldVisible == 1 &&
+              f.field?.readOnly != 1 &&
+              (!requireVerification || f.field?.requiredForVerification == 1),
+        )
         .toList();
     final amountIndex = visible.indexWhere((f) => f.field?.isAmount == 1);
     if (amountIndex > 0) {
@@ -96,18 +105,22 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   /// shown on the summary screen (see the listener in [build]).
   void _submit() {
     FocusScope.of(context).unfocus();
+    widget.formData.fieldsDatum?.forEach((item) {
+      _formData[item.field?.fieldName ?? ''] = item.field?.defaultValue ?? '';
+    });
 
-    final values = <String, dynamic>{
+    _formData.addAll(<String, dynamic>{
       for (final (datum, controller, _) in _formItems)
         if (datum.field?.fieldName != null)
           datum.field!.fieldName!: controller.text.trim(),
-    };
+    });
 
     _submitEvent = context.dispatchProcess(
       VerifyServiceFormAction(
         payload: VerifyServiceFormActionPayload(
+          insId: widget.formData.institution?.insId,
           formId: widget.formData.form?.formId,
-          formData: values,
+          formData: _formData,
         ),
         endpointFunc: _verifyEndpoint,
       ),

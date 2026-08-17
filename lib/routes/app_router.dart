@@ -38,6 +38,13 @@ extension AppRouterNavigation on GoRouter {
       AppRouter.router.pop();
     }
   }
+
+  void popUntilNamedRoutes(List<String> paths) {
+    while (!paths.contains(AppRouter.router.state.path) &&
+        AppRouter.router.canPop()) {
+      AppRouter.router.pop();
+    }
+  }
 }
 
 class PageRouteDefinition {

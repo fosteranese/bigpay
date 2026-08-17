@@ -109,6 +109,7 @@ class _ServicePageState extends State<ServicePage> {
                       GetServiceFormDataAction(
                         payload: GetServiceFormDataActionPayload(
                           formId: item.formId,
+                          insId: item.formId,
                         ),
                         endpointFunc: () {
                           switch (item.activityType) {
@@ -117,7 +118,7 @@ class _ServicePageState extends State<ServicePage> {
                               return '/FBLOnline/formDataByFormId';
 
                             case ActivityTypesConst.fblCollect:
-                              return '/FBLCollect/formDataByFormId';
+                              return '/FBLCollect/formsDataByInsId';
 
                             case ActivityTypesConst.quickFlow:
                             case ActivityTypesConst.quickFlowAlt:

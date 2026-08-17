@@ -1,15 +1,25 @@
+import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/pages/dashboard.pg.dart';
+import 'package:bigpay/ui/pages/history/history.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class TransactionDetailsPage extends StatefulWidget {
-  const TransactionDetailsPage({super.key});
+  const TransactionDetailsPage({
+    super.key,
+    required this.receipt,
+  });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/history/details',
   );
+
+  final RequestResponse receipt;
 
   @override
   State<TransactionDetailsPage> createState() => _TransactionDetailsPageState();
@@ -38,7 +48,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               backgroundColor: AppColors.white,
               fixedSize: Size(28, 28),
             ),
-            onPressed: () {},
+            onPressed: () {
+              context.pop();
+            },
             icon: Icon(
               Icons.chevron_left_outlined,
             ),
@@ -61,43 +73,29 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                   children: [
                     TransactionDetailsItem(
                       title: 'Service',
-                      value: 'Airtime Top Up',
+                      value: widget.receipt.formName ?? '',
                     ),
                     TransactionDetailsItem(
-                      title: 'Phone number',
-                      value: '0245075219',
+                      title: 'Transaction ID',
+                      value: widget.receipt.activityName ?? '',
                     ),
                     Divider(
                       color: Color(0xffF4F5FF),
                       thickness: 4,
                     ),
-                    TransactionDetailsItem(
-                      title: 'Payment source',
-                      value: 'Visa ***9876',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Amount',
-                      value: 'GHS 10.00',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Charges',
-                      value: 'GHS 0.00',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Total',
-                      value: 'GHS 10.00',
-                    ),
+                    ...widget.receipt.previewData.map((item) {
+                      return TransactionDetailsItem(
+                        title: item.key ?? '',
+                        value: item.value ?? '',
+                      );
+                    }),
                     Divider(
                       color: Color(0xffF4F5FF),
                       thickness: 4,
                     ),
                     TransactionDetailsItem(
                       title: 'Date',
-                      value: '12 January, 2024 13:45',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Transaction ID',
-                      value: '12345678900987',
+                      value: widget.receipt.receiptDateTime ?? '',
                     ),
                   ],
                 ),
@@ -112,7 +110,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               mainAxisSize: .min,
               crossAxisAlignment: .center,
               children: [
-                if ('success' == 'success')
+                if (widget.receipt.status == 1)
                   Row(
                     children: [
                       Expanded(
@@ -151,7 +149,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     iconSize: 20,
                   ),
                 const SizedBox(height: 20),
-                FormButton(onPressed: () {}, text: 'Back to Home'),
+                FormButton(
+                  onPressed: () {
+                    AppRouter.router.popUntilNamedRoutes([
+                      DashboardPage.route.path,
+                      ServicePage.route.path,
+                      HistoryPage.route.path,
+                    ]);
+                  },
+                  text: 'Back to Home',
+                ),
               ],
             ),
           ),
@@ -161,8 +168,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Widget _buildTitle() {
-    switch ('success') {
-      case 'success':
+    switch (widget.receipt.status) {
+      case 1:
         return Column(
           children: [
             Icon(
@@ -184,8 +191,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           ],
         );
 
-      case 'error':
-      case 'failed':
+      case 0:
+      case 3:
         return Column(
           children: [
             Icon(

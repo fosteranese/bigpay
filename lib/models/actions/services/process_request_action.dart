@@ -32,6 +32,7 @@ class ProcessRequestActionPayload implements ActionPayloadSerializable {
     this.paymentMode = '',
     this.otp,
     this.pin,
+    this.secretAnswer,
   });
 
   final String? activityId;
@@ -40,6 +41,7 @@ class ProcessRequestActionPayload implements ActionPayloadSerializable {
   final String paymentMode;
   final String? otp;
   final String? pin;
+  final String? secretAnswer;
 
   @override
   Map<String, dynamic> toJson() => {
@@ -50,7 +52,7 @@ class ProcessRequestActionPayload implements ActionPayloadSerializable {
     'auth': {
       'otp': otp,
       'pin': pin,
-      'secretAnswer': null,
+      'secretAnswer': secretAnswer,
     },
   };
 }

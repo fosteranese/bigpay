@@ -3,9 +3,7 @@ import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
-import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/pages/process_flow/done.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/services.pg.dart';
@@ -58,11 +56,6 @@ GoRoute get processFlowRoute => GoRoute(
       // Full-screen like the form and receipt — and consistent with them, so a
       // push from the (root-navigator) form doesn't collide page keys across
       // the shell branch and the root navigator.
-      rootNavigator: true,
-    ),
-    DonePage.route.toGoRouteWithState(
-      (state) => DonePage(receipt: state.extra as RequestResponse?),
-      nested: true,
       rootNavigator: true,
     ),
   ],
