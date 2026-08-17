@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/pages/wallets/add_card.pg.dart';
 import 'package:bigpay/ui/pages/wallets/momo/add_momo.pg.dart';
@@ -17,8 +18,8 @@ GoRoute get walletRoute => GoRoute(
       () => const AddCardPage(),
       nested: true,
     ),
-    VirtualWalletPage.route.toGoRoute(
-      () => const VirtualWalletPage(),
+    VirtualWalletPage.route.toGoRouteWithState(
+      (state) => VirtualWalletPage(account: state.extra as Account?),
       nested: true,
     ),
     AddMoMoPage.route.toGoRoute(

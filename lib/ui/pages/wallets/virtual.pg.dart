@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
+import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
@@ -9,17 +10,37 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_modal.dart';
 
+/// Wallet details. For the virtual wallet it shows the balance design; for any
+/// other wallet it shows the wallet's title in place of the balance.
 class VirtualWalletPage extends StatefulWidget {
-  const VirtualWalletPage({super.key});
+  const VirtualWalletPage({super.key, this.account});
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/wallets/virtual',
   );
+
+  final Account? account;
 
   @override
   State<VirtualWalletPage> createState() => _VirtualWalletPageState();
 }
 
 class _VirtualWalletPageState extends State<VirtualWalletPage> {
+  bool get _isVirtual =>
+      widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
+      widget.account == null;
+
+  String get _title =>
+      widget.account?.title ??
+      widget.account?.sources?.firstOrNull?.tile ??
+      'Virtual Wallet';
+
+  String get _balance =>
+      widget.account?.sources?.firstOrNull?.balance ?? '0.00';
+
+  double get _height {
+    return _isVirtual ? 160 : 160 - 55;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -31,12 +52,17 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
 
     final max = (screenHeight - statusBarHeight) / screenHeight;
     final min =
-        (screenHeight - (statusBarHeight + totalAppBarHeight + 160)) /
+        (screenHeight - (statusBarHeight + totalAppBarHeight + _height)) /
         screenHeight;
     return Stack(
       children: [
         DashboardLayout(
           backgroundColor: AppColors.white,
+          isVirtual: _isVirtual,
+          wallet: widget.account,
+          title: _title,
+          balance: _balance,
+          onBack: () => AppRouter.router.pop(),
           builder: (blur, alpha) => [
             // EmptyWalletTransactions(),
           ],
@@ -53,11 +79,13 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
               child: Scaffold(
                 primary: false,
                 backgroundColor: AppColors.white,
-
                 appBar: AppBar(
                   backgroundColor: AppColors.white,
                   surfaceTintColor: AppColors.white,
                   actionsPadding: .symmetric(horizontal: 10),
+                  automaticallyImplyLeading: false,
+                  automaticallyImplyActions: false,
+                  centerTitle: false,
                   shape: RoundedRectangleBorder(
                     borderRadius: .vertical(top: .circular(20)),
                   ),

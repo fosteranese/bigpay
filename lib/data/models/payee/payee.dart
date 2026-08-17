@@ -13,6 +13,10 @@ class Payee extends Equatable {
     this.shortTitle,
     this.icon,
     this.formData,
+    this.formName,
+    this.activityId,
+    this.activityName,
+    this.activityType,
   });
 
   final String? payeeId;
@@ -22,6 +26,13 @@ class Payee extends Equatable {
   final String? shortTitle;
   final String? icon;
   final Map<String, dynamic>? formData;
+
+  /// Present when the payee comes from `Payee/getAllPayees` — the service it
+  /// belongs to, used on the beneficiaries list and to pay it.
+  final String? formName;
+  final String? activityId;
+  final String? activityName;
+  final String? activityType;
 
   factory Payee.fromMap(Map<String, dynamic> data) => Payee(
     payeeId: data['payeeId'] as String?,
@@ -33,6 +44,10 @@ class Payee extends Equatable {
     formData: data['formData'] is Map
         ? (data['formData'] as Map).cast<String, dynamic>()
         : null,
+    formName: data['formName'] as String?,
+    activityId: data['activityId'] as String?,
+    activityName: data['activityName'] as String?,
+    activityType: data['activityType'] as String?,
   );
 
   Map<String, dynamic> toMap() => {
@@ -43,6 +58,10 @@ class Payee extends Equatable {
     'shortTitle': shortTitle,
     'icon': icon,
     'formData': formData,
+    'formName': formName,
+    'activityId': activityId,
+    'activityName': activityName,
+    'activityType': activityType,
   };
 
   /// Best label to show in the picker.
@@ -57,5 +76,9 @@ class Payee extends Equatable {
     shortTitle,
     icon,
     formData,
+    formName,
+    activityId,
+    activityName,
+    activityType,
   ];
 }

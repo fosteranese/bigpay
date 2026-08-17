@@ -1,7 +1,7 @@
-import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -12,11 +12,30 @@ class DashboardLayout extends StatefulWidget {
     this.isDashboard = false,
     this.backgroundColor = const Color(0xFFF8F8F8),
     this.builder,
+    this.title,
+    this.balance,
+    this.isVirtual = true,
+    this.onBack,
+    this.wallet,
   });
   final List<Widget>? children;
   final bool isDashboard;
   final Color backgroundColor;
   final List<Widget> Function(double blur, double alpha)? builder;
+
+  /// The wallet's display title — shown in the app bar, and (for a non-virtual
+  /// wallet) in place of the balance on the card.
+  final String? title;
+
+  /// The wallet balance, shown on the card only for a virtual wallet.
+  final String? balance;
+
+  /// Whether this is the virtual wallet — drives the balance vs. title design.
+  final bool isVirtual;
+
+  final VoidCallback? onBack;
+
+  final Account? wallet;
 
   @override
   State<DashboardLayout> createState() => _DashboardLayoutState();
@@ -94,7 +113,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                         backgroundColor: AppColors.white,
                         fixedSize: Size(28, 28),
                       ),
-                      onPressed: () {},
+                      onPressed: widget.onBack ?? () {},
                       icon: Icon(
                         Icons.chevron_left_outlined,
                       ),
@@ -121,7 +140,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                       ],
                     )
                   : Text(
-                      'Virtual Wallet',
+                      widget.title ?? 'Wallet',
                       style: AppTypography.p1.copyWith(
                         color: AppColors.white,
                       ),
@@ -152,130 +171,12 @@ class _DashboardLayoutState extends State<DashboardLayout> {
               ),
             ),
             SliverToBoxAdapter(
-              child: Container(
-                width: double.maxFinite,
-                height: 177,
-                margin: const .all(15),
-                decoration: BoxDecoration(
-                  borderRadius: .circular(12),
-                  gradient: LinearGradient(
-                    begin: Alignment(
-                      0.84,
-                      0.44,
-                    ), // Calculates the 293.59° angle
-                    end: Alignment(-0.84, -0.44),
-                    colors: [
-                      Color(0xFF221E55),
-                      Color(0xFF20428C),
-                    ],
-                    stops: [
-                      0.17, // 17%
-                      0.5109, // 51.09%
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: .topRight,
-                      child: ClipRRect(
-                        borderRadius: .circular(12),
-                        child: SvgPicture.asset(
-                          'assets/img/card-corner-icon.svg',
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const .symmetric(
-                        vertical: 22,
-                        horizontal: 18,
-                      ),
-                      child: Column(
-                        mainAxisSize: .max,
-                        crossAxisAlignment: .start,
-                        children: [
-                          Text(
-                            '${widget.isDashboard ? 'Virtual ' : ''}Wallet Balance',
-                            style: AppTypography.smallDetails.copyWith(
-                              color: AppColors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisSize: .max,
-                            mainAxisAlignment: .start,
-                            crossAxisAlignment: .center,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: 'GHS ',
-                                      style: AppTypography.display1.copyWith(
-                                        color: AppColors.secondary,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: '20,000.00',
-                                      style: AppTypography.display1,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              IconButton.filled(
-                                style: IconButton.styleFrom(
-                                  alignment: .center,
-                                  padding: .all(5),
-                                  backgroundColor: AppColors.white11,
-                                  fixedSize: Size(25, 25),
-                                  minimumSize: Size(25, 25),
-                                  maximumSize: Size(25, 25),
-                                ),
-                                onPressed: () {},
-                                icon: SvgPicture.asset(
-                                  SvgImages.invisible,
-                                  colorFilter: .mode(AppColors.white, .srcIn),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FormButton(
-                                  backgroundColor: AppColors.white11,
-                                  height: 46,
-                                  onPressed: () {},
-                                  text: 'Fund Wallet',
-                                  labelSize: 13,
-                                  svgIcon: 'assets/img/wallet.svg',
-                                  iconSize: 15,
-                                  buttonIconAlignment: .left,
-                                ),
-                              ),
-                              if (widget.isDashboard) const SizedBox(width: 10),
-                              if (widget.isDashboard)
-                                Expanded(
-                                  child: FormButton(
-                                    backgroundColor: AppColors.white11,
-                                    height: 46,
-                                    onPressed: () {},
-                                    text: 'View Details',
-                                    labelSize: 13,
-                                    svgIcon: 'assets/img/trending-up.svg',
-                                    iconSize: 15,
-                                    buttonIconAlignment: .left,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              child: VirtualWalletCard(
+                label: widget.title,
+                balance: widget.balance,
+                title: widget.title,
+                isVirtual: widget.isVirtual,
+                wallet: widget.wallet,
               ),
             ),
             ...widget.children ?? [],

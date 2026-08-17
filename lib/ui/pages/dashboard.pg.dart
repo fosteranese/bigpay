@@ -7,8 +7,10 @@ import 'package:bigpay/models/actions/get_profile_picture_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
+import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +21,8 @@ import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/recent_activity.dart';
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -267,7 +267,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               SliverToBoxAdapter(
-                child: VirtualWalletCard(virtualBalance: _virtualBalance),
+                child: VirtualWalletCard(
+                  label: _virtualBalance?.tile,
+                  balance: _virtualBalance?.balance,
+                  isVirtual: true,
+                  showViewDetails: true,
+                  onViewDetails: () =>
+                      AppRouter.router.push(VirtualWalletPage.route.path),
+                ),
               ),
               if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
                 SliverToBoxAdapter(
@@ -341,195 +348,6 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class VirtualWalletCard extends StatelessWidget {
-  VirtualWalletCard({
-    super.key,
-    required this._virtualBalance,
-  });
-
-  final Source? _virtualBalance;
-  final _visible = ValueNotifier(false);
-
-  // Fund Wallet opens the "Top Up" form under the Transfers activity directly,
-  // like a most-used service. Kept static since there's no runtime activity to
-  static const _topUpFormId = 'a454e670-6851-4085-a139-1da5868c531e';
-  static const _topUpActivityId = '713754C2-C287-4777-9CC7-FE4D0133DEC3';
-  static const _topUpActivityType = ActivityTypesConst.fblOnline;
-
-  /// Fetches the Top Up form and hands the result to the dashboard's central
-  /// listener, which jumps to the service form. Mirrors [FrequentServiceItem].
-  void _fundWallet(BuildContext context) {
-    GetServiceFormDataAction.activityDatum = ActivityDatum(
-      activity: Activity(
-        activityId: _topUpActivityId,
-        activityType: _topUpActivityType,
-        activityName: 'Fund Wallet',
-      ),
-    );
-    GetServiceFormDataAction.event = context.dispatchProcess(
-      saveActionResponse: true,
-      returnSavedResponse: true,
-      GetServiceFormDataAction(
-        payload: GetServiceFormDataActionPayload(
-          formId: _topUpFormId,
-          insId: _topUpFormId,
-        ),
-        endpointFunc: () {
-          switch (_topUpActivityType) {
-            case ActivityTypesConst.fblCollect:
-              return '/FBLCollect/formsDataByInsId';
-            case ActivityTypesConst.quickFlow:
-            case ActivityTypesConst.quickFlowAlt:
-              return '/QuickFlow/formDataByFormId';
-            case ActivityTypesConst.fblOnline:
-            case ActivityTypesConst.enquiry:
-            default:
-              return '/FBLOnline/formDataByFormId';
-          }
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      height: 177,
-      margin: const .all(15),
-      decoration: BoxDecoration(
-        borderRadius: .circular(12),
-        gradient: LinearGradient(
-          begin: Alignment(
-            0.84,
-            0.44,
-          ), // Calculates the 293.59° angle
-          end: Alignment(-0.84, -0.44),
-          colors: [
-            Color(0xFF221E55),
-            Color(0xFF20428C),
-          ],
-          stops: [
-            0.17, // 17%
-            0.5109, // 51.09%
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Align(
-            alignment: .topRight,
-            child: ClipRRect(
-              borderRadius: .circular(12),
-              child: SvgPicture.asset(
-                'assets/img/card-corner-icon.svg',
-              ),
-            ),
-          ),
-          Padding(
-            padding: const .symmetric(
-              vertical: 22,
-              horizontal: 18,
-            ),
-            child: Column(
-              mainAxisSize: .max,
-              crossAxisAlignment: .start,
-              children: [
-                Text(
-                  _virtualBalance?.tile ?? 'Virtual Wallet Balance',
-                  style: AppTypography.smallDetails.copyWith(
-                    color: AppColors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ValueListenableBuilder(
-                  valueListenable: _visible,
-                  builder: (context, visible, child) {
-                    return Row(
-                      mainAxisSize: .max,
-                      mainAxisAlignment: .start,
-                      crossAxisAlignment: .center,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'GHS ',
-                                style: AppTypography.display1.copyWith(
-                                  color: AppColors.secondary,
-                                ),
-                              ),
-                              TextSpan(
-                                text: visible
-                                    ? _virtualBalance?.balance ?? '0.00'
-                                    : '* *** **',
-                                style: AppTypography.display1,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        IconButton.filled(
-                          style: IconButton.styleFrom(
-                            alignment: .center,
-                            padding: .all(5),
-                            backgroundColor: AppColors.white11,
-                            fixedSize: Size(25, 25),
-                            minimumSize: Size(25, 25),
-                            maximumSize: Size(25, 25),
-                          ),
-                          onPressed: () {
-                            _visible.value = !_visible.value;
-                          },
-                          icon: SvgPicture.asset(
-                            visible ? SvgImages.invisible : SvgImages.visible,
-                            colorFilter: .mode(AppColors.white, .srcIn),
-                            width: 24,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                Spacer(),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FormButton(
-                        backgroundColor: AppColors.white11,
-                        height: 46,
-                        onPressed: () => _fundWallet(context),
-                        text: 'Fund Wallet',
-                        labelSize: 13,
-                        svgIcon: 'assets/img/wallet.svg',
-                        iconSize: 15,
-                        buttonIconAlignment: .left,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: FormButton(
-                        backgroundColor: AppColors.white11,
-                        height: 46,
-                        onPressed: () {},
-                        text: 'View Details',
-                        labelSize: 13,
-                        svgIcon: 'assets/img/trending-up.svg',
-                        iconSize: 15,
-                        buttonIconAlignment: .left,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

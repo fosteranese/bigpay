@@ -12,6 +12,7 @@ import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:uuid/uuid.dart';
@@ -155,6 +156,10 @@ class WalletListItem extends StatelessWidget {
 
         child: ListTile(
           contentPadding: .symmetric(horizontal: 15),
+          onTap: () => AppRouter.router.push(
+            VirtualWalletPage.route.path,
+            extra: data,
+          ),
           leading: CachedNetworkImage(
             imageUrl:
                 '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
