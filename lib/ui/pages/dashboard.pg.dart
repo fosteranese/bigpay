@@ -355,6 +355,47 @@ class VirtualWalletCard extends StatelessWidget {
   final Source? _virtualBalance;
   final _visible = ValueNotifier(false);
 
+  // Fund Wallet opens the "Top Up" form under the Transfers activity directly,
+  // like a most-used service. Kept static since there's no runtime activity to
+  static const _topUpFormId = 'a454e670-6851-4085-a139-1da5868c531e';
+  static const _topUpActivityId = '713754C2-C287-4777-9CC7-FE4D0133DEC3';
+  static const _topUpActivityType = ActivityTypesConst.fblOnline;
+
+  /// Fetches the Top Up form and hands the result to the dashboard's central
+  /// listener, which jumps to the service form. Mirrors [FrequentServiceItem].
+  void _fundWallet(BuildContext context) {
+    GetServiceFormDataAction.activityDatum = ActivityDatum(
+      activity: Activity(
+        activityId: _topUpActivityId,
+        activityType: _topUpActivityType,
+        activityName: 'Fund Wallet',
+      ),
+    );
+    GetServiceFormDataAction.event = context.dispatchProcess(
+      saveActionResponse: true,
+      returnSavedResponse: true,
+      GetServiceFormDataAction(
+        payload: GetServiceFormDataActionPayload(
+          formId: _topUpFormId,
+          insId: _topUpFormId,
+        ),
+        endpointFunc: () {
+          switch (_topUpActivityType) {
+            case ActivityTypesConst.fblCollect:
+              return '/FBLCollect/formsDataByInsId';
+            case ActivityTypesConst.quickFlow:
+            case ActivityTypesConst.quickFlowAlt:
+              return '/QuickFlow/formDataByFormId';
+            case ActivityTypesConst.fblOnline:
+            case ActivityTypesConst.enquiry:
+            default:
+              return '/FBLOnline/formDataByFormId';
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -462,7 +503,7 @@ class VirtualWalletCard extends StatelessWidget {
                       child: FormButton(
                         backgroundColor: AppColors.white11,
                         height: 46,
-                        onPressed: () {},
+                        onPressed: () => _fundWallet(context),
                         text: 'Fund Wallet',
                         labelSize: 13,
                         svgIcon: 'assets/img/wallet.svg',

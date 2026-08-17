@@ -5,6 +5,7 @@ import 'package:bigpay/models/actions/get_profile_picture_action.dart';
 import 'package:bigpay/models/actions/logout_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/pages/more/complaints/complaints.pg.dart';
 import 'package:bigpay/ui/pages/more/profile.pg.dart';
 import 'package:bigpay/ui/pages/more/security.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
@@ -110,6 +111,13 @@ class _MorePageState extends State<MorePage> {
             },
             title: 'Submit a Complaint',
             icon: Icons.send_outlined,
+          ),
+          ProfileItem(
+            onPressed: () {
+              AppRouter.router.push(ComplaintsPage.route.path);
+            },
+            title: 'Complaints',
+            icon: Icons.forum_outlined,
           ),
           ProfileItem(
             onPressed: () {
