@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>bigpay</string>
+		<string>BigPay</string>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Authenticate with Face ID to sign in and authorize transactions.</string>
 		<key>CFBundlePackageType</key>
