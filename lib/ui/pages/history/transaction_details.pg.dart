@@ -30,7 +30,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.scaffoldBg,
         image: DecorationImage(
           image: AssetImage('assets/img/trans-bg.jpg'),
           fit: .cover,
@@ -45,7 +45,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           leadingWidth: 70,
           leading: IconButton.filled(
             style: IconButton.styleFrom(
-              backgroundColor: AppColors.white,
+              backgroundColor: context.cardBg,
               fixedSize: Size(28, 28),
             ),
             onPressed: () {
@@ -66,7 +66,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 margin: .symmetric(horizontal: 20),
                 padding: .all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: context.cardBg,
                   borderRadius: .circular(8),
                 ),
                 child: Column(
@@ -80,7 +80,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       value: widget.receipt.activityName ?? '',
                     ),
                     Divider(
-                      color: Color(0xffF4F5FF),
+                      color: context.divider,
                       thickness: 4,
                     ),
                     ...widget.receipt.previewData.map((item) {
@@ -90,7 +90,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       );
                     }),
                     Divider(
-                      color: Color(0xffF4F5FF),
+                      color: context.divider,
                       thickness: 4,
                     ),
                     TransactionDetailsItem(
@@ -115,8 +115,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     children: [
                       Expanded(
                         child: FormButton(
-                          backgroundColor: AppColors.white,
-                          foregroundColor: AppColors.black,
+                          backgroundColor: context.cardBg,
+                          foregroundColor: context.textPrimary,
                           onPressed: () {},
                           text: 'Share',
                           icon: Icons.share_outlined,
@@ -127,8 +127,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: FormButton(
-                          backgroundColor: AppColors.white,
-                          foregroundColor: AppColors.black,
+                          backgroundColor: context.cardBg,
+                          foregroundColor: context.textPrimary,
                           onPressed: () {},
                           text: 'Save',
                           icon: Icons.group_outlined,
@@ -140,8 +140,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                   )
                 else
                   FormButton(
-                    backgroundColor: AppColors.white,
-                    foregroundColor: AppColors.black,
+                    backgroundColor: context.cardBg,
+                    foregroundColor: context.textPrimary,
                     onPressed: () {},
                     text: 'Submit a Complain',
                     svgIcon: 'assets/img/complaint.svg',
@@ -180,12 +180,12 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             const SizedBox(height: 10),
             Text(
               'Transaction Successful',
-              style: AppTypography.display2,
+              style: context.display2,
             ),
             Text(
               'Your transaction is complete',
               style: AppTypography.smallDetails.copyWith(
-                color: AppColors.black,
+                color: context.textPrimary,
               ),
             ),
           ],
@@ -203,7 +203,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             const SizedBox(height: 10),
             Text(
               'Transaction Failed',
-              style: AppTypography.display2.copyWith(
+              style: context.display2.copyWith(
                 color: AppColors.danger,
               ),
             ),
@@ -213,7 +213,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
     return Text(
       'Transaction Receipt',
-      style: AppTypography.display2,
+      style: context.display2,
     );
   }
 }
@@ -242,11 +242,11 @@ class TransactionDetailsItem extends StatelessWidget {
               title,
               textAlign: .left,
               style: title.toLowerCase().contains('total')
-                  ? AppTypography.header4.copyWith(
-                      color: AppColors.black,
+                  ? context.header4.copyWith(
+                color: context.textPrimary,
                     )
                   : AppTypography.caption.copyWith(
-                      color: AppColors.fiat,
+                      color: context.textSecondary,
                     ),
             ),
           ),
@@ -255,8 +255,8 @@ class TransactionDetailsItem extends StatelessWidget {
             child: Text(
               value,
               textAlign: .right,
-              style: AppTypography.header4.copyWith(
-                color: AppColors.black,
+              style: context.header4.copyWith(
+                color: context.textPrimary,
               ),
             ),
           ),

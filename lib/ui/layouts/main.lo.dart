@@ -74,14 +74,14 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           stops: [0.0, 0.3077],
           colors: [
-            AppColors.background,
-            AppColors.white,
+            context.scaffoldBg,
+            context.cardBg,
           ],
         ),
       ),
@@ -116,13 +116,13 @@ class _MainLayoutState extends State<MainLayout> {
             title: (widget.miniTitle?.isNotEmpty ?? false)
                 ? Text(
                     widget.miniTitle!,
-                    style: AppTypography.p1,
+                    style: context.p1,
                   )
                 : null,
             leading: AppRouter.router.canPop() && widget.showBackBtn
                 ? IconButton.filled(
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.white,
+                      backgroundColor: context.cardBg,
                       fixedSize: Size(28, 28),
                     ),
                     onPressed: () {
@@ -153,7 +153,7 @@ class _MainLayoutState extends State<MainLayout> {
                               style:
                                   (widget.titleStyle ?? AppTypography.display2)
                                       .copyWith(
-                                        color: AppColors.black,
+                                        color: context.textPrimary,
                                       ),
                             ),
                           )
@@ -166,7 +166,7 @@ class _MainLayoutState extends State<MainLayout> {
                                 child: Text(
                                   widget.title!,
                                   style: AppTypography.display1.copyWith(
-                                    color: AppColors.black,
+                                    color: context.textPrimary,
                                   ),
                                 ),
                               ),
@@ -176,7 +176,7 @@ class _MainLayoutState extends State<MainLayout> {
                         if (widget.subtitle != null)
                           Text(
                             widget.subtitle!,
-                            style: AppTypography.smallDetails,
+                            style: context.smallDetails,
                           )
                         else if (widget.subtitleWidget != null)
                           widget.subtitleWidget!,
@@ -198,8 +198,8 @@ class _MainLayoutState extends State<MainLayout> {
                       ),
                       color:
                           widget.appBarColor ??
-                          AppColors.white.withValues(
-                            alpha: 0.15 * _blurOpacity,
+                          context.appBarOverlay.withValues(
+                            alpha: _blurOpacity,
                           ),
                     ),
                   ),

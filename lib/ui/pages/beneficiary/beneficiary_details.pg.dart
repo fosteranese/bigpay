@@ -102,22 +102,22 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
             const SizedBox(height: 10),
             CircleAvatar(
               radius: 34,
-              backgroundColor: AppColors.tintShade3,
-              child: Text(_initials(_name), style: AppTypography.header2),
+              backgroundColor: context.avatarBg,
+              child: Text(_initials(_name), style: context.header2),
             ),
             const SizedBox(height: 12),
-            Text(_name, style: AppTypography.header3, textAlign: .center),
+            Text(_name, style: context.header3, textAlign: .center),
             if (widget.payee?.formName?.isNotEmpty ?? false)
               Text(
                 widget.payee!.formName!,
-                style: AppTypography.smallDetails,
+                style: context.smallDetails,
                 textAlign: .center,
               ),
             const SizedBox(height: 24),
             Container(
               padding: .all(20),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: context.cardBg,
                 borderRadius: .circular(12),
               ),
               child: Column(
@@ -126,7 +126,7 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
                   for (final (index, entry) in rows.indexed) ...[
                     _detailRow(_label(entry.key), entry.value.toString()),
                     if (index != rows.length - 1)
-                      Divider(color: AppColors.offWhite),
+                      Divider(color: context.divider),
                   ],
                   if (rows.isEmpty)
                     _detailRow('Recipient', widget.payee?.value ?? '-'),
@@ -146,14 +146,14 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
         crossAxisAlignment: .start,
         children: [
           Expanded(
-            child: Text(label, style: AppTypography.smallDetails),
+            child: Text(label, style: context.smallDetails),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               value,
               textAlign: .end,
-              style: AppTypography.smallDetailsBold,
+              style: context.smallDetailsBold,
             ),
           ),
         ],

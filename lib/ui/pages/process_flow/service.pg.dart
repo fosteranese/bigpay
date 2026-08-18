@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
@@ -26,12 +27,14 @@ class ServicePage extends StatefulWidget {
     super.key,
     required this.activityDatum,
     required this.category,
+    this.amDoing = AmDoing.transaction,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/service',
   );
   final ActivityDatum activityDatum;
   final GeneralFlowCategory category;
+  final AmDoing amDoing;
 
   @override
   State<ServicePage> createState() => _ServicePageState();
@@ -70,6 +73,7 @@ class _ServicePageState extends State<ServicePage> {
               'activityDatum': widget.activityDatum,
               'category': widget.category,
               'formData': snapshot.data,
+              'amDoing': widget.amDoing,
             },
           );
           return;
@@ -136,7 +140,7 @@ class _ServicePageState extends State<ServicePage> {
                 contentPadding: .symmetric(
                   horizontal: 15,
                 ),
-                tileColor: AppColors.white,
+                tileColor: context.cardBg,
                 shape: RoundedRectangleBorder(
                   borderRadius: .circular(14),
                 ),
@@ -158,7 +162,7 @@ class _ServicePageState extends State<ServicePage> {
                 ),
                 title: Text(
                   item.formName ?? '',
-                  style: AppTypography.header4,
+                  style: context.header4,
                 ),
                 subtitle: Text(
                   item.description ?? '',
@@ -183,7 +187,7 @@ class _ServicePageState extends State<ServicePage> {
         Text(
           'Finish setting up your profile to start sending, receiving, and managing your money securely.',
           style: AppTypography.smallDetails.copyWith(
-            color: AppColors.black,
+            color: context.textPrimary,
           ),
         ),
         SizedBox(height: 20),
@@ -209,9 +213,9 @@ class _ServicePageState extends State<ServicePage> {
                 1.0,
               ], // Exact CSS percentage stops
               colors: [
-                Color(0xFFB7B7B7), // #B7B7B7 at 0%
-                Color(0xFFDFD6D6), // #DFD6D6 at 50.52%
-                Color(0xFFEFE1E1), // #EFE1E1 at 100%
+                context.textTertiary,
+                context.border,
+                context.divider,
               ],
             ),
           ),

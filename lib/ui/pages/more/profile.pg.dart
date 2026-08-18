@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return MainLayout(
       bottomSize: 100,
       flexibleSpace: Container(
-        color: AppColors.white,
+        color: context.cardBg,
         child: Stack(
           children: [
             Container(
@@ -58,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
                 return CircleAvatar(
                   radius: 18,
-                  backgroundColor: AppColors.tintShade3,
+                  backgroundColor: context.avatarBg,
                   backgroundImage: MemoryImage(
                     base64Decode(
                       AppState.currentUser?.profilePicture ?? '',
@@ -69,10 +69,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
               return CircleAvatar(
                 radius: 36,
-                backgroundColor: AppColors.white,
+                backgroundColor: context.cardBg,
                 child: CircleAvatar(
                   radius: 33,
-                  backgroundColor: AppColors.tintShade3,
+                  backgroundColor: context.avatarBg,
                 ),
               );
             },

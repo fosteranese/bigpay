@@ -14,6 +14,10 @@ GoRoute get authRoute => GoRoute(
   redirect: (context, state) => null,
   routes: [
     NewLoginPage.route.toGoRoute(() => const NewLoginPage(), nested: true),
+    ExistingDeviceLoginPage.route.toGoRoute(
+      () => const ExistingDeviceLoginPage(),
+      nested: true,
+    ),
     SecurePhraseLoginPage.route.toGoRoute(
       () => const SecurePhraseLoginPage(),
       nested: true,

@@ -22,7 +22,7 @@ class HistoryTransactionItem extends StatelessWidget {
 
   bool get _hasAmount => record.amount?.isNotEmpty ?? false;
 
-  Color get _statusColor {
+  Color _statusColor(BuildContext context) {
     switch (record.statusLabel?.toUpperCase()) {
       case StatusConstants.success:
         return AppColors.success;
@@ -32,8 +32,8 @@ class HistoryTransactionItem extends StatelessWidget {
       case StatusConstants.failed:
       case StatusConstants.error:
         return AppColors.danger;
-      default:
-        return AppColors.subtitleGrey;
+        default:
+          return context.textSecondary;
     }
   }
 
@@ -57,12 +57,12 @@ class HistoryTransactionItem extends StatelessWidget {
         height: 44,
         width: 44,
         decoration: BoxDecoration(
-          color: AppColors.backgroundPale,
+          color: context.avatarBg,
           borderRadius: .circular(12),
         ),
         child: Icon(
           _hasAmount ? _directionIcon : Icons.receipt_long_outlined,
-          color: _hasAmount ? _statusColor : AppColors.subtitleGrey,
+          color: _hasAmount ? _statusColor(context) : context.textSecondary,
           size: 18,
         ),
       ),
@@ -70,11 +70,11 @@ class HistoryTransactionItem extends StatelessWidget {
         record.formName ?? record.activityName ?? '',
         maxLines: 2,
         overflow: .ellipsis,
-        style: AppTypography.formLabels,
+        style: context.formLabels,
       ),
       subtitle: Text(
         record.receiptDateTime ?? record.receiptDate ?? '',
-        style: AppTypography.caption,
+        style: context.caption,
       ),
       trailing: Column(
         mainAxisSize: .min,
@@ -84,12 +84,12 @@ class HistoryTransactionItem extends StatelessWidget {
           if (_hasAmount)
             Text(
               record.amount ?? '',
-              style: AppTypography.captionSemibold,
+              style: context.captionSemibold,
             ),
           const SizedBox(height: 4),
           Text(
             record.statusLabel ?? '',
-            style: AppTypography.caption.copyWith(color: _statusColor),
+            style: context.caption.copyWith(color: _statusColor(context)),
           ),
         ],
       ),

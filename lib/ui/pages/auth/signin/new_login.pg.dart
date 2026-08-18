@@ -22,6 +22,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/phone.util.dart';
 import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -159,8 +160,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
         subtitleWidget: Row(
           children: [
             Text(
-              'Don’t have an account?',
-              style: AppTypography.smallDetails,
+              'Don\'t have an account?',
+              style: context.smallDetails,
             ),
             TextButton(
               style: TextButton.styleFrom(
@@ -205,14 +206,16 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                             ),
                             TextSpan(
                               text: AppState.currentUser?.user?.name ?? '',
-                              style: AppTypography.p1Bold,
+                              style: AppTypography.p1Bold.copyWith(
+                                color: context.textPrimary,
+                              ),
                             ),
                             TextSpan(
                               text: '. \nEnter your password to continue.',
                             ),
                           ],
                           style: AppTypography.p1.copyWith(
-                            // color: AppColors.black,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),
@@ -274,7 +277,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                         Text(
                           'Biometric Login',
                           style: AppTypography.smallDetails.copyWith(
-                            color: AppColors.black,
+                            color: context.textPrimary,
                           ),
                         ),
                       ],
@@ -291,7 +294,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                     child: Text(
                       'Forgot Password ?',
                       style: AppTypography.smallDetails.copyWith(
-                        color: AppColors.black,
+                        color: context.textPrimary,
                       ),
                     ),
                   ),
@@ -317,7 +320,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
     FocusScope.of(context).unfocus();
 
     if (_phoneNumberController.text.trim() ==
-        AppState.currentUser?.user?.shortName?.replaceAll('233', '0')) {
+        AppState.currentUser?.user?.shortName?.toLocalPhone) {
       existingLoginEvent = context.dispatchProcess(
         ExistingLoginAction(
           payload: ExistingLoginActionPayload(

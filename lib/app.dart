@@ -71,7 +71,7 @@ class BigPayApp extends StatelessWidget {
                             enabled && (password?.isNotEmpty ?? false);
                         target = biometricReady
                             ? BiometricLoginPage.route.path
-                            : NewLoginPage.route.path;
+                            : ExistingDeviceLoginPage.route.path;
                       }
 
                       AppRouter.router.go(target, extra: snapshot.data);
@@ -116,8 +116,10 @@ class BigPayApp extends StatelessWidget {
             event: () => LogoutAction.event,
             listener: (context, snapshot) {
               if (snapshot.isSuccessful) {
+                // The device is still known after logout — return to the
+                // existing-device unlock screen, not new-device sign-in.
                 AppRouter.router.go(
-                  NewLoginPage.route.path,
+                  ExistingDeviceLoginPage.route.path,
                 );
               }
             },
@@ -133,11 +135,18 @@ class BigPayApp extends StatelessWidget {
             },
           ),
         ],
-        child: MaterialApp.router(
-          title: 'BigPay',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          routerConfig: AppRouter.router,
+        child: ValueListenableBuilder<ThemeMode>(
+          valueListenable: AppState.themeNotifier,
+          builder: (context, themeMode, _) {
+            return MaterialApp.router(
+              title: 'BigPay',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: themeMode,
+              routerConfig: AppRouter.router,
+            );
+          },
         ),
       ),
     );

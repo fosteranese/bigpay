@@ -94,7 +94,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
       height: isActive ? activeSize : size,
       width: isActive ? activeSize : size,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.white : AppColors.flora,
+        color: isActive ? context.cardBg : context.textTertiary,
         borderRadius: .all(
           .circular(size),
         ),
@@ -182,7 +182,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                                 Text(
                                   item.description ?? '',
                                   style: AppTypography.smallDetails.copyWith(
-                                    color: AppColors.white,
+                                    color: context.cardBg,
                                   ),
                                 ),
                               ],
@@ -200,8 +200,8 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                             end: .bottomCenter,
                             colors: [
                               Colors.transparent,
-                              AppColors.black.withAlpha(125),
-                              AppColors.black.withAlpha(240),
+                              context.textPrimary.withAlpha(125),
+                              context.textPrimary.withAlpha(240),
                             ],
                           ),
                         ),
@@ -243,7 +243,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                             TextSpan(
                               text: 'Already have an Account? ',
                               style: AppTypography.smallDetails.copyWith(
-                                color: AppColors.offWhite,
+                                color: context.divider,
                               ),
                             ),
                             TextSpan(

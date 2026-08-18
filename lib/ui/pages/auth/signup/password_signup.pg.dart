@@ -81,7 +81,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
             const SizedBox(height: 25),
             Text(
               'Password must be at least 6 characters and include letters, numbers, and special characters (e.g. !\$@%).',
-              style: AppTypography.caption,
+              style: context.caption,
               textAlign: .center,
             ),
           ],

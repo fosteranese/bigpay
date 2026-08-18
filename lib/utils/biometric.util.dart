@@ -2,6 +2,10 @@ import 'package:local_auth/local_auth.dart';
 
 import 'package:bigpay/utils/app_state.util.dart';
 
+/// Outcome of a biometric prompt — lets callers tell a user cancel/failure
+/// apart from the device having no biometrics set up.
+enum BiometricResult { success, failed, unavailable }
+
 /// Device biometrics plus the persisted "biometric enabled" settings.
 ///
 /// The flags and the saved PIN live in [AppState.db] — an encrypted Hive box —
@@ -17,30 +21,43 @@ class BiometricUtil {
   static const _pinKey = 'biometric-pin';
   static const _passwordKey = 'biometric-password';
 
-  /// Whether the device has usable, enrolled biometric hardware.
+  /// Whether the device can authenticate at all. Lenient (OR) — the real gate
+  /// is [authenticate], which reports whether biometrics are actually enrolled.
   static Future<bool> get isAvailable async {
     try {
-      final supported = await _auth.isDeviceSupported();
-      final canCheck = await _auth.canCheckBiometrics;
-      return supported && canCheck;
+      return await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
     } catch (_) {
       return false;
     }
   }
 
-  /// Prompts the device biometric (Face ID / fingerprint). Returns true only
-  /// when the user authenticates successfully.
-  static Future<bool> authenticate(String reason) async {
+  /// Prompts the device biometric (Face ID / fingerprint).
+  ///
+  /// Returns [BiometricResult.success] when the user authenticates,
+  /// [BiometricResult.unavailable] when the device has no biometrics set up
+  /// (so the caller can tell them to enrol), and [BiometricResult.failed] for a
+  /// cancel or a mismatch. This is the authoritative check — a pre-flight
+  /// `canCheckBiometrics` is unreliable and wrongly blocks enrolled devices.
+  static Future<BiometricResult> authenticate(String reason) async {
     try {
-      return await _auth.authenticate(
+      final ok = await _auth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
-          biometricOnly: true,
-          stickyAuth: true,
-        ),
+        biometricOnly: true,
+        sensitiveTransaction: true,
       );
+      return ok ? BiometricResult.success : BiometricResult.failed;
+    } on LocalAuthException catch (e) {
+      switch (e.code) {
+        case LocalAuthExceptionCode.noCredentialsSet:
+        case LocalAuthExceptionCode.noBiometricsEnrolled:
+        case LocalAuthExceptionCode.noBiometricHardware:
+        case LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
+          return BiometricResult.unavailable;
+        default:
+          return BiometricResult.failed;
+      }
     } catch (_) {
-      return false;
+      return BiometricResult.failed;
     }
   }
 

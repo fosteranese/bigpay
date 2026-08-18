@@ -155,7 +155,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               mainAxisAlignment: .center,
               crossAxisAlignment: .center,
               children: [
-                Icon(Icons.timer, size: 20, color: AppColors.flora),
+                Icon(Icons.timer, size: 20, color: context.textTertiary),
                 const SizedBox(width: 2),
                 Text(
                   'Our team typically responds within 2 hours.',

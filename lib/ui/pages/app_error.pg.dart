@@ -68,7 +68,7 @@ class AppErrorPage extends StatelessWidget {
                 error.message,
                 textAlign: .center,
                 style: AppTypography.smallDetails.copyWith(
-                  color: AppColors.black,
+                  color: context.textPrimary,
                 ),
               ),
             ],

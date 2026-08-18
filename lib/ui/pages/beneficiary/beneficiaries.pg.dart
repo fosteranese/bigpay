@@ -9,6 +9,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/beneficiary/add_beneficiary.pg.dart';
 import 'package:bigpay/ui/pages/beneficiary/beneficiary_details.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -91,7 +92,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         margin: const .all(20),
         padding: const .all(20),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardBg,
           borderRadius: .circular(16),
         ),
         child: Column(
@@ -100,12 +101,12 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
           children: [
             Text(
               'Remove beneficiary',
-              style: AppTypography.header3,
+              style: context.header3,
             ),
             const SizedBox(height: 8),
             Text(
               'Remove ${payee.displayName} from your beneficiaries?',
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
             const SizedBox(height: 20),
             FormButton(
@@ -116,7 +117,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
             const SizedBox(height: 10),
             TextButton(
               onPressed: () => AppRouter.router.pop(false),
-              child: Text('Cancel', style: AppTypography.formLabels),
+              child: Text('Cancel', style: context.formLabels),
             ),
           ],
         ),
@@ -156,8 +157,23 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         }
       },
       child: MainLayout(
+        showBackBtn: true,
         bottomSize: 129,
         title: 'Beneficiaries',
+        actions: SizedBox(
+          width: 110,
+          child: FormButton(
+            padding: .zero,
+            height: 35,
+            labelSize: 13,
+            onPressed: () =>
+                AppRouter.router.push(AddBeneficiaryPage.route.path),
+            text: 'Add New',
+            icon: Icons.add,
+            buttonIconAlignment: .left,
+            iconSize: 16,
+          ),
+        ),
         subtitleWidget: Container(
           padding: .only(top: 20),
           child: FormInput(
@@ -227,13 +243,13 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         ),
         leading: CircleAvatar(
           radius: 21,
-          backgroundColor: AppColors.tintShade3,
-          child: Text(_initials(name), style: AppTypography.caption),
+          backgroundColor: context.avatarBg,
+          child: Text(_initials(name), style: context.caption),
         ),
-        title: Text(name, style: AppTypography.p1Medium),
+        title: Text(name, style: context.p1Medium),
         subtitle: subtitle.isEmpty
             ? null
-            : Text(subtitle, style: AppTypography.smallDetails),
+            : Text(subtitle, style: context.smallDetails),
         trailing: Icon(Icons.chevron_right_outlined),
       ),
     );
@@ -246,7 +262,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         child: Text(
           'No beneficiaries match "$_query"',
           textAlign: .center,
-          style: AppTypography.smallDetails,
+          style: context.smallDetails,
         ),
       ),
     );
@@ -265,10 +281,10 @@ class EmptyBeneficiaries extends StatelessWidget {
       children: [
         const Spacer(),
         SvgPicture.asset('assets/img/empty-wallet.svg'),
-        Text('No beneficiary yet', style: AppTypography.header3),
+        Text('No beneficiary yet', style: context.header3),
         Text(
           'Add beneficiaries to see them here',
-          style: AppTypography.smallDetails,
+          style: context.smallDetails,
         ),
         const Spacer(flex: 4),
       ],

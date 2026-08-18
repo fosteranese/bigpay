@@ -8,6 +8,7 @@ import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
+
 class InfoKycPage extends StatefulWidget {
   const InfoKycPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
@@ -46,7 +47,7 @@ class _InfoKycPageState extends State<InfoKycPage> {
             child: Text(
               'Take a Quick Selfie',
               textAlign: .center,
-              style: AppTypography.display2,
+              style: context.display2,
             ),
           ),
           const SizedBox(height: 10),
@@ -57,7 +58,7 @@ class _InfoKycPageState extends State<InfoKycPage> {
             child: Text(
               'We will match your photo against the National Identification Authority (NIA) database to verify it\'s really you',
               textAlign: .center,
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
           ),
           const SizedBox(height: 20),
@@ -95,18 +96,18 @@ class InfoItem extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: .circular(12),
         side: .new(
-          color: AppColors.inactiveBorder,
+          color: context.border,
         ),
       ),
       leading: SvgPicture.asset(icon),
       title: Text(
         title,
-        style: AppTypography.header3,
+        style: context.header3,
       ),
       subtitle: Text(
         subtitle,
         // overflow: .ellipsis,
-        style: AppTypography.smallDetails,
+        style: context.smallDetails,
       ),
     );
   }

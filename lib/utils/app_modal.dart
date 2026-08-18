@@ -31,7 +31,7 @@ class AppModal {
         margin: const .all(20),
         padding: padding,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardBg,
           borderRadius: .circular(16),
         ),
         child: SingleChildScrollView(
@@ -46,7 +46,7 @@ class AppModal {
                   Expanded(
                     child: Text(
                       label,
-                      style: AppTypography.header1,
+                      style: context.header1,
                     ),
                   ),
                   ...actions,
@@ -55,7 +55,7 @@ class AppModal {
                     style: IconButton.styleFrom(
                       alignment: .center,
                       tapTargetSize: .shrinkWrap,
-                      backgroundColor: AppColors.offWhite,
+                      backgroundColor: context.divider,
                       fixedSize: Size(35, 35),
                       minimumSize: Size(35, 35),
                       maximumSize: Size(35, 35),
@@ -66,7 +66,7 @@ class AppModal {
                     icon: Icon(
                       Icons.close,
                       size: 17,
-                      color: AppColors.black,
+                      color: context.textPrimary,
                     ),
                   ),
                 ],

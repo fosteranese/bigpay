@@ -10,7 +10,7 @@ class DashboardLayout extends StatefulWidget {
     super.key,
     this.children,
     this.isDashboard = false,
-    this.backgroundColor = const Color(0xFFF8F8F8),
+    this.backgroundColor,
     this.builder,
     this.title,
     this.balance,
@@ -20,7 +20,7 @@ class DashboardLayout extends StatefulWidget {
   });
   final List<Widget>? children;
   final bool isDashboard;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final List<Widget> Function(double blur, double alpha)? builder;
 
   /// The wallet's display title — shown in the app bar, and (for a non-virtual
@@ -64,6 +64,9 @@ class _DashboardLayoutState extends State<DashboardLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = widget.backgroundColor ?? context.cardBg;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
         alignment: .topCenter,
@@ -71,12 +74,12 @@ class _DashboardLayoutState extends State<DashboardLayout> {
 
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment(-0.11, -1.0), // Calculates the 176.94° angle
+            begin: Alignment(-0.11, -1.0),
             end: Alignment(0.11, 1.0),
             colors: [
               Color(0xFF385BA9),
-              Color(0xFFC5D8FF),
-              widget.backgroundColor,
+              if (isDark) Color(0xFF1E2D5A) else Color(0xFFC5D8FF),
+              bgColor,
             ],
             stops: [
               0.0829, // 8.29%
@@ -105,12 +108,12 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                       padding: const .only(left: 15),
                       child: CircleAvatar(
                         radius: 18,
-                        backgroundColor: AppColors.tintShade3,
+                        backgroundColor: context.avatarBg,
                       ),
                     )
                   : IconButton.filled(
                       style: IconButton.styleFrom(
-                        backgroundColor: AppColors.white,
+                        backgroundColor: context.cardBg,
                         fixedSize: Size(28, 28),
                       ),
                       onPressed: widget.onBack ?? () {},
@@ -128,7 +131,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                         Text(
                           'Welcome Back',
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.fade,
+                            color: context.divider,
                           ),
                         ),
                         Text(

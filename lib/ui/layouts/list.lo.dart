@@ -67,14 +67,14 @@ class _ListLayoutState extends State<ListLayout> {
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: .topCenter,
           end: .bottomCenter,
           stops: [0.0, 0.3077],
           colors: [
-            AppColors.background,
-            AppColors.white,
+            context.scaffoldBg,
+            context.cardBg,
           ],
         ),
       ),
@@ -104,13 +104,13 @@ class _ListLayoutState extends State<ListLayout> {
         title: (widget.miniTitle?.isNotEmpty ?? false)
             ? Text(
                 widget.miniTitle!,
-                style: AppTypography.p1,
+                style: context.p1,
               )
             : null,
         leading: widget.showBackBtn
             ? IconButton.filled(
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.white,
+                  backgroundColor: context.cardBg,
                   fixedSize: Size(28, 28),
                 ),
                 onPressed: () {},
@@ -132,8 +132,8 @@ class _ListLayoutState extends State<ListLayout> {
               ),
               color:
                   widget.appBarColor ??
-                  AppColors.white.withValues(
-                    alpha: 0.15 * _blurOpacity,
+                  context.appBarOverlay.withValues(
+                    alpha: _blurOpacity,
                   ),
             ),
           ),
@@ -142,7 +142,6 @@ class _ListLayoutState extends State<ListLayout> {
 
       body: Container(
         color: widget.bodyColor,
-        // padding: const .all(20),
         child: widget.child(_scrollController),
       ),
 

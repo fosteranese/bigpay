@@ -24,7 +24,7 @@ class ComplaintBubble extends StatelessWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: fromUser ? AppColors.primary : AppColors.white,
+          color: fromUser ? AppColors.primary : context.cardBg,
           borderRadius: .only(
             topLeft: const .circular(14),
             topRight: const .circular(14),
@@ -49,7 +49,7 @@ class ComplaintBubble extends StatelessWidget {
             Text(
               message.message ?? '',
               style: AppTypography.smallDetails.copyWith(
-                color: fromUser ? AppColors.white : AppColors.black,
+                color: fromUser ? AppColors.white : context.textPrimary,
               ),
             ),
             if (message.date?.isNotEmpty ?? false)
@@ -61,7 +61,7 @@ class ComplaintBubble extends StatelessWidget {
                     fontSize: 10,
                     color: fromUser
                         ? AppColors.white.withValues(alpha: 0.7)
-                        : AppColors.subtitleGrey,
+                        : context.textSecondary,
                   ),
                 ),
               ),

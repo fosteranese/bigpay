@@ -38,13 +38,13 @@ class _OtpMoMoPageState extends State<OtpMoMoPage> {
             'Enter OTP',
             textAlign: .center,
             style: AppTypography.display1.copyWith(
-              color: AppColors.black,
+              color: context.textPrimary,
             ),
           ),
           Text(
             'Enter the 6-digit code sent to +233********219',
             textAlign: .center,
-            style: AppTypography.p1,
+            style: context.p1,
           ),
         ],
       ),

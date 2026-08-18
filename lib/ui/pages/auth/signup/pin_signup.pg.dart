@@ -70,7 +70,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
             context,
             successIcon: CircleAvatar(
               radius: 70,
-              backgroundColor: AppColors.tintShade3,
+              backgroundColor: context.avatarBg,
               backgroundImage: AssetImage(JpgImages.avatar),
             ),
             title: 'Welcome aboard!',

@@ -1,3 +1,4 @@
+import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:go_router/go_router.dart';
@@ -21,9 +22,14 @@ GoRoute get processFlowRoute => GoRoute(
         return ServicePage(
           activityDatum: payload['activityDatum'] as ActivityDatum,
           category: payload['category'] as GeneralFlowCategory,
+          amDoing: payload['amDoing'] as AmDoing? ?? AmDoing.transaction,
         );
       },
       nested: true,
+      // Full-screen and consistent with the form/summary that follow, so the
+      // whole flow stays on the root navigator — otherwise pushing it from a
+      // root route (the add-beneficiary flow) can't resolve the shell branch.
+      rootNavigator: true,
     ),
     ServiceFormPage.route.toGoRouteWithState(
       (state) {
@@ -32,6 +38,7 @@ GoRoute get processFlowRoute => GoRoute(
           activityDatum: payload['activityDatum'],
           category: payload['category'],
           formData: payload['formData'],
+          amDoing: payload['amDoing'] as AmDoing? ?? AmDoing.transaction,
         );
       },
       nested: true,
@@ -50,6 +57,7 @@ GoRoute get processFlowRoute => GoRoute(
           formData: payload?['formData'],
           activityDatum: payload?['activityDatum'],
           category: payload?['category'],
+          amDoing: payload?['amDoing'] as AmDoing? ?? AmDoing.transaction,
         );
       },
       nested: true,

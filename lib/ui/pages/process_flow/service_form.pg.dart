@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/form_verification_response.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
@@ -22,6 +23,7 @@ class ServiceFormPage extends StatefulWidget {
     required this.activityDatum,
     required this.category,
     required this.formData,
+    this.amDoing = AmDoing.transaction,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/form',
@@ -29,6 +31,7 @@ class ServiceFormPage extends StatefulWidget {
   final ActivityDatum activityDatum;
   final GeneralFlowCategory category;
   final GeneralFlowFormData formData;
+  final AmDoing amDoing;
 
   @override
   State<ServiceFormPage> createState() => _ServiceFormPageState();
@@ -172,6 +175,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
               'activityDatum': widget.activityDatum,
               'category': widget.category,
               'formData': widget.formData,
+              'amDoing': widget.amDoing,
               'verification': snapshot.data,
             },
           );

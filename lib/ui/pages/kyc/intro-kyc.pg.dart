@@ -28,7 +28,7 @@ class _IntroKycPageState extends State<IntroKycPage> {
             'Let’s get you verified',
             textAlign: .center,
             style: AppTypography.display1.copyWith(
-              color: AppColors.black,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 10),

@@ -9,11 +9,12 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/auth/signin/new_login.pg.dart';
+import 'package:bigpay/ui/pages/auth/signin/existing_login.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/phone.util.dart';
 import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -50,11 +51,11 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
       return;
     }
 
-    final passed = await BiometricUtil.authenticate('Unlock BigPay');
-    if (!mounted || !passed) return;
+    final result = await BiometricUtil.authenticate('Unlock BigPay');
+    if (!mounted || result != BiometricResult.success) return;
 
     final phone =
-        AppState.currentUser?.user?.shortName?.replaceAll('233', '0') ?? '';
+        AppState.currentUser?.user?.shortName?.toLocalPhone ?? '';
 
     setState(() {
       _loginEvent = context.dispatchProcess(
@@ -69,7 +70,9 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
   }
 
   void _usePassword() {
-    AppRouter.router.go(NewLoginPage.route.path);
+    // A device with biometrics set up is an existing device — fall back to the
+    // existing-device password screen, not new-device sign-in.
+    AppRouter.router.go(ExistingDeviceLoginPage.route.path);
   }
 
   @override
@@ -124,7 +127,7 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
                 'Login with Password',
                 style: AppTypography.buttons.copyWith(
                   fontSize: 14,
-                  color: AppColors.black,
+                  color: context.textPrimary,
                   decoration: .underline,
                 ),
               ),

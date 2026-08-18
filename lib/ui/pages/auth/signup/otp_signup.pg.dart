@@ -109,13 +109,13 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
               'Enter OTP',
               textAlign: .center,
               style: AppTypography.display1.copyWith(
-                color: AppColors.black,
+                color: context.textPrimary,
               ),
             ),
             Text(
               _data.otpData?.message ?? '',
               textAlign: .center,
-              style: AppTypography.p1,
+              style: context.p1,
             ),
           ],
         ),

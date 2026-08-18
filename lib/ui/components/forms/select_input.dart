@@ -2,6 +2,7 @@ import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -97,11 +98,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
         borderRadius: .circular(20),
       ),
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      builder: (ctx) => Container(
         margin: const .all(20),
         padding: const .all(10),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: ctx.cardBg,
           borderRadius: .circular(16),
         ),
         child: SingleChildScrollView(
@@ -115,24 +116,24 @@ class _FormSelectInputState extends State<FormSelectInput> {
                 children: [
                   Text(
                     widget.label ?? 'Select',
-                    style: AppTypography.header1,
+                      style: ctx.header1,
                   ),
                   IconButton.filled(
                     style: IconButton.styleFrom(
                       alignment: .center,
                       tapTargetSize: .shrinkWrap,
-                      backgroundColor: AppColors.offWhite,
+                      backgroundColor: ctx.divider,
                       fixedSize: Size(35, 35),
                       minimumSize: Size(35, 35),
                       maximumSize: Size(35, 35),
                     ),
                     onPressed: () {
-                      context.pop();
+                      ctx.pop();
                     },
                     icon: Icon(
                       Icons.close,
                       size: 17,
-                      color: AppColors.black,
+                      color: ctx.textPrimary,
                     ),
                   ),
                 ],
@@ -160,10 +161,10 @@ class _FormSelectInputState extends State<FormSelectInput> {
           top: .circular(20),
         ),
       ),
-      builder: (_) => Container(
+      builder: (ctx) => Container(
         margin: const .symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: ctx.cardBg,
           borderRadius: .circular(20),
         ),
         child: DraggableScrollableSheet(
@@ -181,24 +182,24 @@ class _FormSelectInputState extends State<FormSelectInput> {
                   children: [
                     Text(
                       widget.label ?? 'Select',
-                      style: AppTypography.header1,
+                    style: ctx.header1,
                     ),
                     IconButton.filled(
                       style: IconButton.styleFrom(
                         alignment: .center,
                         tapTargetSize: .shrinkWrap,
-                        backgroundColor: AppColors.offWhite,
+                        backgroundColor: ctx.divider,
                         fixedSize: Size(35, 35),
                         minimumSize: Size(35, 35),
                         maximumSize: Size(35, 35),
                       ),
                       onPressed: () {
-                        context.pop();
+                        ctx.pop();
                       },
                       icon: Icon(
                         Icons.close,
                         size: 17,
-                        color: AppColors.black,
+                        color: ctx.textPrimary,
                       ),
                     ),
                   ],
@@ -214,12 +215,12 @@ class _FormSelectInputState extends State<FormSelectInput> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: 'Search...',
-                        hintStyle: AppTypography.caption,
+                        hintStyle: ctx.caption,
                         prefixIcon: const Icon(Icons.search),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: .circular(10),
-                          borderSide: const BorderSide(
-                            color: AppColors.tertiary,
+                          borderSide: BorderSide(
+                            color: ctx.border,
                             style: .solid,
                           ),
                         ),
@@ -232,7 +233,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
                           ),
                         ),
                         filled: true,
-                        fillColor: AppColors.offWhite,
+                        fillColor: ctx.divider,
                       ),
                       onChanged: _onSearch,
                     ),
@@ -273,11 +274,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: AppColors.flora),
+          Icon(icon, size: 48, color: context.textTertiary),
           const SizedBox(height: 12),
           Text(
             message,
-            style: AppTypography.smallDetails,
+            style: context.smallDetails,
             textAlign: TextAlign.center,
           ),
         ],
@@ -292,7 +293,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
       decoration: BoxDecoration(
         borderRadius: .circular(10),
         border: .all(
-          color: AppColors.tertiary,
+          color: context.border,
           width: 1,
         ),
       ),

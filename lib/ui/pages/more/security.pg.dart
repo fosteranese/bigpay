@@ -1,3 +1,4 @@
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
@@ -160,9 +161,14 @@ class _SecurityPageState extends State<SecurityPage> {
   /// just re-verifies the PIN.
   Future<void> _toggle({required bool isLogin, required bool enabling}) async {
     if (enabling) {
-      final available = await BiometricUtil.isAvailable;
+      final result = await BiometricUtil.authenticate(
+        'Confirm to enable biometric access',
+      );
       if (!mounted) return;
-      if (!available) {
+
+      // Only block when the device genuinely has no biometrics enrolled — a
+      // cancel/mismatch just aborts silently.
+      if (result == BiometricResult.unavailable) {
         MessageUtil.displayErrorDialog(
           context,
           title: 'Biometrics Unavailable',
@@ -170,11 +176,7 @@ class _SecurityPageState extends State<SecurityPage> {
         );
         return;
       }
-
-      final passed = await BiometricUtil.authenticate(
-        'Confirm to enable biometric access',
-      );
-      if (!mounted || !passed) return;
+      if (result != BiometricResult.success) return;
     }
 
     _pendingEnable = enabling;
@@ -241,9 +243,14 @@ class _SecurityPageState extends State<SecurityPage> {
       await BiometricUtil.setTransactionEnabled(enable);
     }
 
+    // Post-toggle state — the `_loginEnabled`/`_transactionEnabled` fields
+    // aren't updated until the setState below, so compute the new values here.
+    final loginEnabled = isLogin ? enable : _loginEnabled;
+    final transactionEnabled = isLogin ? _transactionEnabled : enable;
+
     if (enable && pin != null) {
       await BiometricUtil.savePin(pin);
-    } else if (!_loginEnabled && !_transactionEnabled) {
+    } else if (!loginEnabled && !transactionEnabled) {
       // Both settings are now off — drop the stored PIN.
       await BiometricUtil.savePin('');
     }
@@ -302,6 +309,13 @@ class _SecurityPageState extends State<SecurityPage> {
                   )
                 else
                   for (final form in forms) _buildFormItem(form),
+                Divider(
+                  color: context.divider,
+                  thickness: 4,
+                  indent: 10,
+                  endIndent: 10,
+                  height: 30,
+                ),
                 _biometricSwitch(
                   title: 'Sign in with Biometrics',
                   value: _loginEnabled,

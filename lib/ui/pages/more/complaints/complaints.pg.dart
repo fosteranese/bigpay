@@ -11,6 +11,7 @@ import 'package:bigpay/ui/pages/more/complaints/complaint_detail.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/date.util.dart';
 
 /// The user's complaints, from `MyAccount/myComplaints`. Tapping one opens its
 /// chat-style trail; the button starts a new complaint on the feedback form.
@@ -61,7 +62,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
     );
   }
 
-  Color _statusColor(String? status) {
+  Color _statusColor(BuildContext context, String? status) {
     switch (status?.toLowerCase()) {
       case 'resolved':
       case 'closed':
@@ -73,20 +74,28 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
       case 'processing':
         return AppColors.pending;
       default:
-        return AppColors.subtitleGrey;
+        return context.textSecondary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      bottomSize: 72,
       title: 'Complaints',
-      bottomNav: FormButton(
-        onPressed: () => AppRouter.router.push(FeedbackPage.route.path),
-        text: 'New Complaint',
+      bottomSize: 60,
+      actions: SizedBox(
+        width: 150,
+        child: FormButton(
+          height: 35,
+          labelSize: 13,
+          onPressed: () => AppRouter.router.push(FeedbackPage.route.path),
+          text: 'New Complaint',
+          icon: Icons.add,
+          buttonIconAlignment: .left,
+          iconSize: 16,
+        ),
       ),
-      child: ProcessConsumer<List<Complaint>>(
+      builder: (scrollController) => ProcessConsumer<List<Complaint>>(
         event: () => _event,
         listener: (context, snapshot) {
           if (snapshot.hasData) {
@@ -95,89 +104,115 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
         },
         builder: (context, snapshot) {
           if (_complaints == null && snapshot.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return SliverFillRemaining(
+              hasScrollBody: false,
+              child: const Center(child: CircularProgressIndicator()),
+            );
           }
 
           final complaints = _complaints ?? const [];
           if (complaints.isEmpty) {
-            return _buildEmptyState();
+            return SliverFillRemaining(
+              hasScrollBody: false,
+              child: _buildEmptyState(),
+            );
           }
 
-          return Column(
-            children: [
-              for (final complaint in complaints) _buildCard(complaint),
-            ],
+          return SliverPadding(
+            padding: const .symmetric(vertical: 10),
+            sliver: SliverList.separated(
+              itemCount: complaints.length,
+              separatorBuilder: (_, _) => Divider(
+                height: 1,
+                color: context.divider,
+                indent: 20,
+                endIndent: 20,
+              ),
+              itemBuilder: (context, index) => _buildItem(complaints[index]),
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildCard(Complaint complaint) {
-    return Padding(
-      padding: const .only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: .circular(14),
+  Widget _buildItem(Complaint complaint) {
+    final color = _statusColor(context, complaint.statusLabel);
+
+    return ListTile(
+      onTap: () => AppRouter.router.push(
+        ComplaintDetailPage.route.path,
+        extra: complaint,
+      ),
+      contentPadding: const .symmetric(horizontal: 20, vertical: 4),
+      leading: CircleAvatar(
+        radius: 21,
+        backgroundColor: context.avatarBg,
+        child: Icon(
+          Icons.forum_outlined,
+          color: color,
+          size: 20,
         ),
-        child: ListTile(
-          contentPadding: const .symmetric(horizontal: 16, vertical: 6),
-          onTap: () => AppRouter.router.push(
-            ComplaintDetailPage.route.path,
-            extra: complaint,
-          ),
-          title: Text(
-            complaint.subject ?? complaint.category ?? 'Complaint',
-            maxLines: 1,
-            overflow: .ellipsis,
-            style: AppTypography.header4,
-          ),
-          subtitle: Column(
-            crossAxisAlignment: .start,
-            children: [
-              if (complaint.lastMessage?.isNotEmpty ?? false)
-                Padding(
-                  padding: const .only(top: 4),
-                  child: Text(
-                    complaint.lastMessage!,
-                    maxLines: 1,
-                    overflow: .ellipsis,
-                    style: AppTypography.caption,
-                  ),
-                ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  if (complaint.statusLabel?.isNotEmpty ?? false) ...[
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _statusColor(complaint.statusLabel),
-                        shape: .circle,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      complaint.statusLabel!,
-                      style: AppTypography.caption.copyWith(
-                        color: _statusColor(complaint.statusLabel),
-                      ),
-                    ),
-                    const Spacer(),
-                  ] else
-                    const Spacer(),
-                  if (complaint.date?.isNotEmpty ?? false)
-                    Text(
-                      complaint.date!,
-                      style: AppTypography.caption,
-                    ),
-                ],
+      ),
+      title: Text(
+        complaint.subject ?? complaint.category ?? 'Complaint',
+        maxLines: 1,
+        overflow: .ellipsis,
+        style: context.p1,
+      ),
+      subtitle: Padding(
+        padding: const .only(top: 4),
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            Text(
+              DateUtil.format(complaint.date),
+              style: context.smallDetails,
+            ),
+            if (complaint.lastMessage?.isNotEmpty ?? false) ...[
+              const SizedBox(height: 2),
+              Text(
+                complaint.lastMessage!,
+                maxLines: 1,
+                overflow: .ellipsis,
+                style: context.caption,
               ),
             ],
-          ),
+          ],
         ),
+      ),
+      trailing: Row(
+        mainAxisSize: .min,
+        children: [
+          Column(
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
+            crossAxisAlignment: .end,
+            children: [
+              if (complaint.reference?.isNotEmpty ?? false)
+                Text(
+                  complaint.reference!,
+                  style: context.small,
+                ),
+              if (complaint.statusLabel?.isNotEmpty ?? false) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const .symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: .circular(6),
+                  ),
+                  child: Text(
+                    complaint.statusLabel!,
+                    style: context.smallBold.copyWith(color: color),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(width: 8),
+          Icon(Icons.chevron_right_outlined),
+        ],
       ),
     );
   }
@@ -192,19 +227,19 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
             Icon(
               Icons.forum_outlined,
               size: 56,
-              color: AppColors.subtitleGrey,
+              color: context.textSecondary,
             ),
             const SizedBox(height: 16),
             Text(
               'No complaints yet',
               textAlign: .center,
-              style: AppTypography.p1Medium,
+              style: context.p1Medium,
             ),
             const SizedBox(height: 8),
             Text(
               'Raised complaints and their replies will appear here.',
               textAlign: .center,
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
           ],
         ),

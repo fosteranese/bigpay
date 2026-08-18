@@ -190,7 +190,7 @@ class WalletListItem extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: .circular(10),
         border: .all(
-          color: AppColors.tertiary,
+          color: context.border,
         ),
       ),
       child: Dismissible(
@@ -206,7 +206,7 @@ class WalletListItem extends StatelessWidget {
             color: AppColors.danger,
             borderRadius: .circular(10),
             border: .all(
-              color: AppColors.tertiary,
+              color: context.border,
             ),
           ),
           child: SvgPicture.asset('assets/img/trash.svg'),
@@ -218,7 +218,7 @@ class WalletListItem extends StatelessWidget {
             color: AppColors.danger,
             borderRadius: .circular(10),
             border: .all(
-              color: AppColors.tertiary,
+              color: context.border,
             ),
           ),
           child: SvgPicture.asset('assets/img/trash.svg'),
@@ -230,7 +230,7 @@ class WalletListItem extends StatelessWidget {
           title: Text(
             'BigPay Virtual Wallet',
             style: AppTypography.caption.copyWith(
-              color: AppColors.black,
+              color: context.textPrimary,
             ),
           ),
           subtitle: Text(

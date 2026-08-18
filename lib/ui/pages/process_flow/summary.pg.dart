@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/form_verification_response.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
@@ -9,11 +10,13 @@ import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
 import 'package:bigpay/models/actions/services/process_request_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -39,6 +42,7 @@ class SummaryPage extends StatefulWidget {
     this.formData,
     this.activityDatum,
     this.category,
+    this.amDoing = AmDoing.transaction,
   });
 
   static PageRouteDefinition route = PageRouteDefinition(
@@ -52,12 +56,19 @@ class SummaryPage extends StatefulWidget {
   final ActivityDatum? activityDatum;
   final GeneralFlowCategory? category;
 
+  /// Whether Continue processes a transaction or saves the form as a
+  /// beneficiary.
+  final AmDoing amDoing;
+
   @override
   State<SummaryPage> createState() => _SummaryPageState();
 }
 
 class _SummaryPageState extends State<SummaryPage> {
   ExecuteProcessEvent? _processEvent;
+  ExecuteProcessEvent? _payeeEvent;
+
+  bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
 
   final _canContinue = ValueNotifier(true);
 
@@ -202,17 +213,28 @@ class _SummaryPageState extends State<SummaryPage> {
     final paymentMode =
         (payload['SourceAccount'] ?? payload['sourceAccount'] ?? '').toString();
 
+    final actionPayload = ProcessRequestActionPayload(
+      activityId: widget.activityDatum?.activity?.activityId,
+      formId: widget.formData?.form?.formId,
+      formData: payload,
+      paymentMode: paymentMode,
+      otp: otp,
+      pin: pin,
+      secretAnswer: secretAnswer,
+    );
+
+    // Same payload either way — a beneficiary is just a saved, unprocessed
+    // request.
+    if (_isAddBeneficiary) {
+      _payeeEvent = context.dispatchProcess(
+        AddPayeeAction(payload: actionPayload),
+      );
+      return;
+    }
+
     _processEvent = context.dispatchProcess(
       ProcessRequestAction(
-        payload: ProcessRequestActionPayload(
-          activityId: widget.activityDatum?.activity?.activityId,
-          formId: widget.formData?.form?.formId,
-          formData: payload,
-          paymentMode: paymentMode,
-          otp: otp,
-          pin: pin,
-          secretAnswer: secretAnswer,
-        ),
+        payload: actionPayload,
         endpointFunc: _processEndpoint,
       ),
     );
@@ -259,46 +281,84 @@ class _SummaryPageState extends State<SummaryPage> {
   Widget build(BuildContext context) {
     final rows = _rows;
 
-    return ProcessListener<RequestResponse>(
-      event: () => _processEvent,
-      listener: (context, snapshot) {
-        if (snapshot.isLoading) {
-          MessageUtil.displayLoading(context);
-          return;
-        } else {
-          MessageUtil.close(context);
-        }
+    return MultiProcessListener(
+      listeners: [
+        ProcessListenerConfig<RequestResponse>(
+          event: () => _processEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
 
-        if (snapshot.isSuccessful) {
-          _processEvent = null;
-          AppRouter.router.push(
-            TransactionDetailsPage.route.path,
-            extra: snapshot.data,
-          );
-          return;
-        }
+            if (snapshot.isSuccessful) {
+              _processEvent = null;
+              AppRouter.router.push(
+                TransactionDetailsPage.route.path,
+                extra: snapshot.data,
+              );
+              return;
+            }
 
-        if (snapshot.hasError) {
-          _processEvent = null;
-          MessageUtil.displayErrorDialog(
-            context,
-            message: snapshot.error!.message,
-          );
-        }
-      },
+            if (snapshot.hasError) {
+              _processEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+        // Add-beneficiary saves the same payload via Payee/addPayee; on success
+        // return to the beneficiaries list.
+        ProcessListenerConfig<bool>(
+          event: () => _payeeEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _payeeEvent = null;
+              MessageUtil.displaySuccessDialog(
+                context,
+                message: snapshot.message ?? 'Beneficiary saved.',
+                onOk: () =>
+                    AppRouter.router.go(BeneficiariesPage.route.path),
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _payeeEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+      ],
       child: MainLayout(
         subtitleWidget: Column(
           children: [
             Text(
-              'Transaction Summary',
+              _isAddBeneficiary ? 'Beneficiary Summary' : 'Transaction Summary',
               textAlign: .center,
-              style: AppTypography.display2,
+              style: context.display2,
             ),
             const SizedBox(height: 10),
             Text(
-              'Kindly confirm the transaction details before you proceed',
+              _isAddBeneficiary
+                  ? 'Confirm the beneficiary details before you save'
+                  : 'Kindly confirm the transaction details before you proceed',
               textAlign: .center,
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
           ],
         ),
@@ -308,7 +368,7 @@ class _SummaryPageState extends State<SummaryPage> {
             return FormButton(
               enabled: canContinue,
               onPressed: _continue,
-              text: 'Continue',
+              text: _isAddBeneficiary ? 'Save Beneficiary' : 'Continue',
             );
           },
         ),
@@ -319,7 +379,7 @@ class _SummaryPageState extends State<SummaryPage> {
             Container(
               padding: .all(20),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: context.cardBg,
                 borderRadius: .circular(12),
               ),
               child: Column(
@@ -330,7 +390,7 @@ class _SummaryPageState extends State<SummaryPage> {
                   for (final (index, (title, value)) in rows.indexed) ...[
                     TransactionDetailsItem(title: title, value: value),
                     if (index != rows.length - 1)
-                      Divider(color: AppColors.offWhite),
+                      Divider(color: context.divider),
                   ],
                 ],
               ),

@@ -57,9 +57,13 @@ final class GetServiceFormDataAction
               .toList() ??
           [];
 
-      final formData =
-          (institutionData['forms'] as List<dynamic>).first
-              as Map<String, dynamic>;
+      final forms = institutionData['forms'] as List<dynamic>?;
+      if (forms == null || forms.isEmpty) {
+        // No form to build — let the UI surface its "unavailable" state
+        // instead of throwing StateError out of the parser.
+        return const GeneralFlowFormData();
+      }
+      final formData = forms.first as Map<String, dynamic>;
       final form = formData['form'] as Map<String, dynamic>;
 
       final fieldData = (formData['fields'] as List<dynamic>).map((
@@ -97,29 +101,31 @@ final class GetServiceFormDataAction
           }).toList(),
         );
       }).toList();
-      fieldData.add(
-        GeneralFlowFieldsDatum(
-          lov: sourceOfPayment,
-          field: GeneralFlowField(
-            formId: fieldData.first.field!.formId,
+      if (fieldData.isNotEmpty) {
+        fieldData.add(
+          GeneralFlowFieldsDatum(
+            lov: sourceOfPayment,
+            field: GeneralFlowField(
+              formId: fieldData.first.field!.formId,
 
-            fieldId: 'SourceAccount',
-            fieldName: 'SourceAccount',
-            fieldCaption: 'Payment Source',
-            defaultValue: '',
-            fieldDataType: FieldDataTypesConst.sourceAccount,
-            fieldMandatory: 1,
-            fieldType: FieldTypesConst.listOfValues,
-            fieldVisible: 1,
-            readOnly: 0,
-            requiredForVerification: 1,
-            isAmount: 0,
-            showOnReceipt: 1,
-            rank: fieldData.first.field!.fieldLength,
-            toolTip: 'Select your preferred payment option',
+              fieldId: 'SourceAccount',
+              fieldName: 'SourceAccount',
+              fieldCaption: 'Payment Source',
+              defaultValue: '',
+              fieldDataType: FieldDataTypesConst.sourceAccount,
+              fieldMandatory: 1,
+              fieldType: FieldTypesConst.listOfValues,
+              fieldVisible: 1,
+              readOnly: 0,
+              requiredForVerification: 1,
+              isAmount: 0,
+              showOnReceipt: 1,
+              rank: fieldData.first.field!.fieldLength,
+              toolTip: 'Select your preferred payment option',
+            ),
           ),
-        ),
-      );
+        );
+      }
       final authMode = (formData['authMode'] as List<dynamic>).map((item) {
         return item as Map<String, dynamic>;
       }).toList();

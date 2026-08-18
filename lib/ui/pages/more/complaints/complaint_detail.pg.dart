@@ -127,7 +127,7 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
               return Center(
                 child: Text(
                   'No messages yet.',
-                  style: AppTypography.smallDetails,
+                  style: context.smallDetails,
                 ),
               );
             }
@@ -163,7 +163,7 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
               style: IconButton.styleFrom(
                 backgroundColor: canSend
                     ? AppColors.primary
-                    : AppColors.subtitleGrey,
+                    : context.textSecondary,
                 fixedSize: const Size(48, 48),
               ),
               onPressed: canSend ? _send : null,

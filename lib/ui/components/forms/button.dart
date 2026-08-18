@@ -57,7 +57,7 @@ class FormButton extends StatelessWidget {
       child: FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor: loading || !enabled
-              ? AppColors.tintShade3
+              ? context.avatarBg
               : backgroundColor,
           padding: padding,
           shape: RoundedRectangleBorder(

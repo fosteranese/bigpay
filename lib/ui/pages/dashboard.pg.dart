@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
@@ -8,6 +6,7 @@ import 'package:bigpay/models/actions/services/get_service_categories_action.dar
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
+import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
@@ -24,6 +23,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/avatar.util.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -66,6 +66,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return MultiProcessListener(
       listeners: [
         ProcessListenerConfig<GeneralFlowCategory>(
@@ -169,8 +170,8 @@ class _DashboardPageState extends State<DashboardPage> {
             end: Alignment(0.11, 1.0),
             colors: [
               Color(0xFF385BA9),
-              Color(0xFFC5D8FF),
-              Color(0xFFF8F8F8),
+              if (isDark) Color(0xFF1E2D5A) else Color(0xFFC5D8FF),
+              isDark ? Color(0xFF11111B) : Color(0xFFF8F8F8),
             ],
             stops: [
               0.0829, // 8.29%
@@ -207,18 +208,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         );
                         return CircleAvatar(
                           radius: 18,
-                          backgroundColor: AppColors.tintShade3,
-                          backgroundImage: MemoryImage(
-                            base64Decode(
-                              AppState.currentUser?.profilePicture ?? '',
-                            ),
+                          backgroundColor: context.avatarBg,
+                          backgroundImage: avatarFromBase64(
+                            AppState.currentUser?.profilePicture,
                           ),
                         );
                       }
 
                       return CircleAvatar(
                         radius: 18,
-                        backgroundColor: AppColors.tintShade3,
+                        backgroundColor: context.avatarBg,
                       );
                     },
                   ),
@@ -231,7 +230,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     Text(
                       'Welcome Back',
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.fade,
+                        color: context.divider,
                       ),
                     ),
                     Text(
@@ -247,7 +246,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     style: IconButton.styleFrom(
                       backgroundColor: AppColors.white20,
                     ),
-                    onPressed: () {},
+                    onPressed: () =>
+                        AppRouter.router.push(NotificationsPage.route.path),
                     icon: SvgPicture.asset('assets/img/new-notification.svg'),
                   ),
                 ],
@@ -287,7 +287,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         padding: const .symmetric(horizontal: 20),
                         child: Text(
                           'Most used services',
-                          style: AppTypography.smallDetailsBold,
+                          style: context.smallDetailsBold,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -320,7 +320,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   child: Text(
                     'Services',
-                    style: AppTypography.header3,
+                    style: context.header3,
                   ),
                 ),
               ),
@@ -399,7 +399,7 @@ class ActionButton extends StatelessWidget {
       child: Container(
         padding: .all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardBg,
           borderRadius: .circular(14),
         ),
         child: Column(
@@ -427,7 +427,7 @@ class ActionButton extends StatelessWidget {
               data.activity?.activityName ?? 'N/A',
               overflow: .ellipsis,
               maxLines: 1,
-              style: AppTypography.header4,
+              style: context.header4,
             ),
             const Spacer(flex: 1),
             Text(
@@ -501,7 +501,7 @@ class FrequentServiceItem extends StatelessWidget {
         margin: .only(left: 10),
         padding: .all(5),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardBg,
           borderRadius: .circular(30),
         ),
         child: Row(
@@ -514,7 +514,7 @@ class FrequentServiceItem extends StatelessWidget {
               // height: 24,
               imageBuilder: (context, imageProvider) {
                 return CircleAvatar(
-                  backgroundColor: AppColors.tintShade3,
+                  backgroundColor: context.avatarBg,
                   backgroundImage: imageProvider,
                 );
               },
@@ -540,7 +540,7 @@ class FrequentServiceItem extends StatelessWidget {
                   data.formName ?? '',
                   textAlign: .start,
                   overflow: .ellipsis,
-                  style: AppTypography.captionSemibold,
+                  style: context.captionSemibold,
                 ),
                 Text(
                   data.activityName ?? '',

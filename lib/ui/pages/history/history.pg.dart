@@ -90,9 +90,9 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return ListLayout(
-      appBarColor: AppColors.white,
+      appBarColor: context.cardBg,
       appBarBottomColor: 5,
-      bodyColor: AppColors.white,
+      bodyColor: context.cardBg,
       miniTitle: 'Transactions',
       bottom: PreferredSize(
         preferredSize: Size(double.maxFinite, 70),
@@ -111,13 +111,13 @@ class _HistoryPageState extends State<HistoryPage> {
               const SizedBox(width: 5),
               IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.white,
+                  backgroundColor: context.cardBg,
                   fixedSize: Size(48, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: .circular(12),
                     side: .new(
                       color: _filterName.isEmpty
-                          ? AppColors.tertiary
+                          ? context.border
                           : AppColors.primary,
                     ),
                   ),
@@ -126,7 +126,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 icon: Icon(
                   Icons.filter_list_outlined,
                   color: _filterName.isEmpty
-                      ? AppColors.black
+                      ? context.textPrimary
                       : AppColors.primary,
                 ),
               ),
@@ -157,7 +157,7 @@ class _HistoryPageState extends State<HistoryPage> {
             itemCount: items.length,
             separatorBuilder: (_, _) => Divider(
               height: 1,
-              color: AppColors.offWhite,
+              color: context.divider,
               indent: 20,
               endIndent: 20,
             ),
@@ -192,19 +192,19 @@ class _HistoryPageState extends State<HistoryPage> {
             Icon(
               Icons.receipt_long_outlined,
               size: 56,
-              color: AppColors.subtitleGrey,
+              color: context.textSecondary,
             ),
             const SizedBox(height: 16),
             Text(
               label,
               textAlign: .center,
-              style: AppTypography.p1Medium,
+              style: context.p1Medium,
             ),
             const SizedBox(height: 8),
             Text(
               'Completed transactions will appear here.',
               textAlign: .center,
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
           ],
         ),
@@ -229,7 +229,7 @@ class _HistoryPageState extends State<HistoryPage> {
             },
             child: Text(
               'Clear Filter',
-              style: AppTypography.formLabels.copyWith(
+              style: context.formLabels.copyWith(
                 decoration: .underline,
               ),
             ),
@@ -242,7 +242,7 @@ class _HistoryPageState extends State<HistoryPage> {
             padding: const .symmetric(vertical: 20),
             child: Text(
               'No services to filter by yet.',
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
           )
         else
@@ -251,7 +251,7 @@ class _HistoryPageState extends State<HistoryPage> {
               contentPadding: .zero,
               title: Text(
                 activity.activityName ?? '',
-                style: AppTypography.formLabels,
+                style: context.formLabels,
               ),
               trailing: _filterName == activity.activityName
                   ? Icon(Icons.check, color: AppColors.primary)

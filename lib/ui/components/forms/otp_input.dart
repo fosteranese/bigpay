@@ -203,7 +203,7 @@ class FormOtpInputState extends State<FormOtpInput> {
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],
-              style: AppTypography.header1,
+              style: context.header1,
               decoration: InputDecoration(
                 counterText: '',
                 border: const UnderlineInputBorder(),
@@ -256,7 +256,7 @@ class FormOtpInputState extends State<FormOtpInput> {
   Color _borderColor(int index) {
     if (_focusNodes[index].hasFocus) return AppColors.tint;
     if (_controllers[index].text.isNotEmpty) return AppColors.primary;
-    return AppColors.tertiary;
+    return context.border;
   }
 
   void _onResendPressed() {
@@ -310,8 +310,8 @@ class FormOtpInputState extends State<FormOtpInput> {
             onTap: _onResendPressed,
             child: Text(
               'Resend Code',
-              style: AppTypography.smallDetailsBold.copyWith(
-                color: AppColors.black,
+              style: context.smallDetailsBold.copyWith(
+                color: context.textPrimary,
                 decoration: .underline,
               ),
             ),
@@ -326,7 +326,7 @@ class FormOtpInputState extends State<FormOtpInput> {
               SizedBox(width: 5),
               Text(
                 'Resend code in ${Duration(seconds: _remainingSeconds).toString().split('.').first.substring(2)}',
-                style: AppTypography.smallDetails,
+                style: context.smallDetails,
               ),
             ],
           ),

@@ -183,3 +183,42 @@ class AppTypography {
     color: AppColors.black,
   );
 }
+
+extension ThemeText on BuildContext {
+  Color get _primary => Theme.of(this).colorScheme.onSurface;
+  Color get _secondary => Theme.of(this).brightness == Brightness.dark
+      ? const Color(0xFF93939F)
+      : AppColors.subtitleGrey;
+  Color get _tertiary => Theme.of(this).brightness == Brightness.dark
+      ? const Color(0xFF6E6E7A)
+      : AppColors.flora;
+
+  TextStyle get display1 => AppTypography.display1.copyWith(color: _primary);
+  TextStyle get display2 => AppTypography.display2.copyWith(color: _primary);
+  TextStyle get header1 => AppTypography.header1.copyWith(color: _primary);
+  TextStyle get header2 => AppTypography.header2.copyWith(color: _primary);
+  TextStyle get header3 => AppTypography.header3.copyWith(color: _primary);
+  TextStyle get header4 => AppTypography.header4.copyWith(color: _primary);
+  TextStyle get p1 => AppTypography.p1.copyWith(color: _primary);
+  TextStyle get p1Medium => AppTypography.p1Medium.copyWith(color: _primary);
+  TextStyle get p1Bold => AppTypography.p1Bold.copyWith(color: _primary);
+  TextStyle get smallDetails =>
+      AppTypography.smallDetails.copyWith(color: _secondary);
+  TextStyle get smallDetailsMedium =>
+      AppTypography.smallDetailsMedium.copyWith(color: _primary);
+  TextStyle get smallDetailsBold =>
+      AppTypography.smallDetailsBold.copyWith(color: _primary);
+  TextStyle get caption => AppTypography.caption.copyWith(color: _tertiary);
+  TextStyle get captionMedium =>
+      AppTypography.captionMedium.copyWith(color: _primary);
+  TextStyle get captionBold =>
+      AppTypography.captionBold.copyWith(color: _primary);
+  TextStyle get captionSemibold =>
+      AppTypography.captionSemibold.copyWith(color: _primary);
+  TextStyle get small => AppTypography.small.copyWith(color: _secondary);
+  TextStyle get smallMedium =>
+      AppTypography.smallMedium.copyWith(color: _primary);
+  TextStyle get smallBold => AppTypography.smallBold.copyWith(color: _primary);
+  TextStyle get formLabels =>
+      AppTypography.formLabels.copyWith(color: _primary);
+}

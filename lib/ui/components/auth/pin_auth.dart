@@ -53,7 +53,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
             widget.data['tooltip'] ?? 'Enter Security PIN',
             textAlign: .center,
             style: AppTypography.display1.copyWith(
-              color: AppColors.black,
+              color: context.textPrimary,
             ),
           ),
           Text(
@@ -94,7 +94,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
               },
               icon: SvgPicture.asset(
                 'assets/img/biometric.svg',
-                colorFilter: .mode(AppColors.black, .srcIn),
+                colorFilter: .mode(context.textPrimary, .srcIn),
               ),
             ),
         ],

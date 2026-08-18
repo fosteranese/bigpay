@@ -45,7 +45,7 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
             'Enter OTP',
             textAlign: .center,
             style: AppTypography.display1.copyWith(
-              color: AppColors.black,
+              color: context.textPrimary,
             ),
           ),
           Text(

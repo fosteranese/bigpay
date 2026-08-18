@@ -7,6 +7,7 @@ import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+
 import 'package:bigpay/utils/app_modal.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -118,19 +119,19 @@ class _FormPayeeInputState extends State<FormPayeeInput> {
           ListTile(
             contentPadding: .zero,
             leading: CircleAvatar(
-              backgroundColor: AppColors.tintShade3,
+              backgroundColor: context.avatarBg,
               child: Icon(
                 Icons.person_outline,
-                color: AppColors.secondary,
+                color: context.textSecondary,
               ),
             ),
             title: Text(
               payee.displayName,
-              style: AppTypography.header4,
+              style: context.header4,
             ),
             subtitle: payee.value == null
                 ? null
-                : Text(payee.value!, style: AppTypography.caption),
+                : Text(payee.value!, style: context.caption),
             onTap: () {
               Navigator.pop(context);
               _select(payee);

@@ -126,7 +126,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
                   child: Text(
                     'Forgot Secret Answer?',
                     style: AppTypography.smallDetails.copyWith(
-                      color: AppColors.black,
+                      color: context.textPrimary,
                       decoration: .underline,
                     ),
                     textAlign: .center,

@@ -113,13 +113,13 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
               'Enter OTP',
               textAlign: .center,
               style: AppTypography.display1.copyWith(
-                color: AppColors.black,
+                color: context.textPrimary,
               ),
             ),
             Text(
               SignIn.verifyUserData?.otpData?.message ?? '',
               textAlign: .center,
-              style: AppTypography.p1,
+              style: context.p1,
             ),
           ],
         ),

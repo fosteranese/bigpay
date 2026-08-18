@@ -61,7 +61,7 @@ class _ServicesPageState extends State<ServicesPage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      backgroundColor: Color(0xffEEF0FA),
+      backgroundColor: context.scaffoldBg,
       miniTitle: 'Services',
       bottom: PreferredSize(
         preferredSize: Size(double.maxFinite, 60),
@@ -96,7 +96,7 @@ class _ServicesPageState extends State<ServicesPage> {
                   SvgPicture.asset('assets/img/empty-wallet.svg'),
                   Text(
                     searching ? 'No matches' : 'Empty Services',
-                    style: AppTypography.p1Bold,
+                    style: context.p1Bold,
                   ),
                   Text(
                     searching
@@ -153,7 +153,7 @@ class _ServicesPageState extends State<ServicesPage> {
                   contentPadding: .symmetric(
                     horizontal: 15,
                   ),
-                  tileColor: AppColors.white,
+                  tileColor: context.cardBg,
                   shape: RoundedRectangleBorder(
                     borderRadius: .circular(14),
                   ),
@@ -175,7 +175,7 @@ class _ServicesPageState extends State<ServicesPage> {
                   ),
                   title: Text(
                     item.activity?.activityName ?? '',
-                    style: AppTypography.header4,
+                    style: context.header4,
                   ),
                   subtitle: Text(
                     item.activity?.description ?? '',

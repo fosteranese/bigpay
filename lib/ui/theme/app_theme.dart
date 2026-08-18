@@ -30,6 +30,28 @@ class AppColors {
   static const backgroundPale = Color(0xFFF1F4FB);
 }
 
+extension ThemeColors on BuildContext {
+  Color get _surface => Theme.of(this).colorScheme.surface;
+  Brightness get _brightness => Theme.of(this).brightness;
+  bool get _isDark => _brightness == Brightness.dark;
+
+  Color get surface => _surface;
+  Color get onSurface => Theme.of(this).colorScheme.onSurface;
+  Color get scaffoldBg => _isDark ? const Color(0xFF11111B) : AppColors.background;
+  Color get cardBg => _isDark ? const Color(0xFF1E1E2E) : AppColors.white;
+  Color get textPrimary => _isDark ? const Color(0xFFE0E0E0) : AppColors.black;
+  Color get textSecondary => _isDark ? const Color(0xFF93939F) : AppColors.subtitleGrey;
+  Color get textTertiary => _isDark ? const Color(0xFF6E6E7A) : AppColors.flora;
+  Color get divider => _isDark ? const Color(0xFF3A3A4C) : AppColors.offWhite;
+  Color get border => _isDark ? const Color(0xFF3A3A4C) : AppColors.tertiary;
+  Color get inputBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.white;
+  Color get avatarBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.tintShade3;
+  Color get appBarOverlay => _isDark
+      ? AppColors.white.withValues(alpha: 0.08)
+      : AppColors.white.withValues(alpha: 0.15);
+  Color get navBarBg => _isDark ? const Color(0xFF1E1E2E) : const Color(0xFFECEDF1);
+}
+
 class AppTheme {
   static ThemeData get light {
     final textTheme = GoogleFonts.mulishTextTheme();
@@ -102,6 +124,91 @@ class AppTheme {
           fontWeight: FontWeight.w400,
         ),
       ),
+      useMaterial3: true,
+    );
+  }
+
+  static ThemeData get dark {
+    final textTheme = GoogleFonts.mulishTextTheme(
+      ThemeData.dark().textTheme,
+    );
+
+    const surface = Color(0xFF1E1E2E);
+    const background = Color(0xFF11111B);
+    const textPrimary = Color(0xFFE0E0E0);
+    const textSecondary = Color(0xFF93939F);
+    const border = Color(0xFF3A3A4C);
+
+    return ThemeData(
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: background,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.primary,
+        secondary: AppColors.tint,
+        surface: surface,
+        error: AppColors.danger,
+      ),
+      textTheme: textTheme.copyWith(
+        headlineLarge: textTheme.headlineLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
+        ),
+        headlineMedium: textTheme.headlineMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
+        ),
+        titleLarge: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
+        ),
+        titleMedium: textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
+        bodyLarge: textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w400,
+          color: textPrimary,
+        ),
+        bodyMedium: textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w400,
+          color: textSecondary,
+        ),
+        labelLarge: textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: textPrimary,
+        ),
+        labelSmall: textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w400,
+          color: textSecondary,
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: surface,
+        foregroundColor: textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.mulish(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surface,
+        selectedItemColor: AppColors.tint,
+        unselectedItemColor: textSecondary,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle: GoogleFonts.mulish(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: GoogleFonts.mulish(
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      dividerColor: border,
       useMaterial3: true,
     );
   }

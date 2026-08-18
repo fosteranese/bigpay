@@ -57,7 +57,7 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
     return Stack(
       children: [
         DashboardLayout(
-          backgroundColor: AppColors.white,
+          backgroundColor: context.cardBg,
           isVirtual: _isVirtual,
           wallet: widget.account,
           title: _title,
@@ -78,10 +78,10 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
               borderRadius: .vertical(top: .circular(20)),
               child: Scaffold(
                 primary: false,
-                backgroundColor: AppColors.white,
+                backgroundColor: context.cardBg,
                 appBar: AppBar(
-                  backgroundColor: AppColors.white,
-                  surfaceTintColor: AppColors.white,
+                  backgroundColor: context.cardBg,
+                  surfaceTintColor: context.cardBg,
                   actionsPadding: .symmetric(horizontal: 10),
                   automaticallyImplyLeading: false,
                   automaticallyImplyActions: false,
@@ -92,14 +92,14 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
                   primary: false,
                   title: Text(
                     'Recent Transactions',
-                    style: AppTypography.header1,
+                    style: context.header1,
                   ),
                   actions: [
                     SizedBox(
                       width: 130,
                       child: FormButton(
-                        backgroundColor: AppColors.tintShade3,
-                        foregroundColor: AppColors.black,
+                        backgroundColor: context.avatarBg,
+                        foregroundColor: context.textPrimary,
                         padding: .zero,
                         height: 30,
                         onPressed: () {
@@ -167,10 +167,10 @@ class TransactionListItem extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.backgroundPale,
+            backgroundColor: context.scaffoldBg,
           ),
           CircleAvatar(
-            backgroundColor: AppColors.white,
+            backgroundColor: context.cardBg,
             radius: 9,
             child: Icon(
               Icons.north_east_outlined,
@@ -182,7 +182,7 @@ class TransactionListItem extends StatelessWidget {
       ),
       title: Text(
         'Fund Wallet',
-        style: AppTypography.formLabels,
+        style: context.formLabels,
       ),
       subtitle: Text(
         '09-Jun-23 12:30pm',
@@ -195,7 +195,7 @@ class TransactionListItem extends StatelessWidget {
         children: [
           Text(
             'GHS 12,000',
-            style: AppTypography.captionSemibold,
+            style: context.captionSemibold,
           ),
           Text(
             'Success',
@@ -223,7 +223,7 @@ class EmptyWalletTransactions extends StatelessWidget {
             padding: .symmetric(horizontal: 20),
             child: Text(
               'Recent Transactions',
-              style: AppTypography.header1,
+              style: context.header1,
             ),
           ),
         ),
@@ -242,7 +242,7 @@ class EmptyWalletTransactions extends StatelessWidget {
                 Text(
                   'No transactions yet',
                   textAlign: .center,
-                  style: AppTypography.p1Medium,
+                  style: context.p1Medium,
                 ),
                 Text(
                   'Your financial journey starts here. Once you send or receive funds, your activity will appear in this space',

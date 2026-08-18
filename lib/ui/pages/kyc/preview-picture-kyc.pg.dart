@@ -2,6 +2,7 @@ import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
@@ -21,7 +22,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      titleStyle: AppTypography.display2,
+      titleStyle: context.display2,
       bottomSize: 0,
       bottomNav: Column(
         mainAxisSize: .min,
@@ -77,14 +78,14 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
                   Text(
                     'Review your photo',
                     textAlign: .center,
-                    style: AppTypography.display2,
+                    style: context.display2,
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Make sure your face is clearly visible before continuing',
                     textAlign: .center,
-                    style: AppTypography.p1.copyWith(
-                      color: AppColors.subtitleGrey,
+                    style: context.p1.copyWith(
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -129,7 +130,7 @@ class CheckListItem extends StatelessWidget {
       leading: isChecked
           ? CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.tintShade3,
+              backgroundColor: context.avatarBg,
               child: const Icon(
                 Icons.check,
                 size: 20,
@@ -147,11 +148,11 @@ class CheckListItem extends StatelessWidget {
             ),
       title: Text(
         title,
-        style: AppTypography.header3,
+        style: context.header3,
       ),
       subtitle: Text(
         subtitle,
-        style: AppTypography.caption,
+        style: context.caption,
       ),
     );
   }

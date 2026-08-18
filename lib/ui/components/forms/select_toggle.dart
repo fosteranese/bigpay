@@ -53,17 +53,17 @@ class _FormSelectToggleInputState extends State<FormSelectToggleInput> {
           width: double.maxFinite,
           height: 67,
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: context.cardBg,
             borderRadius: .circular(10),
             border: Border.all(
-              color: AppColors.border,
+              color: context.border,
             ),
             boxShadow: [
               BoxShadow(
                 offset: Offset(0, 4),
                 blurRadius: 0.06,
                 spreadRadius: 0,
-                color: AppColors.black.withValues(alpha: 0.06),
+                color: context.textPrimary.withValues(alpha: 0.06),
               ),
             ],
           ),
@@ -85,8 +85,8 @@ class _FormSelectToggleInputState extends State<FormSelectToggleInput> {
                             },
                           ),
                           if (item != widget.options.last)
-                            const VerticalDivider(
-                              color: AppColors.fade,
+                            VerticalDivider(
+                              color: context.divider,
                               width: 0,
                             ),
                         ];
@@ -131,13 +131,13 @@ class FormSelectToggleListItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 11.5,
-                backgroundColor: AppColors.tintShade3,
+                backgroundColor: context.avatarBg,
               ),
               const SizedBox(width: 10),
               Text(
                 option.label,
                 style: AppTypography.smallDetails.copyWith(
-                  color: AppColors.black,
+                  color: context.textPrimary,
                 ),
               ),
             ],

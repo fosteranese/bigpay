@@ -45,7 +45,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
         children: [
           Text(
             'Already have an account?',
-            style: AppTypography.smallDetails,
+            style: context.smallDetails,
           ),
           TextButton(
             style: TextButton.styleFrom(
@@ -102,26 +102,26 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
               children: [
                 Text(
                   'By clicking on continue, you accept our ',
-                  style: AppTypography.smallDetails,
+                  style: context.smallDetails,
                 ),
                 InkWell(
                   onTap: () {},
                   child: Text(
                     'Terms of Use',
-                    style: AppTypography.smallDetailsMedium.copyWith(
+                    style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),
                 ),
                 Text(
                   ' and ',
-                  style: AppTypography.smallDetails,
+                  style: context.smallDetails,
                 ),
                 InkWell(
                   onTap: () {},
                   child: Text(
                     'Privacy Policy',
-                    style: AppTypography.smallDetailsMedium.copyWith(
+                    style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),

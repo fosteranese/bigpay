@@ -70,7 +70,7 @@ final class MessageUtil {
       builder: (context) => ZoomIn(
         child: FadeIn(
           child: Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: context.cardBg,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -99,7 +99,7 @@ final class MessageUtil {
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.p1,
+                      style: context.p1,
                     ),
                   const SizedBox(height: 20),
                   FormButton(
@@ -136,7 +136,7 @@ final class MessageUtil {
       builder: (context) => ZoomIn(
         child: FadeIn(
           child: Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: context.cardBg,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -160,14 +160,14 @@ final class MessageUtil {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: AppTypography.header1,
+                      style: context.header1,
                     ),
                   if (message != null) const SizedBox(height: 10),
                   if (message != null)
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.p1,
+                      style: context.p1,
                     ),
                   const SizedBox(height: 20),
                   FormButton(
@@ -236,15 +236,13 @@ final class MessageUtil {
                 if (title?.isNotEmpty ?? false)
                   Text(
                     title ?? '',
-                    style: AppTypography.display2,
+                    style: context.display2,
                     textAlign: .center,
                   ),
                 if (title?.isNotEmpty ?? false) const SizedBox(height: 10),
                 Text(
                   message,
-                  style: AppTypography.smallDetails.copyWith(
-                    color: AppColors.black,
-                  ),
+                  style: context.smallDetails,
                   textAlign: .center,
                 ),
               ],
@@ -273,7 +271,7 @@ final class MessageUtil {
       builder: (context) => ZoomIn(
         child: FadeIn(
           child: Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: context.cardBg,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -294,14 +292,14 @@ final class MessageUtil {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: AppTypography.header1,
+                      style: context.header1,
                     ),
                   if (message != null) const SizedBox(height: 5),
                   if (message != null)
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.p1,
+                      style: context.p1,
                     ),
                   const SizedBox(height: 20),
                   Row(

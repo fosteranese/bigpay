@@ -88,12 +88,12 @@ class _FormInputState extends State<FormInput> {
                 decoration: InputDecoration(
                   contentPadding: widget.padding,
                   hintText: widget.placeholder,
-                  hintStyle: AppTypography.caption,
+                  hintStyle: context.caption,
                   counterText: '',
                   enabledBorder: OutlineInputBorder(
                     borderRadius: .circular(10),
                     borderSide: BorderSide(
-                      color: AppColors.tertiary,
+                      color: context.border,
                       style: .solid,
                     ),
                   ),
@@ -106,7 +106,7 @@ class _FormInputState extends State<FormInput> {
                     ),
                   ),
                   filled: true,
-                  fillColor: AppColors.offWhite,
+                  fillColor: context.inputBg,
                   suffixIcon: widget.suffix,
                 ),
               ),
@@ -137,7 +137,7 @@ class FormLabel extends StatelessWidget {
       padding: const .only(bottom: 5),
       child: Text(
         label,
-        style: AppTypography.formLabels,
+        style: context.formLabels,
       ),
     );
   }
