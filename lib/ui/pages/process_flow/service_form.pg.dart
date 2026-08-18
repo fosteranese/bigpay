@@ -41,7 +41,7 @@ class ServiceFormPage extends StatefulWidget {
 class _ServiceFormPageState extends State<ServiceFormPage> {
   final _canSubmit = ValueNotifier(false);
   ExecuteProcessEvent? _submitEvent;
-  Map<String, dynamic> _formData = {};
+  final Map<String, dynamic> _formData = {};
 
   /// The form definition currently on screen. Seeded from the one passed in,
   /// then replaced by a pull-to-refresh.

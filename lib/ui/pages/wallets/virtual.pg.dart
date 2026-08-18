@@ -25,6 +25,17 @@ class VirtualWalletPage extends StatefulWidget {
 }
 
 class _VirtualWalletPageState extends State<VirtualWalletPage> {
+  // Statement date-range fields (shown in the "View Statement" sheet).
+  final _dateFromController = TextEditingController();
+  final _dateToController = TextEditingController();
+
+  @override
+  void dispose() {
+    _dateFromController.dispose();
+    _dateToController.dispose();
+    super.dispose();
+  }
+
   bool get _isVirtual =>
       widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
       widget.account == null;
@@ -43,8 +54,8 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final statusBarHeight = MediaQuery.paddingOf(context).top;
     const appBarHeight = kToolbarHeight;
     final totalAppBarHeight = statusBarHeight + appBarHeight;
 
@@ -116,13 +127,13 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
                               FormDateInput(
                                 label: 'Date From',
                                 placeholder: 'DD/MM/YY',
-                                controller: TextEditingController(),
+                                controller: _dateFromController,
                               ),
                               const SizedBox(height: 10),
                               FormDateInput(
                                 label: 'Date To',
                                 placeholder: 'DD/MM/YY',
-                                controller: TextEditingController(),
+                                controller: _dateToController,
                               ),
                               const SizedBox(height: 20),
                               FormButton(

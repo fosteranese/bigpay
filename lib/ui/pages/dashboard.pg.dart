@@ -1,14 +1,13 @@
-import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
-import 'package:bigpay/models/actions/refresh_dashboard_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
+import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
 import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
@@ -19,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/data/models/account/source.dart';
-import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/recent_activity.dart';
@@ -37,42 +35,47 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage>
+    with DashboardDataRefresh {
   final _scrollController = ScrollController();
-  double _blurOpacity = 0.0;
 
-  /// The in-flight dashboard refresh, correlated by the listener below.
-  ExecuteProcessEvent? _refreshEvent;
+  /// Drives the app-bar blur as the page scrolls. A notifier (not setState) so
+  /// scrolling repaints only the header overlay, not the whole dashboard.
+  final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
+
+  /// Kept as a field so the "most used" carousel doesn't lose its page (and
+  /// leak a controller) on every rebuild.
+  final PageController _favouritesController = PageController(
+    viewportFraction: 0.60,
+    keepPage: true,
+  );
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      final opacity = (_scrollController.offset / 80).clamp(0.0, 1.0);
-      if (opacity != _blurOpacity) {
-        setState(() => _blurOpacity = opacity);
-      }
+      _blurOpacity.value = (_scrollController.offset / 80).clamp(0.0, 1.0);
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _blurOpacity.dispose();
+    _favouritesController.dispose();
     super.dispose();
   }
 
-  /// Pull-to-refresh: re-fetches the user's dashboard data (activities, most-used
-  /// services, wallet balance) and the avatar, then holds the spinner until the
-  /// reload lands. Mirrors umb's `RefreshUserData`.
+  /// Pull-to-refresh: re-fetches the user's dashboard data (activities,
+  /// most-used services, wallet balance) plus the avatar, holding the spinner
+  /// until the reload lands. Mirrors umb's `RefreshUserData`.
   Future<void> _onRefresh() async {
-    final event = context.dispatchProcess(const RefreshDashboardAction());
-    setState(() => _refreshEvent = event);
     GetProfilePictureAction.event = context.dispatchProcess(
       returnSavedResponse: true,
       saveActionResponse: true,
       GetProfilePictureAction(payload: NoPayload()),
     );
-    await context.awaitProcess(event);
+    await refreshDashboardData();
   }
 
   Source? get _virtualBalance {
@@ -91,14 +94,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return MultiProcessListener(
       listeners: [
         // Pull-to-refresh result: swap in the fresh dashboard data.
-        ProcessListenerConfig<AuthData>(
-          event: () => _refreshEvent,
-          listener: (context, snapshot) {
-            if (snapshot.hasData) {
-              setState(() => AppState.currentUser = snapshot.data);
-            }
-          },
-        ),
+        dashboardRefreshListener,
         ProcessListenerConfig<GeneralFlowCategory>(
           event: () => GetServiceCategoriesAction.event,
           listener: (context, snapshot) {
@@ -289,15 +285,18 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ],
                   centerTitle: false,
-                  flexibleSpace: ClipRect(
-                    child: BackdropFilter(
-                      filter: .blur(
-                        sigmaX: 12 * _blurOpacity,
-                        sigmaY: 12 * _blurOpacity,
-                      ),
-                      child: Container(
-                        color: AppColors.white.withValues(
-                          alpha: 0.15 * _blurOpacity,
+                  flexibleSpace: ValueListenableBuilder<double>(
+                    valueListenable: _blurOpacity,
+                    builder: (context, blur, _) => ClipRect(
+                      child: BackdropFilter(
+                        filter: .blur(
+                          sigmaX: 12 * blur,
+                          sigmaY: 12 * blur,
+                        ),
+                        child: Container(
+                          color: AppColors.white.withValues(
+                            alpha: 0.15 * blur,
+                          ),
                         ),
                       ),
                     ),
@@ -333,10 +332,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           child: PageView(
                             scrollDirection: .horizontal,
                             pageSnapping: true,
-                            controller: PageController(
-                              viewportFraction: 0.60,
-                              keepPage: true,
-                            ),
+                            controller: _favouritesController,
                             padEnds: false,
                             children:
                                 AppState.currentUser?.recentActivity?.map((

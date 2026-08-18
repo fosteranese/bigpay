@@ -2,15 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
-import 'package:bigpay/data/models/auth_data/auth_data.dart';
-import 'package:bigpay/models/actions/refresh_dashboard_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
@@ -25,12 +23,9 @@ class ServicesPage extends StatefulWidget {
   State<ServicesPage> createState() => _ServicesPageState();
 }
 
-class _ServicesPageState extends State<ServicesPage> {
+class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
   final _searchController = TextEditingController();
   String _query = '';
-
-  /// The in-flight dashboard refresh, correlated by the listener in [build].
-  ExecuteProcessEvent? _refreshEvent;
 
   @override
   void initState() {
@@ -44,14 +39,6 @@ class _ServicesPageState extends State<ServicesPage> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  /// Pull-to-refresh: the services list is drawn from the user's account data,
-  /// so re-fetch it (activities and all) and hold the spinner until it lands.
-  Future<void> _onRefresh() async {
-    final event = context.dispatchProcess(const RefreshDashboardAction());
-    setState(() => _refreshEvent = event);
-    await context.awaitProcess(event);
   }
 
   /// The user's services, narrowed by the search query against the service
@@ -73,17 +60,12 @@ class _ServicesPageState extends State<ServicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ProcessListener<AuthData>(
-      event: () => _refreshEvent,
-      listener: (context, snapshot) {
-        if (snapshot.hasData) {
-          setState(() => AppState.currentUser = snapshot.data);
-        }
-      },
+    return MultiProcessListener(
+      listeners: [dashboardRefreshListener],
       child: MainLayout(
         backgroundColor: context.scaffoldBg,
         miniTitle: 'Services',
-        onRefresh: _onRefresh,
+        onRefresh: refreshDashboardData,
         bottom: PreferredSize(
           preferredSize: Size(double.maxFinite, 60),
           child: Padding(

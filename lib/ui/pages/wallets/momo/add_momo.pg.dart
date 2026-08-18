@@ -17,6 +17,16 @@ class AddMoMoPage extends StatefulWidget {
 }
 
 class _AddMoMoPageState extends State<AddMoMoPage> {
+  final _networkController = TextEditingController();
+  final _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _networkController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
@@ -37,7 +47,7 @@ class _AddMoMoPageState extends State<AddMoMoPage> {
           children: [
             FormSelectToggleInput(
               label: 'Choose Network',
-              controller: TextEditingController(),
+              controller: _networkController,
               options: [
                 .new(
                   label: 'MTN',
@@ -58,7 +68,7 @@ class _AddMoMoPageState extends State<AddMoMoPage> {
             ),
             const SizedBox(height: 20),
             FormInput(
-              controller: TextEditingController(),
+              controller: _phoneController,
               label: 'Phone Number',
             ),
           ],

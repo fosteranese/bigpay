@@ -21,7 +21,7 @@ class ComplaintBubble extends StatelessWidget {
         margin: const .symmetric(vertical: 4),
         padding: const .symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
+          maxWidth: MediaQuery.sizeOf(context).width * 0.75,
         ),
         decoration: BoxDecoration(
           color: fromUser ? AppColors.primary : context.cardBg,

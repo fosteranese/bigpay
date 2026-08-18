@@ -43,22 +43,23 @@ class DashboardLayout extends StatefulWidget {
 
 class _DashboardLayoutState extends State<DashboardLayout> {
   final _scrollController = ScrollController();
-  double _blurOpacity = 0.0;
+
+  /// Drives the app-bar blur as the page scrolls. A notifier (not setState) so
+  /// scrolling repaints only the header overlay, not the whole scroll body.
+  final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      final opacity = (_scrollController.offset / 80).clamp(0.0, 1.0);
-      if (opacity != _blurOpacity) {
-        setState(() => _blurOpacity = opacity);
-      }
+      _blurOpacity.value = (_scrollController.offset / 80).clamp(0.0, 1.0);
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _blurOpacity.dispose();
     super.dispose();
   }
 
@@ -159,15 +160,18 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                   ),
               ],
               centerTitle: false,
-              flexibleSpace: ClipRect(
-                child: BackdropFilter(
-                  filter: .blur(
-                    sigmaX: 60 * _blurOpacity,
-                    sigmaY: 60 * _blurOpacity,
-                  ),
-                  child: Container(
-                    color: AppColors.white.withValues(
-                      alpha: 0.15 * _blurOpacity,
+              flexibleSpace: ValueListenableBuilder<double>(
+                valueListenable: _blurOpacity,
+                builder: (context, blur, _) => ClipRect(
+                  child: BackdropFilter(
+                    filter: .blur(
+                      sigmaX: 60 * blur,
+                      sigmaY: 60 * blur,
+                    ),
+                    child: Container(
+                      color: AppColors.white.withValues(
+                        alpha: 0.15 * blur,
+                      ),
                     ),
                   ),
                 ),
@@ -183,7 +187,12 @@ class _DashboardLayoutState extends State<DashboardLayout> {
               ),
             ),
             ...widget.children ?? [],
-            ...(widget.builder?.call(60 * _blurOpacity, 0.15 * _blurOpacity) ??
+            // Sampled per rebuild (not per scroll frame) now that scrolling no
+            // longer rebuilds this layout — the builder's slivers are static.
+            ...(widget.builder?.call(
+                  60 * _blurOpacity.value,
+                  0.15 * _blurOpacity.value,
+                ) ??
                 []),
           ],
         ),

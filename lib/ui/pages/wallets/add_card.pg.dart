@@ -20,6 +20,20 @@ class AddCardPage extends StatefulWidget {
 }
 
 class _AddCardPageState extends State<AddCardPage> {
+  final _nameController = TextEditingController();
+  final _numberController = TextEditingController();
+  final _cvvController = TextEditingController();
+  final _expiryController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _numberController.dispose();
+    _cvvController.dispose();
+    _expiryController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
@@ -142,12 +156,12 @@ class _AddCardPageState extends State<AddCardPage> {
       child: Column(
         children: [
           FormInput(
-            controller: TextEditingController(),
+            controller: _nameController,
             label: 'Card Holder Name',
           ),
           const SizedBox(height: 10),
           FormInput(
-            controller: TextEditingController(),
+            controller: _numberController,
             label: 'Card Number',
           ),
           const SizedBox(height: 10),
@@ -155,14 +169,14 @@ class _AddCardPageState extends State<AddCardPage> {
             children: [
               Expanded(
                 child: FormInput(
-                  controller: TextEditingController(),
+                  controller: _cvvController,
                   label: 'CVV',
                 ),
               ),
               const SizedBox(width: 15),
               Expanded(
                 child: FormInput(
-                  controller: TextEditingController(),
+                  controller: _expiryController,
                   label: 'Expiry Date',
                 ),
               ),
