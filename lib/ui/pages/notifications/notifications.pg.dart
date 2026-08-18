@@ -64,6 +64,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     return MainLayout(
       title: 'Notifications',
+      bottomSize: 60,
       actions: hasUnread
           ? SizedBox(
               width: 120,

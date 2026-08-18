@@ -27,8 +27,9 @@ class MainShell extends StatelessWidget {
           selectedIndex: navigationShell.currentIndex,
           onTap: (index) => navigationShell.goBranch(
             index,
-            // Re-tapping the active tab pops it back to that branch's root.
-            initialLocation: index == navigationShell.currentIndex,
+            // Always land on the tab's main page — reset the branch to its root
+            // on every tap, not just when re-tapping the active tab.
+            initialLocation: true,
           ),
         ),
       ),
