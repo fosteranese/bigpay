@@ -2,7 +2,6 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
@@ -103,19 +102,8 @@ class _SecurityPageState extends State<SecurityPage> {
           formId: form.formId,
           insId: form.formId,
         ),
-        endpointFunc: () {
-          switch (form.activityType) {
-            case ActivityTypesConst.fblCollect:
-              return '/FBLCollect/formsDataByInsId';
-            case ActivityTypesConst.quickFlow:
-            case ActivityTypesConst.quickFlowAlt:
-              return '/QuickFlow/formDataByFormId';
-            case ActivityTypesConst.fblOnline:
-            case ActivityTypesConst.enquiry:
-            default:
-              return '/FBLOnline/formDataByFormId';
-          }
-        },
+        endpointFunc: () =>
+            GetServiceFormDataAction.endpointFor(form.activityType),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -148,12 +149,8 @@ class _ListLayoutState extends State<ListLayout> {
       body: Container(
         color: widget.bodyColor,
         child: widget.onRefresh != null
-            ? RefreshIndicator(
+            ? AppRefreshIndicator(
                 onRefresh: widget.onRefresh!,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.white
-                    : AppColors.primary,
-                backgroundColor: context.cardBg,
                 child: widget.child(_scrollController),
               )
             : widget.child(_scrollController),

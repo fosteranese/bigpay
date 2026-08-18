@@ -1,5 +1,4 @@
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
@@ -7,6 +6,7 @@ import 'package:bigpay/models/actions/get_profile_picture_action.dart';
 import 'package:bigpay/models/actions/refresh_dashboard_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
 import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
@@ -212,12 +212,10 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          body: RefreshIndicator(
+          body: AppRefreshIndicator(
             onRefresh: _onRefresh,
             // The app bar is a sliver, so drop the indicator in below it.
             edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
-            color: isDark ? AppColors.white : AppColors.primary,
-            backgroundColor: context.cardBg,
             child: CustomScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(
@@ -415,27 +413,7 @@ class ActionButton extends StatelessWidget {
           saveActionResponse: true,
           returnSavedResponse: true,
           GetServiceCategoriesAction(
-            endpointFunc: () {
-              if (item.activity?.endpoint?.isNotEmpty ?? false) {
-                return item.activity!.endpoint!;
-              }
-
-              switch (item.activity?.activityType) {
-                case ActivityTypesConst.fblOnline:
-                case ActivityTypesConst.enquiry:
-                  return '/FBLOnline/categories/${item.activity?.activityId}';
-
-                case ActivityTypesConst.fblCollect:
-                  return '/FBLCollect/categories/${item.activity?.activityId}';
-
-                case ActivityTypesConst.quickFlow:
-                case ActivityTypesConst.quickFlowAlt:
-                  return '/QuickFlow/categories/${item.activity?.activityId}';
-
-                default:
-                  return '/FBLOnline/categories/${item.activity?.activityId}';
-              }
-            },
+            endpointFunc: () => GetServiceCategoriesAction.endpointFor(item),
           ),
         );
       },
@@ -514,23 +492,8 @@ class FrequentServiceItem extends StatelessWidget {
           formId: data.formId,
           insId: data.formId,
         ),
-        endpointFunc: () {
-          switch (data.activityType) {
-            case ActivityTypesConst.fblOnline:
-            case ActivityTypesConst.enquiry:
-              return '/FBLOnline/formDataByFormId';
-
-            case ActivityTypesConst.fblCollect:
-              return '/FBLCollect/formsDataByInsId';
-
-            case ActivityTypesConst.quickFlow:
-            case ActivityTypesConst.quickFlowAlt:
-              return '/QuickFlow/formDataByFormId';
-
-            default:
-              return '/FBLOnline/formDataByFormId';
-          }
-        },
+        endpointFunc: () =>
+            GetServiceFormDataAction.endpointFor(data.activityType),
       ),
     );
   }

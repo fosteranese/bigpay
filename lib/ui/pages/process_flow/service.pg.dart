@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
@@ -51,32 +50,16 @@ class _ServicePageState extends State<ServicePage> {
   /// replaced by a pull-to-refresh.
   GeneralFlowCategory? _category;
 
-  /// Rebuilds the endpoint that produced [widget.category] so a refresh can
-  /// re-fetch it — mirrors the switch used when the category was first opened.
-  String _categoriesEndpoint() {
-    final activity = widget.activityDatum.activity;
-    if (activity?.endpoint?.isNotEmpty ?? false) return activity!.endpoint!;
-
-    switch (activity?.activityType) {
-      case ActivityTypesConst.fblCollect:
-        return '/FBLCollect/categories/${activity?.activityId}';
-      case ActivityTypesConst.quickFlow:
-      case ActivityTypesConst.quickFlowAlt:
-        return '/QuickFlow/categories/${activity?.activityId}';
-      case ActivityTypesConst.fblOnline:
-      case ActivityTypesConst.enquiry:
-      default:
-        return '/FBLOnline/categories/${activity?.activityId}';
-    }
-  }
-
   /// Pull-to-refresh: re-fetches this activity's categories/forms and holds the
   /// spinner until they land.
   Future<void> _onRefresh() async {
     final event = context.dispatchProcess(
       saveActionResponse: true,
       returnSavedResponse: true,
-      GetServiceCategoriesAction(endpointFunc: _categoriesEndpoint),
+      GetServiceCategoriesAction(
+        endpointFunc: () =>
+            GetServiceCategoriesAction.endpointFor(widget.activityDatum),
+      ),
     );
     setState(() => _refreshEvent = event);
     await context.awaitProcess(event);
@@ -171,23 +154,10 @@ class _ServicePageState extends State<ServicePage> {
                           formId: item.formId,
                           insId: item.formId,
                         ),
-                        endpointFunc: () {
-                          switch (item.activityType) {
-                            case ActivityTypesConst.fblOnline:
-                            case ActivityTypesConst.enquiry:
-                              return '/FBLOnline/formDataByFormId';
-
-                            case ActivityTypesConst.fblCollect:
-                              return '/FBLCollect/formsDataByInsId';
-
-                            case ActivityTypesConst.quickFlow:
-                            case ActivityTypesConst.quickFlowAlt:
-                              return '/QuickFlow/formDataByFormId';
-
-                            default:
-                              return '/FBLOnline/formDataByFormId';
-                          }
-                        },
+                        endpointFunc: () =>
+                            GetServiceFormDataAction.endpointFor(
+                              item.activityType,
+                            ),
                       ),
                     );
                   };

@@ -110,25 +110,12 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
           formId: _form.form?.formId,
           insId: _form.form?.formId,
         ),
-        endpointFunc: _formDataEndpoint,
+        endpointFunc: () =>
+            GetServiceFormDataAction.endpointFor(_form.form?.activityType),
       ),
     );
     setState(() => _refreshEvent = event);
     await context.awaitProcess(event);
-  }
-
-  String _formDataEndpoint() {
-    switch (_form.form?.activityType) {
-      case ActivityTypesConst.fblCollect:
-        return '/FBLCollect/formsDataByInsId';
-      case ActivityTypesConst.quickFlow:
-      case ActivityTypesConst.quickFlowAlt:
-        return '/QuickFlow/formDataByFormId';
-      case ActivityTypesConst.fblOnline:
-      case ActivityTypesConst.enquiry:
-      default:
-        return '/FBLOnline/formDataByFormId';
-    }
   }
 
   /// Submit is enabled once every mandatory visible field has a value.

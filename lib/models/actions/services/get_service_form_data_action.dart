@@ -33,6 +33,22 @@ final class GetServiceFormDataAction
          responseDataFunc: _responseDataFunc,
        );
 
+  /// The form-data endpoint for [activityType]. Single source for the dashboard
+  /// favourites, service page, service form and security page.
+  static String endpointFor(String? activityType) {
+    switch (activityType) {
+      case ActivityTypesConst.fblCollect:
+        return '/FBLCollect/formsDataByInsId';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/formDataByFormId';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/formDataByFormId';
+    }
+  }
+
   static GeneralFlowFormData _responseDataFunc(dynamic data) {
     final responseData = data as Map<String, dynamic>;
     if (responseData['institutionData'] != null &&

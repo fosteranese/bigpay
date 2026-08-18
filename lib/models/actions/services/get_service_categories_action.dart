@@ -20,6 +20,27 @@ final class GetServiceCategoriesAction
          responseDataFunc: _responseDataFunc,
        );
 
+  /// The categories endpoint for [item] — its explicit endpoint when set,
+  /// otherwise derived from the activity type. Single source for the dashboard,
+  /// services list and service page.
+  static String endpointFor(ActivityDatum? item) {
+    final activity = item?.activity;
+    if (activity?.endpoint?.isNotEmpty ?? false) return activity!.endpoint!;
+
+    final id = activity?.activityId;
+    switch (activity?.activityType) {
+      case ActivityTypesConst.fblCollect:
+        return '/FBLCollect/categories/$id';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/categories/$id';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/categories/$id';
+    }
+  }
+
   static GeneralFlowCategory _responseDataFunc(dynamic data) {
     final result = data as Map<String, dynamic>;
     if (result['category'] != null && result['institution'] != null) {

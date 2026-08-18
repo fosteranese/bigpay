@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/models/actions/refresh_dashboard_action.dart';
@@ -144,34 +143,15 @@ class _ServicesPageState extends State<ServicesPage> {
                   child: ListTile(
                     onTap: () {
                       GetServiceCategoriesAction.activityDatum = item;
-                      GetServiceCategoriesAction
-                          .event = context.dispatchProcess(
-                        saveActionResponse: true,
-                        returnSavedResponse: true,
-                        GetServiceCategoriesAction(
-                          endpointFunc: () {
-                            if (item.activity?.endpoint?.isNotEmpty ?? false) {
-                              return item.activity!.endpoint!;
-                            }
-
-                            switch (item.activity?.activityType) {
-                              case ActivityTypesConst.fblOnline:
-                              case ActivityTypesConst.enquiry:
-                                return '/FBLOnline/categories/${item.activity?.activityId}';
-
-                              case ActivityTypesConst.fblCollect:
-                                return '/FBLCollect/categories/${item.activity?.activityId}';
-
-                              case ActivityTypesConst.quickFlow:
-                              case ActivityTypesConst.quickFlowAlt:
-                                return '/QuickFlow/categories/${item.activity?.activityId}';
-
-                              default:
-                                return '/FBLOnline/categories/${item.activity?.activityId}';
-                            }
-                          },
-                        ),
-                      );
+                      GetServiceCategoriesAction.event = context
+                          .dispatchProcess(
+                            saveActionResponse: true,
+                            returnSavedResponse: true,
+                            GetServiceCategoriesAction(
+                              endpointFunc: () =>
+                                  GetServiceCategoriesAction.endpointFor(item),
+                            ),
+                          );
                     },
                     contentPadding: .symmetric(
                       horizontal: 15,

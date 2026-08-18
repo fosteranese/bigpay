@@ -1,6 +1,7 @@
 import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -108,14 +109,10 @@ class _MainLayoutState extends State<MainLayout> {
     // way it does on the (real-AppBar) history layout.
     final headerHeight =
         widget.bottom?.preferredSize.height ?? widget.bottomSize;
-    final edgeOffset =
-        MediaQuery.paddingOf(context).top + kToolbarHeight + headerHeight;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return RefreshIndicator(
+    return AppRefreshIndicator(
       onRefresh: widget.onRefresh!,
-      edgeOffset: edgeOffset,
-      color: isDark ? AppColors.white : AppColors.primary,
-      backgroundColor: context.cardBg,
+      edgeOffset:
+          MediaQuery.paddingOf(context).top + kToolbarHeight + headerHeight,
       child: child,
     );
   }
