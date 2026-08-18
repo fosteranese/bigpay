@@ -21,6 +21,7 @@ class ListLayout extends StatefulWidget {
     this.bodyColor = Colors.transparent,
     this.bottom,
     this.appBarBottomColor = 0,
+    this.onRefresh,
   });
   final String? title;
   final String? subtitle;
@@ -37,6 +38,10 @@ class ListLayout extends StatefulWidget {
   final Color bodyColor;
   final PreferredSizeWidget? bottom;
   final double appBarBottomColor;
+
+  /// Pull-to-refresh handler. When set, the list gets a [RefreshIndicator];
+  /// the future should complete when the reload lands.
+  final Future<void> Function()? onRefresh;
 
   @override
   State<ListLayout> createState() => _ListLayoutState();
@@ -142,7 +147,16 @@ class _ListLayoutState extends State<ListLayout> {
 
       body: Container(
         color: widget.bodyColor,
-        child: widget.child(_scrollController),
+        child: widget.onRefresh != null
+            ? RefreshIndicator(
+                onRefresh: widget.onRefresh!,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.white
+                    : AppColors.primary,
+                backgroundColor: context.cardBg,
+                child: widget.child(_scrollController),
+              )
+            : widget.child(_scrollController),
       ),
 
       bottomNavigationBar: widget.bottomNav != null

@@ -35,6 +35,22 @@ extension ProcessDispatch on BuildContext {
     read<ProcessBloc>().add(event);
     return event;
   }
+
+  /// Completes when [event] reaches a terminal (success or error) state — for a
+  /// pull-to-refresh whose spinner should stay until the reload lands.
+  Future<void> awaitProcess(ProcessEvent? event) async {
+    if (event == null) return;
+    final bloc = read<ProcessBloc>();
+    final current = bloc.state;
+    if (current.event == event &&
+        current is! ExecutingProcess &&
+        current is! InitialProcess) {
+      return;
+    }
+    await bloc.stream.firstWhere(
+      (state) => state.event == event && state is! ExecutingProcess,
+    );
+  }
 }
 
 /// One event's current state in [ProcessBloc], typed.

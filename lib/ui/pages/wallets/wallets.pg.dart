@@ -59,10 +59,14 @@ class _WalletsPageState extends State<WalletsPage> {
 
   @override
   initState() {
+    _load();
+    super.initState();
+  }
+
+  void _load() {
     mainEvent = context.dispatchProcess(
       GetWalletsAction(),
     );
-    super.initState();
   }
 
   @override
@@ -70,6 +74,10 @@ class _WalletsPageState extends State<WalletsPage> {
     return MainLayout(
       bottomSize: 61,
       title: 'Wallets',
+      onRefresh: () async {
+        setState(_load);
+        await context.awaitProcess(mainEvent);
+      },
       actions: SizedBox(
         width: 100,
         child: FormButton(

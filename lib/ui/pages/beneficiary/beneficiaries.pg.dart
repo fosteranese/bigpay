@@ -160,6 +160,10 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         showBackBtn: true,
         bottomSize: 129,
         title: 'Beneficiaries',
+        onRefresh: () async {
+          _load();
+          await context.awaitProcess(_event);
+        },
         actions: SizedBox(
           width: 110,
           child: FormButton(

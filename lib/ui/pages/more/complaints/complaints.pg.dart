@@ -82,6 +82,10 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'Complaints',
+      onRefresh: () async {
+        _load();
+        await context.awaitProcess(_event);
+      },
       bottomSize: 60,
       actions: SizedBox(
         width: 150,

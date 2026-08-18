@@ -9,6 +9,7 @@ import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/models/actions/services/verify_service_form_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
@@ -42,19 +43,35 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   ExecuteProcessEvent? _submitEvent;
   Map<String, dynamic> _formData = {};
 
-  late final List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)>
-  _formItems;
+  /// The form definition currently on screen. Seeded from the one passed in,
+  /// then replaced by a pull-to-refresh.
+  late GeneralFlowFormData _form;
+
+  /// The in-flight form-definition refresh, correlated by the listener.
+  ExecuteProcessEvent? _refreshEvent;
+
+  List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)> _formItems =
+      [];
 
   @override
   void initState() {
     super.initState();
+    _form = widget.formData;
+    _buildFormItems();
+    _recomputeCanSubmit();
+  }
+
+  /// Builds the editable field list from [_form]. Disposes any prior controllers
+  /// first, so it's safe to call again on a refresh.
+  void _buildFormItems() {
+    _disposeFormItems();
 
     // Matching umb's `_generateField`: when the form needs verification, only
     // the fields required for it are collected here — the rest are gathered on
     // the summary/confirmation screen. Otherwise every visible, editable field
     // is shown. The amount field is floated to the top when present.
-    final requireVerification = widget.formData.form?.requireVerification == 1;
-    final visible = (widget.formData.fieldsDatum ?? [])
+    final requireVerification = _form.form?.requireVerification == 1;
+    final visible = (_form.fieldsDatum ?? [])
         .where(
           (f) =>
               f.field?.fieldVisible == 1 &&
@@ -73,8 +90,45 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       )..addListener(_recomputeCanSubmit);
       return (item, controller, FocusNode());
     }).toList();
+  }
 
-    _recomputeCanSubmit();
+  void _disposeFormItems() {
+    for (final (_, controller, focusNode) in _formItems) {
+      controller.removeListener(_recomputeCanSubmit);
+      controller.dispose();
+      focusNode.dispose();
+    }
+  }
+
+  /// Pull-to-refresh: re-fetches this form's definition and rebuilds the fields,
+  /// holding the spinner until it lands. Any half-entered values are reset to
+  /// the fresh defaults.
+  Future<void> _onRefresh() async {
+    final event = context.dispatchProcess(
+      GetServiceFormDataAction(
+        payload: GetServiceFormDataActionPayload(
+          formId: _form.form?.formId,
+          insId: _form.form?.formId,
+        ),
+        endpointFunc: _formDataEndpoint,
+      ),
+    );
+    setState(() => _refreshEvent = event);
+    await context.awaitProcess(event);
+  }
+
+  String _formDataEndpoint() {
+    switch (_form.form?.activityType) {
+      case ActivityTypesConst.fblCollect:
+        return '/FBLCollect/formsDataByInsId';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/formDataByFormId';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/formDataByFormId';
+    }
   }
 
   /// Submit is enabled once every mandatory visible field has a value.
@@ -108,7 +162,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   /// shown on the summary screen (see the listener in [build]).
   void _submit() {
     FocusScope.of(context).unfocus();
-    widget.formData.fieldsDatum?.forEach((item) {
+    _form.fieldsDatum?.forEach((item) {
       _formData[item.field?.fieldName ?? ''] = item.field?.defaultValue ?? '';
     });
 
@@ -121,8 +175,8 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
     _submitEvent = context.dispatchProcess(
       VerifyServiceFormAction(
         payload: VerifyServiceFormActionPayload(
-          insId: widget.formData.institution?.insId,
-          formId: widget.formData.form?.formId,
+          insId: _form.institution?.insId,
+          formId: _form.form?.formId,
           formData: _formData,
         ),
         endpointFunc: _verifyEndpoint,
@@ -131,7 +185,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   }
 
   String _verifyEndpoint() {
-    switch (widget.formData.form?.activityType) {
+    switch (_form.form?.activityType) {
       case ActivityTypesConst.fblCollect:
         return '/FBLCollect/verifyForm';
       case ActivityTypesConst.quickFlow:
@@ -146,54 +200,69 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
   @override
   void dispose() {
-    for (final (_, controller, focusNode) in _formItems) {
-      controller.removeListener(_recomputeCanSubmit);
-      controller.dispose();
-      focusNode.dispose();
-    }
+    _disposeFormItems();
     _canSubmit.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ProcessListener<FormVerificationResponse>(
-      event: () => _submitEvent,
-      listener: (context, snapshot) {
-        if (snapshot.isLoading) {
-          MessageUtil.displayLoading(context);
-          return;
-        } else {
-          MessageUtil.close(context);
-        }
+    return MultiProcessListener(
+      listeners: [
+        // Pull-to-refresh result: rebuild the fields from the fresh definition.
+        ProcessListenerConfig<GeneralFlowFormData>(
+          event: () => _refreshEvent,
+          listener: (context, snapshot) {
+            if (snapshot.hasData &&
+                (snapshot.data?.fieldsDatum?.isNotEmpty ?? false)) {
+              setState(() {
+                _form = snapshot.data!;
+                _buildFormItems();
+              });
+              _recomputeCanSubmit();
+            }
+          },
+        ),
+        ProcessListenerConfig<FormVerificationResponse>(
+          event: () => _submitEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
 
-        if (snapshot.hasData) {
-          _submitEvent = null;
-          AppRouter.router.push(
-            SummaryPage.route.path,
-            extra: {
-              'activityDatum': widget.activityDatum,
-              'category': widget.category,
-              'formData': widget.formData,
-              'amDoing': widget.amDoing,
-              'verification': snapshot.data,
-            },
-          );
-          return;
-        }
+            if (snapshot.hasData) {
+              _submitEvent = null;
+              AppRouter.router.push(
+                SummaryPage.route.path,
+                extra: {
+                  'activityDatum': widget.activityDatum,
+                  'category': widget.category,
+                  'formData': _form,
+                  'amDoing': widget.amDoing,
+                  'verification': snapshot.data,
+                },
+              );
+              return;
+            }
 
-        if (snapshot.hasError) {
-          _submitEvent = null;
-          MessageUtil.displayErrorDialog(
-            context,
-            message: snapshot.error!.message,
-          );
-        }
-      },
+            if (snapshot.hasError) {
+              _submitEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+      ],
       child: MainLayout(
         bottomSize: 72,
-        title: widget.formData.form?.formName ?? '',
-        subtitle: widget.formData.form?.description ?? '',
+        title: _form.form?.formName ?? '',
+        subtitle: _form.form?.description ?? '',
+        onRefresh: _onRefresh,
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
           builder: (context, canSubmit, child) {

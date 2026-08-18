@@ -25,6 +25,7 @@ class MainLayout extends StatefulWidget {
     this.flexibleSpace,
     this.builder,
     this.backgroundColor = Colors.transparent,
+    this.onRefresh,
   });
   final String? title;
   final String? subtitle;
@@ -44,6 +45,10 @@ class MainLayout extends StatefulWidget {
   final Color backgroundColor;
   final Widget? flexibleSpace;
   final Widget Function(ScrollController scrollController)? builder;
+
+  /// Pull-to-refresh handler. When set, the scroll body gets a
+  /// [RefreshIndicator]; the future should complete when the reload lands.
+  final Future<void> Function()? onRefresh;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -96,129 +101,157 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
+  Widget _wrapRefresh(Widget child) {
+    if (widget.onRefresh == null) return child;
+    // The app bar is a sliver inside the scroll view, so offset the indicator
+    // down by the header height — it then drops in from under the header, the
+    // way it does on the (real-AppBar) history layout.
+    final headerHeight =
+        widget.bottom?.preferredSize.height ?? widget.bottomSize;
+    final edgeOffset =
+        MediaQuery.paddingOf(context).top + kToolbarHeight + headerHeight;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return RefreshIndicator(
+      onRefresh: widget.onRefresh!,
+      edgeOffset: edgeOffset,
+      color: isDark ? AppColors.white : AppColors.primary,
+      backgroundColor: context.cardBg,
+      child: child,
+    );
+  }
+
   Scaffold _buildMainPage() {
     return Scaffold(
       backgroundColor: widget.backgroundColor,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            floating: true,
-            snap: true,
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            automaticallyImplyLeading: false,
-            automaticallyImplyActions: false,
-            leadingWidth: 70,
-            title: (widget.miniTitle?.isNotEmpty ?? false)
-                ? Text(
-                    widget.miniTitle!,
-                    style: context.p1,
-                  )
-                : null,
-            leading: AppRouter.router.canPop() && widget.showBackBtn
-                ? IconButton.filled(
-                    style: IconButton.styleFrom(
-                      backgroundColor: context.cardBg,
-                      fixedSize: Size(28, 28),
-                    ),
-                    onPressed: () {
-                      AppRouter.router.pop();
-                    },
-                    icon: Icon(
-                      Icons.chevron_left_outlined,
-                    ),
-                  )
-                : null,
-            bottom:
-                widget.bottom ??
-                PreferredSize(
-                  preferredSize: Size(double.maxFinite, widget.bottomSize),
-                  child: Container(
-                    width: double.maxFinite,
-                    padding: .only(left: 20, right: 20, bottom: 10),
-                    child: Column(
-                      mainAxisSize: .min,
-                      mainAxisAlignment: .center,
-                      crossAxisAlignment: .start,
-                      children: [
-                        SizedBox(height: 16),
-                        if (widget.title != null && widget.actions == null)
-                          FittedBox(
-                            child: Text(
-                              widget.title!,
-                              style:
-                                  (widget.titleStyle ?? AppTypography.display2)
-                                      .copyWith(
-                                        color: context.textPrimary,
-                                      ),
-                            ),
-                          )
-                        else if (widget.title != null && widget.actions != null)
-                          Row(
-                            mainAxisSize: .max,
-                            crossAxisAlignment: .center,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.title!,
-                                  style: AppTypography.display1.copyWith(
-                                    color: context.textPrimary,
+      body: _wrapRefresh(
+        CustomScrollView(
+          controller: _scrollController,
+          physics: widget.onRefresh != null
+              ? const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                )
+              : const ClampingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              floating: true,
+              snap: true,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+              automaticallyImplyActions: false,
+              leadingWidth: 70,
+              title: (widget.miniTitle?.isNotEmpty ?? false)
+                  ? Text(
+                      widget.miniTitle!,
+                      style: context.p1,
+                    )
+                  : null,
+              leading: AppRouter.router.canPop() && widget.showBackBtn
+                  ? IconButton.filled(
+                      style: IconButton.styleFrom(
+                        backgroundColor: context.cardBg,
+                        fixedSize: Size(28, 28),
+                      ),
+                      onPressed: () {
+                        AppRouter.router.pop();
+                      },
+                      icon: Icon(
+                        Icons.chevron_left_outlined,
+                      ),
+                    )
+                  : null,
+              bottom:
+                  widget.bottom ??
+                  PreferredSize(
+                    preferredSize: Size(double.maxFinite, widget.bottomSize),
+                    child: Container(
+                      width: double.maxFinite,
+                      padding: .only(left: 20, right: 20, bottom: 10),
+                      child: Column(
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .center,
+                        crossAxisAlignment: .start,
+                        children: [
+                          SizedBox(height: 16),
+                          if (widget.title != null && widget.actions == null)
+                            FittedBox(
+                              child: Text(
+                                widget.title!,
+                                style:
+                                    (widget.titleStyle ??
+                                            AppTypography.display2)
+                                        .copyWith(
+                                          color: context.textPrimary,
+                                        ),
+                              ),
+                            )
+                          else if (widget.title != null &&
+                              widget.actions != null)
+                            Row(
+                              mainAxisSize: .max,
+                              crossAxisAlignment: .center,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.title!,
+                                    style: AppTypography.display1.copyWith(
+                                      color: context.textPrimary,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (widget.actions != null) widget.actions!,
-                            ],
-                          ),
-                        if (widget.subtitle != null)
-                          Text(
-                            widget.subtitle!,
-                            style: context.smallDetails,
-                          )
-                        else if (widget.subtitleWidget != null)
-                          widget.subtitleWidget!,
-                      ],
-                    ),
-                  ),
-                ),
-            flexibleSpace:
-                widget.flexibleSpace ??
-                ClipRect(
-                  child: BackdropFilter(
-                    filter: .blur(
-                      sigmaX: 12 * _blurOpacity,
-                      sigmaY: 12 * _blurOpacity,
-                    ),
-                    child: Container(
-                      margin: .only(
-                        bottom: widget.appBarBottomColor,
+                                if (widget.actions != null) widget.actions!,
+                              ],
+                            ),
+                          if (widget.subtitle != null)
+                            Text(
+                              widget.subtitle!,
+                              style: context.smallDetails,
+                            )
+                          else if (widget.subtitleWidget != null)
+                            widget.subtitleWidget!,
+                        ],
                       ),
-                      color:
-                          widget.appBarColor ??
-                          context.appBarOverlay.withValues(
-                            alpha: _blurOpacity,
-                          ),
                     ),
                   ),
-                ),
-          ),
-
-          if (widget.builder != null)
-            widget.builder!(_scrollController)
-          else if (widget.child != null)
-            SliverFillRemaining(
-              fillOverscroll: true,
-              hasScrollBody: false,
-              child: Container(
-                color: widget.bodyColor,
-                padding: const .all(20),
-                child: widget.child,
-              ),
+              flexibleSpace:
+                  widget.flexibleSpace ??
+                  ClipRect(
+                    child: BackdropFilter(
+                      filter: .blur(
+                        sigmaX: 12 * _blurOpacity,
+                        sigmaY: 12 * _blurOpacity,
+                      ),
+                      child: Container(
+                        margin: .only(
+                          bottom: widget.appBarBottomColor,
+                        ),
+                        color:
+                            widget.appBarColor ??
+                            context.appBarOverlay.withValues(
+                              alpha: _blurOpacity,
+                            ),
+                      ),
+                    ),
+                  ),
             ),
-        ],
+
+            if (widget.builder != null)
+              widget.builder!(_scrollController)
+            else if (widget.child != null)
+              SliverFillRemaining(
+                fillOverscroll: true,
+                hasScrollBody: false,
+                child: Container(
+                  color: widget.bodyColor,
+                  padding: const .all(20),
+                  child: widget.child,
+                ),
+              ),
+          ],
+        ),
       ),
       bottomNavigationBar: widget.bottomNav != null
           ? Container(

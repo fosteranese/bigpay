@@ -94,6 +94,10 @@ class _HistoryPageState extends State<HistoryPage> {
       appBarBottomColor: 5,
       bodyColor: context.cardBg,
       miniTitle: 'Transactions',
+      onRefresh: () async {
+        _load();
+        await context.awaitProcess(_historyEvent);
+      },
       bottom: PreferredSize(
         preferredSize: Size(double.maxFinite, 70),
         child: Container(
@@ -148,11 +152,14 @@ class _HistoryPageState extends State<HistoryPage> {
 
           final items = _filtered;
           if (items.isEmpty) {
-            return _buildEmptyState();
+            return _scrollWrap(scrollController, _buildEmptyState());
           }
 
           return ListView.separated(
             controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
+            ),
             padding: const .symmetric(vertical: 10),
             itemCount: items.length,
             separatorBuilder: (_, _) => Divider(
@@ -173,6 +180,20 @@ class _HistoryPageState extends State<HistoryPage> {
           );
         },
       ),
+    );
+  }
+
+  /// Wraps a non-scrolling widget (empty state) in a full-height scrollable so
+  /// pull-to-refresh still works when there's nothing to scroll.
+  Widget _scrollWrap(ScrollController controller, Widget child) {
+    return ListView(
+      controller: controller,
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: ClampingScrollPhysics(),
+      ),
+      children: [
+        SizedBox(height: MediaQuery.sizeOf(context).height * 0.6, child: child),
+      ],
     );
   }
 

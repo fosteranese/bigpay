@@ -1,7 +1,10 @@
+import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/models/actions/refresh_dashboard_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -16,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/data/models/account/source.dart';
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/recent_activity.dart';
@@ -37,6 +41,9 @@ class _DashboardPageState extends State<DashboardPage> {
   final _scrollController = ScrollController();
   double _blurOpacity = 0.0;
 
+  /// The in-flight dashboard refresh, correlated by the listener below.
+  ExecuteProcessEvent? _refreshEvent;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +61,20 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
+  /// Pull-to-refresh: re-fetches the user's dashboard data (activities, most-used
+  /// services, wallet balance) and the avatar, then holds the spinner until the
+  /// reload lands. Mirrors umb's `RefreshUserData`.
+  Future<void> _onRefresh() async {
+    final event = context.dispatchProcess(const RefreshDashboardAction());
+    setState(() => _refreshEvent = event);
+    GetProfilePictureAction.event = context.dispatchProcess(
+      returnSavedResponse: true,
+      saveActionResponse: true,
+      GetProfilePictureAction(payload: NoPayload()),
+    );
+    await context.awaitProcess(event);
+  }
+
   Source? get _virtualBalance {
     return AppState.currentUser?.customerData
         ?.where((item) {
@@ -69,6 +90,15 @@ class _DashboardPageState extends State<DashboardPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return MultiProcessListener(
       listeners: [
+        // Pull-to-refresh result: swap in the fresh dashboard data.
+        ProcessListenerConfig<AuthData>(
+          event: () => _refreshEvent,
+          listener: (context, snapshot) {
+            if (snapshot.hasData) {
+              setState(() => AppState.currentUser = snapshot.data);
+            }
+          },
+        ),
         ProcessListenerConfig<GeneralFlowCategory>(
           event: () => GetServiceCategoriesAction.event,
           listener: (context, snapshot) {
@@ -182,170 +212,183 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          body: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                floating: true,
-                snap: true,
-                backgroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                automaticallyImplyLeading: false,
-                automaticallyImplyActions: false,
-                actionsPadding: .only(right: 15),
-                leadingWidth: 15 + 36,
-                leading: Padding(
-                  padding: const .only(left: 15),
-                  child: ProcessBuilder<String>(
-                    event: () => GetProfilePictureAction.event,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        AppState.currentUser = AppState.currentUser!.copyWith(
-                          profilePicture: snapshot.data ?? '',
-                        );
+          body: RefreshIndicator(
+            onRefresh: _onRefresh,
+            // The app bar is a sliver, so drop the indicator in below it.
+            edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
+            color: isDark ? AppColors.white : AppColors.primary,
+            backgroundColor: context.cardBg,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              ),
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  floating: true,
+                  snap: true,
+                  backgroundColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  automaticallyImplyLeading: false,
+                  automaticallyImplyActions: false,
+                  actionsPadding: .only(right: 15),
+                  leadingWidth: 15 + 36,
+                  leading: Padding(
+                    padding: const .only(left: 15),
+                    child: ProcessBuilder<String>(
+                      event: () => GetProfilePictureAction.event,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          AppState.currentUser = AppState.currentUser!.copyWith(
+                            profilePicture: snapshot.data ?? '',
+                          );
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundColor: context.avatarBg,
+                            backgroundImage: avatarFromBase64(
+                              AppState.currentUser?.profilePicture,
+                            ),
+                          );
+                        }
+
                         return CircleAvatar(
                           radius: 18,
                           backgroundColor: context.avatarBg,
-                          backgroundImage: avatarFromBase64(
-                            AppState.currentUser?.profilePicture,
-                          ),
                         );
-                      }
-
-                      return CircleAvatar(
-                        radius: 18,
-                        backgroundColor: context.avatarBg,
-                      );
-                    },
-                  ),
-                ),
-                title: Column(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: .center,
-                  crossAxisAlignment: .start,
-                  children: [
-                    Text(
-                      'Welcome Back',
-                      style: AppTypography.caption.copyWith(
-                        color: context.divider,
-                      ),
-                    ),
-                    Text(
-                      AppState.currentUser?.user?.name ?? '',
-                      style: AppTypography.p1Medium.copyWith(
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                actions: [
-                  IconButton(
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.white20,
-                    ),
-                    onPressed: () =>
-                        AppRouter.router.push(NotificationsPage.route.path),
-                    icon: SvgPicture.asset('assets/img/new-notification.svg'),
-                  ),
-                ],
-                centerTitle: false,
-                flexibleSpace: ClipRect(
-                  child: BackdropFilter(
-                    filter: .blur(
-                      sigmaX: 12 * _blurOpacity,
-                      sigmaY: 12 * _blurOpacity,
-                    ),
-                    child: Container(
-                      color: AppColors.white.withValues(
-                        alpha: 0.15 * _blurOpacity,
-                      ),
+                      },
                     ),
                   ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: VirtualWalletCard(
-                  label: _virtualBalance?.tile,
-                  balance: _virtualBalance?.balance,
-                  isVirtual: true,
-                  showViewDetails: true,
-                  onViewDetails: () =>
-                      AppRouter.router.push(VirtualWalletPage.route.path),
-                ),
-              ),
-              if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
-                SliverToBoxAdapter(
-                  child: Column(
+                  title: Column(
                     mainAxisSize: .min,
-                    mainAxisAlignment: .start,
+                    mainAxisAlignment: .center,
                     crossAxisAlignment: .start,
                     children: [
-                      Padding(
-                        padding: const .symmetric(horizontal: 20),
-                        child: Text(
-                          'Most used services',
-                          style: context.smallDetailsBold,
+                      Text(
+                        'Welcome Back',
+                        style: AppTypography.caption.copyWith(
+                          color: context.divider,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 60,
-                        child: PageView(
-                          scrollDirection: .horizontal,
-                          pageSnapping: true,
-                          controller: PageController(
-                            viewportFraction: 0.60,
-                            keepPage: true,
-                          ),
-                          padEnds: false,
-                          children:
-                              AppState.currentUser?.recentActivity?.map((item) {
-                                return FrequentServiceItem(data: item);
-                              }).toList() ??
-                              [],
+                      Text(
+                        AppState.currentUser?.user?.name ?? '',
+                        style: AppTypography.p1Medium.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ],
                   ),
-                ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const .only(
-                    top: 20,
-                    left: 15,
-                    right: 15,
-                  ),
-                  child: Text(
-                    'Services',
-                    style: context.header3,
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: .all(15),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                    mainAxisExtent: 124,
-                  ),
-                  delegate: SliverChildListDelegate(
-                    AppState.currentUser?.activities?.map((item) {
-                          return ActionButton(
-                            data: item,
-                          );
-                        }).toList() ??
-                        [],
+                  actions: [
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.white20,
+                      ),
+                      onPressed: () =>
+                          AppRouter.router.push(NotificationsPage.route.path),
+                      icon: SvgPicture.asset('assets/img/new-notification.svg'),
+                    ),
+                  ],
+                  centerTitle: false,
+                  flexibleSpace: ClipRect(
+                    child: BackdropFilter(
+                      filter: .blur(
+                        sigmaX: 12 * _blurOpacity,
+                        sigmaY: 12 * _blurOpacity,
+                      ),
+                      child: Container(
+                        color: AppColors.white.withValues(
+                          alpha: 0.15 * _blurOpacity,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              // Clear the floating bottom nav so the last cards aren't hidden.
-              const SliverToBoxAdapter(child: SizedBox(height: 110)),
-            ],
+                SliverToBoxAdapter(
+                  child: VirtualWalletCard(
+                    label: _virtualBalance?.tile,
+                    balance: _virtualBalance?.balance,
+                    isVirtual: true,
+                    showViewDetails: true,
+                    onViewDetails: () =>
+                        AppRouter.router.push(VirtualWalletPage.route.path),
+                  ),
+                ),
+                if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
+                  SliverToBoxAdapter(
+                    child: Column(
+                      mainAxisSize: .min,
+                      mainAxisAlignment: .start,
+                      crossAxisAlignment: .start,
+                      children: [
+                        Padding(
+                          padding: const .symmetric(horizontal: 20),
+                          child: Text(
+                            'Most used services',
+                            style: context.smallDetailsBold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 60,
+                          child: PageView(
+                            scrollDirection: .horizontal,
+                            pageSnapping: true,
+                            controller: PageController(
+                              viewportFraction: 0.60,
+                              keepPage: true,
+                            ),
+                            padEnds: false,
+                            children:
+                                AppState.currentUser?.recentActivity?.map((
+                                  item,
+                                ) {
+                                  return FrequentServiceItem(data: item);
+                                }).toList() ??
+                                [],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const .only(
+                      top: 20,
+                      left: 15,
+                      right: 15,
+                    ),
+                    child: Text(
+                      'Services',
+                      style: context.header3,
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: .all(15),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 15,
+                          mainAxisSpacing: 15,
+                          mainAxisExtent: 124,
+                        ),
+                    delegate: SliverChildListDelegate(
+                      AppState.currentUser?.activities?.map((item) {
+                            return ActionButton(
+                              data: item,
+                            );
+                          }).toList() ??
+                          [],
+                    ),
+                  ),
+                ),
+                // Clear the floating bottom nav so the last cards aren't hidden.
+                const SliverToBoxAdapter(child: SizedBox(height: 110)),
+              ],
+            ),
           ),
         ),
       ),

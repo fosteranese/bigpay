@@ -9,6 +9,7 @@ import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
+import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
@@ -43,62 +44,117 @@ class ServicePage extends StatefulWidget {
 class _ServicePageState extends State<ServicePage> {
   ExecuteProcessEvent? mainEvent;
 
+  /// The in-flight category refresh, correlated by the listener in [build].
+  ExecuteProcessEvent? _refreshEvent;
+
+  /// The forms shown on this page. Seeded from the category passed in, then
+  /// replaced by a pull-to-refresh.
+  GeneralFlowCategory? _category;
+
+  /// Rebuilds the endpoint that produced [widget.category] so a refresh can
+  /// re-fetch it — mirrors the switch used when the category was first opened.
+  String _categoriesEndpoint() {
+    final activity = widget.activityDatum.activity;
+    if (activity?.endpoint?.isNotEmpty ?? false) return activity!.endpoint!;
+
+    switch (activity?.activityType) {
+      case ActivityTypesConst.fblCollect:
+        return '/FBLCollect/categories/${activity?.activityId}';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/categories/${activity?.activityId}';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/categories/${activity?.activityId}';
+    }
+  }
+
+  /// Pull-to-refresh: re-fetches this activity's categories/forms and holds the
+  /// spinner until they land.
+  Future<void> _onRefresh() async {
+    final event = context.dispatchProcess(
+      saveActionResponse: true,
+      returnSavedResponse: true,
+      GetServiceCategoriesAction(endpointFunc: _categoriesEndpoint),
+    );
+    setState(() => _refreshEvent = event);
+    await context.awaitProcess(event);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ProcessListener<GeneralFlowFormData>(
-      event: () => mainEvent,
-      listener: (context, snapshot) {
-        if (snapshot.isLoading && !snapshot.isSilent && !snapshot.isCached) {
-          MessageUtil.displayLoading(context);
-          return;
-        } else if (!snapshot.isSilent && !snapshot.isCached) {
-          MessageUtil.close(context);
-        }
+    final forms = (_category ?? widget.category).forms ?? const [];
+    return MultiProcessListener(
+      listeners: [
+        ProcessListenerConfig<GeneralFlowCategory>(
+          event: () => _refreshEvent,
+          listener: (context, snapshot) {
+            if (snapshot.hasData) {
+              setState(() => _category = snapshot.data);
+            }
+          },
+        ),
+        ProcessListenerConfig<GeneralFlowFormData>(
+          event: () => mainEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading &&
+                !snapshot.isSilent &&
+                !snapshot.isCached) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else if (!snapshot.isSilent && !snapshot.isCached) {
+              MessageUtil.close(context);
+            }
 
-        if (snapshot.hasData && !(snapshot.isSilent && !snapshot.isCached)) {
-          if (!snapshot.isSilent &&
-              !snapshot.isCached &&
-              (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
-            MessageUtil.displayErrorDialog(
-              context,
-              title: 'Service Unavailable',
-              message: 'This service is currently not available',
-            );
-            return;
-          }
+            if (snapshot.hasData &&
+                !(snapshot.isSilent && !snapshot.isCached)) {
+              if (!snapshot.isSilent &&
+                  !snapshot.isCached &&
+                  (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
+                MessageUtil.displayErrorDialog(
+                  context,
+                  title: 'Service Unavailable',
+                  message: 'This service is currently not available',
+                );
+                return;
+              }
 
-          AppRouter.router.push(
-            ServiceFormPage.route.path,
-            extra: {
-              'activityDatum': widget.activityDatum,
-              'category': widget.category,
-              'formData': snapshot.data,
-              'amDoing': widget.amDoing,
-            },
-          );
-          return;
-        }
+              AppRouter.router.push(
+                ServiceFormPage.route.path,
+                extra: {
+                  'activityDatum': widget.activityDatum,
+                  'category': widget.category,
+                  'formData': snapshot.data,
+                  'amDoing': widget.amDoing,
+                },
+              );
+              return;
+            }
 
-        if (snapshot.hasError) {
-          if (snapshot.error?.code == StatusCodeConstants.verifyIdentify) {
-            _verify();
-            return;
-          }
+            if (snapshot.hasError) {
+              if (snapshot.error?.code == StatusCodeConstants.verifyIdentify) {
+                _verify();
+                return;
+              }
 
-          MessageUtil.displayErrorDialog(
-            context,
-            message: snapshot.error!.message,
-          );
-          return;
-        }
-      },
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+              return;
+            }
+          },
+        ),
+      ],
       child: MainLayout(
         bottomSize: 50,
         title: widget.activityDatum.activity?.activityName ?? '',
+        onRefresh: _onRefresh,
         builder: (_) => SliverList.builder(
-          itemCount: widget.category.forms?.length ?? 0,
+          itemCount: forms.length,
           itemBuilder: (context, index) {
-            final item = widget.category.forms![index];
+            final item = forms[index];
             return Padding(
               padding: const .symmetric(
                 horizontal: 20,

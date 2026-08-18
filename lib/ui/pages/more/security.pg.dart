@@ -82,6 +82,14 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
+  /// Pull-to-refresh: re-loads the security forms and re-reads the on-device
+  /// biometric settings, holding the spinner until the forms land.
+  Future<void> _onRefresh() async {
+    setState(_loadCategories);
+    _loadBiometricSettings();
+    await context.awaitProcess(_categoriesEvent);
+  }
+
   // --- Security forms -------------------------------------------------------
 
   /// Fetches a tapped security form and jumps to it — the same direct-to-form
@@ -289,6 +297,7 @@ class _SecurityPageState extends State<SecurityPage> {
       child: MainLayout(
         bottomSize: 60,
         title: 'Security',
+        onRefresh: _onRefresh,
         child: ProcessConsumer<GeneralFlowCategory>(
           event: () => _categoriesEvent,
           listener: (context, snapshot) {

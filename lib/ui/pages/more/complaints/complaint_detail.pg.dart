@@ -109,6 +109,10 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
         bottomSize: 76,
         title: widget.complaint?.subject ?? 'Complaint',
         subtitle: widget.complaint?.category,
+        onRefresh: () async {
+          _loadDetail();
+          await context.awaitProcess(_detailEvent);
+        },
         bottomNav: _buildComposer(),
         child: ProcessConsumer<ComplaintDetail>(
           event: () => _detailEvent,
