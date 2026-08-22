@@ -28,6 +28,7 @@ class ServicePage extends StatefulWidget {
     required this.activityDatum,
     required this.category,
     this.amDoing = AmDoing.transaction,
+    this.useScaffold = true,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/service',
@@ -35,6 +36,13 @@ class ServicePage extends StatefulWidget {
   final ActivityDatum activityDatum;
   final GeneralFlowCategory category;
   final AmDoing amDoing;
+
+  /// False to render without an owning Scaffold — for use as inline pane
+  /// content in a [FoldAwareLayout] detail pane (see [ServicesPage]), where
+  /// a Scaffold nested inside the pane's Expanded silently fails to render
+  /// its body on a real device. Pushed-page usage (the default) is
+  /// unaffected.
+  final bool useScaffold;
 
   @override
   State<ServicePage> createState() => _ServicePageState();
@@ -131,6 +139,7 @@ class _ServicePageState extends State<ServicePage> {
         ),
       ],
       child: MainLayout(
+        useScaffold: widget.useScaffold,
         bottomSize: 50,
         title: widget.activityDatum.activity?.activityName ?? '',
         onRefresh: _onRefresh,

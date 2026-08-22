@@ -15,6 +15,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:uuid/uuid.dart';
 
 class WalletsPage extends StatefulWidget {
@@ -30,6 +31,24 @@ class WalletsPage extends StatefulWidget {
 class _WalletsPageState extends State<WalletsPage> {
   final _buttonKey = GlobalKey();
   ExecuteProcessEvent? mainEvent;
+
+  /// The wallet shown in the detail pane on a half-opened foldable
+  /// ([FoldAwareLayout]) — unused (and the pane not shown) on any other
+  /// device, where opening a wallet pushes [VirtualWalletPage] instead.
+  Account? _selectedAccount;
+
+  void _openWallet(Account account) {
+    if (context.isBookMode) {
+      setState(() => _selectedAccount = account);
+      return;
+    }
+
+    AppRouter.router.push(
+      VirtualWalletPage.route.path,
+      extra: account,
+    );
+  }
+
   void _showContextMenu(BuildContext context) {
     // 2. Find the RenderBox of the button
     final RenderBox renderBox =
@@ -71,6 +90,24 @@ class _WalletsPageState extends State<WalletsPage> {
 
   @override
   Widget build(BuildContext context) {
+    return FoldAwareLayout(
+      detail: _selectedAccount == null
+          ? null
+          : VirtualWalletView(
+              account: _selectedAccount,
+              onBack: () => setState(() => _selectedAccount = null),
+            ),
+      emptyDetail: Center(
+        child: Text(
+          'Select a wallet to view its details',
+          style: context.smallDetails,
+        ),
+      ),
+      master: _master(context),
+    );
+  }
+
+  Widget _master(BuildContext context) {
     return MainLayout(
       bottomSize: 61,
       title: 'Wallets',
@@ -102,6 +139,7 @@ class _WalletsPageState extends State<WalletsPage> {
                 snapshot.data?.map((item) {
                   return WalletListItem(
                     data: item,
+                    onTap: () => _openWallet(item),
                   );
                 }).toList() ??
                 [],
@@ -116,8 +154,10 @@ class WalletListItem extends StatelessWidget {
   const WalletListItem({
     super.key,
     required this.data,
+    this.onTap,
   });
   final Account data;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -164,10 +204,12 @@ class WalletListItem extends StatelessWidget {
 
         child: ListTile(
           contentPadding: .symmetric(horizontal: 15),
-          onTap: () => AppRouter.router.push(
-            VirtualWalletPage.route.path,
-            extra: data,
-          ),
+          onTap:
+              onTap ??
+              () => AppRouter.router.push(
+                VirtualWalletPage.route.path,
+                extra: data,
+              ),
           leading: CachedNetworkImage(
             imageUrl:
                 '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',

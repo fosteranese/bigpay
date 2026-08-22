@@ -28,6 +28,7 @@ class MainLayout extends StatefulWidget {
     this.builder,
     this.backgroundColor = Colors.transparent,
     this.onRefresh,
+    this.useScaffold = true,
   });
   final String? title;
   final String? subtitle;
@@ -51,6 +52,12 @@ class MainLayout extends StatefulWidget {
   /// Pull-to-refresh handler. When set, the scroll body gets a
   /// [RefreshIndicator]; the future should complete when the reload lands.
   final Future<void> Function()? onRefresh;
+
+  /// False to render without an owning Scaffold — for use as inline pane
+  /// content in a [FoldAwareLayout] detail pane, where a Scaffold nested
+  /// inside the pane's Expanded silently fails to render its body on a real
+  /// device. Pushed-page usage (the default) is unaffected.
+  final bool useScaffold;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -119,165 +126,183 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  Scaffold _buildMainPage() {
-    return Scaffold(
-      backgroundColor: widget.backgroundColor,
-      body: BoundedContent(
-        child: _wrapRefresh(
-          CustomScrollView(
-            controller: _scrollController,
-            physics: widget.onRefresh != null
-                ? const AlwaysScrollableScrollPhysics(
-                    parent: ClampingScrollPhysics(),
-                  )
-                : const ClampingScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                floating: true,
-                snap: true,
-                backgroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                automaticallyImplyLeading: false,
-                automaticallyImplyActions: false,
-                leadingWidth: 70,
-                title: (widget.miniTitle?.isNotEmpty ?? false)
-                    ? Text(
-                        widget.miniTitle!,
-                        style: context.p1,
-                      )
-                    : null,
-                leading: AppRouter.router.canPop() && widget.showBackBtn
-                    ? IconButton.filled(
-                        tooltip: 'Back',
-                        style: IconButton.styleFrom(
-                          backgroundColor: context.cardBg,
-                          foregroundColor: context.textPrimary,
-                          fixedSize: Size(44, 44),
-                        ),
-                        onPressed: () {
-                          AppRouter.router.pop();
-                        },
-                        icon: Icon(
-                          Icons.chevron_left_outlined,
-                        ),
-                      )
-                    : null,
-                bottom:
-                    widget.bottom ??
-                    PreferredSize(
-                      preferredSize: Size(double.maxFinite, widget.bottomSize),
-                      child: Container(
-                        width: double.maxFinite,
-                        padding: .only(
-                          left: context.gutter,
-                          right: context.gutter,
-                          bottom: 10,
-                        ),
-                        child: Column(
-                          mainAxisSize: .min,
-                          mainAxisAlignment: .center,
-                          crossAxisAlignment: .start,
-                          children: [
-                            SizedBox(height: 16),
-                            if (widget.title != null && widget.actions == null)
-                              FittedBox(
-                                child: Text(
-                                  widget.title!,
-                                  style:
-                                      (widget.titleStyle ??
-                                              AppTypography.display2)
-                                          .copyWith(
-                                            color: context.textPrimary,
-                                          ),
-                                ),
-                              )
-                            else if (widget.title != null &&
-                                widget.actions != null)
-                              Row(
-                                mainAxisSize: .max,
-                                crossAxisAlignment: .center,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      widget.title!,
-                                      style: AppTypography.display1.copyWith(
-                                        color: context.textPrimary,
-                                      ),
+  Widget _buildMainPage() {
+    final body = BoundedContent(
+      child: _wrapRefresh(
+        CustomScrollView(
+          controller: _scrollController,
+          physics: widget.onRefresh != null
+              ? const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                )
+              : const ClampingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              floating: true,
+              snap: true,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+              automaticallyImplyActions: false,
+              leadingWidth: 70,
+              title: (widget.miniTitle?.isNotEmpty ?? false)
+                  ? Text(
+                      widget.miniTitle!,
+                      style: context.p1,
+                    )
+                  : null,
+              leading: AppRouter.router.canPop() && widget.showBackBtn
+                  ? IconButton.filled(
+                      tooltip: 'Back',
+                      style: IconButton.styleFrom(
+                        backgroundColor: context.cardBg,
+                        foregroundColor: context.textPrimary,
+                        fixedSize: Size(44, 44),
+                      ),
+                      onPressed: () {
+                        AppRouter.router.pop();
+                      },
+                      icon: Icon(
+                        Icons.chevron_left_outlined,
+                      ),
+                    )
+                  : null,
+              bottom:
+                  widget.bottom ??
+                  PreferredSize(
+                    preferredSize: Size(double.maxFinite, widget.bottomSize),
+                    child: Container(
+                      width: double.maxFinite,
+                      padding: .only(
+                        left: context.gutter,
+                        right: context.gutter,
+                        bottom: 10,
+                      ),
+                      child: Column(
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .center,
+                        crossAxisAlignment: .start,
+                        children: [
+                          SizedBox(height: 16),
+                          if (widget.title != null && widget.actions == null)
+                            FittedBox(
+                              child: Text(
+                                widget.title!,
+                                style:
+                                    (widget.titleStyle ??
+                                            AppTypography.display2)
+                                        .copyWith(
+                                          color: context.textPrimary,
+                                        ),
+                              ),
+                            )
+                          else if (widget.title != null &&
+                              widget.actions != null)
+                            Row(
+                              mainAxisSize: .max,
+                              crossAxisAlignment: .center,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.title!,
+                                    style: AppTypography.display1.copyWith(
+                                      color: context.textPrimary,
                                     ),
                                   ),
-                                  if (widget.actions != null) widget.actions!,
-                                ],
-                              ),
-                            if (widget.subtitle != null)
-                              Text(
-                                widget.subtitle!,
-                                style: context.smallDetails,
-                              )
-                            else if (widget.subtitleWidget != null)
-                              widget.subtitleWidget!,
-                          ],
-                        ),
-                      ),
-                    ),
-                flexibleSpace:
-                    widget.flexibleSpace ??
-                    ValueListenableBuilder<double>(
-                      valueListenable: _blurOpacity,
-                      builder: (context, blur, _) => ClipRect(
-                        child: BackdropFilter(
-                          filter: .blur(
-                            sigmaX: 12 * blur,
-                            sigmaY: 12 * blur,
-                          ),
-                          child: Container(
-                            margin: .only(
-                              bottom: widget.appBarBottomColor,
-                            ),
-                            color:
-                                widget.appBarColor ??
-                                context.appBarOverlay.withValues(
-                                  alpha: blur,
                                 ),
+                                if (widget.actions != null) widget.actions!,
+                              ],
+                            ),
+                          if (widget.subtitle != null)
+                            Text(
+                              widget.subtitle!,
+                              style: context.smallDetails,
+                            )
+                          else if (widget.subtitleWidget != null)
+                            widget.subtitleWidget!,
+                        ],
+                      ),
+                    ),
+                  ),
+              flexibleSpace:
+                  widget.flexibleSpace ??
+                  ValueListenableBuilder<double>(
+                    valueListenable: _blurOpacity,
+                    builder: (context, blur, _) => ClipRect(
+                      child: BackdropFilter(
+                        filter: .blur(
+                          sigmaX: 12 * blur,
+                          sigmaY: 12 * blur,
+                        ),
+                        child: Container(
+                          margin: .only(
+                            bottom: widget.appBarBottomColor,
                           ),
+                          color:
+                              widget.appBarColor ??
+                              context.appBarOverlay.withValues(
+                                alpha: blur,
+                              ),
                         ),
                       ),
                     ),
-              ),
-
-              if (widget.builder != null)
-                widget.builder!(_scrollController)
-              else if (widget.child != null)
-                SliverFillRemaining(
-                  fillOverscroll: true,
-                  hasScrollBody: false,
-                  child: Container(
-                    color: widget.bodyColor,
-                    padding: .all(context.gutter),
-                    child: widget.child,
                   ),
+            ),
+
+            if (widget.builder != null)
+              widget.builder!(_scrollController)
+            else if (widget.child != null)
+              SliverFillRemaining(
+                fillOverscroll: true,
+                hasScrollBody: false,
+                child: Container(
+                  color: widget.bodyColor,
+                  padding: .all(context.gutter),
+                  child: widget.child,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
-      bottomNavigationBar: widget.bottomNav != null
-          ? BoundedContent(
-              child: Container(
-                padding: .only(
-                  right: context.gutter,
-                  left: context.gutter,
-                  top: 15,
-                  bottom: 10,
-                ),
-                child: SafeArea(
-                  child: widget.bottomNav!,
-                ),
+    );
+
+    final Widget? bottomNav = widget.bottomNav == null
+        ? null
+        : BoundedContent(
+            child: Container(
+              padding: .only(
+                right: context.gutter,
+                left: context.gutter,
+                top: 15,
+                bottom: 10,
               ),
-            )
-          : null,
+              child: SafeArea(
+                child: widget.bottomNav!,
+              ),
+            ),
+          );
+
+    if (!widget.useScaffold) {
+      return Container(
+        color: widget.backgroundColor,
+        child: bottomNav == null
+            ? body
+            : Column(
+                children: [
+                  Expanded(child: body),
+                  bottomNav,
+                ],
+              ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: widget.backgroundColor,
+      body: body,
+      bottomNavigationBar: bottomNav,
     );
   }
 }
