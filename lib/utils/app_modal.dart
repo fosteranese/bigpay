@@ -1,5 +1,6 @@
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,10 @@ class AppModal {
     EdgeInsetsGeometry padding = const .all(10),
     List<Widget> actions = const [],
   }) {
+    // Capped the same way page content is via BoundedContent, so the sheet
+    // doesn't stretch edge-to-edge on a tablet/desktop window or straddle
+    // the hinge on a foldable in book mode.
+    final cap = contentCapWidth(context);
     showModalBottomSheet(
       isScrollControlled: true,
       requestFocus: true,
@@ -21,7 +26,8 @@ class AppModal {
       useRootNavigator: true,
       isDismissible: true,
       constraints: BoxConstraints(
-        minWidth: double.maxFinite,
+        minWidth: cap == double.infinity ? double.maxFinite : 0,
+        maxWidth: cap,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),

@@ -8,6 +8,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_modal.dart';
 
 /// A pushed full page wrapping [VirtualWalletView] — used on every device
@@ -113,76 +114,85 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
           maxChildSize: max,
           snap: true,
           builder: (context, scrollController) {
-            return ClipRRect(
-              borderRadius: .vertical(top: .circular(20)),
-              child: Container(
-                color: context.cardBg,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const .fromLTRB(16, 12, 10, 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Recent Transactions',
-                              style: context.header1,
+            // Capped the same way DashboardLayout above caps itself, so the
+            // sheet doesn't disagree with the page on width on a wide screen.
+            return BoundedContent(
+              maxWidth: context.responsive<double>(
+                compact: double.infinity,
+                medium: 760,
+                expanded: 960,
+              ),
+              child: ClipRRect(
+                borderRadius: .vertical(top: .circular(20)),
+                child: Container(
+                  color: context.cardBg,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const .fromLTRB(16, 12, 10, 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Recent Transactions',
+                                style: context.header1,
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            width: 130,
-                            child: FormButton(
-                              backgroundColor: context.avatarBg,
-                              foregroundColor: context.textPrimary,
-                              padding: .zero,
-                              height: 30,
-                              onPressed: () {
-                                AppModal.showBottomModal(
-                                  context,
-                                  label: 'Choose a date range',
-                                  padding: .all(20),
-                                  children: [
-                                    Text(
-                                      'The statement will be sent to your email address',
-                                      style: AppTypography.caption,
-                                    ),
-                                    const SizedBox(height: 20),
-                                    FormDateInput(
-                                      label: 'Date From',
-                                      placeholder: 'DD/MM/YY',
-                                      controller: _dateFromController,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    FormDateInput(
-                                      label: 'Date To',
-                                      placeholder: 'DD/MM/YY',
-                                      controller: _dateToController,
-                                    ),
-                                    const SizedBox(height: 20),
-                                    FormButton(
-                                      height: 54,
-                                      onPressed: () {},
-                                      text: 'Show Results',
-                                    ),
-                                  ],
-                                );
-                              },
-                              labelSize: 13,
-                              text: 'View Statement',
+                            SizedBox(
+                              width: 130,
+                              child: FormButton(
+                                backgroundColor: context.avatarBg,
+                                foregroundColor: context.textPrimary,
+                                padding: .zero,
+                                height: 30,
+                                onPressed: () {
+                                  AppModal.showBottomModal(
+                                    context,
+                                    label: 'Choose a date range',
+                                    padding: .all(20),
+                                    children: [
+                                      Text(
+                                        'The statement will be sent to your email address',
+                                        style: AppTypography.caption,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      FormDateInput(
+                                        label: 'Date From',
+                                        placeholder: 'DD/MM/YY',
+                                        controller: _dateFromController,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      FormDateInput(
+                                        label: 'Date To',
+                                        placeholder: 'DD/MM/YY',
+                                        controller: _dateToController,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      FormButton(
+                                        height: 54,
+                                        onPressed: () {},
+                                        text: 'Show Results',
+                                      ),
+                                    ],
+                                  );
+                                },
+                                labelSize: 13,
+                                text: 'View Statement',
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemBuilder: (context, index) {
-                          return TransactionListItem();
-                        },
+                      Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemBuilder: (context, index) {
+                            return TransactionListItem();
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

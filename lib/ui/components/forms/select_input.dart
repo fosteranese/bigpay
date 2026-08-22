@@ -2,6 +2,7 @@ import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -86,13 +87,15 @@ class _FormSelectInputState extends State<FormSelectInput> {
   }
 
   void _onShortList() {
+    final cap = contentCapWidth(context);
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
       useRootNavigator: true,
       isDismissible: true,
       constraints: BoxConstraints(
-        minWidth: double.maxFinite,
+        minWidth: cap == double.infinity ? double.maxFinite : 0,
+        maxWidth: cap,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),
@@ -151,9 +154,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void _onLongList() {
     _searchController.clear();
     _filteredOptions = widget.options;
+    final cap = contentCapWidth(context);
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
+      constraints: BoxConstraints(
+        minWidth: cap == double.infinity ? double.maxFinite : 0,
+        maxWidth: cap,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: .vertical(
           top: .circular(20),

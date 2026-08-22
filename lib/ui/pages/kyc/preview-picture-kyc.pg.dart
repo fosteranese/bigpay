@@ -44,7 +44,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
         child: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .start,
-          crossAxisAlignment: .start,
+          crossAxisAlignment: .center,
           children: [
             ConstrainedBox(
               constraints: .new(
