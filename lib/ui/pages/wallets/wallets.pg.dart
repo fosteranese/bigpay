@@ -32,13 +32,13 @@ class _WalletsPageState extends State<WalletsPage> {
   final _buttonKey = GlobalKey();
   ExecuteProcessEvent? mainEvent;
 
-  /// The wallet shown in the detail pane on a half-opened foldable
-  /// ([FoldAwareLayout]) — unused (and the pane not shown) on any other
+  /// The wallet shown in the detail pane in split view
+  /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
   /// device, where opening a wallet pushes [VirtualWalletPage] instead.
   Account? _selectedAccount;
 
   void _openWallet(Account account) {
-    if (context.isBookMode) {
+    if (context.usesSplitView) {
       setState(() => _selectedAccount = account);
       return;
     }
@@ -90,18 +90,16 @@ class _WalletsPageState extends State<WalletsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FoldAwareLayout(
+    return MasterDetailLayout(
       detail: _selectedAccount == null
           ? null
           : VirtualWalletView(
               account: _selectedAccount,
               onBack: () => setState(() => _selectedAccount = null),
             ),
-      emptyDetail: Center(
-        child: Text(
-          'Select a wallet to view its details',
-          style: context.smallDetails,
-        ),
+      emptyDetail: const PaneEmptyState(
+        icon: Icons.account_balance_wallet_outlined,
+        message: 'Select a wallet to view its details',
       ),
       master: _master(context),
     );

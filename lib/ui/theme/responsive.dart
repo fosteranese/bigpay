@@ -8,6 +8,7 @@ class Breakpoints {
 
   static const medium = 600.0; // tablet portrait / unfolded foldable
   static const expanded = 840.0; // tablet landscape / desktop
+  static const wide = 1100.0; // room for sidebar + master + detail together
 }
 
 extension ResponsiveContext on BuildContext {
@@ -17,6 +18,10 @@ extension ResponsiveContext on BuildContext {
   bool get isMedium =>
       _width >= Breakpoints.medium && _width < Breakpoints.expanded;
   bool get isExpanded => _width >= Breakpoints.expanded;
+
+  /// Wide enough for a sidebar (248) + a master list pane (~400) + a usable
+  /// detail pane all at once — see [MasterDetailLayout].
+  bool get isWide => _width >= Breakpoints.wide;
 
   /// Drives the [MainShell] nav-rail switch — bottom pill nav below this,
   /// side rail at or above it.

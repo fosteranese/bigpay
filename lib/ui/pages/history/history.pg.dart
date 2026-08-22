@@ -41,8 +41,8 @@ class _HistoryPageState extends State<HistoryPage> {
   /// label the filter control. Empty means "all".
   String _filterName = '';
 
-  /// The receipt shown in the detail pane on a half-opened foldable
-  /// ([FoldAwareLayout]) — unused (and the pane not shown) on any other
+  /// The receipt shown in the detail pane in split view
+  /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
   /// device, where opening a receipt pushes [TransactionDetailsPage] instead.
   RequestResponse? _selectedRecord;
 
@@ -87,7 +87,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void _openReceipt(RequestResponse record) {
-    if (context.isBookMode) {
+    if (context.usesSplitView) {
       setState(() => _selectedRecord = record);
       return;
     }
@@ -100,18 +100,16 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FoldAwareLayout(
+    return MasterDetailLayout(
       detail: _selectedRecord == null
           ? null
           : TransactionDetailsView(
               receipt: _selectedRecord!,
               onBack: () => setState(() => _selectedRecord = null),
             ),
-      emptyDetail: Center(
-        child: Text(
-          'Select a transaction to view its receipt',
-          style: context.smallDetails,
-        ),
+      emptyDetail: const PaneEmptyState(
+        icon: Icons.receipt_long_outlined,
+        message: 'Select a transaction to view its receipt',
       ),
       master: _master(context),
     );

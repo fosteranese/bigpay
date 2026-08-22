@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bigpay/ui/components/app_sidebar.dart';
 import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/side_nav_rail.dart';
+import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 
 /// Hosts the tab branches and the bottom nav bar, switching branches on tap.
@@ -25,7 +27,27 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.isTabletOrLarger) {
+    // A folded phone is still phone-class hardware, and it's already
+    // spending its width on the book-mode master/detail split — adding a
+    // sidebar or rail on top of that just made everything feel cramped.
+    // Bottom pill nav regardless of raw width whenever a hinge is actually
+    // in play.
+    if (!context.isBookMode && context.isExpanded) {
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Row(
+          children: [
+            AppSidebar(
+              selectedIndex: navigationShell.currentIndex,
+              onTap: _goBranch,
+            ),
+            Expanded(child: navigationShell),
+          ],
+        ),
+      );
+    }
+
+    if (!context.isBookMode && context.isMedium) {
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: Row(

@@ -13,7 +13,7 @@ import 'package:go_router/go_router.dart';
 
 /// A pushed full page wrapping [TransactionDetailsView] — used on every
 /// device except a foldable in book mode, where [HistoryPage] shows the same
-/// view inline in the second pane instead (see [FoldAwareLayout]).
+/// view inline in the second pane instead (see [MasterDetailLayout]).
 class TransactionDetailsPage extends StatelessWidget {
   const TransactionDetailsPage({
     super.key,
@@ -43,7 +43,7 @@ class TransactionDetailsPage extends StatelessWidget {
 ///
 /// Deliberately built from plain layout widgets (Column) rather than its own
 /// nested Scaffold: a Scaffold nested inside the Expanded pane of
-/// [FoldAwareLayout] silently fails to render its `body` slot (confirmed on
+/// [MasterDetailLayout] silently fails to render its `body` slot (confirmed on
 /// a real device — the appBar/bottomNavigationBar render fine, the body
 /// doesn't, with no error). One Scaffold in the tree at a time avoids it —
 /// [TransactionDetailsPage] supplies the only one, in both hosting contexts.

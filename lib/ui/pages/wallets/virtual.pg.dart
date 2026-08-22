@@ -12,7 +12,7 @@ import 'package:bigpay/utils/app_modal.dart';
 
 /// A pushed full page wrapping [VirtualWalletView] — used on every device
 /// except a foldable in book mode, where [WalletsPage] shows the same view
-/// inline in the second pane instead (see [FoldAwareLayout]).
+/// inline in the second pane instead (see [MasterDetailLayout]).
 class VirtualWalletPage extends StatelessWidget {
   const VirtualWalletPage({super.key, this.account});
   static PageRouteDefinition route = PageRouteDefinition(
@@ -37,7 +37,7 @@ class VirtualWalletPage extends StatelessWidget {
 ///
 /// Built without a Scaffold anywhere in the tree (both here and in the
 /// [DashboardLayout] it wraps) — a Scaffold nested inside the Expanded pane
-/// of a FoldAwareLayout silently fails to render its body on a real device
+/// of a MasterDetailLayout silently fails to render its body on a real device
 /// (confirmed on [TransactionDetailsView]'s equivalent bug). One Scaffold at
 /// a time avoids it, whichever ancestor happens to supply it.
 class VirtualWalletView extends StatefulWidget {

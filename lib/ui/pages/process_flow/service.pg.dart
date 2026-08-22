@@ -38,7 +38,7 @@ class ServicePage extends StatefulWidget {
   final AmDoing amDoing;
 
   /// False to render without an owning Scaffold — for use as inline pane
-  /// content in a [FoldAwareLayout] detail pane (see [ServicesPage]), where
+  /// content in a [MasterDetailLayout] detail pane (see [ServicesPage]), where
   /// a Scaffold nested inside the pane's Expanded silently fails to render
   /// its body on a real device. Pushed-page usage (the default) is
   /// unaffected.

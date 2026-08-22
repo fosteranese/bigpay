@@ -54,7 +54,7 @@ class MainLayout extends StatefulWidget {
   final Future<void> Function()? onRefresh;
 
   /// False to render without an owning Scaffold — for use as inline pane
-  /// content in a [FoldAwareLayout] detail pane, where a Scaffold nested
+  /// content in a [MasterDetailLayout] detail pane, where a Scaffold nested
   /// inside the pane's Expanded silently fails to render its body on a real
   /// device. Pushed-page usage (the default) is unaffected.
   final bool useScaffold;

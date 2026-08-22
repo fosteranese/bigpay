@@ -70,7 +70,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // No Scaffold here deliberately — a Scaffold nested inside the Expanded
-    // pane of a FoldAwareLayout (see VirtualWalletPage) silently fails to
+    // pane of a MasterDetailLayout (see VirtualWalletPage) silently fails to
     // render its body on a real device, no error. Callers that need Scaffold
     // chrome (e.g. a pushed full page) supply their own around this.
     return Container(

@@ -32,18 +32,19 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
   final _searchController = TextEditingController();
   String _query = '';
 
-  /// The category shown in the detail pane on a half-opened foldable
-  /// ([FoldAwareLayout]) — dispatched through a local event rather than the
-  /// shared [GetServiceCategoriesAction.event] static field, so it doesn't
-  /// also trigger the app-wide listener (in DashboardPage) that pushes
-  /// [ServicePage]. Unused (and the pane not shown) on any other device,
-  /// where opening a service dispatches through the static field as before.
+  /// The category shown in the detail pane in split view
+  /// ([MasterDetailLayout]) — dispatched through a local event rather than
+  /// the shared [GetServiceCategoriesAction.event] static field, so it
+  /// doesn't also trigger the app-wide listener (in DashboardPage) that
+  /// pushes [ServicePage]. Unused (and the pane not shown) on any other
+  /// device, where opening a service dispatches through the static field as
+  /// before.
   ActivityDatum? _selectedActivity;
   GeneralFlowCategory? _selectedCategory;
   ExecuteProcessEvent? _categoryEvent;
 
   void _openService(ActivityDatum item) {
-    if (!context.isBookMode) {
+    if (!context.usesSplitView) {
       GetServiceCategoriesAction.activityDatum = item;
       GetServiceCategoriesAction.event = context.dispatchProcess(
         saveActionResponse: true,
@@ -143,7 +144,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
           },
         ),
       ],
-      child: FoldAwareLayout(
+      child: MasterDetailLayout(
         detail: _selectedActivity == null || _selectedCategory == null
             ? null
             : ServicePage(
@@ -151,11 +152,9 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
                 category: _selectedCategory!,
                 useScaffold: false,
               ),
-        emptyDetail: Center(
-          child: Text(
-            'Select a service to view its forms',
-            style: context.smallDetails,
-          ),
+        emptyDetail: const PaneEmptyState(
+          icon: Icons.description_outlined,
+          message: 'Select a service to view its forms',
         ),
         master: _master(context),
       ),
