@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/ui/components/bottom_nav_bar.dart';
+import 'package:bigpay/ui/components/side_nav_rail.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 /// Hosts the tab branches and the bottom nav bar, switching branches on tap.
 ///
@@ -14,8 +16,30 @@ class MainShell extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
+  void _goBranch(int index) => navigationShell.goBranch(
+    index,
+    // Always land on the tab's main page — reset the branch to its root
+    // on every tap, not just when re-tapping the active tab.
+    initialLocation: true,
+  );
+
   @override
   Widget build(BuildContext context) {
+    if (context.isTabletOrLarger) {
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Row(
+          children: [
+            SideNavRail(
+              selectedIndex: navigationShell.currentIndex,
+              onTap: _goBranch,
+            ),
+            Expanded(child: navigationShell),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       // Let the branch content run under the floating nav bar.
@@ -25,12 +49,7 @@ class MainShell extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: NeumorphicBottomNav(
           selectedIndex: navigationShell.currentIndex,
-          onTap: (index) => navigationShell.goBranch(
-            index,
-            // Always land on the tab's main page — reset the branch to its root
-            // on every tap, not just when re-tapping the active tab.
-            initialLocation: true,
-          ),
+          onTap: _goBranch,
         ),
       ),
     );

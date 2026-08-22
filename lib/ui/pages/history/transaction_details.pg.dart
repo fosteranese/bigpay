@@ -5,6 +5,7 @@ import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
@@ -57,109 +58,113 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           ),
         ),
         body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: .center,
-            children: [
-              _buildTitle(),
-              const SizedBox(height: 20),
-              Container(
-                margin: .symmetric(horizontal: 20),
-                padding: .all(24),
-                decoration: BoxDecoration(
-                  color: context.cardBg,
-                  borderRadius: .circular(8),
+          child: BoundedContent(
+            child: Column(
+              mainAxisAlignment: .center,
+              children: [
+                _buildTitle(),
+                const SizedBox(height: 20),
+                Container(
+                  margin: .symmetric(horizontal: 20),
+                  padding: .all(24),
+                  decoration: BoxDecoration(
+                    color: context.cardBg,
+                    borderRadius: .circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      TransactionDetailsItem(
+                        title: 'Service',
+                        value: widget.receipt.formName ?? '',
+                      ),
+                      TransactionDetailsItem(
+                        title: 'Transaction ID',
+                        value: widget.receipt.activityName ?? '',
+                      ),
+                      Divider(
+                        color: context.divider,
+                        thickness: 4,
+                      ),
+                      ...widget.receipt.previewData.map((item) {
+                        return TransactionDetailsItem(
+                          title: item.key ?? '',
+                          value: item.value ?? '',
+                        );
+                      }),
+                      Divider(
+                        color: context.divider,
+                        thickness: 4,
+                      ),
+                      TransactionDetailsItem(
+                        title: 'Date',
+                        value: widget.receipt.receiptDateTime ?? '',
+                      ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    TransactionDetailsItem(
-                      title: 'Service',
-                      value: widget.receipt.formName ?? '',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Transaction ID',
-                      value: widget.receipt.activityName ?? '',
-                    ),
-                    Divider(
-                      color: context.divider,
-                      thickness: 4,
-                    ),
-                    ...widget.receipt.previewData.map((item) {
-                      return TransactionDetailsItem(
-                        title: item.key ?? '',
-                        value: item.value ?? '',
-                      );
-                    }),
-                    Divider(
-                      color: context.divider,
-                      thickness: 4,
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Date',
-                      value: widget.receipt.receiptDateTime ?? '',
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const .symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              mainAxisSize: .min,
-              crossAxisAlignment: .center,
-              children: [
-                if (widget.receipt.status == 1)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FormButton(
-                          backgroundColor: context.cardBg,
-                          foregroundColor: context.textPrimary,
-                          onPressed: () {},
-                          text: 'Share',
-                          icon: Icons.share_outlined,
-                          buttonIconAlignment: .left,
-                          iconSize: 20,
+            child: BoundedContent(
+              child: Column(
+                mainAxisSize: .min,
+                crossAxisAlignment: .center,
+                children: [
+                  if (widget.receipt.status == 1)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FormButton(
+                            backgroundColor: context.cardBg,
+                            foregroundColor: context.textPrimary,
+                            onPressed: () {},
+                            text: 'Share',
+                            icon: Icons.share_outlined,
+                            buttonIconAlignment: .left,
+                            iconSize: 20,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FormButton(
-                          backgroundColor: context.cardBg,
-                          foregroundColor: context.textPrimary,
-                          onPressed: () {},
-                          text: 'Save',
-                          icon: Icons.group_outlined,
-                          buttonIconAlignment: .left,
-                          iconSize: 20,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FormButton(
+                            backgroundColor: context.cardBg,
+                            foregroundColor: context.textPrimary,
+                            onPressed: () {},
+                            text: 'Save',
+                            icon: Icons.group_outlined,
+                            buttonIconAlignment: .left,
+                            iconSize: 20,
+                          ),
                         ),
-                      ),
-                    ],
-                  )
-                else
+                      ],
+                    )
+                  else
+                    FormButton(
+                      backgroundColor: context.cardBg,
+                      foregroundColor: context.textPrimary,
+                      onPressed: () {},
+                      text: 'Submit a Complain',
+                      svgIcon: 'assets/img/complaint.svg',
+                      buttonIconAlignment: .left,
+                      iconSize: 20,
+                    ),
+                  const SizedBox(height: 20),
                   FormButton(
-                    backgroundColor: context.cardBg,
-                    foregroundColor: context.textPrimary,
-                    onPressed: () {},
-                    text: 'Submit a Complain',
-                    svgIcon: 'assets/img/complaint.svg',
-                    buttonIconAlignment: .left,
-                    iconSize: 20,
+                    onPressed: () {
+                      AppRouter.router.popUntilNamedRoutes([
+                        DashboardPage.route.path,
+                        ServicePage.route.path,
+                        HistoryPage.route.path,
+                      ]);
+                    },
+                    text: 'Back to Home',
                   ),
-                const SizedBox(height: 20),
-                FormButton(
-                  onPressed: () {
-                    AppRouter.router.popUntilNamedRoutes([
-                      DashboardPage.route.path,
-                      ServicePage.route.path,
-                      HistoryPage.route.path,
-                    ]);
-                  },
-                  text: 'Back to Home',
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -243,7 +248,7 @@ class TransactionDetailsItem extends StatelessWidget {
               textAlign: .left,
               style: title.toLowerCase().contains('total')
                   ? context.header4.copyWith(
-                color: context.textPrimary,
+                      color: context.textPrimary,
                     )
                   : AppTypography.caption.copyWith(
                       color: context.textSecondary,

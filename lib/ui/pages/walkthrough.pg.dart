@@ -14,6 +14,7 @@ import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 class WalkthroughPage extends StatefulWidget {
   const WalkthroughPage({super.key});
@@ -170,22 +171,24 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                               horizontal: 20,
                               vertical: 40,
                             ),
-                            child: Column(
-                              mainAxisSize: .min,
-                              mainAxisAlignment: .start,
-                              crossAxisAlignment: .start,
-                              children: [
-                                Text(
-                                  item.title ?? '',
-                                  style: AppTypography.display1,
-                                ),
-                                Text(
-                                  item.description ?? '',
-                                  style: AppTypography.smallDetails.copyWith(
-                                    color: context.cardBg,
+                            child: BoundedContent(
+                              child: Column(
+                                mainAxisSize: .min,
+                                mainAxisAlignment: .start,
+                                crossAxisAlignment: .start,
+                                children: [
+                                  Text(
+                                    item.title ?? '',
+                                    style: AppTypography.display1,
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    item.description ?? '',
+                                    style: AppTypography.smallDetails.copyWith(
+                                      color: context.cardBg,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -217,46 +220,48 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
             child: SafeArea(
               child: Padding(
                 padding: const .all(20),
-                child: Column(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: .end,
-                  crossAxisAlignment: .center,
-                  children: [
-                    _buildPageIndicator(),
-                    FormButton(
-                      onPressed: () {
-                        AppRouter.router.push(
-                          StartSignUpPage.route.path,
-                        );
-                      },
-                      text: 'Create a New Account',
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        AppRouter.router.push(
-                          NewLoginPage.route.path,
-                        );
-                      },
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Already have an Account? ',
-                              style: AppTypography.smallDetails.copyWith(
-                                color: context.divider,
+                child: BoundedContent(
+                  child: Column(
+                    mainAxisSize: .min,
+                    mainAxisAlignment: .end,
+                    crossAxisAlignment: .center,
+                    children: [
+                      _buildPageIndicator(),
+                      FormButton(
+                        onPressed: () {
+                          AppRouter.router.push(
+                            StartSignUpPage.route.path,
+                          );
+                        },
+                        text: 'Create a New Account',
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          AppRouter.router.push(
+                            NewLoginPage.route.path,
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Already have an Account? ',
+                                style: AppTypography.smallDetails.copyWith(
+                                  color: context.divider,
+                                ),
                               ),
-                            ),
-                            TextSpan(
-                              text: 'Sign In',
-                              style: AppTypography.buttons.copyWith(
-                                color: AppColors.secondary,
+                              TextSpan(
+                                text: 'Sign In',
+                                style: AppTypography.buttons.copyWith(
+                                  color: AppColors.secondary,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

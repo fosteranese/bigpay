@@ -24,6 +24,7 @@ import 'package:bigpay/data/models/auth_data/recent_activity.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/avatar.util.dart';
 
@@ -212,176 +213,189 @@ class _DashboardPageState extends State<DashboardPage>
             onRefresh: _onRefresh,
             // The app bar is a sliver, so drop the indicator in below it.
             edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
-            child: CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
+            child: BoundedContent(
+              maxWidth: context.responsive<double>(
+                compact: double.infinity,
+                medium: 760,
+                expanded: 960,
               ),
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  floating: true,
-                  snap: true,
-                  backgroundColor: Colors.transparent,
-                  surfaceTintColor: Colors.transparent,
-                  elevation: 0,
-                  scrolledUnderElevation: 0,
-                  automaticallyImplyLeading: false,
-                  automaticallyImplyActions: false,
-                  actionsPadding: .only(right: 15),
-                  leadingWidth: 15 + 36,
-                  leading: Padding(
-                    padding: const .only(left: 15),
-                    child: ProcessBuilder<String>(
-                      event: () => GetProfilePictureAction.event,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          AppState.currentUser = AppState.currentUser!.copyWith(
-                            profilePicture: snapshot.data ?? '',
-                          );
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    snap: true,
+                    backgroundColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    elevation: 0,
+                    scrolledUnderElevation: 0,
+                    automaticallyImplyLeading: false,
+                    automaticallyImplyActions: false,
+                    actionsPadding: .only(right: 15),
+                    leadingWidth: 15 + 36,
+                    leading: Padding(
+                      padding: const .only(left: 15),
+                      child: ProcessBuilder<String>(
+                        event: () => GetProfilePictureAction.event,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            AppState.currentUser = AppState.currentUser!
+                                .copyWith(
+                                  profilePicture: snapshot.data ?? '',
+                                );
+                            return CircleAvatar(
+                              radius: 18,
+                              backgroundColor: context.avatarBg,
+                              backgroundImage: avatarFromBase64(
+                                AppState.currentUser?.profilePicture,
+                              ),
+                            );
+                          }
+
                           return CircleAvatar(
                             radius: 18,
                             backgroundColor: context.avatarBg,
-                            backgroundImage: avatarFromBase64(
-                              AppState.currentUser?.profilePicture,
-                            ),
                           );
-                        }
-
-                        return CircleAvatar(
-                          radius: 18,
-                          backgroundColor: context.avatarBg,
-                        );
-                      },
-                    ),
-                  ),
-                  title: Column(
-                    mainAxisSize: .min,
-                    mainAxisAlignment: .center,
-                    crossAxisAlignment: .start,
-                    children: [
-                      Text(
-                        'Welcome Back',
-                        style: AppTypography.caption.copyWith(
-                          color: context.divider,
-                        ),
-                      ),
-                      Text(
-                        AppState.currentUser?.user?.name ?? '',
-                        style: AppTypography.p1Medium.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.white20,
-                      ),
-                      onPressed: () =>
-                          AppRouter.router.push(NotificationsPage.route.path),
-                      icon: SvgPicture.asset('assets/img/new-notification.svg'),
-                    ),
-                  ],
-                  centerTitle: false,
-                  flexibleSpace: ValueListenableBuilder<double>(
-                    valueListenable: _blurOpacity,
-                    builder: (context, blur, _) => ClipRect(
-                      child: BackdropFilter(
-                        filter: .blur(
-                          sigmaX: 12 * blur,
-                          sigmaY: 12 * blur,
-                        ),
-                        child: Container(
-                          color: AppColors.white.withValues(
-                            alpha: 0.15 * blur,
-                          ),
-                        ),
+                        },
                       ),
                     ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: VirtualWalletCard(
-                    label: _virtualBalance?.tile,
-                    balance: _virtualBalance?.balance,
-                    isVirtual: true,
-                    showViewDetails: true,
-                    onViewDetails: () =>
-                        AppRouter.router.push(VirtualWalletPage.route.path),
-                  ),
-                ),
-                if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
-                  SliverToBoxAdapter(
-                    child: Column(
+                    title: Column(
                       mainAxisSize: .min,
-                      mainAxisAlignment: .start,
+                      mainAxisAlignment: .center,
                       crossAxisAlignment: .start,
                       children: [
-                        Padding(
-                          padding: const .symmetric(horizontal: 20),
-                          child: Text(
-                            'Most used services',
-                            style: context.smallDetailsBold,
+                        Text(
+                          'Welcome Back',
+                          style: AppTypography.caption.copyWith(
+                            color: context.divider,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 60,
-                          child: PageView(
-                            scrollDirection: .horizontal,
-                            pageSnapping: true,
-                            controller: _favouritesController,
-                            padEnds: false,
-                            children:
-                                AppState.currentUser?.recentActivity?.map((
-                                  item,
-                                ) {
-                                  return FrequentServiceItem(data: item);
-                                }).toList() ??
-                                [],
+                        Text(
+                          AppState.currentUser?.user?.name ?? '',
+                          style: AppTypography.p1Medium.copyWith(
+                            color: AppColors.white,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const .only(
-                      top: 20,
-                      left: 15,
-                      right: 15,
-                    ),
-                    child: Text(
-                      'Services',
-                      style: context.header3,
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: .all(15),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 15,
-                          mainAxisSpacing: 15,
-                          mainAxisExtent: 124,
+                    actions: [
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.white20,
                         ),
-                    delegate: SliverChildListDelegate(
-                      AppState.currentUser?.activities?.map((item) {
-                            return ActionButton(
-                              data: item,
-                            );
-                          }).toList() ??
-                          [],
+                        onPressed: () =>
+                            AppRouter.router.push(NotificationsPage.route.path),
+                        icon: SvgPicture.asset(
+                          'assets/img/new-notification.svg',
+                        ),
+                      ),
+                    ],
+                    centerTitle: false,
+                    flexibleSpace: ValueListenableBuilder<double>(
+                      valueListenable: _blurOpacity,
+                      builder: (context, blur, _) => ClipRect(
+                        child: BackdropFilter(
+                          filter: .blur(
+                            sigmaX: 12 * blur,
+                            sigmaY: 12 * blur,
+                          ),
+                          child: Container(
+                            color: AppColors.white.withValues(
+                              alpha: 0.15 * blur,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                // Clear the floating bottom nav so the last cards aren't hidden.
-                const SliverToBoxAdapter(child: SizedBox(height: 110)),
-              ],
+                  SliverToBoxAdapter(
+                    child: VirtualWalletCard(
+                      label: _virtualBalance?.tile,
+                      balance: _virtualBalance?.balance,
+                      isVirtual: true,
+                      showViewDetails: true,
+                      onViewDetails: () =>
+                          AppRouter.router.push(VirtualWalletPage.route.path),
+                    ),
+                  ),
+                  if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
+                    SliverToBoxAdapter(
+                      child: Column(
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .start,
+                        crossAxisAlignment: .start,
+                        children: [
+                          Padding(
+                            padding: const .symmetric(horizontal: 20),
+                            child: Text(
+                              'Most used services',
+                              style: context.smallDetailsBold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 60,
+                            child: PageView(
+                              scrollDirection: .horizontal,
+                              pageSnapping: true,
+                              controller: _favouritesController,
+                              padEnds: false,
+                              children:
+                                  AppState.currentUser?.recentActivity?.map((
+                                    item,
+                                  ) {
+                                    return FrequentServiceItem(data: item);
+                                  }).toList() ??
+                                  [],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const .only(
+                        top: 20,
+                        left: 15,
+                        right: 15,
+                      ),
+                      child: Text(
+                        'Services',
+                        style: context.header3,
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: .all(15),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: context.responsive(
+                          compact: 2,
+                          medium: 3,
+                          expanded: 4,
+                        ),
+                        crossAxisSpacing: 15,
+                        mainAxisSpacing: 15,
+                        mainAxisExtent: 124,
+                      ),
+                      delegate: SliverChildListDelegate(
+                        AppState.currentUser?.activities?.map((item) {
+                              return ActionButton(
+                                data: item,
+                              );
+                            }).toList() ??
+                            [],
+                      ),
+                    ),
+                  ),
+                  // Clear the floating bottom nav so the last cards aren't hidden.
+                  const SliverToBoxAdapter(child: SizedBox(height: 110)),
+                ],
+              ),
             ),
           ),
         ),

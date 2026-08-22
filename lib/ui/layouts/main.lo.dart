@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({
@@ -121,149 +122,153 @@ class _MainLayoutState extends State<MainLayout> {
   Scaffold _buildMainPage() {
     return Scaffold(
       backgroundColor: widget.backgroundColor,
-      body: _wrapRefresh(
-        CustomScrollView(
-          controller: _scrollController,
-          physics: widget.onRefresh != null
-              ? const AlwaysScrollableScrollPhysics(
-                  parent: ClampingScrollPhysics(),
-                )
-              : const ClampingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              floating: true,
-              snap: true,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              automaticallyImplyLeading: false,
-              automaticallyImplyActions: false,
-              leadingWidth: 70,
-              title: (widget.miniTitle?.isNotEmpty ?? false)
-                  ? Text(
-                      widget.miniTitle!,
-                      style: context.p1,
-                    )
-                  : null,
-              leading: AppRouter.router.canPop() && widget.showBackBtn
-                  ? IconButton.filled(
-                      style: IconButton.styleFrom(
-                        backgroundColor: context.cardBg,
-                        fixedSize: Size(28, 28),
-                      ),
-                      onPressed: () {
-                        AppRouter.router.pop();
-                      },
-                      icon: Icon(
-                        Icons.chevron_left_outlined,
-                      ),
-                    )
-                  : null,
-              bottom:
-                  widget.bottom ??
-                  PreferredSize(
-                    preferredSize: Size(double.maxFinite, widget.bottomSize),
-                    child: Container(
-                      width: double.maxFinite,
-                      padding: .only(left: 20, right: 20, bottom: 10),
-                      child: Column(
-                        mainAxisSize: .min,
-                        mainAxisAlignment: .center,
-                        crossAxisAlignment: .start,
-                        children: [
-                          SizedBox(height: 16),
-                          if (widget.title != null && widget.actions == null)
-                            FittedBox(
-                              child: Text(
-                                widget.title!,
-                                style:
-                                    (widget.titleStyle ??
-                                            AppTypography.display2)
-                                        .copyWith(
-                                          color: context.textPrimary,
-                                        ),
-                              ),
-                            )
-                          else if (widget.title != null &&
-                              widget.actions != null)
-                            Row(
-                              mainAxisSize: .max,
-                              crossAxisAlignment: .center,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    widget.title!,
-                                    style: AppTypography.display1.copyWith(
-                                      color: context.textPrimary,
+      body: BoundedContent(
+        child: _wrapRefresh(
+          CustomScrollView(
+            controller: _scrollController,
+            physics: widget.onRefresh != null
+                ? const AlwaysScrollableScrollPhysics(
+                    parent: ClampingScrollPhysics(),
+                  )
+                : const ClampingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                floating: true,
+                snap: true,
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                automaticallyImplyLeading: false,
+                automaticallyImplyActions: false,
+                leadingWidth: 70,
+                title: (widget.miniTitle?.isNotEmpty ?? false)
+                    ? Text(
+                        widget.miniTitle!,
+                        style: context.p1,
+                      )
+                    : null,
+                leading: AppRouter.router.canPop() && widget.showBackBtn
+                    ? IconButton.filled(
+                        style: IconButton.styleFrom(
+                          backgroundColor: context.cardBg,
+                          fixedSize: Size(28, 28),
+                        ),
+                        onPressed: () {
+                          AppRouter.router.pop();
+                        },
+                        icon: Icon(
+                          Icons.chevron_left_outlined,
+                        ),
+                      )
+                    : null,
+                bottom:
+                    widget.bottom ??
+                    PreferredSize(
+                      preferredSize: Size(double.maxFinite, widget.bottomSize),
+                      child: Container(
+                        width: double.maxFinite,
+                        padding: .only(left: 20, right: 20, bottom: 10),
+                        child: Column(
+                          mainAxisSize: .min,
+                          mainAxisAlignment: .center,
+                          crossAxisAlignment: .start,
+                          children: [
+                            SizedBox(height: 16),
+                            if (widget.title != null && widget.actions == null)
+                              FittedBox(
+                                child: Text(
+                                  widget.title!,
+                                  style:
+                                      (widget.titleStyle ??
+                                              AppTypography.display2)
+                                          .copyWith(
+                                            color: context.textPrimary,
+                                          ),
+                                ),
+                              )
+                            else if (widget.title != null &&
+                                widget.actions != null)
+                              Row(
+                                mainAxisSize: .max,
+                                crossAxisAlignment: .center,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      widget.title!,
+                                      style: AppTypography.display1.copyWith(
+                                        color: context.textPrimary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if (widget.actions != null) widget.actions!,
-                              ],
-                            ),
-                          if (widget.subtitle != null)
-                            Text(
-                              widget.subtitle!,
-                              style: context.smallDetails,
-                            )
-                          else if (widget.subtitleWidget != null)
-                            widget.subtitleWidget!,
-                        ],
-                      ),
-                    ),
-                  ),
-              flexibleSpace:
-                  widget.flexibleSpace ??
-                  ValueListenableBuilder<double>(
-                    valueListenable: _blurOpacity,
-                    builder: (context, blur, _) => ClipRect(
-                      child: BackdropFilter(
-                        filter: .blur(
-                          sigmaX: 12 * blur,
-                          sigmaY: 12 * blur,
-                        ),
-                        child: Container(
-                          margin: .only(
-                            bottom: widget.appBarBottomColor,
-                          ),
-                          color:
-                              widget.appBarColor ??
-                              context.appBarOverlay.withValues(
-                                alpha: blur,
+                                  if (widget.actions != null) widget.actions!,
+                                ],
                               ),
+                            if (widget.subtitle != null)
+                              Text(
+                                widget.subtitle!,
+                                style: context.smallDetails,
+                              )
+                            else if (widget.subtitleWidget != null)
+                              widget.subtitleWidget!,
+                          ],
                         ),
                       ),
                     ),
-                  ),
-            ),
-
-            if (widget.builder != null)
-              widget.builder!(_scrollController)
-            else if (widget.child != null)
-              SliverFillRemaining(
-                fillOverscroll: true,
-                hasScrollBody: false,
-                child: Container(
-                  color: widget.bodyColor,
-                  padding: const .all(20),
-                  child: widget.child,
-                ),
+                flexibleSpace:
+                    widget.flexibleSpace ??
+                    ValueListenableBuilder<double>(
+                      valueListenable: _blurOpacity,
+                      builder: (context, blur, _) => ClipRect(
+                        child: BackdropFilter(
+                          filter: .blur(
+                            sigmaX: 12 * blur,
+                            sigmaY: 12 * blur,
+                          ),
+                          child: Container(
+                            margin: .only(
+                              bottom: widget.appBarBottomColor,
+                            ),
+                            color:
+                                widget.appBarColor ??
+                                context.appBarOverlay.withValues(
+                                  alpha: blur,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
               ),
-          ],
+
+              if (widget.builder != null)
+                widget.builder!(_scrollController)
+              else if (widget.child != null)
+                SliverFillRemaining(
+                  fillOverscroll: true,
+                  hasScrollBody: false,
+                  child: Container(
+                    color: widget.bodyColor,
+                    padding: const .all(20),
+                    child: widget.child,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: widget.bottomNav != null
-          ? Container(
-              padding: .only(
-                right: 20,
-                left: 20,
-                top: 15,
-                bottom: 10,
-              ),
-              child: SafeArea(
-                child: widget.bottomNav!,
+          ? BoundedContent(
+              child: Container(
+                padding: .only(
+                  right: 20,
+                  left: 20,
+                  top: 15,
+                  bottom: 10,
+                ),
+                child: SafeArea(
+                  child: widget.bottomNav!,
+                ),
               ),
             )
           : null,

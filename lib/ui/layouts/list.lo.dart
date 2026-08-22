@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 class ListLayout extends StatefulWidget {
   const ListLayout({
@@ -150,26 +151,30 @@ class _ListLayoutState extends State<ListLayout> {
         ),
       ),
 
-      body: Container(
-        color: widget.bodyColor,
-        child: widget.onRefresh != null
-            ? AppRefreshIndicator(
-                onRefresh: widget.onRefresh!,
-                child: widget.child(_scrollController),
-              )
-            : widget.child(_scrollController),
+      body: BoundedContent(
+        child: Container(
+          color: widget.bodyColor,
+          child: widget.onRefresh != null
+              ? AppRefreshIndicator(
+                  onRefresh: widget.onRefresh!,
+                  child: widget.child(_scrollController),
+                )
+              : widget.child(_scrollController),
+        ),
       ),
 
       bottomNavigationBar: widget.bottomNav != null
-          ? Container(
-              padding: .only(
-                right: 20,
-                left: 20,
-                top: 15,
-                bottom: 10,
-              ),
-              child: SafeArea(
-                child: widget.bottomNav!,
+          ? BoundedContent(
+              child: Container(
+                padding: .only(
+                  right: 20,
+                  left: 20,
+                  top: 15,
+                  bottom: 10,
+                ),
+                child: SafeArea(
+                  child: widget.bottomNav!,
+                ),
               ),
             )
           : null,

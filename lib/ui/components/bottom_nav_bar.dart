@@ -1,5 +1,6 @@
 // ─── Neumorphic Bottom Nav ────────────────────────────────────────────────────
 
+import 'package:bigpay/ui/components/nav_items.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -15,16 +16,8 @@ class NeumorphicBottomNav extends StatelessWidget {
 
   static const _activeColor = AppColors.tint; // brand green
 
-  static const _items = <({IconData icon, String label})>[
-    (icon: Icons.home_outlined, label: 'Home'),
-    (icon: Icons.account_balance_wallet_outlined, label: 'Wallets'),
-    (icon: Icons.description_outlined, label: 'Services'),
-    (icon: Icons.history, label: 'History'),
-    (icon: Icons.more_horiz, label: 'More'),
-  ];
-
   Widget _item(int index, Color pillColor, Color inactiveColor) {
-    final item = _items[index];
+    final item = navBarItems[index];
     final isActive = selectedIndex == index;
     final color = isActive ? _activeColor : inactiveColor;
 
@@ -115,7 +108,7 @@ class NeumorphicBottomNav extends StatelessWidget {
         mainAxisAlignment: .center,
         crossAxisAlignment: .center,
         children: [
-          for (var i = 0; i < _items.length; i++)
+          for (var i = 0; i < navBarItems.length; i++)
             _item(i, pillColor, inactiveColor),
         ],
       ),
