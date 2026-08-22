@@ -253,21 +253,25 @@ class _ThemeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const .symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.transparent,
-          borderRadius: .circular(8),
-          border: Border.all(
-            color: selected ? AppColors.primary : context.border,
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const .symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : Colors.transparent,
+            borderRadius: .circular(8),
+            border: Border.all(
+              color: selected ? AppColors.primary : context.border,
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: context.smallBold.copyWith(
-            color: selected ? AppColors.white : context.textSecondary,
+          child: Text(
+            label,
+            style: context.smallBold.copyWith(
+              color: selected ? AppColors.white : context.textSecondary,
+            ),
           ),
         ),
       ),

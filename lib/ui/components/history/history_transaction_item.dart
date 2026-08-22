@@ -32,8 +32,8 @@ class HistoryTransactionItem extends StatelessWidget {
       case StatusConstants.failed:
       case StatusConstants.error:
         return AppColors.danger;
-        default:
-          return context.textSecondary;
+      default:
+        return context.textSecondary;
     }
   }
 
@@ -50,6 +50,19 @@ class HistoryTransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = record.formName ?? record.activityName ?? 'Transaction';
+    final amount = _hasAmount ? ', ${record.amount}' : '';
+    final status = record.statusLabel ?? '';
+
+    return Semantics(
+      label: '$title$amount, $status',
+      button: onTap != null,
+      excludeSemantics: true,
+      child: _tile(context),
+    );
+  }
+
+  Widget _tile(BuildContext context) {
     return ListTile(
       onTap: onTap,
       contentPadding: const .symmetric(horizontal: 20, vertical: 4),

@@ -16,45 +16,63 @@ class NeumorphicBottomNav extends StatelessWidget {
 
   static const _activeColor = AppColors.tint; // brand green
 
-  Widget _item(int index, Color pillColor, Color inactiveColor) {
+  Widget _item(
+    BuildContext context,
+    int index,
+    Color pillColor,
+    Color inactiveColor,
+  ) {
     final item = navBarItems[index];
     final isActive = selectedIndex == index;
     final color = isActive ? _activeColor : inactiveColor;
 
-    final content = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(item.icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          item.label,
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          softWrap: false,
-          style: TextStyle(
-            color: color,
-            fontSize: 10.5,
-            height: 1.1,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.2,
+    final content = ExcludeSemantics(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(item.icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            item.label,
+            maxLines: 1,
+            overflow: TextOverflow.visible,
+            softWrap: false,
+            // A tab bar conventionally caps its own text scale (rather than
+            // ballooning the whole bar) so a large system font size doesn't
+            // clip against the bar's minimum height.
+            textScaler: MediaQuery.textScalerOf(
+              context,
+            ).clamp(maxScaleFactor: 1.3),
+            style: TextStyle(
+              color: color,
+              fontSize: 10.5,
+              height: 1.1,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
 
-    final navItem = GestureDetector(
-      behavior: .opaque,
-      onTap: () => onTap(index),
-      child: AnimatedContainer(
-        width: isActive ? 90 : null,
-        duration: const .new(milliseconds: 180),
-        curve: Curves.easeOut,
-        padding: const .symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? pillColor : Colors.transparent,
-          borderRadius: .circular(38),
+    final navItem = Semantics(
+      label: item.label,
+      button: true,
+      selected: isActive,
+      child: GestureDetector(
+        behavior: .opaque,
+        onTap: () => onTap(index),
+        child: AnimatedContainer(
+          width: isActive ? 90 : null,
+          duration: const .new(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const .symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive ? pillColor : Colors.transparent,
+            borderRadius: .circular(38),
+          ),
+          child: content,
         ),
-        child: content,
       ),
     );
 
@@ -75,7 +93,7 @@ class NeumorphicBottomNav extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      height: 62,
+      constraints: const BoxConstraints(minHeight: 62),
       decoration: BoxDecoration(
         color: barColor,
         borderRadius: .circular(38),
@@ -109,7 +127,7 @@ class NeumorphicBottomNav extends StatelessWidget {
         crossAxisAlignment: .center,
         children: [
           for (var i = 0; i < navBarItems.length; i++)
-            _item(i, pillColor, inactiveColor),
+            _item(context, i, pillColor, inactiveColor),
         ],
       ),
     );

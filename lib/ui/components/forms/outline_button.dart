@@ -55,9 +55,7 @@ class FormOutlineButton extends StatelessWidget {
       height: height,
       child: TextButton(
         style: TextButton.styleFrom(
-          backgroundColor: loading || !enabled
-              ? context.cardBg
-              : null,
+          backgroundColor: loading || !enabled ? context.cardBg : null,
           padding: padding,
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? .circular(height),
@@ -68,7 +66,9 @@ class FormOutlineButton extends StatelessWidget {
           ),
           fixedSize: Size(double.maxFinite, height),
         ),
-        onPressed: onPressed,
+        // null (rather than the raw callback) so Material — and screen
+        // readers — actually treat the button as disabled while loading.
+        onPressed: (loading || !enabled) ? null : onPressed,
         child: _content(context, effectiveForeground),
       ),
     );
@@ -77,11 +77,14 @@ class FormOutlineButton extends StatelessWidget {
   Widget _content(BuildContext context, Color effectiveForeground) {
     if (loading) {
       final double size = height > 30 ? 30 : 10;
-      return SizedBox(
-        width: size,
-        height: size,
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
+      return Semantics(
+        label: '$text, loading',
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
         ),
       );
     }

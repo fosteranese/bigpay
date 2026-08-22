@@ -116,16 +116,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
                 children: [
                   Text(
                     widget.label ?? 'Select',
-                      style: ctx.header1,
+                    style: ctx.header1,
                   ),
                   IconButton.filled(
+                    tooltip: 'Close',
                     style: IconButton.styleFrom(
                       alignment: .center,
-                      tapTargetSize: .shrinkWrap,
                       backgroundColor: ctx.divider,
-                      fixedSize: Size(35, 35),
-                      minimumSize: Size(35, 35),
-                      maximumSize: Size(35, 35),
+                      fixedSize: Size(44, 44),
                     ),
                     onPressed: () {
                       ctx.pop();
@@ -182,16 +180,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
                   children: [
                     Text(
                       widget.label ?? 'Select',
-                    style: ctx.header1,
+                      style: ctx.header1,
                     ),
                     IconButton.filled(
+                      tooltip: 'Close',
                       style: IconButton.styleFrom(
                         alignment: .center,
-                        tapTargetSize: .shrinkWrap,
                         backgroundColor: ctx.divider,
-                        fixedSize: Size(35, 35),
-                        minimumSize: Size(35, 35),
-                        maximumSize: Size(35, 35),
+                        fixedSize: Size(44, 44),
                       ),
                       onPressed: () {
                         ctx.pop();
@@ -301,6 +297,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
         borderRadius: .circular(10),
         child: ListTile(
           onTap: () => _onSelect(option),
+          selected: selected,
           title: Text(option.label),
           contentPadding: .symmetric(horizontal: 10),
           trailing: FormRadioButton(selected: selected),

@@ -11,7 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 
-class TransactionDetailsPage extends StatefulWidget {
+/// A pushed full page wrapping [TransactionDetailsView] — used on every
+/// device except a foldable in book mode, where [HistoryPage] shows the same
+/// view inline in the second pane instead (see [FoldAwareLayout]).
+class TransactionDetailsPage extends StatelessWidget {
   const TransactionDetailsPage({
     super.key,
     required this.receipt,
@@ -23,10 +26,37 @@ class TransactionDetailsPage extends StatefulWidget {
   final RequestResponse receipt;
 
   @override
-  State<TransactionDetailsPage> createState() => _TransactionDetailsPageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: TransactionDetailsView(
+        receipt: receipt,
+        onBack: () => context.pop(),
+      ),
+    );
+  }
 }
 
-class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
+/// The transaction receipt content itself, independent of how it's hosted —
+/// a pushed page ([TransactionDetailsPage], [onBack] provided) or an inline
+/// pane in [HistoryPage]'s foldable book-mode split ([onBack] null, no back
+/// button since the master list stays visible alongside it).
+///
+/// Deliberately built from plain layout widgets (Column) rather than its own
+/// nested Scaffold: a Scaffold nested inside the Expanded pane of
+/// [FoldAwareLayout] silently fails to render its `body` slot (confirmed on
+/// a real device — the appBar/bottomNavigationBar render fine, the body
+/// doesn't, with no error). One Scaffold in the tree at a time avoids it —
+/// [TransactionDetailsPage] supplies the only one, in both hosting contexts.
+class TransactionDetailsView extends StatelessWidget {
+  const TransactionDetailsView({
+    super.key,
+    required this.receipt,
+    this.onBack,
+  });
+
+  final RequestResponse receipt;
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,141 +69,153 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           opacity: 0.06,
         ),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          leadingWidth: 70,
-          leading: IconButton.filled(
-            style: IconButton.styleFrom(
-              backgroundColor: context.cardBg,
-              fixedSize: Size(28, 28),
-            ),
-            onPressed: () {
-              context.pop();
-            },
-            icon: Icon(
-              Icons.chevron_left_outlined,
-            ),
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: BoundedContent(
-            child: Column(
-              mainAxisAlignment: .center,
-              children: [
-                _buildTitle(),
-                const SizedBox(height: 20),
-                Container(
-                  margin: .symmetric(horizontal: 20),
-                  padding: .all(24),
-                  decoration: BoxDecoration(
-                    color: context.cardBg,
-                    borderRadius: .circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      TransactionDetailsItem(
-                        title: 'Service',
-                        value: widget.receipt.formName ?? '',
-                      ),
-                      TransactionDetailsItem(
-                        title: 'Transaction ID',
-                        value: widget.receipt.activityName ?? '',
-                      ),
-                      Divider(
-                        color: context.divider,
-                        thickness: 4,
-                      ),
-                      ...widget.receipt.previewData.map((item) {
-                        return TransactionDetailsItem(
-                          title: item.key ?? '',
-                          value: item.value ?? '',
-                        );
-                      }),
-                      Divider(
-                        color: context.divider,
-                        thickness: 4,
-                      ),
-                      TransactionDetailsItem(
-                        title: 'Date',
-                        value: widget.receipt.receiptDateTime ?? '',
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const .symmetric(horizontal: 20, vertical: 10),
-            child: BoundedContent(
-              child: Column(
-                mainAxisSize: .min,
-                crossAxisAlignment: .center,
-                children: [
-                  if (widget.receipt.status == 1)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FormButton(
-                            backgroundColor: context.cardBg,
-                            foregroundColor: context.textPrimary,
-                            onPressed: () {},
-                            text: 'Share',
-                            icon: Icons.share_outlined,
-                            buttonIconAlignment: .left,
-                            iconSize: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: FormButton(
-                            backgroundColor: context.cardBg,
-                            foregroundColor: context.textPrimary,
-                            onPressed: () {},
-                            text: 'Save',
-                            icon: Icons.group_outlined,
-                            buttonIconAlignment: .left,
-                            iconSize: 20,
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    FormButton(
+      child: Column(
+        children: [
+          if (onBack != null)
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const .fromLTRB(20, 12, 20, 0),
+                child: Align(
+                  alignment: .centerLeft,
+                  child: IconButton.filled(
+                    tooltip: 'Back',
+                    style: IconButton.styleFrom(
                       backgroundColor: context.cardBg,
                       foregroundColor: context.textPrimary,
-                      onPressed: () {},
-                      text: 'Submit a Complain',
-                      svgIcon: 'assets/img/complaint.svg',
-                      buttonIconAlignment: .left,
-                      iconSize: 20,
+                      fixedSize: Size(44, 44),
                     ),
-                  const SizedBox(height: 20),
-                  FormButton(
-                    onPressed: () {
-                      AppRouter.router.popUntilNamedRoutes([
-                        DashboardPage.route.path,
-                        ServicePage.route.path,
-                        HistoryPage.route.path,
-                      ]);
-                    },
-                    text: 'Back to Home',
+                    onPressed: onBack,
+                    icon: Icon(
+                      Icons.chevron_left_outlined,
+                    ),
                   ),
-                ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: BoundedContent(
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .center,
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildTitle(context),
+                    const SizedBox(height: 20),
+                    Container(
+                      margin: .symmetric(horizontal: 20),
+                      padding: .all(24),
+                      decoration: BoxDecoration(
+                        color: context.cardBg,
+                        borderRadius: .circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          TransactionDetailsItem(
+                            title: 'Service',
+                            value: receipt.formName ?? '',
+                          ),
+                          TransactionDetailsItem(
+                            title: 'Transaction ID',
+                            value: receipt.activityName ?? '',
+                          ),
+                          Divider(
+                            color: context.divider,
+                            thickness: 4,
+                          ),
+                          ...receipt.previewData.map((item) {
+                            return TransactionDetailsItem(
+                              title: item.key ?? '',
+                              value: item.value ?? '',
+                            );
+                          }),
+                          Divider(
+                            color: context.divider,
+                            thickness: 4,
+                          ),
+                          TransactionDetailsItem(
+                            title: 'Date',
+                            value: receipt.receiptDateTime ?? '',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const .symmetric(horizontal: 20, vertical: 10),
+              child: BoundedContent(
+                child: Column(
+                  mainAxisSize: .min,
+                  crossAxisAlignment: .center,
+                  children: [
+                    if (receipt.status == 1)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FormButton(
+                              backgroundColor: context.cardBg,
+                              foregroundColor: context.textPrimary,
+                              onPressed: () {},
+                              text: 'Share',
+                              icon: Icons.share_outlined,
+                              buttonIconAlignment: .left,
+                              iconSize: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: FormButton(
+                              backgroundColor: context.cardBg,
+                              foregroundColor: context.textPrimary,
+                              onPressed: () {},
+                              text: 'Save',
+                              icon: Icons.group_outlined,
+                              buttonIconAlignment: .left,
+                              iconSize: 20,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      FormButton(
+                        backgroundColor: context.cardBg,
+                        foregroundColor: context.textPrimary,
+                        onPressed: () {},
+                        text: 'Submit a Complain',
+                        svgIcon: 'assets/img/complaint.svg',
+                        buttonIconAlignment: .left,
+                        iconSize: 20,
+                      ),
+                    const SizedBox(height: 20),
+                    FormButton(
+                      onPressed: () {
+                        AppRouter.router.popUntilNamedRoutes([
+                          DashboardPage.route.path,
+                          ServicePage.route.path,
+                          HistoryPage.route.path,
+                        ]);
+                      },
+                      text: 'Back to Home',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTitle() {
-    switch (widget.receipt.status) {
+  Widget _buildTitle(BuildContext context) {
+    switch (receipt.status) {
       case 1:
         return Column(
           children: [

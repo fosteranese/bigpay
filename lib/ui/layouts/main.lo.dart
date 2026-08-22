@@ -151,9 +151,11 @@ class _MainLayoutState extends State<MainLayout> {
                     : null,
                 leading: AppRouter.router.canPop() && widget.showBackBtn
                     ? IconButton.filled(
+                        tooltip: 'Back',
                         style: IconButton.styleFrom(
                           backgroundColor: context.cardBg,
-                          fixedSize: Size(28, 28),
+                          foregroundColor: context.textPrimary,
+                          fixedSize: Size(44, 44),
                         ),
                         onPressed: () {
                           AppRouter.router.pop();
@@ -169,7 +171,11 @@ class _MainLayoutState extends State<MainLayout> {
                       preferredSize: Size(double.maxFinite, widget.bottomSize),
                       child: Container(
                         width: double.maxFinite,
-                        padding: .only(left: 20, right: 20, bottom: 10),
+                        padding: .only(
+                          left: context.gutter,
+                          right: context.gutter,
+                          bottom: 10,
+                        ),
                         child: Column(
                           mainAxisSize: .min,
                           mainAxisAlignment: .center,
@@ -249,7 +255,7 @@ class _MainLayoutState extends State<MainLayout> {
                   hasScrollBody: false,
                   child: Container(
                     color: widget.bodyColor,
-                    padding: const .all(20),
+                    padding: .all(context.gutter),
                     child: widget.child,
                   ),
                 ),
@@ -261,8 +267,8 @@ class _MainLayoutState extends State<MainLayout> {
           ? BoundedContent(
               child: Container(
                 padding: .only(
-                  right: 20,
-                  left: 20,
+                  right: context.gutter,
+                  left: context.gutter,
                   top: 15,
                   bottom: 10,
                 ),

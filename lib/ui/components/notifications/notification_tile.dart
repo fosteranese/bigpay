@@ -31,7 +31,18 @@ class NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unread = !notification.read;
+    final title = notification.title ?? 'Notification';
+    final unreadPrefix = unread ? 'Unread, ' : '';
 
+    return Semantics(
+      label: '$unreadPrefix$title, $_time',
+      button: onTap != null,
+      excludeSemantics: true,
+      child: _tile(context, unread),
+    );
+  }
+
+  Widget _tile(BuildContext context, bool unread) {
     return ListTile(
       onTap: onTap,
       contentPadding: const .symmetric(horizontal: 20, vertical: 4),

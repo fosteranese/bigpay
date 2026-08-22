@@ -31,35 +31,46 @@ class SideNavRail extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      child: GestureDetector(
-        behavior: .opaque,
-        onTap: () => onTap(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isActive ? pillColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: .min,
-            children: [
-              Icon(item.icon, color: color, size: 24),
-              const SizedBox(height: 4),
-              Text(
-                item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 11,
-                  height: 1.1,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.2,
-                ),
+      child: Semantics(
+        label: item.label,
+        button: true,
+        selected: isActive,
+        child: GestureDetector(
+          behavior: .opaque,
+          onTap: () => onTap(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            constraints: const BoxConstraints(minHeight: 44),
+            decoration: BoxDecoration(
+              color: isActive ? pillColor : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ExcludeSemantics(
+              child: Column(
+                mainAxisSize: .min,
+                children: [
+                  Icon(item.icon, color: color, size: 24),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textScaler: MediaQuery.textScalerOf(
+                      context,
+                    ).clamp(maxScaleFactor: 1.3),
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11,
+                      height: 1.1,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

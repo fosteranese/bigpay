@@ -117,30 +117,38 @@ class FormSelectToggleListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSelected = option.value == selected.value;
     return Expanded(
-      child: InkWell(
-        onTap: onSelected,
-        child: Container(
-          height: double.maxFinite,
-          width: double.maxFinite,
-          color: option.value == selected.value ? AppColors.tintShade1 : null,
-          child: Row(
-            mainAxisSize: .max,
-            mainAxisAlignment: .center,
-            crossAxisAlignment: .center,
-            children: [
-              CircleAvatar(
-                radius: 11.5,
-                backgroundColor: context.avatarBg,
+      child: Semantics(
+        label: option.label,
+        button: true,
+        selected: isSelected,
+        child: InkWell(
+          onTap: onSelected,
+          child: Container(
+            height: double.maxFinite,
+            width: double.maxFinite,
+            color: isSelected ? AppColors.tintShade1 : null,
+            child: ExcludeSemantics(
+              child: Row(
+                mainAxisSize: .max,
+                mainAxisAlignment: .center,
+                crossAxisAlignment: .center,
+                children: [
+                  CircleAvatar(
+                    radius: 11.5,
+                    backgroundColor: context.avatarBg,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    option.label,
+                    style: AppTypography.smallDetails.copyWith(
+                      color: context.textPrimary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text(
-                option.label,
-                style: AppTypography.smallDetails.copyWith(
-                  color: context.textPrimary,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

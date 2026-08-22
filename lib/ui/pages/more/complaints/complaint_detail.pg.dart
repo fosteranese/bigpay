@@ -164,6 +164,7 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
           valueListenable: _canSend,
           builder: (context, canSend, child) {
             return IconButton.filled(
+              tooltip: 'Send message',
               style: IconButton.styleFrom(
                 backgroundColor: canSend
                     ? AppColors.primary

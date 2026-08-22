@@ -158,13 +158,11 @@ class VirtualWalletCard extends StatelessWidget {
                             ),
                           ),
                           IconButton.filled(
+                            tooltip: visible ? 'Hide balance' : 'Show balance',
                             style: IconButton.styleFrom(
                               alignment: .center,
-                              padding: .all(5),
                               backgroundColor: AppColors.white11,
-                              fixedSize: Size(25, 25),
-                              minimumSize: Size(25, 25),
-                              maximumSize: Size(25, 25),
+                              fixedSize: Size(44, 44),
                             ),
                             onPressed: () => _visible.value = !_visible.value,
                             icon: SvgPicture.asset(

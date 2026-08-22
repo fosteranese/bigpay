@@ -34,28 +34,40 @@ class BiometricLoginPage extends StatefulWidget {
 class _BiometricLoginPageState extends State<BiometricLoginPage> {
   ExecuteProcessEvent? _loginEvent;
 
-  @override
-  void initState() {
-    super.initState();
-    // Prompt for biometrics as soon as the screen settles.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _unlock());
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Prompt for biometrics as soon as the screen settles. Auto-triggered —
+  //   // stays on this page rather than bouncing to the password screen when
+  //   // there's nothing to replay yet, so the user actually sees it land here.
+  //   WidgetsBinding.instance.addPostFrameCallback((_) => _unlock(auto: true));
+  // }
 
-  Future<void> _unlock() async {
+  Future<void> _unlock({bool auto = false}) async {
     final password = await BiometricUtil.readLoginPassword();
     if (!mounted) return;
 
-    // Nothing stored to replay — send the user to the password screen.
+    // Nothing stored to replay. A manual tap explains why and lets the user
+    // opt into the password screen; the auto-trigger on launch just stays put
+    // instead of bouncing the user away before they see this page.
     if (password == null || password.isEmpty) {
-      _usePassword();
+      if (!auto) {
+        MessageUtil.displayActionDialog(
+          context,
+          title: 'Password Required',
+          message:
+              'Login with your password first to enjoy login with biometrics.',
+          onConfirmText: 'Login',
+          onConfirm: _usePassword,
+        );
+      }
       return;
     }
 
     final result = await BiometricUtil.authenticate('Unlock BigPay');
     if (!mounted || result != BiometricResult.success) return;
 
-    final phone =
-        AppState.currentUser?.user?.shortName?.toLocalPhone ?? '';
+    final phone = AppState.currentUser?.user?.shortName?.toLocalPhone ?? '';
 
     setState(() {
       _loginEvent = context.dispatchProcess(
@@ -119,7 +131,10 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
         bottomNav: Column(
           mainAxisSize: .min,
           children: [
-            FormButton(onPressed: _unlock, text: 'Unlock with Biometrics'),
+            FormButton(
+              onPressed: _unlock,
+              text: 'Unlock with Biometrics',
+            ),
             SizedBox(height: 10),
             TextButton(
               onPressed: _usePassword,
@@ -136,6 +151,7 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
         ),
         child: Center(
           child: IconButton(
+            tooltip: 'Unlock with biometrics',
             onPressed: _unlock,
             icon: SvgPicture.asset(
               SvgImages.biometric,

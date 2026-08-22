@@ -49,6 +49,7 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
           onChanged: widget.onChanged,
           maxLines: 1,
           suffix: IconButton(
+            tooltip: value ? 'Show password' : 'Hide password',
             onPressed: () {
               _isPassword.value = !_isPassword.value;
             },

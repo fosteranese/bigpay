@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -115,13 +116,17 @@ class _ListLayoutState extends State<ListLayout> {
                 style: context.p1,
               )
             : null,
-        leading: widget.showBackBtn
+        leading: AppRouter.router.canPop() && widget.showBackBtn
             ? IconButton.filled(
+                tooltip: 'Back',
                 style: IconButton.styleFrom(
                   backgroundColor: context.cardBg,
-                  fixedSize: Size(28, 28),
+                  foregroundColor: context.textPrimary,
+                  fixedSize: Size(44, 44),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  AppRouter.router.pop();
+                },
                 icon: Icon(
                   Icons.chevron_left_outlined,
                 ),
@@ -167,8 +172,8 @@ class _ListLayoutState extends State<ListLayout> {
           ? BoundedContent(
               child: Container(
                 padding: .only(
-                  right: 20,
-                  left: 20,
+                  right: context.gutter,
+                  left: context.gutter,
                   top: 15,
                   bottom: 10,
                 ),

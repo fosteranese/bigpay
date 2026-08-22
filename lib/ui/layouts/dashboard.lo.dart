@@ -120,9 +120,11 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                         ),
                       )
                     : IconButton.filled(
+                        tooltip: 'Back',
                         style: IconButton.styleFrom(
                           backgroundColor: context.cardBg,
-                          fixedSize: Size(28, 28),
+                          foregroundColor: context.textPrimary,
+                          fixedSize: Size(44, 44),
                         ),
                         onPressed: widget.onBack ?? () {},
                         icon: Icon(

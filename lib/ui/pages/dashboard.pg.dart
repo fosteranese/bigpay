@@ -284,6 +284,7 @@ class _DashboardPageState extends State<DashboardPage>
                     ),
                     actions: [
                       IconButton(
+                        tooltip: 'Notifications',
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.white20,
                         ),
@@ -555,13 +556,23 @@ class FrequentServiceItem extends StatelessWidget {
                 Text(
                   data.formName ?? '',
                   textAlign: .start,
+                  maxLines: 1,
                   overflow: .ellipsis,
+                  // This pill lives inside a fixed-height carousel; clamp
+                  // rather than let a large system text size overflow it.
+                  textScaler: MediaQuery.textScalerOf(
+                    context,
+                  ).clamp(maxScaleFactor: 1.3),
                   style: context.captionSemibold,
                 ),
                 Text(
                   data.activityName ?? '',
                   textAlign: .start,
+                  maxLines: 1,
                   overflow: .ellipsis,
+                  textScaler: MediaQuery.textScalerOf(
+                    context,
+                  ).clamp(maxScaleFactor: 1.3),
                   style: AppTypography.caption,
                 ),
               ],

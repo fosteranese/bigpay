@@ -27,6 +27,12 @@ extension ResponsiveContext on BuildContext {
     if (_width >= Breakpoints.medium) return medium ?? compact;
     return compact;
   }
+
+  /// Breakpoint-scaled spacing — the shared layouts' outer padding grows a
+  /// little past phone width, alongside (not instead of) the content-width
+  /// cap in [BoundedContent].
+  double get gutter =>
+      responsive<double>(compact: 20, medium: 28, expanded: 36);
 }
 
 /// Centers [child] and caps its width once the viewport grows past phone

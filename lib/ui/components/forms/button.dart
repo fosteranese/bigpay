@@ -65,13 +65,9 @@ class FormButton extends StatelessWidget {
           ),
           fixedSize: Size(double.maxFinite, height),
         ),
-        onPressed: () {
-          if (loading || !enabled) {
-            return;
-          }
-
-          onPressed();
-        },
+        // null (rather than a no-op callback) so Material — and screen
+        // readers — actually treat the button as disabled while loading.
+        onPressed: (loading || !enabled) ? null : onPressed,
         child: _content,
       ),
     );
@@ -80,11 +76,14 @@ class FormButton extends StatelessWidget {
   Widget get _content {
     if (loading) {
       final double size = height > 30 ? 30 : 10;
-      return SizedBox(
-        width: size,
-        height: size,
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
+      return Semantics(
+        label: '$text, loading',
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
         ),
       );
     }

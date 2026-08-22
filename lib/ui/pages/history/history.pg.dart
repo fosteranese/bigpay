@@ -12,6 +12,7 @@ import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/list.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/utils/app_modal.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -39,6 +40,11 @@ class _HistoryPageState extends State<HistoryPage> {
   /// The active filter's activity name, shown in the empty state and used to
   /// label the filter control. Empty means "all".
   String _filterName = '';
+
+  /// The receipt shown in the detail pane on a half-opened foldable
+  /// ([FoldAwareLayout]) — unused (and the pane not shown) on any other
+  /// device, where opening a receipt pushes [TransactionDetailsPage] instead.
+  RequestResponse? _selectedRecord;
 
   @override
   void initState() {
@@ -81,6 +87,11 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void _openReceipt(RequestResponse record) {
+    if (context.isBookMode) {
+      setState(() => _selectedRecord = record);
+      return;
+    }
+
     AppRouter.router.push(
       TransactionDetailsPage.route.path,
       extra: record,
@@ -89,6 +100,24 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    return FoldAwareLayout(
+      detail: _selectedRecord == null
+          ? null
+          : TransactionDetailsView(
+              receipt: _selectedRecord!,
+              onBack: () => setState(() => _selectedRecord = null),
+            ),
+      emptyDetail: Center(
+        child: Text(
+          'Select a transaction to view its receipt',
+          style: context.smallDetails,
+        ),
+      ),
+      master: _master(context),
+    );
+  }
+
+  Widget _master(BuildContext context) {
     return ListLayout(
       appBarColor: context.cardBg,
       appBarBottomColor: 5,
@@ -114,6 +143,9 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(width: 5),
               IconButton(
+                tooltip: _filterName.isEmpty
+                    ? 'Filter transactions'
+                    : 'Filter: $_filterName',
                 style: IconButton.styleFrom(
                   backgroundColor: context.cardBg,
                   fixedSize: Size(48, 48),
