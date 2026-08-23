@@ -50,9 +50,20 @@ extension ResponsiveContext on BuildContext {
 /// left pane's width: [MediaQuery] reports the *whole* unfolded window
 /// (both panes plus the seam), so capping to the ordinary tablet/desktop
 /// width and centering across that would straddle the hinge instead of
-/// sitting inside one pane.
-double contentCapWidth(BuildContext context, {double? maxWidth}) {
-  final hinge = context.isBookMode ? context.hingeBounds : null;
+/// sitting inside one pane. Skipped when [BuildContext.isInsideSplitPane] —
+/// a modal opened from inside a [MasterDetailLayout] pane (e.g. the detail
+/// pane, which sits to the *right* of the hinge) should size against that
+/// pane, not get pulled toward the left-of-hinge width — or when
+/// [avoidHinge] is false, for content whose design calls for spanning the
+/// whole window even in book mode (see [BoundedContent.avoidHinge]).
+double contentCapWidth(
+  BuildContext context, {
+  double? maxWidth,
+  bool avoidHinge = true,
+}) {
+  final hinge = (avoidHinge && context.isBookMode && !context.isInsideSplitPane)
+      ? context.hingeBounds
+      : null;
   if (hinge != null) {
     return maxWidth == null ? hinge.left : math.min(maxWidth, hinge.left);
   }
@@ -69,17 +80,40 @@ double contentCapWidth(BuildContext context, {double? maxWidth}) {
 /// foldable, or a desktop window. On a foldable in book mode, confines
 /// itself to the left pane instead of centering across the hinge.
 class BoundedContent extends StatelessWidget {
-  const BoundedContent({super.key, required this.child, this.maxWidth});
+  const BoundedContent({
+    super.key,
+    required this.child,
+    this.maxWidth,
+    this.avoidHinge = true,
+  });
 
   final Widget child;
   final double? maxWidth;
 
+  /// False to span the *whole* unfolded window in book mode instead of
+  /// confining to the left pane — for content whose design reads as one
+  /// continuous canvas across the hinge (pure branding/decorative art with
+  /// nothing interactive sitting right on the seam, e.g. the splash
+  /// screen) rather than as a list/detail-style page. Squeezing every page
+  /// into just the left half regardless of what it actually contains reads
+  /// as broken, not deliberate — this is the opt-out for pages where a
+  /// full-window layout is the better call even in book mode. Ignored
+  /// outside book mode.
+  final bool avoidHinge;
+
   @override
   Widget build(BuildContext context) {
-    final cap = contentCapWidth(context, maxWidth: maxWidth);
+    final cap = contentCapWidth(
+      context,
+      maxWidth: maxWidth,
+      avoidHinge: avoidHinge,
+    );
     if (cap == double.infinity) return child;
 
-    final hinge = context.isBookMode ? context.hingeBounds : null;
+    final hinge =
+        (avoidHinge && context.isBookMode && !context.isInsideSplitPane)
+        ? context.hingeBounds
+        : null;
     if (hinge != null) {
       // heightFactor: 1 on both Aligns — the outer one (for the pane
       // confinement) is just as prone to the size-inflation issue described

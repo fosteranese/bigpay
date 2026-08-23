@@ -152,10 +152,6 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
                 category: _selectedCategory!,
                 useScaffold: false,
               ),
-        emptyDetail: const PaneEmptyState(
-          icon: Icons.description_outlined,
-          message: 'Select a service to view its forms',
-        ),
         master: _master(context),
       ),
     );

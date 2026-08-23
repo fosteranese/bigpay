@@ -125,6 +125,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
 
     return CachedNetworkImage(
       imageUrl: url,
+      fit: .cover,
       placeholder: (context, url) => fallback,
       errorWidget: (context, url, error) => fallback,
     );
@@ -161,6 +162,12 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
             children: _walkThrough
                 .map(
                   (item) => Stack(
+                    // fit: .expand — without it (the default is loose),
+                    // the slide image sizes to its own intrinsic pixel size
+                    // instead of filling the slide, exposing bare Scaffold
+                    // background around/behind it (worst on a wide or
+                    // book-mode window, where the gap is largest).
+                    fit: .expand,
                     children: [
                       _slideImage(item),
                       Align(

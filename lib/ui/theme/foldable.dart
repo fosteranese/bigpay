@@ -4,7 +4,6 @@ import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 
 /// Reads the device's fold/hinge geometry, exposed by Flutter as
@@ -36,28 +35,39 @@ extension FoldableContext on BuildContext {
   /// ([MasterDetailLayout]) rather than push a separate page — either a real
   /// foldable hinge (book mode) or just a wide-enough regular screen.
   bool get usesSplitView => isBookMode || isWide;
+
+  /// True when this context lives inside a [MasterDetailLayout]'s pane —
+  /// its parent has already confined it to one side of the split (e.g. the
+  /// detail pane, which sits on the *right* of the hinge). [BoundedContent]
+  /// uses this to skip its own hinge-avoidance in that case: re-confining
+  /// pane content to the left-of-hinge width would push it to hug whichever
+  /// edge faces the hinge instead of centering in its own, already-correct
+  /// box — which is why, before this check existed, a modal opened from
+  /// [MasterDetailLayout]'s detail pane (e.g. the wallet page's "View
+  /// Statement" sheet) rendered hard against the left edge instead of
+  /// staying inside the pane it was actually opened from.
+  bool get isInsideSplitPane =>
+      findAncestorWidgetOfExactType<MasterDetailLayout>() != null;
 }
 
 /// Splits [master] and [detail] into two side-by-side panes whenever
-/// [BuildContext.usesSplitView] is true — across a real foldable hinge in
-/// book mode, or a fixed-width [masterWidth] pane on any other wide screen.
-/// Otherwise just renders [master] full-width, so this is a no-op wrapper on
-/// a phone or a medium (tablet/rail-width) screen.
-///
-/// [detail] is optional — pass null to show [emptyDetail] (e.g. "select an
-/// item") in the second pane before anything's been picked.
+/// [BuildContext.usesSplitView] is true *and* something's actually selected
+/// — across a real foldable hinge in book mode, or a fixed-width
+/// [masterWidth] pane on any other wide screen. Otherwise (including
+/// whenever [detail] is null — nothing selected yet) just renders [master]
+/// full-width, so this is a no-op wrapper on a phone or a medium
+/// (tablet/rail-width) screen, and doesn't split into a cramped list pane
+/// plus an empty detail pane before the user has picked anything.
 class MasterDetailLayout extends StatelessWidget {
   const MasterDetailLayout({
     super.key,
     required this.master,
     this.detail,
-    this.emptyDetail,
     this.masterWidth = 400,
   });
 
   final Widget master;
   final Widget? detail;
-  final Widget? emptyDetail;
 
   /// Master-pane width for the wide-screen (non-hinge) case. Ignored in real
   /// book mode, where the hinge's own position determines the split.
@@ -69,6 +79,15 @@ class MasterDetailLayout extends StatelessWidget {
     if (hinge == null && !context.isWide) {
       return master;
     }
+
+    // Nothing selected yet — let master use the whole window instead of
+    // splitting into a cramped list pane plus a mostly-empty "select
+    // something" pane. The split only earns its keep once there's a detail
+    // to actually show.
+    if (detail == null) {
+      return master;
+    }
+    final resolvedDetail = detail!;
 
     final masterPaneWidth = hinge?.left ?? masterWidth;
     // Some foldables (e.g. Pixel Fold's continuous hinge) report a
@@ -89,53 +108,8 @@ class MasterDetailLayout extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: detail ?? emptyDetail ?? const SizedBox.shrink(),
-        ),
+        Expanded(child: resolvedDetail),
       ],
-    );
-  }
-}
-
-/// The "nothing selected yet" state for a [MasterDetailLayout] detail pane —
-/// a soft icon circle plus a short message, so every list→detail flow gets
-/// the same polish instead of each hand-rolling its own `Center(Text(...))`.
-class PaneEmptyState extends StatelessWidget {
-  const PaneEmptyState({
-    super.key,
-    required this.icon,
-    required this.message,
-  });
-
-  final IconData icon;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: context.avatarBg,
-              ),
-              child: Icon(icon, size: 28, color: context.textTertiary),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              style: context.smallDetails,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

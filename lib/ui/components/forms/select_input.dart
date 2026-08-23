@@ -93,10 +93,9 @@ class _FormSelectInputState extends State<FormSelectInput> {
       useSafeArea: true,
       useRootNavigator: true,
       isDismissible: true,
-      constraints: BoxConstraints(
-        minWidth: cap == double.infinity ? double.maxFinite : 0,
-        maxWidth: cap,
-      ),
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),
       ),
@@ -158,10 +157,9 @@ class _FormSelectInputState extends State<FormSelectInput> {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      constraints: BoxConstraints(
-        minWidth: cap == double.infinity ? double.maxFinite : 0,
-        maxWidth: cap,
-      ),
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: const RoundedRectangleBorder(
         borderRadius: .vertical(
           top: .circular(20),

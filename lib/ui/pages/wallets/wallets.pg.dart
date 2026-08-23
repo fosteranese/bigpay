@@ -97,10 +97,6 @@ class _WalletsPageState extends State<WalletsPage> {
               account: _selectedAccount,
               onBack: () => setState(() => _selectedAccount = null),
             ),
-      emptyDetail: const PaneEmptyState(
-        icon: Icons.account_balance_wallet_outlined,
-        message: 'Select a wallet to view its details',
-      ),
       master: _master(context),
     );
   }

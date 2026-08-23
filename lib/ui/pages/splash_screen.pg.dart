@@ -2,6 +2,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 
@@ -19,29 +20,54 @@ class SplashScreenPage extends StatelessWidget {
     // The background icon has a fixed intrinsic size (375x403, matching a
     // standard phone width) and doesn't scale on its own. Below that width
     // it overflows off-screen on a small/candy-bar phone; above it, scale it
-    // to the same content cap the rest of the app uses so it doesn't look
-    // lost on a tablet or desktop window.
-    final bgIconWidth = context.responsive<double>(
-      compact: MediaQuery.sizeOf(context).width,
-      medium: 640,
-      expanded: 720,
-    );
+    // to the same content cap the rest of the app uses (via contentCapWidth,
+    // so it also matches whatever BoundedContent below actually gives it) so
+    // it doesn't look lost on a tablet or desktop window. Pure branding art
+    // with nothing interactive on it — avoidHinge: false below lets it span
+    // the whole window in book mode too, instead of getting squeezed into
+    // just the left pane.
+    final cap = contentCapWidth(context, avoidHinge: false);
+    final bgIconWidth = cap == double.infinity
+        ? MediaQuery.sizeOf(context).width
+        : cap;
 
     return Scaffold(
-      body: Stack(
-        fit: .expand,
-        alignment: .bottomCenter,
-        children: [
-          Align(
-            alignment: .bottomCenter,
-            child: SvgPicture.asset(
-              SvgImages.splashBgIcon,
-              width: bgIconWidth,
-              height: bgIconWidth / _bgIconAspectRatio,
-            ),
+      body: Container(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        // Matches MainLayout's background — every other page in the app
+        // gets this gradient; without it, this pre-auth page fell through
+        // to the flat theme scaffold color, reading as a "white patch" next
+        // to the rest of the app's chrome.
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: const [0.0, 0.3077],
+            colors: [context.scaffoldBg, context.cardBg],
           ),
-          Align(alignment: .center, child: SvgPicture.asset(SvgImages.icon)),
-        ],
+        ),
+        child: BoundedContent(
+          avoidHinge: false,
+          child: Stack(
+            fit: .expand,
+            alignment: .bottomCenter,
+            children: [
+              Align(
+                alignment: .bottomCenter,
+                child: SvgPicture.asset(
+                  SvgImages.splashBgIcon,
+                  width: bgIconWidth,
+                  height: bgIconWidth / _bgIconAspectRatio,
+                ),
+              ),
+              Align(
+                alignment: .center,
+                child: SvgPicture.asset(SvgImages.icon),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

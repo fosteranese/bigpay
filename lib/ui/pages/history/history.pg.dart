@@ -107,10 +107,6 @@ class _HistoryPageState extends State<HistoryPage> {
               receipt: _selectedRecord!,
               onBack: () => setState(() => _selectedRecord = null),
             ),
-      emptyDetail: const PaneEmptyState(
-        icon: Icons.receipt_long_outlined,
-        message: 'Select a transaction to view its receipt',
-      ),
       master: _master(context),
     );
   }

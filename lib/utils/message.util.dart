@@ -30,6 +30,7 @@ final class MessageUtil {
           child: FadeIn(
             child: Dialog(
               backgroundColor: Colors.transparent,
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -75,6 +76,7 @@ final class MessageUtil {
               borderRadius: BorderRadius.circular(20),
             ),
             insetPadding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -141,6 +143,7 @@ final class MessageUtil {
               borderRadius: BorderRadius.circular(20),
             ),
             insetPadding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -276,6 +279,7 @@ final class MessageUtil {
               borderRadius: BorderRadius.circular(20),
             ),
             insetPadding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Column(

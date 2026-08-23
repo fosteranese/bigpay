@@ -15,8 +15,10 @@ class AppModal {
     List<Widget> actions = const [],
   }) {
     // Capped the same way page content is via BoundedContent, so the sheet
-    // doesn't stretch edge-to-edge on a tablet/desktop window or straddle
-    // the hinge on a foldable in book mode.
+    // doesn't stretch edge-to-edge on a tablet/desktop window — using
+    // showModalBottomSheet's own `constraints` param (its supported,
+    // documented way to do this) rather than fighting its layout with a
+    // custom wrapper.
     final cap = contentCapWidth(context);
     showModalBottomSheet(
       isScrollControlled: true,
@@ -25,10 +27,9 @@ class AppModal {
       useSafeArea: true,
       useRootNavigator: true,
       isDismissible: true,
-      constraints: BoxConstraints(
-        minWidth: cap == double.infinity ? double.maxFinite : 0,
-        maxWidth: cap,
-      ),
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),
       ),
