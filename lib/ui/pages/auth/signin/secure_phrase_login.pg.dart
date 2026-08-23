@@ -68,6 +68,7 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
         }
       },
       child: MainLayout(
+        maxWidth: 480,
         title: 'Enter your secure phrase',
         titleStyle: AppTypography.display1,
         subtitle:

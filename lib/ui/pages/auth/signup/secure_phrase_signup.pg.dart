@@ -41,6 +41,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
+      maxWidth: 480,
       title: 'Create a secure phrase',
       titleStyle: AppTypography.display1,
       subtitle:

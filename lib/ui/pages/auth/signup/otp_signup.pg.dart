@@ -100,6 +100,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
         ),
       ],
       child: MainLayout(
+        maxWidth: 480,
         subtitleWidget: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .center,

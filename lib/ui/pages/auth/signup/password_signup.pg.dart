@@ -40,6 +40,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
+      maxWidth: 480,
       title: 'Create Password',
       titleStyle: AppTypography.display1,
       bottomSize: 60,

@@ -77,6 +77,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
         return;
       },
       child: MainLayout(
+        maxWidth: 480,
         title: 'Create Password',
         titleStyle: AppTypography.display1,
         bottomSize: 60,

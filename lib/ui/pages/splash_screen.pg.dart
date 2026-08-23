@@ -22,11 +22,8 @@ class SplashScreenPage extends StatelessWidget {
     // it overflows off-screen on a small/candy-bar phone; above it, scale it
     // to the same content cap the rest of the app uses (via contentCapWidth,
     // so it also matches whatever BoundedContent below actually gives it) so
-    // it doesn't look lost on a tablet or desktop window. Pure branding art
-    // with nothing interactive on it — avoidHinge: false below lets it span
-    // the whole window in book mode too, instead of getting squeezed into
-    // just the left pane.
-    final cap = contentCapWidth(context, avoidHinge: false);
+    // it doesn't look lost on a tablet or desktop window.
+    final cap = contentCapWidth(context);
     final bgIconWidth = cap == double.infinity
         ? MediaQuery.sizeOf(context).width
         : cap;
@@ -48,7 +45,6 @@ class SplashScreenPage extends StatelessWidget {
           ),
         ),
         child: BoundedContent(
-          avoidHinge: false,
           child: Stack(
             fit: .expand,
             alignment: .bottomCenter,

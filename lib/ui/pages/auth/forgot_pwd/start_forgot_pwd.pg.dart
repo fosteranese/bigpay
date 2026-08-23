@@ -80,6 +80,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
         }
       },
       child: MainLayout(
+        maxWidth: 480,
         title: 'Forgot Password',
         titleStyle: AppTypography.display1,
         bottomSize: 60,

@@ -77,6 +77,7 @@ class _StartForgotSecurePhrasePageState
         }
       },
       child: MainLayout(
+        maxWidth: 480,
         title: 'Forgot Secure Phrase',
         titleStyle: AppTypography.display1,
         bottomSize: 60,

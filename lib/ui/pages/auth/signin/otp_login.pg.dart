@@ -104,6 +104,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
         ),
       ],
       child: MainLayout(
+        maxWidth: 480,
         subtitleWidget: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .center,

@@ -29,6 +29,7 @@ class MainLayout extends StatefulWidget {
     this.backgroundColor = Colors.transparent,
     this.onRefresh,
     this.useScaffold = true,
+    this.maxWidth,
   });
   final String? title;
   final String? subtitle;
@@ -58,6 +59,12 @@ class MainLayout extends StatefulWidget {
   /// inside the pane's Expanded silently fails to render its body on a real
   /// device. Pushed-page usage (the default) is unaffected.
   final bool useScaffold;
+
+  /// Overrides [BoundedContent]'s default width cap (640/720 at
+  /// medium/expanded) — for pages whose content is naturally much narrower
+  /// than a generic content page, e.g. a single-column auth form with one or
+  /// two fields and a button, which looks stretched-out at the generic cap.
+  final double? maxWidth;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -128,6 +135,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   Widget _buildMainPage() {
     final body = BoundedContent(
+      maxWidth: widget.maxWidth,
       child: _wrapRefresh(
         CustomScrollView(
           controller: _scrollController,
@@ -272,6 +280,7 @@ class _MainLayoutState extends State<MainLayout> {
     final Widget? bottomNav = widget.bottomNav == null
         ? null
         : BoundedContent(
+            maxWidth: widget.maxWidth,
             child: Container(
               padding: .only(
                 right: context.gutter,

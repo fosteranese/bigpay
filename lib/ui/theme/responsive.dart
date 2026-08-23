@@ -46,20 +46,17 @@ extension ResponsiveContext on BuildContext {
 
 /// The width centered content should cap itself to — the same logic
 /// [BoundedContent] uses, exposed for call sites that can't just wrap a
-/// child in a widget (e.g. modal bottom sheets). In book mode, this is the
-/// left pane's width: [MediaQuery] reports the *whole* unfolded window
-/// (both panes plus the seam), so capping to the ordinary tablet/desktop
-/// width and centering across that would straddle the hinge instead of
-/// sitting inside one pane. Skipped when [BuildContext.isInsideSplitPane] —
-/// a modal opened from inside a [MasterDetailLayout] pane (e.g. the detail
-/// pane, which sits to the *right* of the hinge) should size against that
-/// pane, not get pulled toward the left-of-hinge width — or when
-/// [avoidHinge] is false, for content whose design calls for spanning the
-/// whole window even in book mode (see [BoundedContent.avoidHinge]).
+/// child in a widget (e.g. modal bottom sheets). [avoidHinge] defaults to
+/// false — see [BoundedContent.avoidHinge] for why — so book mode is treated
+/// like any other wide screen (capped, centered across the whole window)
+/// unless a caller explicitly opts in to confining itself to the left-of-
+/// hinge pane, and even then [BuildContext.isInsideSplitPane] overrides it
+/// back off — content already confined to one side by a [MasterDetailLayout]
+/// pane shouldn't be re-confined against the hinge on top of that.
 double contentCapWidth(
   BuildContext context, {
   double? maxWidth,
-  bool avoidHinge = true,
+  bool avoidHinge = false,
 }) {
   final hinge = (avoidHinge && context.isBookMode && !context.isInsideSplitPane)
       ? context.hingeBounds
@@ -77,28 +74,36 @@ double contentCapWidth(
 
 /// Centers [child] and caps its width once the viewport grows past phone
 /// size, so content doesn't stretch edge-to-edge on a tablet, an unfolded
-/// foldable, or a desktop window. On a foldable in book mode, confines
-/// itself to the left pane instead of centering across the hinge.
+/// foldable, or a desktop window. Book mode is treated the same as any
+/// other wide screen by default — see [avoidHinge].
 class BoundedContent extends StatelessWidget {
   const BoundedContent({
     super.key,
     required this.child,
     this.maxWidth,
-    this.avoidHinge = true,
+    this.avoidHinge = false,
   });
 
   final Widget child;
   final double? maxWidth;
 
-  /// False to span the *whole* unfolded window in book mode instead of
-  /// confining to the left pane — for content whose design reads as one
-  /// continuous canvas across the hinge (pure branding/decorative art with
-  /// nothing interactive sitting right on the seam, e.g. the splash
-  /// screen) rather than as a list/detail-style page. Squeezing every page
-  /// into just the left half regardless of what it actually contains reads
-  /// as broken, not deliberate — this is the opt-out for pages where a
-  /// full-window layout is the better call even in book mode. Ignored
-  /// outside book mode.
+  /// True to confine to the left pane in book mode instead of centering
+  /// across the whole unfolded window. Defaults to false: confining every
+  /// standalone page to just the left half, with the right half sitting
+  /// empty except for the background, is what a first pass at this did —
+  /// applied to sign-in, sign-up, forgot-password, service forms, the
+  /// summary screen, and the dashboard — and it consistently read as
+  /// squeezed/broken rather than deliberate, for all of them. Centering
+  /// across the whole window instead (same as any other wide screen) reads
+  /// as normal. The one place this still matters is [MasterDetailLayout]'s
+  /// own master/detail split, which handles hinge-avoidance itself and
+  /// doesn't go through this flag at all — so in practice `avoidHinge: true`
+  /// is now reserved for a page that's *not* inside a split view but still
+  /// has some specific reason to keep clear of the seam (nothing currently
+  /// does). Ignored outside book mode, and ignored whenever
+  /// [BuildContext.isInsideSplitPane] is true regardless of this flag —
+  /// content already confined to one side by a [MasterDetailLayout] pane
+  /// shouldn't be re-confined against the hinge on top of that.
   final bool avoidHinge;
 
   @override

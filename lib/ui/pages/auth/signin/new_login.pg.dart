@@ -155,6 +155,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
         ),
       ],
       child: MainLayout(
+        maxWidth: 480,
         title: 'Sign In',
         titleStyle: AppTypography.display1,
         subtitleWidget: Row(

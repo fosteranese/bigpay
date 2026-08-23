@@ -98,6 +98,7 @@ class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
         ),
       ],
       child: MainLayout(
+        maxWidth: 480,
         subtitleWidget: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .center,

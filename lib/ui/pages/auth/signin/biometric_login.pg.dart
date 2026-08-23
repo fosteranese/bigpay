@@ -121,6 +121,7 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
         }
       },
       child: MainLayout(
+        maxWidth: 480,
         subtitleWidget: Align(
           alignment: .center,
           child: SvgPicture.asset(

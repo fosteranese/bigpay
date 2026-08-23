@@ -90,6 +90,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
         }
       },
       child: MainLayout(
+        maxWidth: 480,
         title: 'Set Security PIN',
         titleStyle: AppTypography.display1,
         subtitle:

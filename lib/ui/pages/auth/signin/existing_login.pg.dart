@@ -92,9 +92,41 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
   /// Keeps the just-used password for biometric sign-in when it's enabled.
   Future<void> _rememberPasswordForBiometric(String password) async {
     if (password.isEmpty) return;
-    if (await BiometricUtil.isLoginEnabled) {
-      await BiometricUtil.saveLoginPassword(password);
+    await BiometricUtil.saveLoginPassword(password);
+  }
+
+  /// Runs the biometric unlock right here instead of navigating to a separate
+  /// page — this page already has the password field, avatar, and login
+  /// listener it needs.
+  Future<void> _biometricUnlock() async {
+    final password = await BiometricUtil.readLoginPassword();
+    if (!mounted) return;
+
+    // Nothing stored to replay yet — point the user at the password field
+    // already on this page rather than sending them anywhere.
+    if (password == null || password.isEmpty) {
+      MessageUtil.displayActionDialog(
+        context,
+        title: 'Password Required',
+        message:
+            'Login with your password first to enjoy login with biometrics.',
+        onConfirmText: 'Ok',
+        onConfirm: () => _passwordFocusNode.requestFocus(),
+      );
+      return;
     }
+
+    final result = await BiometricUtil.authenticate('Unlock BigPay');
+    if (!mounted || result != BiometricResult.success) return;
+
+    _loginEvent = context.dispatchProcess(
+      ExistingLoginAction(
+        payload: ExistingLoginActionPayload(
+          phoneNumber: _phone,
+          password: password,
+        ),
+      ),
+    );
   }
 
   void _signIn() {
@@ -170,8 +202,16 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
         }
       },
       child: MainLayout(
+        maxWidth: 480,
         showBackBtn: false,
-        bottomSize: 120,
+        bottomSize: 60,
+        subtitleWidget: Align(
+          alignment: .center,
+          child: SvgPicture.asset(
+            SvgImages.icon,
+            height: 50,
+          ),
+        ),
         bottomNav: Column(
           mainAxisSize: .min,
           children: [
@@ -191,7 +231,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
         child: Column(
           crossAxisAlignment: .stretch,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 120),
             Center(child: _buildAvatar()),
             const SizedBox(height: 16),
             Text(
@@ -219,11 +259,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
                 if (_biometricEnabled)
                   TextButton(
                     style: TextButton.styleFrom(padding: .zero),
-                    onPressed: () {
-                      AppRouter.router.push(
-                        BiometricLoginPage.route.path,
-                      );
-                    },
+                    onPressed: _biometricUnlock,
                     child: Row(
                       mainAxisSize: .min,
                       mainAxisAlignment: .start,

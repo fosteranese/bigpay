@@ -39,6 +39,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
+      maxWidth: 480,
       title: 'Sign Up',
       titleStyle: AppTypography.display1,
       subtitleWidget: Row(
