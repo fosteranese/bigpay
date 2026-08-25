@@ -10,8 +10,10 @@ import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/security/verify_pin_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/more/more.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
@@ -121,10 +123,11 @@ class _SecurityPageState extends State<SecurityPage> {
       if (!snapshot.isSilent &&
           !snapshot.isCached &&
           (formData?.fieldsDatum?.isEmpty ?? true)) {
+        final l10n = AppLocalizations.of(context)!;
         MessageUtil.displayErrorDialog(
           context,
-          title: 'Service Unavailable',
-          message: 'This service is currently not available',
+          title: l10n.commonServiceUnavailableTitle,
+          message: l10n.commonServiceUnavailableMessage,
         );
         return;
       }
@@ -158,17 +161,18 @@ class _SecurityPageState extends State<SecurityPage> {
   Future<void> _toggle({required bool isLogin, required bool enabling}) async {
     if (enabling) {
       final result = await BiometricUtil.authenticate(
-        'Confirm to enable biometric access',
+        AppLocalizations.of(context)!.securityConfirmBiometricAccess,
       );
       if (!mounted) return;
 
       // Only block when the device genuinely has no biometrics enrolled — a
       // cancel/mismatch just aborts silently.
       if (result == BiometricResult.unavailable) {
+        final l10n = AppLocalizations.of(context)!;
         MessageUtil.displayErrorDialog(
           context,
-          title: 'Biometrics Unavailable',
-          message: 'Set up Face ID or a fingerprint on your device first.',
+          title: l10n.securityBiometricsUnavailableTitle,
+          message: l10n.securityBiometricsUnavailableMessage,
         );
         return;
       }
@@ -176,11 +180,12 @@ class _SecurityPageState extends State<SecurityPage> {
     }
 
     _pendingEnable = enabling;
+    final l10n = AppLocalizations.of(context)!;
     AuthenticationUtil.pin(
-      data: const {
+      data: {
         'fieldLength': 6,
-        'tooltip': 'Enter Security PIN',
-        'description': 'Confirm your PIN to update biometric settings.',
+        'tooltip': l10n.securityEnterPinTooltip,
+        'description': l10n.securityConfirmPinDescription,
       },
       onSuccess: (pin) {
         // Dismiss the PIN dialog, then verify with the backend.
@@ -284,7 +289,7 @@ class _SecurityPageState extends State<SecurityPage> {
       ],
       child: MainLayout(
         bottomSize: 60,
-        title: 'Security',
+        title: AppLocalizations.of(context)!.securityTitle,
         onRefresh: _onRefresh,
         child: ProcessConsumer<GeneralFlowCategory>(
           event: () => _categoriesEvent,
@@ -302,7 +307,7 @@ class _SecurityPageState extends State<SecurityPage> {
                 if (loading)
                   const Padding(
                     padding: .symmetric(vertical: 30),
-                    child: CircularProgressIndicator(),
+                    child: ListItemSkeleton(),
                   )
                 else
                   for (final form in forms) _buildFormItem(form),
@@ -314,12 +319,12 @@ class _SecurityPageState extends State<SecurityPage> {
                   height: 30,
                 ),
                 _biometricSwitch(
-                  title: 'Sign in with Biometrics',
+                  title: AppLocalizations.of(context)!.securitySignInWithBiometrics,
                   value: _loginEnabled,
                   onChanged: (value) => _toggle(isLogin: true, enabling: value),
                 ),
                 _biometricSwitch(
-                  title: 'Transact with Biometrics',
+                  title: AppLocalizations.of(context)!.securityTransactWithBiometrics,
                   value: _transactionEnabled,
                   onChanged: (value) =>
                       _toggle(isLogin: false, enabling: value),
@@ -350,17 +355,9 @@ class _SecurityPageState extends State<SecurityPage> {
     return ProfileItem(
       title: title,
       icon: Icons.fingerprint,
-      trailing: SizedBox(
-        height: 30,
-        width: 49,
-        child: FittedBox(
-          child: Switch(
-            value: value,
-            padding: .zero,
-            materialTapTargetSize: .shrinkWrap,
-            onChanged: onChanged,
-          ),
-        ),
+      trailing: Switch(
+        value: value,
+        onChanged: onChanged,
       ),
     );
   }

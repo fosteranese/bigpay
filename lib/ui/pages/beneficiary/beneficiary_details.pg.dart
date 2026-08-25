@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -11,8 +12,11 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
 
-/// A saved beneficiary's details, with the option to remove it.
-class BeneficiaryDetailsPage extends StatefulWidget {
+/// A pushed full page wrapping [BeneficiaryDetailsView] — used on every
+/// device except a foldable in book mode (or a wide screen), where
+/// [BeneficiariesPage] shows the same view inline in the second pane instead
+/// (see [MasterDetailLayout]).
+class BeneficiaryDetailsPage extends StatelessWidget {
   const BeneficiaryDetailsPage({super.key, this.payee});
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/beneficiaries/details',
@@ -22,13 +26,33 @@ class BeneficiaryDetailsPage extends StatefulWidget {
   final Payee? payee;
 
   @override
-  State<BeneficiaryDetailsPage> createState() => _BeneficiaryDetailsPageState();
+  Widget build(BuildContext context) {
+    return BeneficiaryDetailsView(payee: payee);
+  }
 }
 
-class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
+/// A saved beneficiary's details, with the option to remove it — independent
+/// of how it's hosted: a pushed page ([BeneficiaryDetailsPage], default back
+/// behavior) or an inline pane in [BeneficiariesPage]'s split view ([onBack]
+/// provided, clears the pane's selection instead of popping a route that was
+/// never pushed).
+class BeneficiaryDetailsView extends StatefulWidget {
+  const BeneficiaryDetailsView({super.key, this.payee, this.onBack});
+
+  final Payee? payee;
+  final VoidCallback? onBack;
+
+  @override
+  State<BeneficiaryDetailsView> createState() =>
+      _BeneficiaryDetailsViewState();
+}
+
+class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
   ExecuteProcessEvent? _deleteEvent;
 
-  String get _name => widget.payee?.displayName ?? 'Beneficiary';
+  String _name(BuildContext context) =>
+      widget.payee?.displayName ??
+      AppLocalizations.of(context)!.beneficiariesFallbackName;
 
   String _initials(String name) {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
@@ -80,7 +104,11 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
 
         if (snapshot.isSuccessful) {
           _deleteEvent = null;
-          AppRouter.router.pop();
+          if (widget.onBack != null) {
+            widget.onBack!();
+          } else {
+            AppRouter.router.pop();
+          }
         } else if (snapshot.hasError) {
           _deleteEvent = null;
           MessageUtil.displayErrorDialog(
@@ -90,12 +118,14 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
         }
       },
       child: MainLayout(
+        useScaffold: widget.onBack == null,
+        onBack: widget.onBack,
         bottomSize: 72,
-        title: 'Beneficiary Details',
+        title: AppLocalizations.of(context)!.beneficiariesDetailsTitle,
         bottomNav: FormButton(
           backgroundColor: AppColors.danger,
           onPressed: _delete,
-          text: 'Remove Beneficiary',
+          text: AppLocalizations.of(context)!.beneficiariesRemoveButton,
         ),
         child: Column(
           children: [
@@ -103,17 +133,17 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
             CircleAvatar(
               radius: 34,
               backgroundColor: context.avatarBg,
-              child: Text(_initials(_name), style: context.header2),
+              child: Text(_initials(_name(context)), style: context.header2),
             ),
-            const SizedBox(height: 12),
-            Text(_name, style: context.header3, textAlign: .center),
+            const SizedBox(height: Spacing.md),
+            Text(_name(context), style: context.header3, textAlign: .center),
             if (widget.payee?.formName?.isNotEmpty ?? false)
               Text(
                 widget.payee!.formName!,
                 style: context.smallDetails,
                 textAlign: .center,
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: Spacing.xxl),
             Container(
               padding: .all(20),
               decoration: BoxDecoration(
@@ -129,7 +159,10 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
                       Divider(color: context.divider),
                   ],
                   if (rows.isEmpty)
-                    _detailRow('Recipient', widget.payee?.value ?? '-'),
+                    _detailRow(
+                      AppLocalizations.of(context)!.beneficiariesRecipientLabel,
+                      widget.payee?.value ?? '-',
+                    ),
                 ],
               ),
             ),
@@ -148,7 +181,7 @@ class _BeneficiaryDetailsPageState extends State<BeneficiaryDetailsPage> {
           Expanded(
             child: Text(label, style: context.smallDetails),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: Spacing.md),
           Expanded(
             child: Text(
               value,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/services/get_form_payees_action.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
@@ -102,18 +103,19 @@ class _FormPayeeInputState extends State<FormPayeeInput> {
   }
 
   void _showPicker(BuildContext context, List<Payee> payees) {
+    final l10n = AppLocalizations.of(context)!;
     if (payees.isEmpty) {
       MessageUtil.displayErrorDialog(
         context,
-        title: 'No saved recipients',
-        message: 'There are no saved recipients for this service yet.',
+        title: l10n.payeeNoSavedRecipientsTitle,
+        message: l10n.payeeNoSavedRecipientsMessage,
       );
       return;
     }
 
     AppModal.showBottomModal(
       context,
-      label: 'Select ${widget.label ?? 'recipient'}',
+      label: '${l10n.commonSelect} ${widget.label ?? l10n.payeeRecipientFallback}',
       children: [
         for (final payee in payees)
           ListTile(

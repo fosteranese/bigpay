@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/forgot_pwd/complete_forgot_pwd_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
@@ -46,6 +48,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ProcessListener<Null>(
       event: () => mainEvent,
       listener: (context, snapshot) {
@@ -70,16 +73,20 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
 
         MessageUtil.displaySuccessFullDialog(
           context,
-          title: 'Successful',
-          message:
-              'Your password has been reset successfully. You can use your new password to log in now',
+          title: l10n.authSuccessfulTitle,
+          message: l10n.authPasswordResetSuccessMessage,
         );
         return;
       },
       child: MainLayout(
         maxWidth: 480,
-        title: 'Create Password',
-        titleStyle: AppTypography.display1,
+        title: l10n.authCreatePasswordTitle,
+        titleStyle: context.display1,
+        stepIndicator: StepProgress(
+          currentStep: 2,
+          totalSteps: 3,
+          labels: ['Verify', 'OTP', 'New Password'],
+        ),
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
@@ -87,7 +94,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
             return FormButton(
               enabled: value,
               onPressed: _onContinue,
-              text: 'Save Password',
+              text: l10n.authSavePassword,
             );
           },
         ),
@@ -98,7 +105,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
             crossAxisAlignment: .center,
             children: [
               FormPasswordInput(
-                label: 'Password',
+                label: l10n.commonPasswordLabel,
                 focusNode: _passwordFocusNode,
                 controller: _passwordController,
                 next: (_) {
@@ -108,14 +115,14 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
               ),
               const SizedBox(height: 15),
               FormPasswordInput(
-                label: 'Confirm Password',
+                label: l10n.commonConfirmPasswordLabel,
                 focusNode: _confirmPasswordFocusNode,
                 controller: _confirmPasswordController,
                 onChanged: _onChanged,
               ),
               const SizedBox(height: 25),
               Text(
-                'Password must be at least 6 characters and include letters, numbers, and special characters (e.g. !\$@%).',
+                l10n.authPasswordRequirements,
                 style: context.caption,
                 textAlign: .center,
               ),

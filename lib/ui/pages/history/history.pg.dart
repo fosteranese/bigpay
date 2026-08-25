@@ -9,6 +9,8 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/history/history_transaction_item.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/list.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -112,11 +114,12 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _master(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListLayout(
       appBarColor: context.cardBg,
       appBarBottomColor: 5,
       bodyColor: context.cardBg,
-      miniTitle: 'Transactions',
+      miniTitle: l10n.historyTitle,
       onRefresh: () async {
         _load();
         await context.awaitProcess(_historyEvent);
@@ -130,7 +133,7 @@ class _HistoryPageState extends State<HistoryPage> {
             children: [
               Expanded(
                 child: FormInput(
-                  placeholder: 'Search',
+                  placeholder: l10n.commonSearch,
                   controller: _searchController,
                   suffix: Icon(Icons.search),
                 ),
@@ -138,8 +141,8 @@ class _HistoryPageState extends State<HistoryPage> {
               const SizedBox(width: 5),
               IconButton(
                 tooltip: _filterName.isEmpty
-                    ? 'Filter transactions'
-                    : 'Filter: $_filterName',
+                    ? l10n.historyFilterTooltip
+                    : l10n.historyFilterActiveTooltip(_filterName),
                 style: IconButton.styleFrom(
                   backgroundColor: context.cardBg,
                   fixedSize: Size(48, 48),
@@ -173,7 +176,12 @@ class _HistoryPageState extends State<HistoryPage> {
         },
         builder: (context, snapshot) {
           if (_source == null && snapshot.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              itemCount: 8,
+              itemBuilder: (_, _) => const TransactionItemSkeleton(),
+            );
           }
 
           final items = _filtered;
@@ -224,11 +232,12 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     final label = _query.isNotEmpty
-        ? 'No transactions match "$_query"'
+        ? l10n.historyNoMatchQuery(_query)
         : _filterName.isNotEmpty
-        ? 'No $_filterName transactions found'
-        : 'No transactions yet';
+        ? l10n.historyNoFilterResults(_filterName)
+        : l10n.walletsNoTransactionsYet;
 
     return Center(
       child: Padding(
@@ -241,15 +250,15 @@ class _HistoryPageState extends State<HistoryPage> {
               size: 56,
               color: context.textSecondary,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.lg),
             Text(
               label,
               textAlign: .center,
               style: context.p1Medium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             Text(
-              'Completed transactions will appear here.',
+              AppLocalizations.of(context)!.historyEmptySubtitle,
               textAlign: .center,
               style: context.smallDetails,
             ),
@@ -261,10 +270,11 @@ class _HistoryPageState extends State<HistoryPage> {
 
   void _onOpenFilter() {
     final activities = _source?.activity ?? const [];
+    final l10n = AppLocalizations.of(context)!;
 
     AppModal.showBottomModal(
       context,
-      label: 'Filter by service',
+      label: l10n.historyFilterByService,
       padding: .all(20),
       actions: [
         if (_filterName.isNotEmpty)
@@ -275,7 +285,7 @@ class _HistoryPageState extends State<HistoryPage> {
               _load();
             },
             child: Text(
-              'Clear Filter',
+              l10n.historyClearFilter,
               style: context.formLabels.copyWith(
                 decoration: .underline,
               ),
@@ -288,7 +298,7 @@ class _HistoryPageState extends State<HistoryPage> {
           Padding(
             padding: const .symmetric(vertical: 20),
             child: Text(
-              'No services to filter by yet.',
+              l10n.historyNoServicesToFilter,
               style: context.smallDetails,
             ),
           )

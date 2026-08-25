@@ -1,3 +1,4 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 
 class StartKycPage extends StatefulWidget {
   const StartKycPage({super.key});
@@ -33,9 +35,15 @@ class _StartKycPageState extends State<StartKycPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Ghana Card Information',
-      titleStyle: AppTypography.display2,
+      title: l10n.kycGhanaCardInfoTitle,
+      titleStyle: context.display2,
+      stepIndicator: StepProgress(
+        currentStep: 0,
+        totalSteps: 3,
+        labels: ['ID', 'Selfie', 'Contact'],
+      ),
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
@@ -43,7 +51,7 @@ class _StartKycPageState extends State<StartKycPage> {
           return FormButton(
             enabled: value,
             onPressed: _continue,
-            text: 'Continue',
+            text: l10n.commonContinue,
           );
         },
       ),

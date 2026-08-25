@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/signup/start_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
@@ -38,31 +40,42 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       maxWidth: 480,
-      title: 'Sign Up',
-      titleStyle: AppTypography.display1,
-      subtitleWidget: Row(
+      title: l10n.authSignUpTitle,
+      titleStyle: context.display1,
+      stepIndicator: StepProgress(
+        currentStep: 0,
+        totalSteps: 5,
+        labels: ['Phone', 'OTP', 'Password', 'Security', 'PIN'],
+      ),
+      subtitleWidget: Column(
+        mainAxisSize: .min,
         children: [
-          Text(
-            'Already have an account?',
-            style: context.smallDetails,
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              tapTargetSize: .shrinkWrap,
-            ),
-            onPressed: () {
-              AppRouter.router.push(
-                NewLoginPage.route.path,
-              );
-            },
-            child: Text(
-              'Sign in',
-              style: AppTypography.buttons.copyWith(
-                color: AppColors.secondary,
+          Row(
+            children: [
+              Text(
+                l10n.authAlreadyHaveAccount,
+                style: context.smallDetails,
               ),
-            ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  tapTargetSize: .shrinkWrap,
+                ),
+                onPressed: () {
+                  AppRouter.router.push(
+                    NewLoginPage.route.path,
+                  );
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.authSignInLink,
+                  style: context.buttons.copyWith(
+                    color: context.accentGreen,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -102,26 +115,26 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
               runAlignment: .start,
               children: [
                 Text(
-                  'By clicking on continue, you accept our ',
+                  l10n.authTermsPrefix,
                   style: context.smallDetails,
                 ),
                 InkWell(
                   onTap: () {},
                   child: Text(
-                    'Terms of Use',
+                    l10n.authTermsOfUse,
                     style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),
                 ),
                 Text(
-                  ' and ',
+                  l10n.authAnd,
                   style: context.smallDetails,
                 ),
                 InkWell(
                   onTap: () {},
                   child: Text(
-                    'Privacy Policy',
+                    l10n.authPrivacyPolicy,
                     style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
@@ -132,7 +145,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
             const SizedBox(height: 10),
             FormButton(
               onPressed: _continue,
-              text: 'Continue',
+              text: l10n.commonContinue,
             ),
           ],
         ),
@@ -141,7 +154,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
         child: Column(
           children: [
             FormInput(
-              label: 'Phone Number',
+              label: l10n.commonPhoneNumberLabel,
               keyboardType: .phone,
               focusNode: _phoneNumberFocusNode,
               controller: _phoneNumberController,

@@ -11,6 +11,7 @@ import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/models/actions/services/verify_service_form_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -256,7 +257,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             return FormButton(
               enabled: canSubmit,
               onPressed: _submit,
-              text: 'Submit',
+              text: AppLocalizations.of(context)!.commonSubmit,
             );
           },
         ),

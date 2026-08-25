@@ -10,6 +10,7 @@ import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -103,10 +104,11 @@ class _ServicePageState extends State<ServicePage> {
               if (!snapshot.isSilent &&
                   !snapshot.isCached &&
                   (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
+                final l10n = AppLocalizations.of(context)!;
                 MessageUtil.displayErrorDialog(
                   context,
-                  title: 'Service Unavailable',
-                  message: 'This service is currently not available',
+                  title: l10n.commonServiceUnavailableTitle,
+                  message: l10n.commonServiceUnavailableMessage,
                 );
                 return;
               }
@@ -201,7 +203,7 @@ class _ServicePageState extends State<ServicePage> {
                 ),
                 subtitle: Text(
                   item.description ?? '',
-                  style: AppTypography.caption,
+                  style: context.caption,
                 ),
                 trailing: Icon(Icons.chevron_right_outlined),
               ),
@@ -213,24 +215,25 @@ class _ServicePageState extends State<ServicePage> {
   }
 
   void _verify() {
+    final l10n = AppLocalizations.of(context)!;
     AppModal.showBottomModal(
       context,
-      label: 'Verify Your Identity',
+      label: l10n.servicesVerifyIdentityTitle,
       padding: .all(20),
       children: [
         SizedBox(height: 10),
         Text(
-          'Finish setting up your profile to start sending, receiving, and managing your money securely.',
-          style: AppTypography.smallDetails.copyWith(
+          l10n.servicesVerifyIdentityMessage,
+          style: context.smallDetails.copyWith(
             color: context.textPrimary,
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: Spacing.xl),
         Align(
           alignment: .bottomRight,
           child: Text(
-            '60% Complete',
-            style: AppTypography.caption,
+            l10n.servicesPercentComplete,
+            style: context.caption,
           ),
         ),
         SizedBox(height: 5),
@@ -260,7 +263,7 @@ class _ServicePageState extends State<ServicePage> {
                 width: 0.6 * constraint.maxWidth,
                 decoration: BoxDecoration(
                   borderRadius: .circular(20),
-                  color: AppColors.secondary,
+                  color: context.accentGreen,
                 ),
               );
             },
@@ -274,7 +277,7 @@ class _ServicePageState extends State<ServicePage> {
             AppRouter.router.pop();
             AppRouter.router.push(IntroKycPage.route.path);
           },
-          text: 'Start Verification',
+          text: l10n.servicesStartVerification,
         ),
       ],
     );

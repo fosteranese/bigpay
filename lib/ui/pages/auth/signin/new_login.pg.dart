@@ -9,11 +9,13 @@ import 'package:bigpay/models/actions/auth_action.dart';
 import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
@@ -82,6 +84,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MultiProcessListener(
       listeners: [
         ProcessListenerConfig<NewDeviceLoginData>(
@@ -156,35 +159,45 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
       ],
       child: MainLayout(
         maxWidth: 480,
-        title: 'Sign In',
-        titleStyle: AppTypography.display1,
-        subtitleWidget: Row(
+        title: l10n.authSignIn,
+        titleStyle: context.display1,
+        stepIndicator: StepProgress(
+          currentStep: 0,
+          totalSteps: 3,
+          labels: ['Credentials', 'Security', 'OTP'],
+        ),
+        subtitleWidget: Column(
+          mainAxisSize: .min,
           children: [
-            Text(
-              'Don\'t have an account?',
-              style: context.smallDetails,
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                tapTargetSize: .shrinkWrap,
-              ),
-              onPressed: () {
-                AppRouter.router.push(
-                  StartSignUpPage.route.path,
-                );
-              },
-              child: Text(
-                'Sign up',
-                style: AppTypography.buttons.copyWith(
-                  color: AppColors.secondary,
+            Row(
+              children: [
+                Text(
+                  l10n.authDontHaveAccount,
+                  style: context.smallDetails,
                 ),
-              ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    tapTargetSize: .shrinkWrap,
+                  ),
+                  onPressed: () {
+                    AppRouter.router.push(
+                      StartSignUpPage.route.path,
+                    );
+                  },
+                  child: Text(
+                    l10n.authSignUpLink,
+                    style: context.buttons.copyWith(
+                      color: context.accentGreen,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
         bottomNav: FormButton(
           onPressed: _onSave,
-          text: 'Sign In',
+          text: l10n.authSignIn,
         ),
         child: Form(
           child: Column(
@@ -203,19 +216,19 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: 'Welcome back, ',
+                              text: l10n.authWelcomeBackPrefix,
                             ),
                             TextSpan(
                               text: AppState.currentUser?.user?.name ?? '',
-                              style: AppTypography.p1Bold.copyWith(
+                              style: context.p1Bold.copyWith(
                                 color: context.textPrimary,
                               ),
                             ),
                             TextSpan(
-                              text: '. \nEnter your password to continue.',
+                              text: l10n.authEnterPasswordContinueSuffix,
                             ),
                           ],
-                          style: AppTypography.p1.copyWith(
+                          style: context.p1.copyWith(
                             color: context.textPrimary,
                           ),
                         ),
@@ -224,20 +237,20 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                     SizedBox(
                       width: 90,
                       child: FormButton(
-                        height: 40,
+                        height: 44,
                         onPressed: () {
                           setState(() {
                             SignIn.phoneNumber = '';
                           });
                         },
-                        text: 'Change',
+                        text: l10n.commonChange,
                       ),
                     ),
                   ],
                 )
               else
                 FormInput(
-                  label: 'Phone Number',
+                  label: l10n.commonPhoneNumberLabel,
                   keyboardType: .phone,
                   focusNode: _phoneNumberFocusNode,
                   controller: _phoneNumberController,
@@ -251,8 +264,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
               SizedBox(height: 15),
               FormPasswordInput(
-                label: 'Password',
-                placeholder: 'Password',
+                label: l10n.commonPasswordLabel,
+                placeholder: l10n.commonPasswordPlaceholder,
                 controller: _passwordController,
                 focusNode: _passwordFocusNode,
               ),
@@ -276,8 +289,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                         SvgPicture.asset(SvgImages.biometric),
                         SizedBox(width: 5),
                         Text(
-                          'Biometric Login',
-                          style: AppTypography.smallDetails.copyWith(
+                          l10n.commonBiometricLogin,
+                          style: context.smallDetails.copyWith(
                             color: context.textPrimary,
                           ),
                         ),
@@ -293,8 +306,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                       );
                     },
                     child: Text(
-                      'Forgot Password ?',
-                      style: AppTypography.smallDetails.copyWith(
+                      l10n.commonForgotPassword,
+                      style: context.smallDetails.copyWith(
                         color: context.textPrimary,
                       ),
                     ),

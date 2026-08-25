@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
 import 'package:bigpay/data/models/initialization_data/walk_through.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -31,7 +32,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   int _currentPage = 0;
   List<WalkThrough> _walkThrough = const [];
   Timer? _timer;
-  bool _pause = false;
+  // final bool _pause = false;
   String baseUrl = '';
   String imageDirectory = '';
 
@@ -66,9 +67,9 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
           return;
         }
 
-        if (_pause) {
-          return;
-        }
+        // if (_pause) {
+        //   return;
+        // }
         if (_currentPage == _walkThrough.length - 1) {
           // _currentPage = 0;
           // _pageController.jumpToPage(_currentPage);
@@ -186,11 +187,11 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                                 children: [
                                   Text(
                                     item.title ?? '',
-                                    style: AppTypography.display1,
+                                    style: context.display1,
                                   ),
                                   Text(
                                     item.description ?? '',
-                                    style: AppTypography.smallDetails.copyWith(
+                                    style: context.smallDetails.copyWith(
                                       color: context.cardBg,
                                     ),
                                   ),
@@ -240,7 +241,9 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                             StartSignUpPage.route.path,
                           );
                         },
-                        text: 'Create a New Account',
+                        text: AppLocalizations.of(
+                          context,
+                        )!.walkthroughCreateAccount,
                       ),
                       TextButton(
                         onPressed: () {
@@ -252,15 +255,17 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: 'Already have an Account? ',
-                                style: AppTypography.smallDetails.copyWith(
+                                text: AppLocalizations.of(
+                                  context,
+                                )!.walkthroughAlreadyHaveAccount,
+                                style: context.smallDetails.copyWith(
                                   color: context.divider,
                                 ),
                               ),
                               TextSpan(
-                                text: 'Sign In',
-                                style: AppTypography.buttons.copyWith(
-                                  color: AppColors.secondary,
+                                text: AppLocalizations.of(context)!.authSignIn,
+                                style: context.buttons.copyWith(
+                                  color: AppColors.brightGreen,
                                 ),
                               ),
                             ],

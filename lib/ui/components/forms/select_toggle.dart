@@ -142,7 +142,7 @@ class FormSelectToggleListItem extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     option.label,
-                    style: AppTypography.smallDetails.copyWith(
+                    style: context.smallDetails.copyWith(
                       color: context.textPrimary,
                     ),
                   ),

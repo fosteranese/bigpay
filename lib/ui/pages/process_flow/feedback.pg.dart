@@ -5,6 +5,7 @@ import 'package:bigpay/data/models/complaint/complaint.dart';
 import 'package:bigpay/data/models/complaint/complaint_category.dart';
 import 'package:bigpay/models/actions/complaints/get_complaint_categories_action.dart';
 import 'package:bigpay/models/actions/complaints/submit_complaint_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -124,7 +125,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
               MessageUtil.displaySuccessDialog(
                 context,
                 message:
-                    snapshot.message ?? 'Your complaint has been submitted.',
+                    snapshot.message ??
+                    AppLocalizations.of(context)!.feedbackSubmittedMessage,
                 onOk: () => AppRouter.router.pop(),
               );
               return;
@@ -142,9 +144,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
       ],
       child: MainLayout(
         bottomSize: 112,
-        title: 'Report an Issue',
-        subtitle:
-            'Encountered a problem? Tell us what went wrong, and our support team will get straight to work to resolve it for you.',
+        title: AppLocalizations.of(context)!.feedbackTitle,
+        subtitle: AppLocalizations.of(context)!.feedbackSubtitle,
         bottomNav: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .start,
@@ -158,8 +159,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 Icon(Icons.timer, size: 20, color: context.textTertiary),
                 const SizedBox(width: 2),
                 Text(
-                  'Our team typically responds within 2 hours.',
-                  style: AppTypography.caption,
+                  AppLocalizations.of(context)!.feedbackResponseTimeNotice,
+                  style: context.caption,
                 ),
               ],
             ),
@@ -170,7 +171,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 return FormButton(
                   enabled: canSubmit,
                   onPressed: _submit,
-                  text: 'Send Message',
+                  text: AppLocalizations.of(context)!.feedbackSendMessage,
                 );
               },
             ),
@@ -183,8 +184,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
             crossAxisAlignment: .center,
             children: [
               FormSelectInput(
-                label: 'Select a category',
-                placeholder: 'Search...',
+                label: AppLocalizations.of(context)!.feedbackSelectCategoryLabel,
+                placeholder: AppLocalizations.of(context)!.feedbackCategorySearchPlaceholder,
                 controller: _categoryController,
                 onChanged: _onCategorySelected,
                 next: (_) => _subjectFocusNode.requestFocus(),
@@ -198,14 +199,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
               SizedBox(height: 15),
               FormInput(
-                label: 'Subject',
+                label: AppLocalizations.of(context)!.feedbackSubjectLabel,
                 controller: _subjectController,
                 focusNode: _subjectFocusNode,
               ),
               SizedBox(height: 15),
               FormTextAreaInput(
-                label: 'Message',
-                placeholder: 'Details of your challenge here',
+                label: AppLocalizations.of(context)!.feedbackMessageLabel,
+                placeholder: AppLocalizations.of(context)!.feedbackMessagePlaceholder,
                 controller: _messageController,
               ),
             ],

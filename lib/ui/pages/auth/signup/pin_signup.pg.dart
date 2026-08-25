@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/signup/complete_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/pin_unified_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -48,6 +50,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ProcessListener<AuthData>(
       event: () => mainEvent,
       listener: (context, snapshot) {
@@ -73,9 +76,9 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
               backgroundColor: context.avatarBg,
               backgroundImage: AssetImage(JpgImages.avatar),
             ),
-            title: 'Welcome aboard!',
+            title: l10n.authWelcomeAboardTitle,
             message: snapshot.message ?? '',
-            btnText: 'Get Started',
+            btnText: l10n.authGetStarted,
             onOk: () {},
           );
           return;
@@ -91,17 +94,29 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
       },
       child: MainLayout(
         maxWidth: 480,
-        title: 'Set Security PIN',
-        titleStyle: AppTypography.display1,
-        subtitle:
-            'Set a 4-digit code to authorize payments and keep your wallet secure.',
+        title: l10n.authSetSecurityPinTitle,
+        titleStyle: context.display1,
+        stepIndicator: StepProgress(
+          currentStep: 4,
+          totalSteps: 5,
+          labels: ['Phone', 'OTP', 'Password', 'Security', 'PIN'],
+        ),
+        subtitleWidget: Column(
+          mainAxisSize: .min,
+          children: [
+            Text(
+              l10n.authSetPinSubtitle,
+              style: context.smallDetails,
+            ),
+          ],
+        ),
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
           builder: (context, value, child) {
             return FormButton(
               enabled: value,
               onPressed: _onSave,
-              text: 'Save',
+              text: l10n.commonSave,
             );
           },
         ),
@@ -112,7 +127,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
             crossAxisAlignment: .center,
             children: [
               FormPinUnifiedInput(
-                label: 'Enter 6-digit PIN',
+                label: l10n.authEnterPin,
                 length: 6,
                 focusNode: _pinFocusNode,
                 controller: _pinController,
@@ -123,7 +138,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
               ),
               const SizedBox(height: 15),
               FormPinUnifiedInput(
-                label: 'Confirm PIN',
+                label: l10n.authConfirmPin,
                 length: 6,
                 focusNode: _confirmPinFocusNode,
                 controller: _confirmPinController,

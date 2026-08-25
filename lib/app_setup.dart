@@ -23,6 +23,7 @@ void bootstrap() {
       await Hive.initFlutter();
       await Database.init();
       await AppState.loadTheme();
+      await AppState.loadLocale();
 
       await init();
 

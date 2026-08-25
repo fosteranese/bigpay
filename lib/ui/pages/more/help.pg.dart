@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/more/more.pg.dart';
@@ -19,8 +20,9 @@ class HelpPage extends StatefulWidget {
 class _HelpPageState extends State<HelpPage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Help',
+      title: l10n.helpTitle,
       child: Column(
         children: [
           ProfileItem(
@@ -30,7 +32,7 @@ class _HelpPageState extends State<HelpPage> {
               );
               launchUrl(url);
             },
-            title: 'Call Us',
+            title: l10n.helpCallUs,
             icon: Icons.phone_outlined,
           ),
           ProfileItem(
@@ -40,7 +42,7 @@ class _HelpPageState extends State<HelpPage> {
               );
               launchUrl(url);
             },
-            title: 'Email Us',
+            title: l10n.helpEmailUs,
             icon: Icons.email_outlined,
           ),
           ProfileItem(
@@ -54,7 +56,7 @@ class _HelpPageState extends State<HelpPage> {
                     );
               launchUrl(url, mode: LaunchMode.externalApplication);
             },
-            title: 'Contact us via WhatsApp',
+            title: l10n.helpContactWhatsApp,
             iconSvg: 'assets/img/whatsapp.svg',
           ),
         ],

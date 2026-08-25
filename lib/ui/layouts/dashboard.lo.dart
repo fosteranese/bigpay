@@ -1,8 +1,11 @@
 import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -82,8 +85,8 @@ class _DashboardLayoutState extends State<DashboardLayout> {
           begin: Alignment(-0.11, -1.0),
           end: Alignment(0.11, 1.0),
           colors: [
-            Color(0xFF385BA9),
-            if (isDark) Color(0xFF1E2D5A) else Color(0xFFC5D8FF),
+            AppColors.dashboardGradientStart,
+            if (isDark) AppColors.dashboardGradientMidDark else AppColors.dashboardGradientMidLight,
             bgColor,
           ],
           stops: [
@@ -123,7 +126,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                       ),
                     )
                   : IconButton.filled(
-                      tooltip: 'Back',
+                      tooltip: AppLocalizations.of(context)!.commonBack,
                       style: IconButton.styleFrom(
                         backgroundColor: context.cardBg,
                         foregroundColor: context.textPrimary,
@@ -142,14 +145,14 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                       crossAxisAlignment: .start,
                       children: [
                         Text(
-                          'Welcome Back',
-                          style: AppTypography.caption.copyWith(
+                          AppLocalizations.of(context)!.dashboardWelcomeBack,
+                          style: context.caption.copyWith(
                             color: context.divider,
                           ),
                         ),
                         Text(
-                          'Tom Dockery',
-                          style: AppTypography.p1Medium.copyWith(
+                          AppState.currentUser?.user?.name ?? '',
+                          style: context.p1Medium.copyWith(
                             color: AppColors.white,
                           ),
                         ),
@@ -157,7 +160,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                     )
                   : Text(
                       widget.title ?? 'Wallet',
-                      style: AppTypography.p1.copyWith(
+                      style: context.p1.copyWith(
                         color: AppColors.white,
                       ),
                     ),
@@ -168,7 +171,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                       backgroundColor: AppColors.white20,
                     ),
                     onPressed: () {},
-                    icon: SvgPicture.asset('assets/img/new-notification.svg'),
+                    icon: SvgPicture.asset(SvgImages.newNotification),
                   ),
               ],
               centerTitle: false,

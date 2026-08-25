@@ -1,4 +1,5 @@
 import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:uuid/uuid.dart';
@@ -55,6 +57,7 @@ class _WalletsPageState extends State<WalletsPage> {
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
     final Offset buttonPosition = renderBox.localToGlobal(Offset.zero);
     final Size buttonSize = renderBox.size;
+    final l10n = AppLocalizations.of(context)!;
 
     // 3. Display the menu right below the button
     showMenu<String>(
@@ -68,8 +71,8 @@ class _WalletsPageState extends State<WalletsPage> {
         buttonPosition.dy,
       ),
       items: [
-        const PopupMenuItem(value: 'share', child: Text('Share')),
-        const PopupMenuItem(value: 'archive', child: Text('Archive')),
+        PopupMenuItem(value: 'share', child: Text(l10n.commonShare)),
+        PopupMenuItem(value: 'archive', child: Text(l10n.commonArchive)),
       ],
     ).then((value) {
       if (value != null) logger.i('Selected: $value');
@@ -94,6 +97,10 @@ class _WalletsPageState extends State<WalletsPage> {
       detail: _selectedAccount == null
           ? null
           : VirtualWalletView(
+              // Without a key, switching the selection reuses the same
+              // State instead of creating a fresh one for the new account
+              // (Account extends Equatable, so this compares by value).
+              key: ValueKey(_selectedAccount),
               account: _selectedAccount,
               onBack: () => setState(() => _selectedAccount = null),
             ),
@@ -104,7 +111,7 @@ class _WalletsPageState extends State<WalletsPage> {
   Widget _master(BuildContext context) {
     return MainLayout(
       bottomSize: 61,
-      title: 'Wallets',
+      title: AppLocalizations.of(context)!.walletsTitle,
       onRefresh: () async {
         setState(_load);
         await context.awaitProcess(mainEvent);
@@ -114,12 +121,12 @@ class _WalletsPageState extends State<WalletsPage> {
         child: FormButton(
           key: _buttonKey,
           padding: .zero,
-          height: 35,
+          height: 44,
           labelSize: 13,
           onPressed: () {
             _showContextMenu(context);
           },
-          text: 'Add New',
+          text: AppLocalizations.of(context)!.commonAddNew,
           icon: Icons.add,
           buttonIconAlignment: .left,
           iconSize: 16,
@@ -181,7 +188,7 @@ class WalletListItem extends StatelessWidget {
               color: context.border,
             ),
           ),
-          child: SvgPicture.asset('assets/img/trash.svg'),
+          child: SvgPicture.asset(SvgImages.trash),
         ),
         secondaryBackground: Container(
           padding: .all(20),
@@ -193,7 +200,7 @@ class WalletListItem extends StatelessWidget {
               color: context.border,
             ),
           ),
-          child: SvgPicture.asset('assets/img/trash.svg'),
+          child: SvgPicture.asset(SvgImages.trash),
         ),
 
         child: ListTile(
@@ -218,13 +225,13 @@ class WalletListItem extends StatelessWidget {
           ),
           title: Text(
             data.sources?.first.tile ?? '',
-            style: AppTypography.caption.copyWith(
+            style: context.caption.copyWith(
               color: context.textPrimary,
             ),
           ),
           subtitle: Text(
             data.sources?.first.balance ?? '0.00',
-            style: AppTypography.caption,
+            style: context.caption,
           ),
           trailing: FormRadioButton(selected: false),
         ),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/data/models/notification/push_notification.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/notifications/notification_tile.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -62,8 +65,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final read = items.where((n) => n.read).toList();
     final hasUnread = unread.isNotEmpty;
 
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Notifications',
+      title: l10n.dashboardNotificationsTooltip,
       bottomSize: 60,
       onRefresh: _load,
       actions: hasUnread
@@ -71,26 +75,30 @@ class _NotificationsPageState extends State<NotificationsPage> {
               width: 120,
               child: FormButton(
                 padding: .zero,
-                height: 35,
+                height: 44,
                 labelSize: 12,
                 onPressed: _markAllRead,
-                text: 'Mark all read',
+                text: l10n.notificationsMarkAllRead,
               ),
             )
           : null,
       child: _items == null
-          ? const Center(child: CircularProgressIndicator())
+          ? ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 8,
+              itemBuilder: (_, _) => const ListItemSkeleton(),
+            )
           : items.isEmpty
           ? _buildEmptyState()
           : Column(
               crossAxisAlignment: .stretch,
               children: [
                 if (unread.isNotEmpty) ...[
-                  _sectionHeader('New'),
+                  _sectionHeader(l10n.notificationsNewSection),
                   for (final n in unread) _buildItem(n),
                 ],
                 if (read.isNotEmpty) ...[
-                  _sectionHeader('Earlier'),
+                  _sectionHeader(l10n.notificationsEarlierSection),
                   for (final n in read) _buildItem(n),
                 ],
               ],
@@ -128,32 +136,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const .symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Icon(
-              Icons.notifications_off_outlined,
-              size: 56,
-              color: context.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No notifications yet',
-              textAlign: .center,
-              style: context.p1Medium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Updates about your account and transactions will appear here.',
-              textAlign: .center,
-              style: context.smallDetails,
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.notifications_off_outlined,
+      title: AppLocalizations.of(context)!.notificationsEmptyTitle,
+      subtitle: AppLocalizations.of(context)!.notificationsEmptySubtitle,
     );
   }
 }

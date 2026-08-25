@@ -5,6 +5,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/models/actions/auth_action.dart';
 import 'package:bigpay/models/actions/login/existing_login_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -52,19 +53,19 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
     // instead of bouncing the user away before they see this page.
     if (password == null || password.isEmpty) {
       if (!auto) {
+        final l10n = AppLocalizations.of(context)!;
         MessageUtil.displayActionDialog(
           context,
-          title: 'Password Required',
-          message:
-              'Login with your password first to enjoy login with biometrics.',
-          onConfirmText: 'Login',
+          title: l10n.authPasswordRequiredTitle,
+          message: l10n.authPasswordRequiredMessage,
+          onConfirmText: l10n.commonLogin,
           onConfirm: _usePassword,
         );
       }
       return;
     }
 
-    final result = await BiometricUtil.authenticate('Unlock BigPay');
+    final result = await BiometricUtil.authenticate(AppLocalizations.of(context)!.securityUnlockBigPay);
     if (!mounted || result != BiometricResult.success) return;
 
     final phone = AppState.currentUser?.user?.shortName?.toLocalPhone ?? '';
@@ -89,6 +90,7 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ProcessListener<AuthData>(
       event: () => _loginEvent,
       listener: (context, snapshot) {
@@ -134,14 +136,14 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
           children: [
             FormButton(
               onPressed: _unlock,
-              text: 'Unlock with Biometrics',
+              text: l10n.authUnlockWithBiometrics,
             ),
             SizedBox(height: 10),
             TextButton(
               onPressed: _usePassword,
               child: Text(
-                'Login with Password',
-                style: AppTypography.buttons.copyWith(
+                l10n.authLoginWithPassword,
+                style: context.buttons.copyWith(
                   fontSize: 14,
                   color: context.textPrimary,
                   decoration: .underline,
@@ -152,7 +154,7 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
         ),
         child: Center(
           child: IconButton(
-            tooltip: 'Unlock with biometrics',
+            tooltip: l10n.authUnlockWithBiometricsTooltip,
             onPressed: _unlock,
             icon: SvgPicture.asset(
               SvgImages.biometric,

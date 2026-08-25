@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
 import 'package:bigpay/models/actions/logout_action.dart';
@@ -15,12 +16,27 @@ import 'package:bigpay/ui/pages/more/help.pg.dart';
 import 'package:bigpay/ui/pages/more/profile.pg.dart';
 import 'package:bigpay/ui/pages/more/security.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
+import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
+import 'package:bigpay/utils/app_modal.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/avatar.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+
+/// Each supported language's own name, in that language — shown in the
+/// picker regardless of the app's current display language, so a user can
+/// always recognize their language even if the UI is currently in the wrong
+/// one. Not part of the ARB files: this must never be translated.
+const _languageNames = {
+  'en': 'English',
+  'de': 'Deutsch',
+  'es': 'Español',
+  'fr': 'Français',
+  'ar': 'العربية',
+  'pcm': 'Pidgin',
+};
 
 class MorePage extends StatefulWidget {
   const MorePage({super.key});
@@ -43,9 +59,10 @@ class _MorePageState extends State<MorePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       bottomSize: 150,
-      title: 'Account',
+      title: l10n.moreAccountTitle,
       subtitleWidget: InkWell(
         borderRadius: .circular(12),
         onTap: () {
@@ -103,46 +120,48 @@ class _MorePageState extends State<MorePage> {
       child: Column(
         children: [
           _buildThemeSwitcher(),
+          const SizedBox(height: Spacing.sm),
+          _buildLanguageSwitcher(),
           Divider(
             color: context.divider,
             thickness: 4,
             indent: 10,
             endIndent: 10,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
           ProfileItem(
             onPressed: () {
               AppRouter.router.push(BeneficiariesPage.route.path);
             },
-            title: 'Beneficiaries',
+            title: l10n.moreBeneficiaries,
             icon: Icons.group_outlined,
           ),
           ProfileItem(
             onPressed: () {
               AppRouter.router.push(SecurityPage.route.path);
             },
-            title: 'Security',
+            title: l10n.securityTitle,
             icon: Icons.admin_panel_settings_outlined,
           ),
           ProfileItem(
             onPressed: () {
               AppRouter.router.push(FeedbackPage.route.path);
             },
-            title: 'Submit a Complaint',
+            title: l10n.moreSubmitComplaint,
             icon: Icons.send_outlined,
           ),
           ProfileItem(
             onPressed: () {
               AppRouter.router.push(ComplaintsPage.route.path);
             },
-            title: 'Complaints',
+            title: l10n.complaintsTitle,
             icon: Icons.forum_outlined,
           ),
           ProfileItem(
             onPressed: () {
               AppRouter.router.push(HelpPage.route.path);
             },
-            title: 'Help',
+            title: l10n.helpTitle,
             icon: Icons.help_outline,
           ),
           ProfileItem(
@@ -154,7 +173,7 @@ class _MorePageState extends State<MorePage> {
                 mode: LaunchMode.externalApplication,
               );
             },
-            title: 'Privacy Statement',
+            title: l10n.morePrivacyStatement,
             icon: Icons.privacy_tip_outlined,
           ),
           Divider(
@@ -168,9 +187,9 @@ class _MorePageState extends State<MorePage> {
             onPressed: () {
               MessageUtil.displayActionDialog(
                 context,
-                title: 'Sign Out',
-                message: 'Are you sure you want to sign out?',
-                onConfirmText: 'Sign Out',
+                title: l10n.moreSignOutTitle,
+                message: l10n.moreSignOutConfirm,
+                onConfirmText: l10n.moreSignOutTitle,
                 onConfirmButtonColor: AppColors.danger,
                 onConfirmButtonTextColor: AppColors.white,
                 icon: Icon(
@@ -189,10 +208,113 @@ class _MorePageState extends State<MorePage> {
             },
             backgroundColor: AppColors.danger.withValues(alpha: 0.2),
             iconColor: AppColors.danger,
-            title: 'Sign Out',
+            title: l10n.moreSignOutTitle,
             icon: Icons.logout_outlined,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageSwitcher() {
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: AppState.localeNotifier,
+      builder: (context, current, _) {
+        final l10n = AppLocalizations.of(context)!;
+        return InkWell(
+          borderRadius: .circular(12),
+          onTap: () => _openLanguagePicker(context, current),
+          child: Container(
+            padding: const .only(bottom: 12),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20.5,
+                  backgroundColor: context.avatarBg,
+                  child: Icon(
+                    Icons.language_outlined,
+                    color: context.accentGreen,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: Spacing.lg),
+                Text(
+                  l10n.settingsLanguage,
+                  style: context.p1,
+                ),
+                const Spacer(),
+                Text(
+                  current == null
+                      ? l10n.moreThemeAuto
+                      : (_languageNames[current.languageCode] ??
+                            current.languageCode),
+                  style: context.smallDetails.copyWith(
+                    color: context.textSecondary,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_outlined,
+                  color: context.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _openLanguagePicker(BuildContext context, Locale? current) {
+    final l10n = AppLocalizations.of(context)!;
+    AppModal.showBottomModal(
+      context,
+      label: l10n.settingsLanguage,
+      children: [
+        const SizedBox(height: 10),
+        _languageOption(
+          label: l10n.moreThemeAuto,
+          selected: current == null,
+          onTap: () {
+            AppState.setLocale(null);
+            Navigator.pop(context);
+          },
+        ),
+        for (final locale in AppState.supportedLocales)
+          _languageOption(
+            label: _languageNames[locale.languageCode] ?? locale.languageCode,
+            selected: current?.languageCode == locale.languageCode,
+            onTap: () {
+              AppState.setLocale(locale);
+              Navigator.pop(context);
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _languageOption({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const .only(bottom: 10),
+      decoration: BoxDecoration(
+        borderRadius: .circular(10),
+        border: .all(
+          color: context.border,
+          width: 1,
+        ),
+      ),
+      child: Material(
+        borderRadius: .circular(10),
+        child: ListTile(
+          onTap: onTap,
+          selected: selected,
+          title: Text(label),
+          contentPadding: .symmetric(horizontal: 10),
+          trailing: FormRadioButton(selected: selected),
+        ),
       ),
     );
   }
@@ -210,13 +332,13 @@ class _MorePageState extends State<MorePage> {
                 backgroundColor: context.avatarBg,
                 child: Icon(
                   Icons.dark_mode_outlined,
-                  color: AppColors.secondary,
+                  color: context.accentGreen,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: Spacing.lg),
               Text(
-                'Theme',
+                AppLocalizations.of(context)!.moreThemeLabel,
                 style: context.p1,
               ),
               const Spacer(),
@@ -224,10 +346,10 @@ class _MorePageState extends State<MorePage> {
                 if (mode != ThemeMode.values.first) const SizedBox(width: 6),
                 _ThemeChip(
                   label: mode == ThemeMode.light
-                      ? 'Light'
+                      ? AppLocalizations.of(context)!.moreThemeLight
                       : mode == ThemeMode.dark
-                      ? 'Dark'
-                      : 'Auto',
+                      ? AppLocalizations.of(context)!.moreThemeDark
+                      : AppLocalizations.of(context)!.moreThemeAuto,
                   selected: current == mode,
                   onTap: () => AppState.setTheme(mode),
                 ),
@@ -283,7 +405,7 @@ class ProfileItem extends StatelessWidget {
   const ProfileItem({
     super.key,
     this.backgroundColor,
-    this.iconColor = AppColors.secondary,
+    this.iconColor,
     required this.title,
     this.icon,
     this.iconUrl,
@@ -293,7 +415,7 @@ class ProfileItem extends StatelessWidget {
   });
 
   final Color? backgroundColor;
-  final Color iconColor;
+  final Color? iconColor;
   final String title;
   final IconData? icon;
   final String? iconUrl;
@@ -303,6 +425,7 @@ class ProfileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveIconColor = iconColor ?? context.accentGreen;
     return Material(
       color: Colors.transparent,
       child: ListTile(
@@ -328,12 +451,12 @@ class ProfileItem extends StatelessWidget {
                     height: 22,
                     placeholder: (context, url) => Icon(
                       Icons.shield_outlined,
-                      color: AppColors.secondary,
+                      color: effectiveIconColor,
                       size: 22,
                     ),
                     errorWidget: (context, url, error) => Icon(
                       Icons.shield_outlined,
-                      color: AppColors.secondary,
+                      color: effectiveIconColor,
                       size: 22,
                     ),
                   ),
@@ -343,13 +466,13 @@ class ProfileItem extends StatelessWidget {
               if (icon != null) {
                 return Icon(
                   icon,
-                  color: iconColor,
+                  color: effectiveIconColor,
                 );
               }
 
               return Icon(
                 Icons.circle_outlined,
-                color: iconColor,
+                color: effectiveIconColor,
               );
             },
           ),

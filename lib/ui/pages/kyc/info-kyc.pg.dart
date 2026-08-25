@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
 
@@ -22,7 +25,13 @@ class InfoKycPage extends StatefulWidget {
 class _InfoKycPageState extends State<InfoKycPage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
+      stepIndicator: StepProgress(
+        currentStep: 1,
+        totalSteps: 3,
+        labels: ['ID', 'Selfie', 'Contact'],
+      ),
       bottom: PreferredSize(
         preferredSize: Size.zero,
         child: SizedBox.shrink(),
@@ -31,21 +40,21 @@ class _InfoKycPageState extends State<InfoKycPage> {
         onPressed: () {
           AppRouter.router.push(ContactInfoKycPage.route.path);
         },
-        text: 'Continue',
+        text: l10n.commonContinue,
       ),
       child: Column(
         mainAxisSize: .min,
         mainAxisAlignment: .start,
         crossAxisAlignment: .center,
         children: [
-          SvgPicture.asset('assets/img/selfie.svg'),
-          const SizedBox(height: 20),
+          SvgPicture.asset(SvgImages.selfie),
+          const SizedBox(height: Spacing.xl),
           ConstrainedBox(
             constraints: const BoxConstraints(
               maxWidth: 285,
             ),
             child: Text(
-              'Take a Quick Selfie',
+              l10n.kycTakeSelfieTitle,
               textAlign: .center,
               style: context.display2,
             ),
@@ -56,22 +65,22 @@ class _InfoKycPageState extends State<InfoKycPage> {
               maxWidth: 285,
             ),
             child: Text(
-              'We will match your photo against the National Identification Authority (NIA) database to verify it\'s really you',
+              l10n.kycSelfieMatchSubtitle,
               textAlign: .center,
               style: context.smallDetails,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.xl),
           InfoItem(
             icon: 'assets/img/identify.svg',
-            title: 'Identity verification',
-            subtitle: 'Scan your Ghana Card front & back',
+            title: l10n.kycIdentityVerificationTitle,
+            subtitle: l10n.kycScanCardSubtitle,
           ),
           const SizedBox(height: 10),
           InfoItem(
             icon: 'assets/img/encrypted.svg',
-            title: 'Fully encrypted',
-            subtitle: 'Your data is encrypted and secure',
+            title: l10n.kycFullyEncryptedTitle,
+            subtitle: l10n.kycDataEncryptedSubtitle,
           ),
         ],
       ),

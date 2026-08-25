@@ -5,6 +5,7 @@ import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
@@ -78,8 +79,8 @@ class _StartForgotSecurePhrasePageState
       },
       child: MainLayout(
         maxWidth: 480,
-        title: 'Forgot Secure Phrase',
-        titleStyle: AppTypography.display1,
+        title: AppLocalizations.of(context)!.authForgotSecurePhraseTitle,
+        titleStyle: context.display1,
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
@@ -87,7 +88,7 @@ class _StartForgotSecurePhrasePageState
             return FormButton(
               enabled: value,
               onPressed: _onContinue,
-              text: 'Continue',
+              text: AppLocalizations.of(context)!.commonContinue,
             );
           },
         ),
@@ -98,7 +99,7 @@ class _StartForgotSecurePhrasePageState
             crossAxisAlignment: .center,
             children: [
               FormInput(
-                label: 'Phone Number',
+                label: AppLocalizations.of(context)!.commonPhoneNumberLabel,
                 focusNode: _phoneNumberFocusNode,
                 controller: _phoneNumberController,
                 next: (_) {
@@ -109,7 +110,7 @@ class _StartForgotSecurePhrasePageState
               ),
               const SizedBox(height: 15),
               FormInput(
-                label: 'Email Address',
+                label: AppLocalizations.of(context)!.authEmailAddressLabel,
                 focusNode: _emailFocusNode,
                 controller: _emailController,
                 next: (_) {

@@ -17,6 +17,7 @@ class Breakpoints {
 
 extension ResponsiveContext on BuildContext {
   double get _width => MediaQuery.sizeOf(this).width;
+  double get _height => MediaQuery.sizeOf(this).height;
 
   bool get isCompact => _width < Breakpoints.medium;
   bool get isMedium =>
@@ -31,10 +32,33 @@ extension ResponsiveContext on BuildContext {
   /// side rail at or above it.
   bool get isTabletOrLarger => !isCompact;
 
+  /// Landscape phones: width may be > 600 (registering as tablet) but height
+  /// is cramped (~375–450 px). This flag lets layouts tighten vertical
+  /// spacing, drop the full app-bar subtitle row, and keep CTAs reachable.
+  bool get isShortHeight => _height < 500;
+
+  /// Landscape phone specifically: short height AND width under 900px
+  /// (excludes tablets in portrait that happen to be short).
+  bool get isLandscapePhone => isShortHeight && _width < 900;
+
   T responsive<T>({required T compact, T? medium, T? expanded}) {
     if (_width >= Breakpoints.expanded) return expanded ?? medium ?? compact;
     if (_width >= Breakpoints.medium) return medium ?? compact;
     return compact;
+  }
+
+  /// Spacing that also compresses on short-height screens (landscape phones).
+  double responsiveSpacing({
+    required double compact,
+    double? medium,
+    double? expanded,
+  }) {
+    final base = responsive<double>(
+      compact: compact,
+      medium: medium,
+      expanded: expanded,
+    );
+    return isShortHeight ? base * 0.5 : base;
   }
 
   /// Breakpoint-scaled spacing — the shared layouts' outer padding grows a

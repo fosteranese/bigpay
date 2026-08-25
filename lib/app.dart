@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
 import 'package:bigpay/models/actions/action.dart';
@@ -65,11 +66,7 @@ class BigPayApp extends StatelessWidget {
                       var target = WalkthroughPage.route.path;
                       if (savedUser != null && snapshot.isCached) {
                         final enabled = await BiometricUtil.isLoginEnabled;
-                        final password =
-                            await BiometricUtil.readLoginPassword();
-                        final biometricReady =
-                            enabled && (password?.isNotEmpty ?? false);
-                        target = biometricReady
+                        target = enabled
                             ? BiometricLoginPage.route.path
                             : ExistingDeviceLoginPage.route.path;
                       }
@@ -138,13 +135,30 @@ class BigPayApp extends StatelessWidget {
         child: ValueListenableBuilder<ThemeMode>(
           valueListenable: AppState.themeNotifier,
           builder: (context, themeMode, _) {
-            return MaterialApp.router(
-              title: 'BigPay',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: themeMode,
-              routerConfig: AppRouter.router,
+            return ValueListenableBuilder<Locale?>(
+              valueListenable: AppState.localeNotifier,
+              builder: (context, locale, _) {
+                return MaterialApp.router(
+                  title: 'BigPay',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.light,
+                  darkTheme: AppTheme.dark,
+                  themeMode: themeMode,
+                  locale: locale,
+                  supportedLocales: AppState.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  routerConfig: AppRouter.router,
+                  builder: (context, child) {
+                    final scaler = MediaQuery.textScalerOf(context).clamp(
+                      maxScaleFactor: 1.3,
+                    );
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaler: scaler),
+                      child: child ?? SizedBox.shrink(),
+                    );
+                  },
+                );
+              },
             );
           },
         ),

@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -93,6 +94,7 @@ class VirtualWalletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.maxFinite,
       height: _height,
@@ -102,9 +104,17 @@ class VirtualWalletCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment(0.84, 0.44), // 293.59° angle
           end: Alignment(-0.84, -0.44),
-          colors: [Color(0xFF221E55), Color(0xFF20428C)],
+          colors: AppGradients.walletCard.colors,
           stops: [0.17, 0.5109],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.25),
+            offset: const Offset(0, 8),
+            blurRadius: 24,
+            spreadRadius: -4,
+          ),
+        ],
       ),
       child: Stack(
         children: [
@@ -112,7 +122,7 @@ class VirtualWalletCard extends StatelessWidget {
             alignment: .topRight,
             child: ClipRRect(
               borderRadius: .circular(12),
-              child: SvgPicture.asset('assets/img/card-corner-icon.svg'),
+              child: SvgPicture.asset(SvgImages.cardCornerIcon),
             ),
           ),
           Padding(
@@ -123,9 +133,9 @@ class VirtualWalletCard extends StatelessWidget {
               children: [
                 Text(
                   isVirtual
-                      ? (label ?? 'Virtual Wallet Balance')
-                      : (title ?? 'Wallet'),
-                  style: AppTypography.smallDetails.copyWith(
+                      ? (label ?? l10n.walletsVirtualBalanceLabel)
+                      : (title ?? l10n.walletsGenericFallback),
+                  style: context.smallDetails.copyWith(
                     color: AppColors.white,
                   ),
                 ),
@@ -144,21 +154,23 @@ class VirtualWalletCard extends StatelessWidget {
                               children: [
                                 TextSpan(
                                   text: 'GHS ',
-                                  style: AppTypography.display1.copyWith(
-                                    color: AppColors.secondary,
+                                  style: context.display1.copyWith(
+                                    color: AppColors.brightGreen,
                                   ),
                                 ),
                                 TextSpan(
                                   text: visible
                                       ? balance ?? '0.00'
                                       : '* *** **',
-                                  style: AppTypography.display1,
+                                  style: context.display1,
                                 ),
                               ],
                             ),
                           ),
                           IconButton.filled(
-                            tooltip: visible ? 'Hide balance' : 'Show balance',
+                            tooltip: visible
+                                ? l10n.walletsHideBalanceTooltip
+                                : l10n.walletsShowBalanceTooltip,
                             style: IconButton.styleFrom(
                               alignment: .center,
                               backgroundColor: AppColors.white11,
@@ -178,7 +190,7 @@ class VirtualWalletCard extends StatelessWidget {
                 else
                   Text(
                     wallet?.sources?.first.tile ?? title ?? '',
-                    style: AppTypography.display1.copyWith(
+                    style: context.display1.copyWith(
                       color: AppColors.white,
                     ),
                   ),
@@ -191,7 +203,7 @@ class VirtualWalletCard extends StatelessWidget {
                           backgroundColor: AppColors.white11,
                           height: 46,
                           onPressed: () => _fundWallet(context),
-                          text: 'Fund Wallet',
+                          text: l10n.walletsFundWalletDemo,
                           labelSize: 13,
                           svgIcon: 'assets/img/wallet.svg',
                           iconSize: 15,
@@ -205,7 +217,7 @@ class VirtualWalletCard extends StatelessWidget {
                             backgroundColor: AppColors.white11,
                             height: 46,
                             onPressed: onViewDetails ?? () {},
-                            text: 'View Details',
+                            text: l10n.walletsViewDetails,
                             labelSize: 13,
                             svgIcon: 'assets/img/trending-up.svg',
                             iconSize: 15,

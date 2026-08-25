@@ -4,11 +4,13 @@ import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/login/verify_secure_phrase_login_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -69,17 +71,29 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
       },
       child: MainLayout(
         maxWidth: 480,
-        title: 'Enter your secure phrase',
-        titleStyle: AppTypography.display1,
-        subtitle:
-            'Customize your private Q&A for faster verification and safer digital payments.',
+        title: AppLocalizations.of(context)!.authEnterSecurePhraseTitle,
+        titleStyle: context.display1,
+        stepIndicator: StepProgress(
+          currentStep: 1,
+          totalSteps: 3,
+          labels: ['Credentials', 'Security', 'OTP'],
+        ),
+        subtitleWidget: Column(
+          mainAxisSize: .min,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.authSecurePhraseSubtitle,
+              style: context.smallDetails,
+            ),
+          ],
+        ),
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
           builder: (context, value, child) {
             return FormButton(
               enabled: value,
               onPressed: _onContinue,
-              text: 'Continue',
+              text: AppLocalizations.of(context)!.commonContinue,
             );
           },
         ),
@@ -90,7 +104,7 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
             crossAxisAlignment: .center,
             children: [
               FormInput(
-                label: 'Answer to the Question',
+                label: AppLocalizations.of(context)!.authAnswerToQuestionLabel,
                 focusNode: _answerFocusNode,
                 controller: _answerController,
                 onChanged: _onChanged,

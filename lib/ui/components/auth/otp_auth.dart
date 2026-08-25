@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -35,6 +36,7 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       subtitleWidget: Column(
         mainAxisSize: .min,
@@ -42,16 +44,16 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
         crossAxisAlignment: .center,
         children: [
           Text(
-            'Enter OTP',
+            l10n.authEnterOtp,
             textAlign: .center,
-            style: AppTypography.display1.copyWith(
+            style: context.display1.copyWith(
               color: context.textPrimary,
             ),
           ),
           Text(
-            'Please provide your 6-digit shortcode send to your phone number to authorize this transaction',
+            l10n.otpAuthDescription,
             textAlign: .center,
-            style: AppTypography.caption,
+            style: context.caption,
           ),
         ],
       ),
@@ -64,7 +66,7 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
                 return FormButton(
                   onPressed: () {},
                   enabled: value.length == 6,
-                  text: 'Continue',
+                  text: l10n.commonContinue,
                 );
               },
             ),

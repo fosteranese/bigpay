@@ -1,3 +1,4 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -36,8 +38,9 @@ class _AddCardPageState extends State<AddCardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      miniTitle: 'Add Card',
+      miniTitle: l10n.walletsAddCardTitle,
       bottomSize: 98 + 61 + 56,
       subtitleWidget: Container(
         padding: .symmetric(horizontal: 28, vertical: 19),
@@ -76,8 +79,8 @@ class _AddCardPageState extends State<AddCardPage> {
               mainAxisAlignment: .spaceBetween,
               children: [
                 Text(
-                  'DEBIT',
-                  style: AppTypography.caption.copyWith(
+                  l10n.walletsDebitLabel,
+                  style: context.caption.copyWith(
                     fontSize: 15,
                     color: AppColors.white,
                   ),
@@ -97,7 +100,7 @@ class _AddCardPageState extends State<AddCardPage> {
                 Text(
                   '****    ****    ****    6525',
                   textAlign: .left,
-                  style: AppTypography.header1.copyWith(
+                  style: context.header1.copyWith(
                     color: AppColors.white,
                   ),
                 ),
@@ -109,16 +112,16 @@ class _AddCardPageState extends State<AddCardPage> {
                   children: [
                     Text(
                       'VALID\nTHRU   ',
-                      style: AppTypography.small.copyWith(
+                      style: context.small.copyWith(
                         fontSize: 6,
-                        color: Color(0xffD7D7D7),
+                        color: AppColors.cardOverlay,
                       ),
                     ),
                     Text(
                       '__/__',
-                      style: AppTypography.small.copyWith(
-                        fontSize: 14.91,
-                        color: Color(0xffD7D7D7),
+                      style: context.small.copyWith(
+                        fontSize: 15,
+                        color: AppColors.cardOverlay,
                         textBaseline: .alphabetic,
                         letterSpacing: 1,
                       ),
@@ -136,12 +139,12 @@ class _AddCardPageState extends State<AddCardPage> {
                   child: Text(
                     'TOM DOCKERY ADJEI MENSAH',
                     overflow: .ellipsis,
-                    style: AppTypography.caption.copyWith(
-                      color: Color(0xffD7D7D7),
+                    style: context.caption.copyWith(
+                      color: AppColors.cardOverlay,
                     ),
                   ),
                 ),
-                SvgPicture.asset('assets/img/visa.svg'),
+                SvgPicture.asset(SvgImages.visa),
               ],
             ),
           ],
@@ -151,18 +154,18 @@ class _AddCardPageState extends State<AddCardPage> {
       bottomNav: FormButton(
         onPressed: () {},
         enabled: false,
-        text: 'Save',
+        text: l10n.commonSave,
       ),
       child: Column(
         children: [
           FormInput(
             controller: _nameController,
-            label: 'Card Holder Name',
+            label: l10n.walletsCardHolderNameLabel,
           ),
           const SizedBox(height: 10),
           FormInput(
             controller: _numberController,
-            label: 'Card Number',
+            label: l10n.walletsCardNumberLabel,
           ),
           const SizedBox(height: 10),
           Row(
@@ -170,14 +173,14 @@ class _AddCardPageState extends State<AddCardPage> {
               Expanded(
                 child: FormInput(
                   controller: _cvvController,
-                  label: 'CVV',
+                  label: l10n.walletsCvvLabel,
                 ),
               ),
               const SizedBox(width: 15),
               Expanded(
                 child: FormInput(
                   controller: _expiryController,
-                  label: 'Expiry Date',
+                  label: l10n.walletsExpiryDateLabel,
                 ),
               ),
             ],
@@ -223,7 +226,7 @@ class WalletListItem extends StatelessWidget {
               color: context.border,
             ),
           ),
-          child: SvgPicture.asset('assets/img/trash.svg'),
+          child: SvgPicture.asset(SvgImages.trash),
         ),
         secondaryBackground: Container(
           padding: .all(20),
@@ -235,21 +238,21 @@ class WalletListItem extends StatelessWidget {
               color: context.border,
             ),
           ),
-          child: SvgPicture.asset('assets/img/trash.svg'),
+          child: SvgPicture.asset(SvgImages.trash),
         ),
 
         child: ListTile(
           contentPadding: .symmetric(horizontal: 15),
-          leading: SvgPicture.asset('assets/img/bigpay-icon.svg'),
+          leading: SvgPicture.asset(SvgImages.bigpayIcon),
           title: Text(
-            'BigPay Virtual Wallet',
-            style: AppTypography.caption.copyWith(
+            AppLocalizations.of(context)!.walletsBigPayVirtualWalletDemo,
+            style: context.caption.copyWith(
               color: context.textPrimary,
             ),
           ),
           subtitle: Text(
-            'Balance - GHS 20,000.00',
-            style: AppTypography.caption,
+            AppLocalizations.of(context)!.walletsBalanceDemo,
+            style: context.caption,
           ),
           trailing: FormRadioButton(selected: false),
         ),

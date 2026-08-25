@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
@@ -8,12 +7,15 @@ import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
@@ -114,10 +116,11 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
           if (!snapshot.isSilent &&
               !snapshot.isCached &&
               (snapshot.data?.forms?.isEmpty ?? true)) {
+            final l10n = AppLocalizations.of(context)!;
             MessageUtil.displayErrorDialog(
               context,
-              title: 'Service Unavailable',
-              message: 'This service is currently not available',
+              title: l10n.commonServiceUnavailableTitle,
+              message: l10n.commonServiceUnavailableMessage,
             );
             return;
           }
@@ -143,14 +146,14 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
       },
       child: MainLayout(
         backgroundColor: context.scaffoldBg,
-        title: 'Add Beneficiary',
-        subtitle: 'Choose a service to save a beneficiary for',
+        title: AppLocalizations.of(context)!.beneficiariesAddTitle,
+        subtitle: AppLocalizations.of(context)!.beneficiariesAddSubtitle,
         bottom: PreferredSize(
           preferredSize: Size(double.maxFinite, 60),
           child: Padding(
             padding: const .only(left: 20, right: 20, bottom: 10),
             child: FormInput(
-              placeholder: 'Search',
+              placeholder: AppLocalizations.of(context)!.commonSearch,
               controller: _searchController,
               suffix: Icon(Icons.search),
             ),
@@ -164,17 +167,11 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
               return SliverFillRemaining(
                 fillOverscroll: true,
                 hasScrollBody: false,
-                child: Column(
-                  mainAxisAlignment: .center,
-                  children: [
-                    const Spacer(flex: 3),
-                    SvgPicture.asset('assets/img/empty-wallet.svg'),
-                    Text(
-                      _query.isNotEmpty ? 'No matches' : 'Empty Services',
-                      style: context.p1Bold,
-                    ),
-                    const Spacer(flex: 6),
-                  ],
+                child: EmptyState(
+                  svgAsset: SvgImages.emptyWallet,
+                  title: _query.isNotEmpty
+                      ? AppLocalizations.of(context)!.commonNoMatches
+                      : AppLocalizations.of(context)!.beneficiariesEmptyServices,
                 ),
               );
             }

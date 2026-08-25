@@ -40,10 +40,16 @@ class BiometricUtil {
   /// `canCheckBiometrics` is unreliable and wrongly blocks enrolled devices.
   static Future<BiometricResult> authenticate(String reason) async {
     try {
+      final result = await _auth.isDeviceSupported();
+      if (!result) {
+        return BiometricResult.unavailable;
+      }
+
       final ok = await _auth.authenticate(
         localizedReason: reason,
         biometricOnly: true,
-        sensitiveTransaction: true,
+        // sensitiveTransaction: true,
+        sensitiveTransaction: false,
       );
       return ok ? BiometricResult.success : BiometricResult.failed;
     } on LocalAuthException catch (e) {

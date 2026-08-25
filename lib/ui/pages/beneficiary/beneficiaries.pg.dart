@@ -5,14 +5,19 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
 import 'package:bigpay/models/actions/beneficiary/get_payees_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/beneficiary/add_beneficiary.pg.dart';
 import 'package:bigpay/ui/pages/beneficiary/beneficiary_details.pg.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 class BeneficiariesPage extends StatefulWidget {
@@ -32,6 +37,29 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   ExecuteProcessEvent? _deleteEvent;
   List<Payee>? _payees;
   String _query = '';
+
+  /// The beneficiary shown in the detail pane in split view
+  /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
+  /// device, where opening a beneficiary pushes [BeneficiaryDetailsPage]
+  /// instead.
+  Payee? _selectedPayee;
+
+  void _openDetails(Payee payee) {
+    if (context.usesSplitView) {
+      setState(() => _selectedPayee = payee);
+      return;
+    }
+
+    AppRouter.router.push(
+      BeneficiaryDetailsPage.route.path,
+      extra: payee,
+    );
+  }
+
+  void _closeDetails() {
+    setState(() => _selectedPayee = null);
+    _load();
+  }
 
   @override
   void initState() {
@@ -84,6 +112,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   }
 
   Future<bool> _confirmDelete(Payee payee) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       useRootNavigator: true,
@@ -100,24 +129,24 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
           crossAxisAlignment: .stretch,
           children: [
             Text(
-              'Remove beneficiary',
+              l10n.beneficiariesRemoveTitle,
               style: context.header3,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             Text(
-              'Remove ${payee.displayName} from your beneficiaries?',
+              l10n.beneficiariesRemoveConfirm(payee.displayName),
               style: context.smallDetails,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             FormButton(
               backgroundColor: AppColors.danger,
               onPressed: () => AppRouter.router.pop(true),
-              text: 'Remove',
+              text: l10n.commonRemove,
             ),
             const SizedBox(height: 10),
             TextButton(
               onPressed: () => AppRouter.router.pop(false),
-              child: Text('Cancel', style: context.formLabels),
+              child: Text(l10n.commonCancel, style: context.formLabels),
             ),
           ],
         ),
@@ -127,7 +156,10 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   }
 
   void _delete(Payee payee) {
-    setState(() => _payees = List.of(_payees ?? const [])..remove(payee));
+    setState(() {
+      _payees = List.of(_payees ?? const [])..remove(payee);
+      if (_selectedPayee?.payeeId == payee.payeeId) _selectedPayee = null;
+    });
     _deleteEvent = context.dispatchProcess(
       DeletePayeeAction(payload: DeletePayeePayload(payeeId: payee.payeeId)),
     );
@@ -141,6 +173,22 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    return MasterDetailLayout(
+      detail: _selectedPayee == null
+          ? null
+          : BeneficiaryDetailsView(
+              // See the matching key on ComplaintDetailView — without one,
+              // switching the master-list selection reuses the same State
+              // instead of creating a fresh one for the new payee.
+              key: ValueKey(_selectedPayee!.payeeId),
+              payee: _selectedPayee,
+              onBack: _closeDetails,
+            ),
+      master: _master(context),
+    );
+  }
+
+  Widget _master(BuildContext context) {
     return ProcessListener<bool>(
       event: () => _deleteEvent,
       listener: (context, snapshot) {
@@ -159,7 +207,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
       child: MainLayout(
         showBackBtn: true,
         bottomSize: 129,
-        title: 'Beneficiaries',
+        title: AppLocalizations.of(context)!.moreBeneficiaries,
         onRefresh: () async {
           _load();
           await context.awaitProcess(_event);
@@ -168,11 +216,11 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
           width: 110,
           child: FormButton(
             padding: .zero,
-            height: 35,
+            height: 44,
             labelSize: 13,
             onPressed: () =>
                 AppRouter.router.push(AddBeneficiaryPage.route.path),
-            text: 'Add New',
+            text: AppLocalizations.of(context)!.commonAddNew,
             icon: Icons.add,
             buttonIconAlignment: .left,
             iconSize: 16,
@@ -181,7 +229,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         subtitleWidget: Container(
           padding: .only(top: 20),
           child: FormInput(
-            placeholder: 'Search',
+            placeholder: AppLocalizations.of(context)!.commonSearch,
             controller: _searchController,
             suffix: Icon(Icons.search),
             textInputAction: .search,
@@ -196,7 +244,11 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
           },
           builder: (context, snapshot) {
             if (_payees == null && snapshot.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 6,
+                itemBuilder: (_, _) => const ListItemSkeleton(),
+              );
             }
 
             final beneficiaries = _filtered;
@@ -237,14 +289,11 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
           color: AppColors.danger,
           borderRadius: .circular(10),
         ),
-        child: SvgPicture.asset('assets/img/trash.svg'),
+        child: SvgPicture.asset(SvgImages.trash),
       ),
       child: ListTile(
         contentPadding: .zero,
-        onTap: () => AppRouter.router.push(
-          BeneficiaryDetailsPage.route.path,
-          extra: payee,
-        ),
+        onTap: () => _openDetails(payee),
         leading: CircleAvatar(
           radius: 21,
           backgroundColor: context.avatarBg,
@@ -264,7 +313,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
       child: Padding(
         padding: const .symmetric(vertical: 60),
         child: Text(
-          'No beneficiaries match "$_query"',
+          AppLocalizations.of(context)!.beneficiariesNoMatchQuery(_query),
           textAlign: .center,
           style: context.smallDetails,
         ),
@@ -278,20 +327,10 @@ class EmptyBeneficiaries extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: .max,
-      mainAxisAlignment: .center,
-      crossAxisAlignment: .center,
-      children: [
-        const Spacer(),
-        SvgPicture.asset('assets/img/empty-wallet.svg'),
-        Text('No beneficiary yet', style: context.header3),
-        Text(
-          'Add beneficiaries to see them here',
-          style: context.smallDetails,
-        ),
-        const Spacer(flex: 4),
-      ],
+    return EmptyState(
+      svgAsset: SvgImages.emptyWallet,
+      title: AppLocalizations.of(context)!.beneficiariesEmptyTitle,
+      subtitle: AppLocalizations.of(context)!.beneficiariesEmptySubtitle,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -118,7 +119,7 @@ class _ListLayoutState extends State<ListLayout> {
             : null,
         leading: AppRouter.router.canPop() && widget.showBackBtn
             ? IconButton.filled(
-                tooltip: 'Back',
+                tooltip: AppLocalizations.of(context)!.commonBack,
                 style: IconButton.styleFrom(
                   backgroundColor: context.cardBg,
                   foregroundColor: context.textPrimary,

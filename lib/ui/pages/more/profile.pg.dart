@@ -5,6 +5,7 @@ import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -24,6 +25,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       bottomSize: 100,
       flexibleSpace: Container(
@@ -37,10 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   stops: const [0.5406, 1.0],
-                  colors: const [
-                    Color(0xFF221E55),
-                    Color(0xFF20428C),
-                  ],
+                  colors: AppGradients.walletCard.colors,
                 ),
               ),
             ),
@@ -83,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const .only(bottom: 30),
               child: Text(
                 AppState.currentUser?.user?.name ?? '',
-                style: AppTypography.formLabels.copyWith(
+                style: context.formLabels.copyWith(
                   color: AppColors.white,
                 ),
               ),
@@ -97,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: .center,
         children: [
           FormInput(
-            label: 'First Name *',
+            label: l10n.profileFirstNameLabel,
             controller: TextEditingController(
               text: AppState.currentUser?.user?.firstName ?? '',
             ),
@@ -105,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Middle Name',
+            label: l10n.profileMiddleNameLabel,
             controller: TextEditingController(
               text: AppState.currentUser?.user?.middleName ?? '',
             ),
@@ -113,7 +112,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Last Name *',
+            label: l10n.profileLastNameLabel,
             controller: TextEditingController(
               text: AppState.currentUser?.user?.lastName ?? '',
             ),
@@ -121,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Email Address *',
+            label: l10n.profileEmailAddressLabel,
             controller: TextEditingController(
               text: AppState.currentUser?.user?.email ?? '',
             ),
@@ -129,7 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Date of Birth *',
+            label: l10n.profileDateOfBirthLabel,
             controller: TextEditingController(
               text: AppState.currentUser?.user?.birthDate ?? '',
             ),
@@ -140,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Expanded(
                 child: FormInput(
-                  label: 'Gender *',
+                  label: l10n.profileGenderLabel,
                   controller: TextEditingController(
                     text: AppState.currentUser?.user?.gender ?? '',
                   ),
@@ -150,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(width: 10),
               Expanded(
                 child: FormInput(
-                  label: 'Nationality',
+                  label: l10n.profileNationalityLabel,
                   controller: TextEditingController(
                     text: AppState.currentUser?.user?.nationality ?? '',
                   ),

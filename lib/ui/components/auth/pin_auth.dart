@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -43,6 +44,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       subtitleWidget: Column(
         mainAxisSize: .min,
@@ -50,17 +52,16 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
         crossAxisAlignment: .center,
         children: [
           Text(
-            widget.data['tooltip'] ?? 'Enter Security PIN',
+            widget.data['tooltip'] ?? l10n.securityEnterPinTooltip,
             textAlign: .center,
-            style: AppTypography.display1.copyWith(
+            style: context.display1.copyWith(
               color: context.textPrimary,
             ),
           ),
           Text(
-            widget.data['description'] ??
-                'Please provide your 6-digit PIN to authorize this action and keep your account secure.',
+            widget.data['description'] ?? l10n.pinAuthDefaultDescription,
             textAlign: .center,
-            style: AppTypography.caption,
+            style: context.caption,
           ),
         ],
       ),
@@ -75,7 +76,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
                     widget.onSuccess(_otp.value);
                   },
                   enabled: value.length == _length,
-                  text: 'Continue',
+                  text: l10n.commonContinue,
                 );
               },
             ),
@@ -85,7 +86,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
             IconButton(
               style: IconButton.styleFrom(
                 side: BorderSide(
-                  color: AppColors.secondary,
+                  color: context.accentGreen,
                 ),
                 fixedSize: Size(48, 48),
               ),

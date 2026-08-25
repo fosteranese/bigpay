@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_modal.dart';
@@ -71,10 +73,10 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
       widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
       widget.account == null;
 
-  String get _title =>
+  String _title(BuildContext context) =>
       widget.account?.title ??
       widget.account?.sources?.firstOrNull?.tile ??
-      'Virtual Wallet';
+      AppLocalizations.of(context)!.walletsVirtualWalletFallback;
 
   String get _balance =>
       widget.account?.sources?.firstOrNull?.balance ?? '0.00';
@@ -100,7 +102,7 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
           backgroundColor: context.cardBg,
           isVirtual: _isVirtual,
           wallet: widget.account,
-          title: _title,
+          title: _title(context),
           balance: _balance,
           onBack: widget.onBack,
           builder: (blur, alpha) => [
@@ -134,7 +136,7 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Recent Transactions',
+                                AppLocalizations.of(context)!.walletsRecentTransactions,
                                 style: context.header1,
                               ),
                             ),
@@ -144,40 +146,41 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 backgroundColor: context.avatarBg,
                                 foregroundColor: context.textPrimary,
                                 padding: .zero,
-                                height: 30,
+                                height: 44,
                                 onPressed: () {
+                                  final l10n = AppLocalizations.of(context)!;
                                   AppModal.showBottomModal(
                                     context,
-                                    label: 'Choose a date range',
+                                    label: l10n.walletsChooseDateRange,
                                     padding: .all(20),
                                     children: [
                                       Text(
-                                        'The statement will be sent to your email address',
-                                        style: AppTypography.caption,
+                                        l10n.walletsStatementEmailNotice,
+                                        style: context.caption,
                                       ),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: Spacing.xl),
                                       FormDateInput(
-                                        label: 'Date From',
-                                        placeholder: 'DD/MM/YY',
+                                        label: l10n.walletsDateFromLabel,
+                                        placeholder: l10n.commonDateFormatPlaceholder,
                                         controller: _dateFromController,
                                       ),
                                       const SizedBox(height: 10),
                                       FormDateInput(
-                                        label: 'Date To',
-                                        placeholder: 'DD/MM/YY',
+                                        label: l10n.walletsDateToLabel,
+                                        placeholder: l10n.commonDateFormatPlaceholder,
                                         controller: _dateToController,
                                       ),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: Spacing.xl),
                                       FormButton(
                                         height: 54,
                                         onPressed: () {},
-                                        text: 'Show Results',
+                                        text: l10n.commonShowResults,
                                       ),
                                     ],
                                   );
                                 },
                                 labelSize: 13,
-                                text: 'View Statement',
+                                text: AppLocalizations.of(context)!.walletsViewStatement,
                               ),
                             ),
                           ],
@@ -230,12 +233,12 @@ class TransactionListItem extends StatelessWidget {
         ],
       ),
       title: Text(
-        'Fund Wallet',
+        AppLocalizations.of(context)!.walletsFundWalletDemo,
         style: context.formLabels,
       ),
       subtitle: Text(
         '09-Jun-23 12:30pm',
-        style: AppTypography.caption,
+        style: context.caption,
       ),
       trailing: Column(
         mainAxisSize: .max,
@@ -247,8 +250,8 @@ class TransactionListItem extends StatelessWidget {
             style: context.captionSemibold,
           ),
           Text(
-            'Success',
-            style: AppTypography.caption.copyWith(
+            AppLocalizations.of(context)!.commonSuccess,
+            style: context.caption.copyWith(
               color: AppColors.success,
             ),
           ),
@@ -271,7 +274,7 @@ class EmptyWalletTransactions extends StatelessWidget {
           child: Padding(
             padding: .symmetric(horizontal: 20),
             child: Text(
-              'Recent Transactions',
+              AppLocalizations.of(context)!.walletsRecentTransactions,
               style: context.header1,
             ),
           ),
@@ -281,25 +284,11 @@ class EmptyWalletTransactions extends StatelessWidget {
           hasScrollBody: false,
           child: Padding(
             padding: const .symmetric(horizontal: 30),
-            child: Column(
-              mainAxisSize: .max,
-              mainAxisAlignment: .center,
-              crossAxisAlignment: .center,
-              children: [
-                const Spacer(flex: 1),
-                SvgPicture.asset('assets/img/empty-wallet.svg'),
-                Text(
-                  'No transactions yet',
-                  textAlign: .center,
-                  style: context.p1Medium,
-                ),
-                Text(
-                  'Your financial journey starts here. Once you send or receive funds, your activity will appear in this space',
-                  textAlign: .center,
-                  style: AppTypography.smallDetails,
-                ),
-                const Spacer(flex: 3),
-              ],
+            child: EmptyState(
+              svgAsset: SvgImages.emptyWallet,
+              title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
+              subtitle:
+                  AppLocalizations.of(context)!.walletsNoTransactionsSubtitle,
             ),
           ),
         ),

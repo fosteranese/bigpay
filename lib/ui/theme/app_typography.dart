@@ -221,4 +221,6 @@ extension ThemeText on BuildContext {
   TextStyle get smallBold => AppTypography.smallBold.copyWith(color: _primary);
   TextStyle get formLabels =>
       AppTypography.formLabels.copyWith(color: _primary);
+  TextStyle get buttons => AppTypography.buttons.copyWith(color: _primary);
+  TextStyle get menuLinks => AppTypography.menuLinks.copyWith(color: _primary);
 }

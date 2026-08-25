@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -13,6 +13,8 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/utils/app_state.util.dart';
@@ -122,10 +124,11 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
               if (!snapshot.isSilent &&
                   !snapshot.isCached &&
                   (snapshot.data?.forms?.isEmpty ?? true)) {
+                final l10n = AppLocalizations.of(context)!;
                 MessageUtil.displayErrorDialog(
                   context,
-                  title: 'Service Unavailable',
-                  message: 'This service is currently not available',
+                  title: l10n.commonServiceUnavailableTitle,
+                  message: l10n.commonServiceUnavailableMessage,
                 );
                 return;
               }
@@ -148,6 +151,12 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
         detail: _selectedActivity == null || _selectedCategory == null
             ? null
             : ServicePage(
+                // Without a key, switching the selection reuses the same
+                // State — a stale `_category` (set by a prior pull-to-
+                // refresh on a different activity) would then shadow the
+                // new `widget.category` instead of a fresh State starting
+                // from it. ActivityDatum extends Equatable.
+                key: ValueKey(_selectedActivity),
                 activityDatum: _selectedActivity!,
                 category: _selectedCategory!,
                 useScaffold: false,
@@ -160,7 +169,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
   Widget _master(BuildContext context) {
     return MainLayout(
       backgroundColor: context.scaffoldBg,
-      miniTitle: 'Services',
+      miniTitle: AppLocalizations.of(context)!.dashboardServicesHeader,
       onRefresh: refreshDashboardData,
       bottom: PreferredSize(
         preferredSize: Size(double.maxFinite, 60),
@@ -171,7 +180,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
             bottom: 10,
           ),
           child: FormInput(
-            placeholder: 'Search',
+            placeholder: AppLocalizations.of(context)!.commonSearch,
             controller: _searchController,
             suffix: Icon(Icons.search),
           ),
@@ -180,6 +189,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
       builder: (_) => Builder(
         builder: (context) {
           final activities = _activities;
+          final l10n = AppLocalizations.of(context)!;
 
           if (activities.isEmpty) {
             final searching = _query.isNotEmpty;
@@ -191,19 +201,15 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
                 mainAxisAlignment: .center,
                 crossAxisAlignment: .center,
                 children: [
-                  Spacer(flex: 3),
-                  SvgPicture.asset('assets/img/empty-wallet.svg'),
-                  Text(
-                    searching ? 'No matches' : 'Empty Services',
-                    style: context.p1Bold,
+                  EmptyState(
+                    svgAsset: SvgImages.emptyWallet,
+                    title: searching
+                        ? l10n.commonNoMatches
+                        : l10n.beneficiariesEmptyServices,
+                    subtitle: searching
+                        ? l10n.servicesNoMatchQuery(_query)
+                        : l10n.servicesNoneFound,
                   ),
-                  Text(
-                    searching
-                        ? 'No services match "$_query"'
-                        : 'No Services found',
-                    style: AppTypography.caption,
-                  ),
-                  Spacer(flex: 6),
                 ],
               ),
             );
@@ -249,7 +255,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
                   ),
                   subtitle: Text(
                     item.activity?.description ?? '',
-                    style: AppTypography.caption,
+                    style: context.caption,
                   ),
                   trailing: Icon(Icons.chevron_right_outlined),
                 ),

@@ -1,33 +1,80 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   static const primary = Color(0xFF20428C);
-  static const secondary = Color(0xFF78C143);
+  static const secondary = Color(0xFF2F700D);
   static const tertiaryBrand = Color(0xFF47A147);
   static const tint = Color(0xFF55A11F);
+  static const brightGreen = Color(0xFF78C143);
   static const tintShade1 = Color(0x36ABBAC4);
   static const tintShade3 = Color(0xffD8F3C5);
   static const white = Color(0xFFFFFFFF);
   static const white11 = Color(0x1CFFFFFF);
   static const white20 = Color(0x33E2ECFF);
   static const black = Color(0xFF010101);
-  static const textDark = Color(0xFF242424);
-  static const subtitleGrey = Color(0xFF919195);
-  static const shade2 = Color(0xFF93B2F0);
+  static const subtitleGrey = Color(0xFF63636B);
   static const offWhite = Color(0xFFF8F8F8);
-  static const inactiveBorder = Color(0xFFD9DADB);
   static const border = Color(0xFFF5F5F5);
   static const danger = Color(0xFFDE0101);
   static const pending = Color(0xFFEA8406);
-  static const fade = Color(0xFFD9DADB);
   static const shade3 = Color(0xFFABBAC4);
-  static const flora = Color(0xFF919195);
-  static const fiat = Color(0xFF54534A);
+  static const flora = Color(0xFF63636B);
   static const tertiary = Color(0xFFEDEDED);
   static const background = Color(0xFFE0E3EF);
   static const success = Color(0xFF007E13);
-  static const backgroundPale = Color(0xFFF1F4FB);
+  static const cardOverlay = Color(0xFFD7D7D7);
+  static const dashboardGradientStart = Color(0xFF385BA9);
+  static const dashboardGradientMidLight = Color(0xFFC5D8FF);
+  static const dashboardGradientMidDark = Color(0xFF1E2D5A);
+  static const dashboardGradientEndLight = Color(0xFFF8F8F8);
+  static const dashboardGradientEndDark = Color(0xFF11111B);
+  static const navShadow = Color(0xFFC6C8D1);
+}
+
+class AppGradients {
+  AppGradients._();
+
+  static const walletCard = LinearGradient(
+    colors: [Color(0xFF221E55), Color(0xFF20428C)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const dashboard = LinearGradient(
+    colors: [Color(0xFF385BA9), Color(0xFF1E2D5A)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+}
+
+class Spacing {
+  Spacing._();
+
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 20;
+  static const double xxl = 24;
+  static const double xxxl = 32;
+}
+
+class AppRadius {
+  AppRadius._();
+
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+  static const double pill = 28;
+
+  static BorderRadius get smAll => BorderRadius.circular(sm);
+  static BorderRadius get mdAll => BorderRadius.circular(md);
+  static BorderRadius get lgAll => BorderRadius.circular(lg);
+  static BorderRadius get xlAll => BorderRadius.circular(xl);
+  static BorderRadius get pillAll => BorderRadius.circular(pill);
 }
 
 extension ThemeColors on BuildContext {
@@ -50,14 +97,26 @@ extension ThemeColors on BuildContext {
       ? AppColors.white.withValues(alpha: 0.08)
       : AppColors.white.withValues(alpha: 0.15);
   Color get navBarBg => _isDark ? const Color(0xFF1E1E2E) : const Color(0xFFECEDF1);
+  Color get accentGreen => _isDark ? AppColors.brightGreen : AppColors.secondary;
 }
 
 class AppTheme {
+  static const _pageTransitions = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+    },
+  );
+
   static ThemeData get light {
     final textTheme = GoogleFonts.mulishTextTheme();
 
     return ThemeData(
       scaffoldBackgroundColor: AppColors.background,
+      pageTransitionsTheme: _pageTransitions,
       colorScheme: ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.tint,
@@ -142,6 +201,7 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: background,
+      pageTransitionsTheme: _pageTransitions,
       colorScheme: ColorScheme.dark(
         primary: AppColors.primary,
         secondary: AppColors.tint,

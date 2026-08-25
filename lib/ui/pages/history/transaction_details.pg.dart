@@ -1,4 +1,5 @@
 import 'package:bigpay/data/models/general_flow/request_response.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
@@ -79,7 +80,7 @@ class TransactionDetailsView extends StatelessWidget {
                 child: Align(
                   alignment: .centerLeft,
                   child: IconButton.filled(
-                    tooltip: 'Back',
+                    tooltip: AppLocalizations.of(context)!.commonBack,
                     style: IconButton.styleFrom(
                       backgroundColor: context.cardBg,
                       foregroundColor: context.textPrimary,
@@ -100,9 +101,9 @@ class TransactionDetailsView extends StatelessWidget {
                   mainAxisSize: .min,
                   mainAxisAlignment: .center,
                   children: [
-                    const SizedBox(height: 20),
+                    const SizedBox(height: Spacing.xl),
                     _buildTitle(context),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: Spacing.xl),
                     Container(
                       margin: .symmetric(horizontal: 20),
                       padding: .all(24),
@@ -113,11 +114,11 @@ class TransactionDetailsView extends StatelessWidget {
                       child: Column(
                         children: [
                           TransactionDetailsItem(
-                            title: 'Service',
+                            title: AppLocalizations.of(context)!.historyServiceLabel,
                             value: receipt.formName ?? '',
                           ),
                           TransactionDetailsItem(
-                            title: 'Transaction ID',
+                            title: AppLocalizations.of(context)!.historyTransactionIdLabel,
                             value: receipt.activityName ?? '',
                           ),
                           Divider(
@@ -135,7 +136,7 @@ class TransactionDetailsView extends StatelessWidget {
                             thickness: 4,
                           ),
                           TransactionDetailsItem(
-                            title: 'Date',
+                            title: AppLocalizations.of(context)!.commonDateLabel,
                             value: receipt.receiptDateTime ?? '',
                           ),
                         ],
@@ -163,7 +164,7 @@ class TransactionDetailsView extends StatelessWidget {
                               backgroundColor: context.cardBg,
                               foregroundColor: context.textPrimary,
                               onPressed: () {},
-                              text: 'Share',
+                              text: AppLocalizations.of(context)!.commonShare,
                               icon: Icons.share_outlined,
                               buttonIconAlignment: .left,
                               iconSize: 20,
@@ -175,7 +176,7 @@ class TransactionDetailsView extends StatelessWidget {
                               backgroundColor: context.cardBg,
                               foregroundColor: context.textPrimary,
                               onPressed: () {},
-                              text: 'Save',
+                              text: AppLocalizations.of(context)!.commonSave,
                               icon: Icons.group_outlined,
                               buttonIconAlignment: .left,
                               iconSize: 20,
@@ -188,12 +189,12 @@ class TransactionDetailsView extends StatelessWidget {
                         backgroundColor: context.cardBg,
                         foregroundColor: context.textPrimary,
                         onPressed: () {},
-                        text: 'Submit a Complain',
+                        text: AppLocalizations.of(context)!.historySubmitComplain,
                         svgIcon: 'assets/img/complaint.svg',
                         buttonIconAlignment: .left,
                         iconSize: 20,
                       ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: Spacing.xl),
                     FormButton(
                       onPressed: () {
                         AppRouter.router.popUntilNamedRoutes([
@@ -202,7 +203,7 @@ class TransactionDetailsView extends StatelessWidget {
                           HistoryPage.route.path,
                         ]);
                       },
-                      text: 'Back to Home',
+                      text: AppLocalizations.of(context)!.commonBackToHome,
                     ),
                   ],
                 ),
@@ -226,12 +227,12 @@ class TransactionDetailsView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Transaction Successful',
+              AppLocalizations.of(context)!.historyTransactionSuccessful,
               style: context.display2,
             ),
             Text(
-              'Your transaction is complete',
-              style: AppTypography.smallDetails.copyWith(
+              AppLocalizations.of(context)!.historyTransactionCompleteSubtitle,
+              style: context.smallDetails.copyWith(
                 color: context.textPrimary,
               ),
             ),
@@ -249,7 +250,7 @@ class TransactionDetailsView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Transaction Failed',
+              AppLocalizations.of(context)!.historyTransactionFailed,
               style: context.display2.copyWith(
                 color: AppColors.danger,
               ),
@@ -259,7 +260,7 @@ class TransactionDetailsView extends StatelessWidget {
     }
 
     return Text(
-      'Transaction Receipt',
+      AppLocalizations.of(context)!.historyTransactionReceipt,
       style: context.display2,
     );
   }
@@ -292,12 +293,12 @@ class TransactionDetailsItem extends StatelessWidget {
                   ? context.header4.copyWith(
                       color: context.textPrimary,
                     )
-                  : AppTypography.caption.copyWith(
+                  : context.caption.copyWith(
                       color: context.textSecondary,
                     ),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: Spacing.xl),
           Expanded(
             child: Text(
               value,

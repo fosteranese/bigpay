@@ -12,6 +12,7 @@ import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
 import 'package:bigpay/models/actions/services/process_request_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -256,7 +257,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
   /// (title, value) rows: the service name followed by the server's preview
   /// rows. Rows without a value are dropped.
-  List<(String, String)> get _rows {
+  List<(String, String)> _rows(BuildContext context) {
     final rows = <(String, String)>[];
 
     final service =
@@ -264,7 +265,7 @@ class _SummaryPageState extends State<SummaryPage> {
         widget.activityDatum?.activity?.activityName ??
         '';
     if (service.isNotEmpty) {
-      rows.add(('Service', service));
+      rows.add((AppLocalizations.of(context)!.historyServiceLabel, service));
     }
 
     for (final item in widget.verification?.previewData ?? const []) {
@@ -279,7 +280,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final rows = _rows;
+    final rows = _rows(context);
 
     return MultiProcessListener(
       listeners: [
@@ -327,7 +328,9 @@ class _SummaryPageState extends State<SummaryPage> {
               _payeeEvent = null;
               MessageUtil.displaySuccessDialog(
                 context,
-                message: snapshot.message ?? 'Beneficiary saved.',
+                message:
+                    snapshot.message ??
+                    AppLocalizations.of(context)!.summaryBeneficiarySavedMessage,
                 onOk: () =>
                     AppRouter.router.go(BeneficiariesPage.route.path),
               );
@@ -348,15 +351,17 @@ class _SummaryPageState extends State<SummaryPage> {
         subtitleWidget: Column(
           children: [
             Text(
-              _isAddBeneficiary ? 'Beneficiary Summary' : 'Transaction Summary',
+              _isAddBeneficiary
+                  ? AppLocalizations.of(context)!.summaryBeneficiaryTitle
+                  : AppLocalizations.of(context)!.summaryTransactionTitle,
               textAlign: .center,
               style: context.display2,
             ),
             const SizedBox(height: 10),
             Text(
               _isAddBeneficiary
-                  ? 'Confirm the beneficiary details before you save'
-                  : 'Kindly confirm the transaction details before you proceed',
+                  ? AppLocalizations.of(context)!.summaryBeneficiaryConfirm
+                  : AppLocalizations.of(context)!.summaryTransactionConfirm,
               textAlign: .center,
               style: context.smallDetails,
             ),
@@ -368,7 +373,9 @@ class _SummaryPageState extends State<SummaryPage> {
             return FormButton(
               enabled: canContinue,
               onPressed: _continue,
-              text: _isAddBeneficiary ? 'Save Beneficiary' : 'Continue',
+              text: _isAddBeneficiary
+                  ? AppLocalizations.of(context)!.summarySaveBeneficiary
+                  : AppLocalizations.of(context)!.commonContinue,
             );
           },
         ),
@@ -396,7 +403,7 @@ class _SummaryPageState extends State<SummaryPage> {
               ),
             ),
             if (_editableItems.isNotEmpty) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: Spacing.xl),
               ..._buildEditableFields,
             ],
           ],

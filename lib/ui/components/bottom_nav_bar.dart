@@ -22,7 +22,7 @@ class NeumorphicBottomNav extends StatelessWidget {
     Color pillColor,
     Color inactiveColor,
   ) {
-    final item = navBarItems[index];
+    final item = navBarItems(context)[index];
     final isActive = selectedIndex == index;
     final color = isActive ? _activeColor : inactiveColor;
 
@@ -101,7 +101,7 @@ class NeumorphicBottomNav extends StatelessWidget {
           BoxShadow(
             color: isDark
                 ? Colors.black.withValues(alpha: 0.3)
-                : const Color(0xFFC6C8D1),
+                : AppColors.navShadow,
             offset: const Offset(5, 8),
             blurRadius: 18,
           ),
@@ -126,7 +126,7 @@ class NeumorphicBottomNav extends StatelessWidget {
         mainAxisAlignment: .center,
         crossAxisAlignment: .center,
         children: [
-          for (var i = 0; i < navBarItems.length; i++)
+          for (var i = 0; i < navBarItems(context).length; i++)
             _item(context, i, pillColor, inactiveColor),
         ],
       ),

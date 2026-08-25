@@ -77,6 +77,7 @@ class MainRemote {
     Map<String, dynamic> data = {
       'meta': appInfo.toMap(),
     };
+    data['meta']['locale'] = AppState.effectiveLocaleCode;
 
     if (body != null) {
       final finalBody = Map<String, dynamic>.from(body);

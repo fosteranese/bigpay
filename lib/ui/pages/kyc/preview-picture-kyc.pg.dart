@@ -1,4 +1,5 @@
 import 'package:bigpay/ui/components/forms/outline_button.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -21,6 +22,7 @@ class PicturePreviewKycPage extends StatefulWidget {
 class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       titleStyle: context.display2,
       bottomSize: 0,
@@ -31,12 +33,12 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
         children: [
           FormButton(
             onPressed: () {},
-            text: 'Verify Photo',
+            text: l10n.kycVerifyPhoto,
           ),
           const SizedBox(height: 10),
           FormOutlineButton(
             onPressed: () {},
-            text: 'Retake Picture',
+            text: l10n.kycRetakePicture,
           ),
         ],
       ),
@@ -60,7 +62,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
                     decoration: BoxDecoration(
                       borderRadius: .circular(100),
                       border: .all(
-                        color: AppColors.secondary,
+                        color: context.accentGreen,
                         width: 1,
                       ),
                     ),
@@ -70,19 +72,19 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
                       child: const Icon(
                         Icons.person,
                         size: 100,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Review your photo',
+                    l10n.kycReviewPhotoTitle,
                     textAlign: .center,
                     style: context.display2,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Make sure your face is clearly visible before continuing',
+                    l10n.kycReviewPhotoSubtitle,
                     textAlign: .center,
                     style: context.p1.copyWith(
                       color: context.textSecondary,
@@ -93,17 +95,17 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
             ),
             const SizedBox(height: 30),
             CheckListItem(
-              title: 'Face clearly visible',
-              subtitle: 'No obstructions or glasses',
+              title: l10n.kycFaceClearlyVisible,
+              subtitle: l10n.kycNoObstructions,
             ),
             CheckListItem(
-              title: 'Well lit',
-              subtitle: 'Even lighting, no harsh shadows',
+              title: l10n.kycWellLit,
+              subtitle: l10n.kycEvenLighting,
             ),
             CheckListItem(
               isChecked: false,
-              title: 'Slight blur detected',
-              subtitle: 'Retake if image feels unclear',
+              title: l10n.kycSlightBlur,
+              subtitle: l10n.kycRetakeIfUnclear,
             ),
           ],
         ),
@@ -143,7 +145,7 @@ class CheckListItem extends StatelessWidget {
               child: const Icon(
                 Icons.warning_amber_rounded,
                 size: 20,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
       title: Text(

@@ -1,4 +1,5 @@
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
@@ -44,13 +45,6 @@ class _DashboardPageState extends State<DashboardPage>
   /// scrolling repaints only the header overlay, not the whole dashboard.
   final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
 
-  /// Kept as a field so the "most used" carousel doesn't lose its page (and
-  /// leak a controller) on every rebuild.
-  final PageController _favouritesController = PageController(
-    viewportFraction: 0.60,
-    keepPage: true,
-  );
-
   @override
   void initState() {
     super.initState();
@@ -63,7 +57,6 @@ class _DashboardPageState extends State<DashboardPage>
   void dispose() {
     _scrollController.dispose();
     _blurOpacity.dispose();
-    _favouritesController.dispose();
     super.dispose();
   }
 
@@ -115,8 +108,8 @@ class _DashboardPageState extends State<DashboardPage>
                   (snapshot.data?.forms?.isEmpty ?? true)) {
                 MessageUtil.displayErrorDialog(
                   context,
-                  title: 'Service Unavailable',
-                  message: 'This service is currently not available',
+                  title: AppLocalizations.of(context)!.commonServiceUnavailableTitle,
+                  message: AppLocalizations.of(context)!.commonServiceUnavailableMessage,
                 );
                 return;
               }
@@ -161,8 +154,8 @@ class _DashboardPageState extends State<DashboardPage>
                   (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
                 MessageUtil.displayErrorDialog(
                   context,
-                  title: 'Service Unavailable',
-                  message: 'This service is currently not available',
+                  title: AppLocalizations.of(context)!.commonServiceUnavailableTitle,
+                  message: AppLocalizations.of(context)!.commonServiceUnavailableMessage,
                 );
                 return;
               }
@@ -196,9 +189,9 @@ class _DashboardPageState extends State<DashboardPage>
             begin: Alignment(-0.11, -1.0), // Calculates the 176.94° angle
             end: Alignment(0.11, 1.0),
             colors: [
-              Color(0xFF385BA9),
-              if (isDark) Color(0xFF1E2D5A) else Color(0xFFC5D8FF),
-              isDark ? Color(0xFF11111B) : Color(0xFFF8F8F8),
+              AppColors.dashboardGradientStart,
+              if (isDark) AppColors.dashboardGradientMidDark else AppColors.dashboardGradientMidLight,
+              isDark ? AppColors.dashboardGradientEndDark : AppColors.dashboardGradientEndLight,
             ],
             stops: [
               0.0829, // 8.29%
@@ -269,14 +262,14 @@ class _DashboardPageState extends State<DashboardPage>
                       crossAxisAlignment: .start,
                       children: [
                         Text(
-                          'Welcome Back',
-                          style: AppTypography.caption.copyWith(
+                          AppLocalizations.of(context)!.dashboardWelcomeBack,
+                          style: context.caption.copyWith(
                             color: context.divider,
                           ),
                         ),
                         Text(
                           AppState.currentUser?.user?.name ?? '',
-                          style: AppTypography.p1Medium.copyWith(
+                          style: context.p1Medium.copyWith(
                             color: AppColors.white,
                           ),
                         ),
@@ -284,7 +277,7 @@ class _DashboardPageState extends State<DashboardPage>
                     ),
                     actions: [
                       IconButton(
-                        tooltip: 'Notifications',
+                        tooltip: AppLocalizations.of(context)!.dashboardNotificationsTooltip,
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.white20,
                         ),
@@ -333,25 +326,35 @@ class _DashboardPageState extends State<DashboardPage>
                           Padding(
                             padding: const .symmetric(horizontal: 20),
                             child: Text(
-                              'Most used services',
+                              AppLocalizations.of(context)!.dashboardMostUsedServices,
                               style: context.smallDetailsBold,
                             ),
                           ),
                           const SizedBox(height: 10),
                           SizedBox(
-                            height: 60,
-                            child: PageView(
+                            height: context.responsive(
+                              compact: 60,
+                              medium: 72,
+                              expanded: 84,
+                            ),
+                            // A plain horizontal list rather than a
+                            // fixed-fraction PageView — a fraction sized for
+                            // a phone (~0.6 of the width) would balloon each
+                            // pill to fill most of a wide/expanded window
+                            // instead of just showing more of them at their
+                            // natural size, which is what more room should
+                            // buy here.
+                            child: ListView.builder(
                               scrollDirection: .horizontal,
-                              pageSnapping: true,
-                              controller: _favouritesController,
-                              padEnds: false,
-                              children:
-                                  AppState.currentUser?.recentActivity?.map((
-                                    item,
-                                  ) {
-                                    return FrequentServiceItem(data: item);
-                                  }).toList() ??
-                                  [],
+                              itemCount:
+                                  AppState.currentUser?.recentActivity
+                                      ?.length ??
+                                  0,
+                              itemBuilder: (context, index) {
+                                final item =
+                                    AppState.currentUser!.recentActivity![index];
+                                return FrequentServiceItem(data: item);
+                              },
                             ),
                           ),
                         ],
@@ -365,7 +368,7 @@ class _DashboardPageState extends State<DashboardPage>
                         right: 15,
                       ),
                       child: Text(
-                        'Services',
+                        AppLocalizations.of(context)!.dashboardServicesHeader,
                         style: context.header3,
                       ),
                     ),
@@ -456,7 +459,8 @@ class ActionButton extends StatelessWidget {
             ),
             const Spacer(flex: 4),
             Text(
-              data.activity?.activityName ?? 'N/A',
+              data.activity?.activityName ??
+                  AppLocalizations.of(context)!.commonNotAvailable,
               overflow: .ellipsis,
               maxLines: 1,
               style: context.header4,
@@ -466,7 +470,7 @@ class ActionButton extends StatelessWidget {
               data.activity?.description ?? '',
               overflow: .ellipsis,
               maxLines: 2,
-              style: AppTypography.caption,
+              style: context.caption,
             ),
           ],
         ),
@@ -511,12 +515,33 @@ class FrequentServiceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Scales the pill up alongside the carousel's own responsive height
+    // (see the SizedBox wrapping this in the dashboard build) — otherwise
+    // a phone-sized pill just reads as small and cramped inside a taller,
+    // wider row on a bigger screen instead of using the extra space.
+    final iconSize = context.responsive<double>(
+      compact: 24,
+      medium: 28,
+      expanded: 32,
+    );
+    final padding = context.responsive<double>(
+      compact: 5,
+      medium: 8,
+      expanded: 10,
+    );
+    final gap = context.responsive<double>(compact: 5, medium: 8, expanded: 10);
+    final fontScale = context.responsive<double>(
+      compact: 1,
+      medium: 1.1,
+      expanded: 1.2,
+    );
+
     return GestureDetector(
       onTap: () => _open(context),
       child: Container(
         alignment: .centerLeft,
         margin: .only(left: 10),
-        padding: .all(5),
+        padding: .all(padding),
         decoration: BoxDecoration(
           color: context.cardBg,
           borderRadius: .circular(30),
@@ -527,10 +552,9 @@ class FrequentServiceItem extends StatelessWidget {
             CachedNetworkImage(
               imageUrl:
                   '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
-              // width: 24,
-              // height: 24,
               imageBuilder: (context, imageProvider) {
                 return CircleAvatar(
+                  radius: iconSize / 2,
                   backgroundColor: context.avatarBg,
                   backgroundImage: imageProvider,
                 );
@@ -538,16 +562,16 @@ class FrequentServiceItem extends StatelessWidget {
               placeholder: (context, url) => Icon(
                 Icons.circle_outlined,
                 color: Theme.of(context).primaryColor,
-                size: 24,
+                size: iconSize,
               ),
               errorWidget: (context, url, error) => Icon(
                 Icons.circle_outlined,
                 color: Theme.of(context).primaryColor,
-                size: 24,
+                size: iconSize,
               ),
             ),
 
-            const SizedBox(width: 5),
+            SizedBox(width: gap),
             Column(
               mainAxisSize: .max,
               mainAxisAlignment: .center,
@@ -563,7 +587,10 @@ class FrequentServiceItem extends StatelessWidget {
                   textScaler: MediaQuery.textScalerOf(
                     context,
                   ).clamp(maxScaleFactor: 1.3),
-                  style: context.captionSemibold,
+                  style: context.captionSemibold.copyWith(
+                    fontSize: (context.captionSemibold.fontSize ?? 12) *
+                        fontScale,
+                  ),
                 ),
                 Text(
                   data.activityName ?? '',
@@ -573,7 +600,10 @@ class FrequentServiceItem extends StatelessWidget {
                   textScaler: MediaQuery.textScalerOf(
                     context,
                   ).clamp(maxScaleFactor: 1.3),
-                  style: AppTypography.caption,
+                  style: context.caption.copyWith(
+                    fontSize: (context.caption.fontSize ?? 11) *
+                        fontScale,
+                  ),
                 ),
               ],
             ),

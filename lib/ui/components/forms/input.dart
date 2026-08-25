@@ -111,6 +111,25 @@ class _FormInputState extends State<FormInput> {
                         width: 2,
                       ),
                     ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: .circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.danger,
+                        style: .solid,
+                      ),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: .circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.danger,
+                        style: .solid,
+                        width: 2,
+                      ),
+                    ),
+                    errorMaxLines: 2,
+                    errorStyle: context.caption.copyWith(
+                      color: AppColors.danger,
+                    ),
                     filled: true,
                     fillColor: context.inputBg,
                     suffixIcon: widget.suffix,
@@ -118,6 +137,16 @@ class _FormInputState extends State<FormInput> {
                 ),
               ),
             ),
+            if (field.hasError && field.errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, left: 15),
+                child: Text(
+                  field.errorText!,
+                  style: context.caption.copyWith(
+                    color: AppColors.danger,
+                  ),
+                ),
+              ),
           ],
         );
       },

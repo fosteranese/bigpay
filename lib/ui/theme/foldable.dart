@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 
 /// Reads the device's fold/hinge geometry, exposed by Flutter as
 /// [MediaQueryData.displayFeatures]. Purely additive to the width-based
@@ -58,7 +59,7 @@ extension FoldableContext on BuildContext {
 /// full-width, so this is a no-op wrapper on a phone or a medium
 /// (tablet/rail-width) screen, and doesn't split into a cramped list pane
 /// plus an empty detail pane before the user has picked anything.
-class MasterDetailLayout extends StatelessWidget {
+class MasterDetailLayout extends StatefulWidget {
   const MasterDetailLayout({
     super.key,
     required this.master,
@@ -74,42 +75,120 @@ class MasterDetailLayout extends StatelessWidget {
   final double masterWidth;
 
   @override
+  State<MasterDetailLayout> createState() => _MasterDetailLayoutState();
+}
+
+class _MasterDetailLayoutState extends State<MasterDetailLayout> {
+  // Reflects our own split state into AppState.splitDetailOpenNotifier so
+  // MainShell can collapse the sidebar/rail while a tab-root page (Services,
+  // Wallets, History) is actually showing a detail pane — otherwise those
+  // pages read differently from a pushed split view (Complaints,
+  // Beneficiaries), which already has the full window to itself since
+  // pushed routes don't carry the sidebar. Deferred to a post-frame
+  // callback rather than set synchronously in build(): this runs as a
+  // side effect of building, and MainShell (an ancestor) listens to it —
+  // mutating an ancestor's dependency mid-build is the kind of thing
+  // Flutter's build-phase assertions exist to catch.
+  void _syncSidebarCollapse(bool splitting) {
+    if (AppState.splitDetailOpenNotifier.value == splitting) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) AppState.splitDetailOpenNotifier.value = splitting;
+    });
+  }
+
+  @override
+  void dispose() {
+    // Leaving the page entirely (e.g. switching tabs) — don't leave the
+    // sidebar permanently collapsed with nothing left to justify it.
+    if (AppState.splitDetailOpenNotifier.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AppState.splitDetailOpenNotifier.value = false;
+      });
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final hinge = context.isBookMode ? context.hingeBounds : null;
+    final isSplitting =
+        (hinge != null || context.isWide) && widget.detail != null;
+    _syncSidebarCollapse(isSplitting);
+
     if (hinge == null && !context.isWide) {
-      return master;
+      return widget.master;
     }
 
     // Nothing selected yet — let master use the whole window instead of
     // splitting into a cramped list pane plus a mostly-empty "select
     // something" pane. The split only earns its keep once there's a detail
     // to actually show.
-    if (detail == null) {
-      return master;
+    if (widget.detail == null) {
+      return widget.master;
     }
-    final resolvedDetail = detail!;
+    final resolvedDetail = widget.detail!;
 
-    final masterPaneWidth = hinge?.left ?? masterWidth;
     // Some foldables (e.g. Pixel Fold's continuous hinge) report a
     // zero-width hairline rather than a physical seam — floor the gap so the
     // divider stays visible instead of collapsing to nothing.
     final gapWidth = math.max(hinge?.width ?? 24.0, 24.0);
+    const minDetailWidth = 320.0;
 
-    return Row(
-      crossAxisAlignment: .stretch,
-      children: [
-        SizedBox(width: masterPaneWidth, child: master),
-        SizedBox(
-          width: gapWidth,
-          child: Center(
-            child: Container(
-              width: 1,
-              color: context.textTertiary.withValues(alpha: 0.3),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // hinge.left is reported in the window's own coordinate space
+        // (origin at the physical screen's top-left), not this widget's
+        // local one — only safe to use directly when this widget itself
+        // starts at the window's left edge. The sidebar-collapse above
+        // handles the steady state, but the *first* frame a split turns on
+        // (sidebar still visible, MainShell hasn't reacted yet) still needs
+        // this: however much narrower this widget's own local width is
+        // than the full window is exactly how much horizontal space fixed
+        // chrome ahead of it has already consumed — subtracting that turns
+        // the global hinge offset into the correct local one. (Checking
+        // only that hinge.left *fits inside* the local width isn't
+        // sufficient on its own — a global offset can easily still be
+        // smaller than the local width while still being the wrong
+        // number.)
+        final windowWidth = MediaQuery.sizeOf(context).width;
+        final precedingChromeWidth = math.max(
+          0.0,
+          windowWidth - constraints.maxWidth,
+        );
+        final localHingeLeft = hinge != null
+            ? hinge.left - precedingChromeWidth
+            : null;
+        final masterPaneWidth =
+            (localHingeLeft != null &&
+                localHingeLeft >= minDetailWidth &&
+                localHingeLeft + gapWidth + minDetailWidth <=
+                    constraints.maxWidth)
+            ? localHingeLeft
+            : widget.masterWidth;
+
+        return Row(
+          crossAxisAlignment: .stretch,
+          children: [
+            SizedBox(width: masterPaneWidth, child: widget.master),
+            // Explicitly painted, not left transparent — with nothing else
+            // behind this Row (MasterDetailLayout sits directly under
+            // MainShell's transparent-background Scaffold), an unpainted
+            // gap let whatever's further back than that show through as a
+            // solid black bar the width of the real hinge seam.
+            Container(
+              width: gapWidth,
+              color: context.scaffoldBg,
+              child: Center(
+                child: Container(
+                  width: 1,
+                  color: context.textTertiary.withValues(alpha: 0.3),
+                ),
+              ),
             ),
-          ),
-        ),
-        Expanded(child: resolvedDetail),
-      ],
+            Expanded(child: resolvedDetail),
+          ],
+        );
+      },
     );
   }
 }

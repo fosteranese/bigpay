@@ -14,17 +14,23 @@ class AppSidebar extends StatelessWidget {
     super.key,
     required this.selectedIndex,
     required this.onTap,
+    this.width = _defaultWidth,
   });
 
   final int selectedIndex;
   final ValueChanged<int> onTap;
 
-  static const _width = 248.0;
+  /// Overridable so [MainShell] can widen the sidebar to fill the whole
+  /// left-of-hinge panel in book mode, instead of leaving a gap between a
+  /// fixed-width sidebar and the hinge.
+  final double width;
+
+  static const _defaultWidth = 248.0;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: _width,
+      width: width,
       decoration: BoxDecoration(
         color: context.cardBg,
         border: Border(right: BorderSide(color: context.border)),
@@ -38,7 +44,7 @@ class AppSidebar extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
               child: SvgPicture.asset(SvgImages.icon, height: 22),
             ),
-            for (var i = 0; i < navBarItems.length; i++)
+            for (var i = 0; i < navBarItems(context).length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: _Item(
@@ -67,7 +73,7 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = navBarItems[index];
+    final item = navBarItems(context)[index];
     final color = selected ? AppColors.tint : context.textSecondary;
 
     return Padding(

@@ -51,9 +51,8 @@ class FormButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.maxFinite,
-      height: height,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height),
       child: FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor: loading || !enabled
@@ -63,17 +62,17 @@ class FormButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? .circular(height),
           ),
-          fixedSize: Size(double.maxFinite, height),
+          minimumSize: Size(double.maxFinite, height),
         ),
         // null (rather than a no-op callback) so Material — and screen
         // readers — actually treat the button as disabled while loading.
         onPressed: (loading || !enabled) ? null : onPressed,
-        child: _content,
+        child: _content(context),
       ),
     );
   }
 
-  Widget get _content {
+  Widget _content(BuildContext context) {
     if (loading) {
       final double size = height > 30 ? 30 : 10;
       return Semantics(
@@ -82,20 +81,20 @@ class FormButton extends StatelessWidget {
           width: size,
           height: size,
           child: CircularProgressIndicator(
-            color: AppColors.primary,
+            color: foregroundColor,
           ),
         ),
       );
     }
 
-    return icon == null && svgIcon == null ? _text : _textAndIcon;
+    return icon == null && svgIcon == null ? _text(context) : _textAndIcon(context);
   }
 
-  Widget get _text {
+  Widget _text(BuildContext context) {
     return Text(
       text,
       maxLines: 1,
-      style: AppTypography.buttons.copyWith(
+      style: context.buttons.copyWith(
         fontSize: labelSize ?? 16,
         fontWeight: fontWeight ?? .bold,
         color: enabled ? foregroundColor : AppColors.flora,
@@ -122,7 +121,7 @@ class FormButton extends StatelessWidget {
     );
   }
 
-  Widget get _textAndIcon {
+  Widget _textAndIcon(BuildContext context) {
     if (buttonIconAlignment == .left) {
       return Row(
         mainAxisAlignment: .center,
@@ -130,7 +129,7 @@ class FormButton extends StatelessWidget {
         children: [
           _icon,
           SizedBox(width: iconSpacerBeforeAfter ?? 10),
-          _text,
+          _text(context),
         ],
       );
     }
@@ -139,7 +138,7 @@ class FormButton extends StatelessWidget {
       mainAxisAlignment: .center,
       crossAxisAlignment: .center,
       children: [
-        _text,
+        _text(context),
         SizedBox(width: iconSpacerBeforeAfter ?? 10),
         _icon,
       ],

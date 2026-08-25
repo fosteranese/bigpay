@@ -50,9 +50,8 @@ class FormOutlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveForeground = foregroundColor ?? context.textPrimary;
-    return SizedBox(
-      width: double.maxFinite,
-      height: height,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height),
       child: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: loading || !enabled ? context.cardBg : null,
@@ -64,7 +63,7 @@ class FormOutlineButton extends StatelessWidget {
               width: 1,
             ),
           ),
-          fixedSize: Size(double.maxFinite, height),
+          minimumSize: Size(double.maxFinite, height),
         ),
         // null (rather than the raw callback) so Material — and screen
         // readers — actually treat the button as disabled while loading.
@@ -83,7 +82,7 @@ class FormOutlineButton extends StatelessWidget {
           width: size,
           height: size,
           child: CircularProgressIndicator(
-            color: AppColors.primary,
+            color: effectiveForeground,
           ),
         ),
       );
@@ -98,7 +97,7 @@ class FormOutlineButton extends StatelessWidget {
     return Text(
       text,
       maxLines: 1,
-      style: AppTypography.buttons.copyWith(
+      style: context.buttons.copyWith(
         fontSize: labelSize ?? 16,
         fontWeight: fontWeight ?? .bold,
         color: enabled ? effectiveForeground : AppColors.flora,

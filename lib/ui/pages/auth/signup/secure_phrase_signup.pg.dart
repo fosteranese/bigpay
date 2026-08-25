@@ -1,10 +1,12 @@
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/select_input.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -40,19 +42,32 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       maxWidth: 480,
-      title: 'Create a secure phrase',
-      titleStyle: AppTypography.display1,
-      subtitle:
-          'Customize your private Q&A for faster verification and safer digital payments.',
+      title: l10n.authCreateSecurePhraseTitle,
+      titleStyle: context.display1,
+      stepIndicator: StepProgress(
+        currentStep: 3,
+        totalSteps: 5,
+        labels: ['Phone', 'OTP', 'Password', 'Security', 'PIN'],
+      ),
+      subtitleWidget: Column(
+        mainAxisSize: .min,
+        children: [
+          Text(
+            l10n.authSecurePhraseSubtitle,
+            style: context.smallDetails,
+          ),
+        ],
+      ),
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
         builder: (context, value, child) {
           return FormButton(
             enabled: value,
             onPressed: _continue,
-            text: 'Continue',
+            text: l10n.commonContinue,
           );
         },
       ),
@@ -63,8 +78,8 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
           crossAxisAlignment: .center,
           children: [
             FormSelectInput(
-              label: 'Choose a Question',
-              placeholder: 'Select...',
+              label: l10n.authChooseQuestionLabel,
+              placeholder: l10n.commonSelectPlaceholder,
               focusNode: _questionFocusNode,
               controller: _questionController,
               next: (_) {
@@ -82,7 +97,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
             ),
             const SizedBox(height: 15),
             FormInput(
-              label: 'Answer to the Question',
+              label: l10n.authAnswerToQuestionLabel,
               focusNode: _answerFocusNode,
               controller: _answerController,
               onChanged: _onChanged,

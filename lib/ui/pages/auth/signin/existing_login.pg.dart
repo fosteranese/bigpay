@@ -9,6 +9,7 @@ import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/models/actions/auth_action.dart';
 import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
@@ -105,18 +106,18 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
     // Nothing stored to replay yet — point the user at the password field
     // already on this page rather than sending them anywhere.
     if (password == null || password.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
       MessageUtil.displayActionDialog(
         context,
-        title: 'Password Required',
-        message:
-            'Login with your password first to enjoy login with biometrics.',
-        onConfirmText: 'Ok',
+        title: l10n.authPasswordRequiredTitle,
+        message: l10n.authPasswordRequiredMessage,
+        onConfirmText: l10n.commonOk,
         onConfirm: () => _passwordFocusNode.requestFocus(),
       );
       return;
     }
 
-    final result = await BiometricUtil.authenticate('Unlock BigPay');
+    final result = await BiometricUtil.authenticate(AppLocalizations.of(context)!.securityUnlockBigPay);
     if (!mounted || result != BiometricResult.success) return;
 
     _loginEvent = context.dispatchProcess(
@@ -132,7 +133,10 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
   void _signIn() {
     FocusScope.of(context).unfocus();
     if (_passwordController.text.trim().isEmpty) {
-      MessageUtil.displayErrorDialog(context, message: 'Password is required');
+      MessageUtil.displayErrorDialog(
+        context,
+        message: AppLocalizations.of(context)!.authPasswordRequiredError,
+      );
       return;
     }
 
@@ -158,6 +162,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ProcessListener<AuthData>(
       event: () => _loginEvent,
       listener: (context, snapshot) {
@@ -215,14 +220,14 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
         bottomNav: Column(
           mainAxisSize: .min,
           children: [
-            FormButton(onPressed: _signIn, text: 'Sign In'),
+            FormButton(onPressed: _signIn, text: l10n.authSignIn),
             const SizedBox(height: 6),
             TextButton(
               onPressed: _useDifferentAccount,
               child: Text(
-                'Not you? Use a different account',
-                style: AppTypography.smallDetails.copyWith(
-                  color: AppColors.secondary,
+                l10n.authUseDifferentAccount,
+                style: context.smallDetails.copyWith(
+                  color: context.accentGreen,
                 ),
               ),
             ),
@@ -233,22 +238,22 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
           children: [
             const SizedBox(height: 120),
             Center(child: _buildAvatar()),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.lg),
             Text(
-              'Welcome back',
+              l10n.authWelcomeBack,
               textAlign: .center,
               style: context.smallDetails,
             ),
             const SizedBox(height: 2),
             Text(
-              _name.isEmpty ? 'Sign in to continue' : _name,
+              _name.isEmpty ? l10n.authSignInToContinue : _name,
               textAlign: .center,
               style: context.header2,
             ),
             const SizedBox(height: 36),
             FormPasswordInput(
-              label: 'Password',
-              placeholder: 'Enter your password',
+              label: l10n.commonPasswordLabel,
+              placeholder: l10n.authEnterPasswordPlaceholder,
               controller: _passwordController,
               focusNode: _passwordFocusNode,
             ),
@@ -268,8 +273,8 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
                         SvgPicture.asset(SvgImages.biometric),
                         SizedBox(width: 5),
                         Text(
-                          'Biometric Login',
-                          style: AppTypography.smallDetails.copyWith(
+                          l10n.commonBiometricLogin,
+                          style: context.smallDetails.copyWith(
                             color: context.textPrimary,
                           ),
                         ),
@@ -287,8 +292,8 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
                     );
                   },
                   child: Text(
-                    'Forgot Password ?',
-                    style: AppTypography.smallDetails.copyWith(
+                    l10n.commonForgotPassword,
+                    style: context.smallDetails.copyWith(
                       color: context.textPrimary,
                     ),
                   ),

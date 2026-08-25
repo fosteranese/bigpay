@@ -1,3 +1,4 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -63,9 +64,10 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Residential Address',
-      titleStyle: AppTypography.display2,
+      title: l10n.kycResidentialAddressTitle,
+      titleStyle: context.display2,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
@@ -73,7 +75,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
           return FormButton(
             enabled: value,
             onPressed: () {},
-            text: 'Continue',
+            text: l10n.commonContinue,
           );
         },
       ),
@@ -86,7 +88,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
             FormInput(
               focusNode: _regionFocusNode,
               controller: _regionController,
-              label: 'State / Region *',
+              label: l10n.kycStateRegionLabel,
               onChanged: _onChanged,
               next: (value) {
                 _districtFocusNode.requestFocus();
@@ -96,7 +98,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
             FormInput(
               focusNode: _districtFocusNode,
               controller: _districtController,
-              label: 'District',
+              label: l10n.kycDistrictLabel,
               onChanged: _onChanged,
               next: (value) {
                 _cityFocusNode.requestFocus();
@@ -106,7 +108,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
             FormInput(
               focusNode: _cityFocusNode,
               controller: _cityController,
-              label: 'Town / City *',
+              label: l10n.kycTownCityLabel,
               onChanged: _onChanged,
               next: (value) {
                 _digitalAddressFocusNode.requestFocus();
@@ -116,7 +118,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
             FormInput(
               focusNode: _digitalAddressFocusNode,
               controller: _digitalAddressController,
-              label: 'Digital Address *',
+              label: l10n.kycDigitalAddressRequiredLabel,
               onChanged: _onChanged,
               next: (value) {
                 _countryFocusNode.requestFocus();
@@ -126,8 +128,8 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
             FormSelectInput(
               focusNode: _countryFocusNode,
               controller: _countryController,
-              label: 'Country *',
-              placeholder: 'Select ...',
+              label: l10n.kycCountryLabel,
+              placeholder: l10n.kycSelectPlaceholder,
               onChanged: _onChanged,
               next: (value) {
                 FocusScope.of(context).unfocus();

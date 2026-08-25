@@ -30,6 +30,7 @@ class AppNav {
     if (ctx != null) {
       return showDialog<T>(
         context: ctx,
+        useRootNavigator: true,
         barrierDismissible: barrierDismissible,
         barrierColor: barrierColor,
         useSafeArea: useSafeArea,
@@ -51,6 +52,7 @@ class AppNav {
     if (ctx != null) {
       return showModalBottomSheet<T>(
         context: ctx,
+        useRootNavigator: true,
         isScrollControlled: isScrollControlled,
         backgroundColor: backgroundColor,
         useSafeArea: useSafeArea,

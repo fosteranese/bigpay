@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -190,6 +191,11 @@ class FormOtpInputState extends State<FormOtpInput> {
       children: List.generate(widget.count, (index) {
         return Focus(
           onKeyEvent: (node, event) => _onKeyEvent(node, event, index),
+          // A Row gives non-flex children unbounded width by default —
+          // ConstrainedBox's minWidth/minHeight-only constraints don't cap
+          // that, so TextField's InputDecorator was crashing with "cannot
+          // have an unbounded width" the moment this actually rendered.
+          // SizedBox gives a tight (bounded) box instead.
           child: SizedBox(
             width: 48,
             height: 56,
@@ -298,7 +304,7 @@ class FormOtpInputState extends State<FormOtpInput> {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               widget.error!,
-              style: AppTypography.smallDetails.copyWith(
+              style: context.smallDetails.copyWith(
                 color: AppColors.danger,
               ),
               textAlign: TextAlign.center,
@@ -307,12 +313,19 @@ class FormOtpInputState extends State<FormOtpInput> {
         const SizedBox(height: 16),
         if (widget.onResend != null && _canResend)
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: _onResendPressed,
-            child: Text(
-              'Resend Code',
-              style: context.smallDetailsBold.copyWith(
-                color: context.textPrimary,
-                decoration: .underline,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 15,
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.otpResendCode,
+                style: context.smallDetailsBold.copyWith(
+                  color: context.textPrimary,
+                  decoration: .underline,
+                ),
               ),
             ),
           )
@@ -325,7 +338,9 @@ class FormOtpInputState extends State<FormOtpInput> {
               SvgPicture.asset(SvgImages.timer),
               SizedBox(width: 5),
               Text(
-                'Resend code in ${Duration(seconds: _remainingSeconds).toString().split('.').first.substring(2)}',
+                AppLocalizations.of(context)!.otpResendCodeIn(
+                  Duration(seconds: _remainingSeconds).toString().split('.').first.substring(2),
+                ),
                 style: context.smallDetails,
               ),
             ],

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/models/actions/ghana_card/auto_ghana_card_verification_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
@@ -58,6 +60,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ProcessListener<Null>(
       event: () => mainEvent,
       listener: (context, snapshot) {
@@ -75,7 +78,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
             );
             MessageUtil.displaySuccessFullDialog(
               context,
-              title: 'Verification Successful!',
+              title: l10n.kycVerificationSuccessTitle,
               message: snapshot.response?.message ?? '',
               onOk: () {
                 Future.delayed(Duration(seconds: 1), () {
@@ -93,7 +96,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
         if (snapshot.hasError) {
           MessageUtil.displayErrorDialog(
             context,
-            title: 'Verification Failed',
+            title: l10n.kycVerificationFailedTitle,
             message: snapshot.error!.message,
           );
 
@@ -101,8 +104,13 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
         }
       },
       child: MainLayout(
-        title: 'Contact Information',
-        titleStyle: AppTypography.display2,
+        title: l10n.kycContactInfoTitle,
+        titleStyle: context.display2,
+        stepIndicator: StepProgress(
+          currentStep: 2,
+          totalSteps: 3,
+          labels: ['ID', 'Selfie', 'Contact'],
+        ),
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,
@@ -110,7 +118,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
             return FormButton(
               enabled: value,
               onPressed: _continue,
-              text: 'Continue',
+              text: l10n.commonContinue,
             );
           },
         ),
@@ -123,7 +131,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
               FormInput(
                 focusNode: _emailAddressFocusNode,
                 controller: _emailAddressController,
-                label: 'Email Address *',
+                label: l10n.profileEmailAddressLabel,
                 onChanged: _onChanged,
                 next: (value) {
                   _streetAddressFocusNode.requestFocus();
@@ -133,7 +141,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
               FormInput(
                 focusNode: _streetAddressFocusNode,
                 controller: _streetAddressController,
-                label: 'Street Address *',
+                label: l10n.kycStreetAddressLabel,
                 onChanged: _onChanged,
                 next: (value) {
                   _digitalAddressFocusNode.requestFocus();
@@ -143,7 +151,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
               FormInput(
                 focusNode: _digitalAddressFocusNode,
                 controller: _digitalAddressController,
-                label: 'Digital Address',
+                label: l10n.kycDigitalAddressLabel,
                 onChanged: _onChanged,
                 next: (value) {
                   FocusScope.of(context).unfocus();

@@ -1,3 +1,4 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -88,6 +89,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
 
   void _onShortList() {
     final cap = contentCapWidth(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -117,11 +119,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
                 crossAxisAlignment: .start,
                 children: [
                   Text(
-                    widget.label ?? 'Select',
+                    widget.label ?? l10n.commonSelect,
                     style: ctx.header1,
                   ),
                   IconButton.filled(
-                    tooltip: 'Close',
+                    tooltip: l10n.commonClose,
                     style: IconButton.styleFrom(
                       alignment: .center,
                       backgroundColor: ctx.divider,
@@ -140,7 +142,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
               ),
               const SizedBox(height: 16),
               if (widget.options.isEmpty)
-                _emptyState(message: 'No options available')
+                _emptyState(message: l10n.commonNoOptionsAvailable)
               else
                 ...widget.options.map(_buildOption),
             ],
@@ -154,9 +156,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
     _searchController.clear();
     _filteredOptions = widget.options;
     final cap = contentCapWidth(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
+      useRootNavigator: true,
       constraints: cap == double.infinity
           ? null
           : BoxConstraints(maxWidth: cap),
@@ -185,11 +189,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
                   mainAxisAlignment: .spaceBetween,
                   children: [
                     Text(
-                      widget.label ?? 'Select',
+                      widget.label ?? l10n.commonSelect,
                       style: ctx.header1,
                     ),
                     IconButton.filled(
-                      tooltip: 'Close',
+                      tooltip: l10n.commonClose,
                       style: IconButton.styleFrom(
                         alignment: .center,
                         backgroundColor: ctx.divider,
@@ -216,7 +220,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'Search...',
+                        hintText: l10n.feedbackCategorySearchPlaceholder,
                         hintStyle: ctx.caption,
                         prefixIcon: const Icon(Icons.search),
                         enabledBorder: OutlineInputBorder(
@@ -246,8 +250,8 @@ class _FormSelectInputState extends State<FormSelectInput> {
                   child: _filteredOptions.isEmpty
                       ? _emptyState(
                           message: _searchController.text.isEmpty
-                              ? 'No options available'
-                              : 'No results found',
+                              ? l10n.commonNoOptionsAvailable
+                              : l10n.commonNoResultsFound,
                           icon: _searchController.text.isEmpty
                               ? Icons.inbox_outlined
                               : Icons.search_off_outlined,

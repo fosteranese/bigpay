@@ -25,7 +25,7 @@ class SideNavRail extends StatelessWidget {
     Color pillColor,
     Color inactiveColor,
   ) {
-    final item = navBarItems[index];
+    final item = navBarItems(context)[index];
     final isActive = selectedIndex == index;
     final color = isActive ? _activeColor : inactiveColor;
 
@@ -96,7 +96,7 @@ class SideNavRail extends StatelessWidget {
         child: Column(
           mainAxisAlignment: .center,
           children: [
-            for (var i = 0; i < navBarItems.length; i++)
+            for (var i = 0; i < navBarItems(context).length; i++)
               _item(context, i, pillColor, inactiveColor),
           ],
         ),

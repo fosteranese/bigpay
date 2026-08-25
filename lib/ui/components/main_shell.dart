@@ -1,11 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/ui/components/app_sidebar.dart';
 import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/side_nav_rail.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 
 /// Hosts the tab branches and the bottom nav bar, switching branches on tap.
 ///
@@ -27,27 +31,61 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A folded phone is still phone-class hardware, and it's already
-    // spending its width on the book-mode master/detail split — adding a
-    // sidebar or rail on top of that just made everything feel cramped.
-    // Bottom pill nav regardless of raw width whenever a hinge is actually
-    // in play.
-    if (!context.isBookMode && context.isExpanded) {
-      return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Row(
-          children: [
-            AppSidebar(
-              selectedIndex: navigationShell.currentIndex,
-              onTap: _goBranch,
+    // Book mode gets the same chrome as any other window this wide —
+    // an unfolded/half-opened foldable at expanded+ width has the same
+    // real estate as a tablet or desktop, so it should look like one,
+    // sidebar included, not fall back to phone-style bottom nav.
+    if (context.isExpanded) {
+      return ValueListenableBuilder<bool>(
+        valueListenable: AppState.splitDetailOpenNotifier,
+        builder: (context, splitDetailOpen, _) {
+          // A tab-root page (Services, Wallets, History) is showing its own
+          // master+detail split — give it the whole window the same way a
+          // pushed split view (Complaints, Beneficiaries) already gets it,
+          // instead of leaving the sidebar competing for width alongside
+          // two more panes.
+          if (splitDetailOpen) {
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: navigationShell,
+            );
+          }
+
+          final hinge = context.isBookMode ? context.hingeBounds : null;
+          // In book mode, align the sidebar to the physical hinge instead
+          // of its own fixed width — the left panel should read as "the
+          // sidebar", not "the sidebar plus some unexplained gap before the
+          // hinge". Falls back to the fixed width whenever there's no real
+          // hinge to align to (MainShell is the outermost shell, so unlike
+          // MasterDetailLayout it never needs to correct for preceding
+          // chrome — there isn't any here).
+          final sidebarWidth = hinge != null && hinge.left >= 200
+              ? hinge.left
+              : null;
+          final gapWidth = hinge != null
+              ? math.max(hinge.width, 1.0)
+              : null;
+
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Row(
+              children: [
+                AppSidebar(
+                  selectedIndex: navigationShell.currentIndex,
+                  onTap: _goBranch,
+                  width: sidebarWidth ?? 248,
+                ),
+                if (gapWidth != null)
+                  Container(width: gapWidth, color: context.scaffoldBg),
+                Expanded(child: navigationShell),
+              ],
             ),
-            Expanded(child: navigationShell),
-          ],
-        ),
+          );
+        },
       );
     }
 
-    if (!context.isBookMode && context.isMedium) {
+    if (context.isMedium) {
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: Row(
