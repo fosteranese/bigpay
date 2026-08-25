@@ -27,48 +27,41 @@ class StepProgress extends StatelessWidget {
     return _buildHorizontal(context, isCompact);
   }
 
+  // Just the segmented bar, no "(current/total)" caption underneath — this
+  // renders in MainLayout's header right above the page's own title (e.g.
+  // "Enter OTP"), which already names the current step, so a text label
+  // repeating that here read as cluttered rather than informative. The
+  // vertical/labeled variant below is a different context (the auth brand
+  // panel, with no adjacent title of its own) and keeps its labels.
   Widget _buildHorizontal(BuildContext context, bool isCompact) {
-    return Column(
-      mainAxisSize: .min,
-      children: [
-        Row(
-          children: List.generate(totalSteps, (index) {
-            final isCompleted = index < currentStep;
-            final isCurrent = index == currentStep;
-            return Expanded(
-              child: Container(
-                height: isCompact ? 3 : 4,
-                margin: .symmetric(
-                  horizontal: index == 0 || index == totalSteps - 1 ? 0 : 2,
-                ),
-                decoration: BoxDecoration(
-                  color: isCompleted || isCurrent
-                      ? context.accentGreen
-                      : context.border,
-                  borderRadius: BorderRadius.only(
-                    topLeft: index == 0 ? Radius.circular(2) : Radius.zero,
-                    bottomLeft: index == 0 ? Radius.circular(2) : Radius.zero,
-                    topRight: index == totalSteps - 1
-                        ? Radius.circular(2)
-                        : Radius.zero,
-                    bottomRight: index == totalSteps - 1
-                        ? Radius.circular(2)
-                        : Radius.zero,
-                  ),
-                ),
+    return Row(
+      children: List.generate(totalSteps, (index) {
+        final isCompleted = index < currentStep;
+        final isCurrent = index == currentStep;
+        return Expanded(
+          child: Container(
+            height: isCompact ? 3 : 4,
+            margin: .symmetric(
+              horizontal: index == 0 || index == totalSteps - 1 ? 0 : 2,
+            ),
+            decoration: BoxDecoration(
+              color: isCompleted || isCurrent
+                  ? context.accentGreen
+                  : context.border,
+              borderRadius: BorderRadius.only(
+                topLeft: index == 0 ? Radius.circular(2) : Radius.zero,
+                bottomLeft: index == 0 ? Radius.circular(2) : Radius.zero,
+                topRight: index == totalSteps - 1
+                    ? Radius.circular(2)
+                    : Radius.zero,
+                bottomRight: index == totalSteps - 1
+                    ? Radius.circular(2)
+                    : Radius.zero,
               ),
-            );
-          }),
-        ),
-        if (!isCompact && labels != null) ...[
-          const SizedBox(height: Spacing.xs),
-          Text(
-            '${labels![currentStep]} (${currentStep + 1}/$totalSteps)',
-            style: context.caption,
-            textAlign: .center,
+            ),
           ),
-        ],
-      ],
+        );
+      }),
     );
   }
 

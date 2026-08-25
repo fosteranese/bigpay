@@ -82,6 +82,24 @@ class AppLocalizationsEs extends AppLocalizations {
       'La contraseña debe tener al menos 6 caracteres e incluir letras, números y caracteres especiales (p. ej., !\$@%).';
 
   @override
+  String get passwordRuleMinLength => 'At least 6 characters';
+
+  @override
+  String get passwordRuleUppercase => 'At least one uppercase letter';
+
+  @override
+  String get passwordRuleLowercase => 'At least one lowercase letter';
+
+  @override
+  String get passwordRuleNumber => 'At least one number';
+
+  @override
+  String get passwordRuleSpecialChar => 'At least one special character';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
   String get authSetSecurityPinTitle => 'Establecer PIN de seguridad';
 
   @override

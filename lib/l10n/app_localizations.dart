@@ -250,6 +250,42 @@ abstract class AppLocalizations {
   /// **'Password must be at least 6 characters and include letters, numbers, and special characters (e.g. !\$@%).'**
   String get authPasswordRequirements;
 
+  /// Password checklist rule: minimum length
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get passwordRuleMinLength;
+
+  /// Password checklist rule: uppercase letter required
+  ///
+  /// In en, this message translates to:
+  /// **'At least one uppercase letter'**
+  String get passwordRuleUppercase;
+
+  /// Password checklist rule: lowercase letter required
+  ///
+  /// In en, this message translates to:
+  /// **'At least one lowercase letter'**
+  String get passwordRuleLowercase;
+
+  /// Password checklist rule: number required
+  ///
+  /// In en, this message translates to:
+  /// **'At least one number'**
+  String get passwordRuleNumber;
+
+  /// Password checklist rule: special character required
+  ///
+  /// In en, this message translates to:
+  /// **'At least one special character'**
+  String get passwordRuleSpecialChar;
+
+  /// Error shown when confirm password does not match
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordMismatch;
+
   /// Set-PIN page title
   ///
   /// In en, this message translates to:

@@ -82,6 +82,24 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل وتشمل حروفًا وأرقامًا ورموزًا خاصة (مثل !\$@%).';
 
   @override
+  String get passwordRuleMinLength => 'At least 6 characters';
+
+  @override
+  String get passwordRuleUppercase => 'At least one uppercase letter';
+
+  @override
+  String get passwordRuleLowercase => 'At least one lowercase letter';
+
+  @override
+  String get passwordRuleNumber => 'At least one number';
+
+  @override
+  String get passwordRuleSpecialChar => 'At least one special character';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
   String get authSetSecurityPinTitle => 'تعيين رمز الأمان';
 
   @override

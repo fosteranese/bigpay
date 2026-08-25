@@ -29,6 +29,12 @@
   "authCreatePasswordTitle": "Create Password",
   "authSavePassword": "Save Password",
   "authPasswordRequirements": "Password must reach 6 characters and get letters, numbers, and special characters (e.g. !$@%).",
+  "passwordRuleMinLength": "At least 6 characters",
+  "passwordRuleUppercase": "At least one uppercase letter",
+  "passwordRuleLowercase": "At least one lowercase letter",
+  "passwordRuleNumber": "At least one number",
+  "passwordRuleSpecialChar": "At least one special character",
+  "passwordMismatch": "Passwords do not match",
 
   "authSetSecurityPinTitle": "Set Security PIN",
   "authSetPinSubtitle": "Set 4-digit code make you fit approve payments and keep your wallet safe.",

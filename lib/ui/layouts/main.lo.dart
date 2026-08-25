@@ -117,6 +117,15 @@ class _MainLayoutState extends State<MainLayout> {
     super.dispose();
   }
 
+  /// Past expanded width (with [MainLayout.maxWidth] set), the step
+  /// indicator moves into [_AuthBrandPanel] as a labeled vertical stepper
+  /// instead — showing the same slim bar again in the header here would be
+  /// a redundant second copy of it right next to the fuller version.
+  bool _usesBrandPanelStepIndicator(BuildContext context) =>
+      widget.maxWidth != null && context.isExpanded;
+
+  static const _headerStepIndicatorHeight = 20.0;
+
   @override
   Widget build(BuildContext context) {
     final page = Container(
@@ -154,7 +163,10 @@ class _MainLayoutState extends State<MainLayout> {
     return Row(
       crossAxisAlignment: .stretch,
       children: [
-        _AuthBrandPanel(width: context.isWide ? 480 : 420),
+        _AuthBrandPanel(
+          width: context.isWide ? 480 : 420,
+          stepIndicator: widget.stepIndicator,
+        ),
         Expanded(child: page),
       ],
     );
@@ -265,7 +277,14 @@ class _MainLayoutState extends State<MainLayout> {
               bottom:
                   widget.bottom ??
                   PreferredSize(
-                    preferredSize: Size(double.maxFinite, widget.bottomSize),
+                    preferredSize: Size(
+                      double.maxFinite,
+                      widget.bottomSize +
+                          (widget.stepIndicator != null &&
+                                  !_usesBrandPanelStepIndicator(context)
+                              ? _headerStepIndicatorHeight
+                              : 0),
+                    ),
                     child: Container(
                       width: double.maxFinite,
                       padding: .only(
@@ -278,11 +297,12 @@ class _MainLayoutState extends State<MainLayout> {
                         mainAxisAlignment: .center,
                         crossAxisAlignment: .start,
                         children: [
-                          if (widget.stepIndicator != null) ...[
-                            widget.stepIndicator!,
-                            SizedBox(height: context.isShortHeight ? 4 : 8),
-                          ],
                           SizedBox(height: context.isShortHeight ? 8 : 16),
+                          if (widget.stepIndicator != null &&
+                              !_usesBrandPanelStepIndicator(context)) ...[
+                            widget.stepIndicator!,
+                            SizedBox(height: context.isShortHeight ? 8 : 12),
+                          ],
                           if (widget.title != null && widget.actions == null)
                             FittedBox(
                               child: Text(
@@ -363,19 +383,12 @@ class _MainLayoutState extends State<MainLayout> {
                       : (widget.bottomAlign
                             ? Alignment.bottomCenter
                             : Alignment.center),
-                  child: widget.stepIndicator != null && !context.isCompact
-                      ? Row(
-                          crossAxisAlignment: .start,
-                          children: [
-                            SizedBox(
-                              width: 200,
-                              child: widget.stepIndicator!,
-                            ),
-                            const SizedBox(width: Spacing.xl),
-                            Expanded(child: pageContent),
-                          ],
-                        )
-                      : pageContent,
+                  // The step indicator used to be injected here (compact
+                  // width only) — moved into the header, right above the
+                  // title, so it reads as persistent flow progress instead
+                  // of scrolling away with the page's own content, and so
+                  // it shows at medium width too instead of only compact.
+                  child: pageContent,
                 ),
               ),
           ],
@@ -432,9 +445,10 @@ class _MainLayoutState extends State<MainLayout> {
 /// [MainLayout.build]. Deliberately generic (no step-specific copy) since
 /// it's shared by all 14 sign-up/sign-in/forgot-password screens alike.
 class _AuthBrandPanel extends StatelessWidget {
-  const _AuthBrandPanel({required this.width});
+  const _AuthBrandPanel({required this.width, this.stepIndicator});
 
   final double width;
+  final Widget? stepIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -470,6 +484,10 @@ class _AuthBrandPanel extends StatelessWidget {
                   decoration: TextDecoration.none,
                 ),
               ),
+              if (stepIndicator != null) ...[
+                const SizedBox(height: 32),
+                stepIndicator!,
+              ],
             ],
           ),
         ),

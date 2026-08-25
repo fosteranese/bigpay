@@ -6,11 +6,13 @@ import 'package:bigpay/models/actions/forgot_pwd/complete_forgot_pwd_action.dart
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
+import 'package:bigpay/ui/components/password_checklist.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -33,6 +35,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
   final _confirmPasswordController = TextEditingController();
 
   final _canSubmit = ValueNotifier(false);
+  final _passwordMismatch = ValueNotifier(false);
 
   @override
   void dispose() {
@@ -42,6 +45,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _canSubmit.dispose();
+    _passwordMismatch.dispose();
 
     super.dispose();
   }
@@ -120,11 +124,29 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
                 controller: _confirmPasswordController,
                 onChanged: _onChanged,
               ),
-              const SizedBox(height: 25),
-              Text(
-                l10n.authPasswordRequirements,
-                style: context.caption,
-                textAlign: .center,
+              ValueListenableBuilder(
+                valueListenable: _passwordMismatch,
+                builder: (context, mismatch, _) {
+                  if (!mismatch) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      l10n.passwordMismatch,
+                      style: context.smallDetails.copyWith(
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              ValueListenableBuilder(
+                valueListenable: _passwordController,
+                builder: (context, _, _) {
+                  return PasswordChecklist(
+                    password: _passwordController.text,
+                  );
+                },
               ),
             ],
           ),
@@ -134,9 +156,13 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
   }
 
   void _onChanged(_) {
+    final password = _passwordController.text;
+    final confirm = _confirmPasswordController.text;
+    _passwordMismatch.value = confirm.isNotEmpty && password != confirm;
     _canSubmit.value =
-        _passwordController.text.isNotEmpty &&
-        _confirmPasswordController.text.isNotEmpty;
+        PasswordChecklist.allPassed(password) &&
+        confirm.isNotEmpty &&
+        password == confirm;
   }
 
   void _onContinue() {
