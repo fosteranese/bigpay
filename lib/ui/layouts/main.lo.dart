@@ -557,6 +557,38 @@ class _AuthProgressPanel extends StatelessWidget {
               ),
             ),
           ),
+          Positioned(
+            left: -100,
+            bottom: -90,
+            child: Container(
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.dashboardGradientStart.withValues(alpha: 0.16),
+                    AppColors.dashboardGradientStart.withValues(alpha: 0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.55, 1.0],
+                  colors: [
+                    AppColors.black.withValues(alpha: 0),
+                    AppColors.black.withValues(alpha: 0.16),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(
               left: 44,
@@ -567,13 +599,35 @@ class _AuthProgressPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: .start,
               children: [
-                SvgPicture.asset(
-                  SvgImages.icon,
-                  width: 96,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.white,
-                    BlendMode.srcIn,
-                  ),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      left: -32,
+                      top: -32,
+                      child: Container(
+                        width: 160,
+                        height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              AppColors.white.withValues(alpha: 0.07),
+                              AppColors.white.withValues(alpha: 0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      SvgImages.icon,
+                      width: 96,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: shortHeight ? 28 : 44),
                 Expanded(
@@ -582,6 +636,19 @@ class _AuthProgressPanel extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: shortHeight ? 20 : 32),
+                Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.white.withValues(alpha: 0),
+                        AppColors.white.withValues(alpha: 0.14),
+                        AppColors.white.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: shortHeight ? 16 : 22),
                 Row(
                   crossAxisAlignment: .end,
                   children: [
@@ -617,28 +684,74 @@ class _AuthProgressPanel extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: shortHeight ? 10 : 14),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 6,
-                        color: AppColors.white.withValues(alpha: 0.12),
-                      ),
-                      FractionallySizedBox(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final fraction = ((current + 1) / progress.totalSteps)
+                        .clamp(0.0, 1.0);
+                    final fillWidth = constraints.maxWidth * fraction;
+                    return SizedBox(
+                      height: 14,
+                      child: Stack(
                         alignment: Alignment.centerLeft,
-                        widthFactor: ((current + 1) / progress.totalSteps)
-                            .clamp(0.0, 1.0),
-                        child: Container(
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: AppColors.brightGreen,
-                            borderRadius: BorderRadius.circular(3),
+                        children: [
+                          Container(
+                            width: double.maxFinite,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
                           ),
-                        ),
+                          Container(
+                            width: fillWidth,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.tertiaryBrand,
+                                  AppColors.brightGreen,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.brightGreen.withValues(
+                                    alpha: 0.45,
+                                  ),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            left: (fillWidth - 7).clamp(0.0, double.maxFinite),
+                            top: 0,
+                            child: Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.white,
+                                border: Border.all(
+                                  color: AppColors.brightGreen,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.brightGreen.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ),

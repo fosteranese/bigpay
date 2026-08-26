@@ -164,8 +164,15 @@ class _StepCard extends StatelessWidget {
       height: 30,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        gradient: isCompleted
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.tertiaryBrand, AppColors.brightGreen],
+              )
+            : null,
         color: isCompleted
-            ? AppColors.brightGreen
+            ? null
             : isCurrent
                 ? AppColors.white
                 : Colors.transparent,
@@ -177,7 +184,15 @@ class _StepCard extends StatelessWidget {
                   offset: Offset(0, 2),
                 ),
               ]
-            : null,
+            : isCompleted
+                ? [
+                    BoxShadow(
+                      color: AppColors.brightGreen.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ]
+                : null,
       ),
       child: isCompleted
           ? Icon(Icons.check_rounded, size: 17, color: AppColors.white)
