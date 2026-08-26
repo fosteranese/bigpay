@@ -131,8 +131,8 @@ class _StepCard extends StatelessWidget {
         boxShadow: isCurrent
             ? [
                 BoxShadow(
-                  color: AppColors.brightGreen.withValues(alpha: 0.1),
-                  blurRadius: 14,
+                  color: AppColors.brightGreen.withValues(alpha: 0.16),
+                  blurRadius: 20,
                   offset: Offset(0, 4),
                 ),
               ]

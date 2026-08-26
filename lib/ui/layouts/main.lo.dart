@@ -384,13 +384,12 @@ class _MainLayoutState extends State<MainLayout> {
                       : (widget.bottomAlign
                             ? Alignment.bottomCenter
                             : Alignment.center),
-                  // Past phone width the narrow auth forms sit on their own
-                  // card surface — fields floating bare on the gradient read
-                  // as a phone layout stretched onto a big canvas, while a
-                  // contained surface reads as a deliberate desktop form.
-                  child: (widget.maxWidth != null && !context.isCompact)
-                      ? _FormSurface(child: pageContent)
-                      : pageContent,
+                  // The step indicator used to be injected here (compact
+                  // width only) — moved into the header, right above the
+                  // title, so it reads as persistent flow progress instead
+                  // of scrolling away with the page's own content, and so
+                  // it shows at medium width too instead of only compact.
+                  child: pageContent,
                 ),
               ),
           ],
@@ -439,48 +438,6 @@ class _MainLayoutState extends State<MainLayout> {
       backgroundColor: widget.backgroundColor,
       body: body,
       bottomNavigationBar: dockedBottomNav,
-    );
-  }
-}
-
-/// Elevated surface for the narrow auth forms at tablet width and up —
-/// gives the centered form a contained, deliberate frame (soft shadow +
-/// hairline border + breathing-room padding) instead of bare fields on the
-/// page gradient. The CTA travels inside the card with the fields.
-class _FormSurface extends StatelessWidget {
-  const _FormSurface({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      padding: EdgeInsets.symmetric(
-        horizontal: context.responsiveSpacing(
-          compact: 24,
-          medium: 32,
-          expanded: 40,
-        ),
-        vertical: context.responsiveSpacing(
-          compact: 28,
-          medium: 36,
-          expanded: 44,
-        ),
-      ),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: AppRadius.xlAll,
-        border: Border.all(color: context.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.07),
-            blurRadius: 30,
-            offset: Offset(0, 14),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }
@@ -570,7 +527,7 @@ class _AuthProgressPanel extends StatelessWidget {
               SvgImages.splashBgIcon,
               width: 340,
               colorFilter: ColorFilter.mode(
-                AppColors.white.withValues(alpha: 0.03),
+                AppColors.white.withValues(alpha: 0.04),
                 BlendMode.srcIn,
               ),
             ),
@@ -579,13 +536,13 @@ class _AuthProgressPanel extends StatelessWidget {
             top: -110,
             right: -90,
             child: Container(
-              width: 260,
-              height: 260,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.brightGreen.withValues(alpha: 0.09),
+                    AppColors.brightGreen.withValues(alpha: 0.13),
                     AppColors.brightGreen.withValues(alpha: 0),
                   ],
                 ),
