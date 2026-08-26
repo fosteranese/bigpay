@@ -156,51 +156,57 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                 borderRadius: .vertical(top: .circular(20)),
                 child: Container(
                   color: context.cardBg,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const .fromLTRB(16, 12, 10, 12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.walletsRecentTransactions,
-                                style: context.header1,
+                  child: ProcessBuilder<MiniStatement>(
+                    event: () => _txEvent,
+                    builder: (context, snapshot) {
+                      return CustomScrollView(
+                        controller: scrollController,
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const .fromLTRB(16, 12, 10, 12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      AppLocalizations.of(context)!
+                                          .walletsRecentTransactions,
+                                      style: context.header1,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 130,
+                                    child: FormButton(
+                                      backgroundColor: context.avatarBg,
+                                      foregroundColor: context.textPrimary,
+                                      padding: .zero,
+                                      height: 44,
+                                      onPressed: _showDateFilter,
+                                      labelSize: 13,
+                                      text: AppLocalizations.of(context)!
+                                          .walletsViewStatement,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            SizedBox(
-                              width: 130,
-                              child: FormButton(
-                                backgroundColor: context.avatarBg,
-                                foregroundColor: context.textPrimary,
-                                padding: .zero,
-                                height: 44,
-                                onPressed: _showDateFilter,
-                                labelSize: 13,
-                                text: AppLocalizations.of(
-                                  context,
-                                )!.walletsViewStatement,
+                          ),
+                          if (snapshot.isLoading)
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: ProcessBuilder<MiniStatement>(
-                          event: () => _txEvent,
-                          builder: (context, snapshot) {
-                            if (snapshot.isLoading) {
-                              return ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
+                              sliver: SliverList.separated(
                                 itemCount: 6,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 10),
                                 itemBuilder: (_, _) =>
                                     const TransactionItemSkeleton(),
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return Center(
+                              ),
+                            )
+                          else if (snapshot.hasError)
+                            SliverToBoxAdapter(
+                              child: Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(24),
                                   child: Column(
@@ -214,17 +220,15 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                       const SizedBox(height: Spacing.lg),
                                       Text(
                                         snapshot.message ??
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.commonRetry,
+                                            AppLocalizations.of(context)!
+                                                .commonRetry,
                                         textAlign: TextAlign.center,
                                         style: context.p1Medium,
                                       ),
                                       const SizedBox(height: Spacing.xl),
                                       FormButton(
-                                        text: AppLocalizations.of(
-                                          context,
-                                        )!.commonRetry,
+                                        text: AppLocalizations.of(context)!
+                                            .commonRetry,
                                         onPressed: () {
                                           MessageUtil.close(context);
                                           _loadTransactions();
@@ -233,30 +237,43 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                     ],
                                   ),
                                 ),
-                              );
-                            }
-                            final transactions =
-                                snapshot.data?.transactions ?? [];
-                            if (transactions.isEmpty) {
-                              return EmptyWalletTransactions();
-                            }
-                            return ListView.separated(
-                              controller: scrollController,
+                              ),
+                            )
+                          else if ((snapshot.data?.transactions ?? []).isEmpty)
+                            SliverFillRemaining(
+                              hasScrollBody: false,
+                              child: Padding(
+                                padding: const .symmetric(horizontal: 30),
+                                child: EmptyState(
+                                  svgAsset: SvgImages.emptyWallet,
+                                  title: AppLocalizations.of(context)!
+                                      .walletsNoTransactionsYet,
+                                  subtitle: AppLocalizations.of(context)!
+                                      .walletsNoTransactionsSubtitle,
+                                ),
+                              ),
+                            )
+                          else
+                            SliverPadding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 8,
                               ),
-                              itemCount: transactions.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 10),
-                              itemBuilder: (_, index) => TransactionListItem(
-                                transaction: transactions[index],
+                              sliver: SliverList.separated(
+                                itemCount:
+                                    snapshot.data!.transactions!.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 10),
+                                itemBuilder: (_, index) =>
+                                    TransactionListItem(
+                                      transaction: snapshot
+                                          .data!.transactions![index],
+                                    ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -383,29 +400,6 @@ class TransactionListItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class EmptyWalletTransactions extends StatelessWidget {
-  const EmptyWalletTransactions({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const .only(
-          left: 30,
-          right: 30,
-        ),
-        child: EmptyState(
-          svgAsset: SvgImages.emptyWallet,
-          title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
-          subtitle: AppLocalizations.of(
-            context,
-          )!.walletsNoTransactionsSubtitle,
-        ),
       ),
     );
   }
