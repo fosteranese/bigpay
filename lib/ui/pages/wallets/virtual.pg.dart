@@ -91,11 +91,11 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
     String? end;
     if (startDate != null) {
       start =
-          '${startDate.year.toString().padLeft(4)}-${startDate.month.toString().padLeft(2)}-${startDate.day.toString().padLeft(2)}';
+          '${startDate.year.toString().padLeft(4, '0')}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
     }
     if (endDate != null) {
       end =
-          '${endDate.year.toString().padLeft(4)}-${endDate.month.toString().padLeft(2)}-${endDate.day.toString().padLeft(2)}';
+          '${endDate.year.toString().padLeft(4, '0')}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
     }
     _txEvent = context.dispatchProcess(
       GetWalletTransactionsAction(
