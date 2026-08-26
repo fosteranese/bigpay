@@ -7,7 +7,6 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/wallet/get_wallet_transactions_action.dart';
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
@@ -239,24 +238,19 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                             final transactions =
                                 snapshot.data?.transactions ?? [];
                             if (transactions.isEmpty) {
-                              return EmptyWalletTransactions(
-                                onRefresh: _loadTransactions,
-                              );
+                              return EmptyWalletTransactions();
                             }
-                            return AppRefreshIndicator(
-                              onRefresh: () async => _loadTransactions(),
-                              child: ListView.separated(
-                                controller: scrollController,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                itemCount: transactions.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (_, index) => TransactionListItem(
-                                  transaction: transactions[index],
-                                ),
+                            return ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              itemCount: transactions.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (_, index) => TransactionListItem(
+                                transaction: transactions[index],
                               ),
                             );
                           },
@@ -395,34 +389,23 @@ class TransactionListItem extends StatelessWidget {
 }
 
 class EmptyWalletTransactions extends StatelessWidget {
-  const EmptyWalletTransactions({super.key, required this.onRefresh});
-
-  final VoidCallback onRefresh;
+  const EmptyWalletTransactions({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AppRefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.3,
-          ),
-          Padding(
-            padding: const .only(
-              left: 30,
-              right: 30,
-            ),
-            child: EmptyState(
-              svgAsset: SvgImages.emptyWallet,
-              title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
-              subtitle: AppLocalizations.of(
-                context,
-              )!.walletsNoTransactionsSubtitle,
-            ),
-          ),
-        ],
+    return Center(
+      child: Padding(
+        padding: const .only(
+          left: 30,
+          right: 30,
+        ),
+        child: EmptyState(
+          svgAsset: SvgImages.emptyWallet,
+          title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
+          subtitle: AppLocalizations.of(
+            context,
+          )!.walletsNoTransactionsSubtitle,
+        ),
       ),
     );
   }
