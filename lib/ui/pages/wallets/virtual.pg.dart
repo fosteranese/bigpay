@@ -172,28 +172,6 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 style: context.header1,
                               ),
                             ),
-                            if (_hasActiveFilter) ...[
-                              GestureDetector(
-                                onTap: _clearFilter,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.danger.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                                  ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.historyClearFilter,
-                                    style: context.caption.copyWith(
-                                      color: AppColors.danger,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
                             SizedBox(
                               width: 130,
                               child: FormButton(
@@ -419,27 +397,16 @@ class EmptyWalletTransactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: .symmetric(horizontal: 20),
-          child: Text(
-            AppLocalizations.of(context)!.walletsRecentTransactions,
-            style: context.header1,
-          ),
+    return Center(
+      child: Padding(
+        padding: const .symmetric(horizontal: 30),
+        child: EmptyState(
+          svgAsset: SvgImages.emptyWallet,
+          title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
+          subtitle:
+              AppLocalizations.of(context)!.walletsNoTransactionsSubtitle,
         ),
-        Expanded(
-          child: Padding(
-            padding: const .symmetric(horizontal: 30),
-            child: EmptyState(
-              svgAsset: SvgImages.emptyWallet,
-              title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
-              subtitle:
-                  AppLocalizations.of(context)!.walletsNoTransactionsSubtitle,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
