@@ -115,28 +115,18 @@ class _StepCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
         color: isCurrent
-            ? AppColors.white.withValues(alpha: 0.12)
+            ? AppColors.white.withValues(alpha: 0.08)
             : isCompleted
-                ? AppColors.white.withValues(alpha: 0.06)
+                ? AppColors.white.withValues(alpha: 0.05)
                 : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isCurrent
-              ? AppColors.brightGreen.withValues(alpha: 0.7)
+              ? AppColors.brightGreen.withValues(alpha: 0.35)
               : AppColors.white.withValues(
-                  alpha: isCompleted ? 0.14 : 0.09,
+                  alpha: isCompleted ? 0.1 : 0.08,
                 ),
-          width: isCurrent ? 1.5 : 1,
         ),
-        boxShadow: isCurrent
-            ? [
-                BoxShadow(
-                  color: AppColors.brightGreen.withValues(alpha: 0.1),
-                  blurRadius: 14,
-                  offset: Offset(0, 4),
-                ),
-              ]
-            : null,
       ),
       child: Row(
         children: [
@@ -160,15 +150,6 @@ class _StepCard extends StatelessWidget {
               ),
             ),
           ),
-          if (isCurrent)
-            Container(
-              width: 7,
-              height: 7,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.brightGreen,
-              ),
-            ),
         ],
       ),
     );
