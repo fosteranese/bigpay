@@ -527,7 +527,7 @@ class _AuthProgressPanel extends StatelessWidget {
               SvgImages.splashBgIcon,
               width: 340,
               colorFilter: ColorFilter.mode(
-                AppColors.white.withValues(alpha: 0.04),
+                AppColors.white.withValues(alpha: 0.03),
                 BlendMode.srcIn,
               ),
             ),
@@ -536,13 +536,13 @@ class _AuthProgressPanel extends StatelessWidget {
             top: -110,
             right: -90,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 260,
+              height: 260,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.brightGreen.withValues(alpha: 0.13),
+                    AppColors.brightGreen.withValues(alpha: 0.09),
                     AppColors.brightGreen.withValues(alpha: 0),
                   ],
                 ),
@@ -574,24 +574,49 @@ class _AuthProgressPanel extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: shortHeight ? 20 : 32),
-                Divider(
-                  thickness: 1,
-                  color: AppColors.white.withValues(alpha: 0.15),
+                Row(
+                  crossAxisAlignment: .end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        labels[current],
+                        style: context.header2.copyWith(
+                          color: AppColors.white,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${current + 1} / ${progress.totalSteps}',
+                      style: context.caption.copyWith(
+                        color: AppColors.white.withValues(alpha: 0.6),
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: shortHeight ? 14 : 20),
-                Text(
-                  labels[current],
-                  style: context.header2.copyWith(
-                    color: AppColors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Step ${current + 1} of ${progress.totalSteps}',
-                  style: context.caption.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.7),
-                    decoration: TextDecoration.none,
+                SizedBox(height: shortHeight ? 10 : 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 5,
+                        color: AppColors.white.withValues(alpha: 0.12),
+                      ),
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: ((current + 1) / progress.totalSteps)
+                            .clamp(0.0, 1.0),
+                        child: Container(
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: AppColors.brightGreen,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
