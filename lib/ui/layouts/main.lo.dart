@@ -650,40 +650,40 @@ class _AuthProgressPanel extends StatelessWidget {
                 ),
                 SizedBox(height: shortHeight ? 16 : 22),
                 Row(
-                  crossAxisAlignment: .end,
                   children: [
                     Expanded(
                       child: Text(
-                        labels[current],
-                        style: context.header2.copyWith(
-                          color: AppColors.white,
+                        'CURRENT STEP',
+                        style: context.caption.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.4,
+                          color: AppColors.white.withValues(alpha: 0.55),
                           decoration: TextDecoration.none,
                         ),
                       ),
                     ),
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '${current + 1}',
-                            style: context.smallBold.copyWith(
-                              color: AppColors.white,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' / ${progress.totalSteps}',
-                            style: context.caption.copyWith(
-                              color: AppColors.white.withValues(alpha: 0.6),
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      '${(current + 1).toString().padLeft(2, '0')} / ${progress.totalSteps.toString().padLeft(2, '0')}',
+                      style: context.caption.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.4,
+                        color: AppColors.white.withValues(alpha: 0.75),
+                        decoration: TextDecoration.none,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: shortHeight ? 10 : 14),
+                SizedBox(height: shortHeight ? 6 : 8),
+                Text(
+                  labels[current],
+                  style: context.header1.copyWith(
+                    color: AppColors.white,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                SizedBox(height: shortHeight ? 12 : 18),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final fraction = ((current + 1) / progress.totalSteps)
@@ -716,7 +716,7 @@ class _AuthProgressPanel extends StatelessWidget {
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.brightGreen.withValues(
-                                    alpha: 0.45,
+                                    alpha: 0.3,
                                   ),
                                   blurRadius: 8,
                                   offset: Offset(0, 1),
@@ -740,9 +740,9 @@ class _AuthProgressPanel extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.brightGreen.withValues(
-                                      alpha: 0.7,
+                                      alpha: 0.5,
                                     ),
-                                    blurRadius: 8,
+                                    blurRadius: 6,
                                   ),
                                 ],
                               ),

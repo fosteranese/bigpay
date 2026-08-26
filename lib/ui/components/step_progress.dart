@@ -121,7 +121,7 @@ class _StepCard extends StatelessWidget {
             : isCompleted
                 ? AppColors.white.withValues(alpha: 0.05)
                 : Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
           color: isCurrent
               ? AppColors.brightGreen.withValues(alpha: 0.35)
@@ -138,6 +138,7 @@ class _StepCard extends StatelessWidget {
             child: Text(
               label,
               style: context.p1.copyWith(
+                letterSpacing: 0.1,
                 color: isCurrent
                     ? AppColors.white
                     : isCompleted
@@ -187,7 +188,7 @@ class _StepCard extends StatelessWidget {
             : isCompleted
                 ? [
                     BoxShadow(
-                      color: AppColors.brightGreen.withValues(alpha: 0.3),
+                      color: AppColors.brightGreen.withValues(alpha: 0.22),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
