@@ -40,14 +40,14 @@ class StepProgress extends StatelessWidget {
         final isCurrent = index == currentStep;
         return Expanded(
           child: Container(
-            height: isCompact ? 3 : 4,
+            height: isCompact ? 4 : 5,
             margin: .symmetric(
               horizontal: index == 0 || index == totalSteps - 1 ? 0 : 2,
             ),
             decoration: BoxDecoration(
               color: isCompleted || isCurrent
                   ? context.accentGreen
-                  : context.border,
+                  : context.textSecondary.withValues(alpha: 0.55),
               borderRadius: BorderRadius.only(
                 topLeft: index == 0 ? Radius.circular(2) : Radius.zero,
                 bottomLeft: index == 0 ? Radius.circular(2) : Radius.zero,
@@ -73,70 +73,118 @@ class StepProgress extends StatelessWidget {
         final isCompleted = index < currentStep;
         final isCurrent = index == currentStep;
         final isLast = index == totalSteps - 1;
-        return Row(
-          crossAxisAlignment: .start,
-          children: [
-            Column(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isCompleted || isCurrent
-                        ? context.accentGreen
-                        : context.border,
-                  ),
-                  child: isCompleted
-                      ? Icon(Icons.check, size: 16, color: AppColors.white)
-                      : isCurrent
-                          ? Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.white,
-                              ),
-                            )
-                          : null,
-                ),
-                if (!isLast)
-                  Container(
-                    width: 2,
-                    height: 32,
-                    color: isCompleted ? context.accentGreen : context.border,
-                  ),
-              ],
-            ),
-            const SizedBox(width: Spacing.md),
-            Expanded(
-              child: Padding(
-                padding: .only(top: 3),
+
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: .stretch,
+            children: [
+              SizedBox(
+                width: 32,
                 child: Column(
-                  crossAxisAlignment: .start,
                   children: [
-                    Text(
-                      labels![index],
-                      style: isCurrent
-                          ? context.smallBold
-                          : isCompleted
-                              ? context.smallMedium
-                              : context.small.copyWith(
-                                  color: context.textTertiary,
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted
+                            ? context.accentGreen
+                            : isCurrent
+                                ? AppColors.white
+                                : Colors.transparent,
+                        border: isCompleted || isCurrent
+                            ? Border.all(
+                                color: context.accentGreen,
+                                width: 2,
+                              )
+                            : Border.all(
+                                color: context.textSecondary.withValues(alpha: 0.35),
+                                width: 1.5,
+                              ),
+                        boxShadow: isCompleted
+                            ? [
+                                BoxShadow(
+                                  color: context.accentGreen.withValues(alpha: 0.25),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: isCompleted
+                          ? Icon(Icons.check, size: 18, color: AppColors.white)
+                          : isCurrent
+                              ? Center(
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: context.accentGreen,
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: context.caption.copyWith(
+                                      color: context.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                     ),
-                    if (isCurrent) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Step ${index + 1} of $totalSteps',
-                        style: context.caption,
+                    if (!isLast)
+                      Expanded(
+                        child: Container(
+                          width: 1.5,
+                          margin: const .symmetric(vertical: 4),
+                          color: isCompleted
+                              ? context.accentGreen
+                              : context.textSecondary.withValues(alpha: 0.25),
+                        ),
                       ),
-                    ],
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: Spacing.lg),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: 5,
+                    bottom: isLast ? 0 : Spacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: .start,
+                    mainAxisAlignment: .center,
+                    children: [
+                      Text(
+                        labels![index],
+                        style: isCurrent
+                            ? context.smallBold.copyWith(
+                                color: context.accentGreen,
+                              )
+                            : isCompleted
+                                ? context.smallMedium
+                                : context.small.copyWith(
+                                    color: context.textSecondary,
+                                  ),
+                      ),
+                      if (isCurrent) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'Step ${index + 1} of $totalSteps',
+                          style: context.caption.copyWith(
+                            color: context.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       }),
     );
