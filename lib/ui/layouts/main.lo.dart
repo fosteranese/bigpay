@@ -500,11 +500,11 @@ class _AuthBrandPanel extends StatelessWidget {
   }
 }
 
-/// Full-height progress panel for stepped auth flows — brand mark pinned at
-/// the top, the vertical stepper centered in the leftover space, and a
-/// summary footer (current step name + counter) anchoring the bottom, so
-/// the panel reads as a composed sidebar instead of a widget dropped into
-/// an empty gradient.
+/// Full-height progress panel for stepped auth flows — brand mark at the
+/// top, the vertical stepper centered in the leftover space, and a summary
+/// footer (current step name + counter) anchoring the bottom, so the panel
+/// reads as a composed sidebar instead of a widget dropped into an empty
+/// gradient.
 class _AuthProgressPanel extends StatelessWidget {
   const _AuthProgressPanel({required this.progress});
 
@@ -514,48 +514,87 @@ class _AuthProgressPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = progress.labels!;
     final current = progress.currentStep.clamp(0, labels.length - 1);
+    final shortHeight = context.isShortHeight;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 48,
-        vertical: context.isShortHeight ? 32 : 56,
-      ),
-      child: Column(
-        crossAxisAlignment: .start,
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          SvgPicture.asset(
-            SvgImages.icon,
-            width: 112,
-            colorFilter: const ColorFilter.mode(
-              AppColors.white,
-              BlendMode.srcIn,
+          Positioned(
+            right: -90,
+            bottom: -70,
+            child: SvgPicture.asset(
+              SvgImages.splashBgIcon,
+              width: 340,
+              colorFilter: ColorFilter.mode(
+                AppColors.white.withValues(alpha: 0.04),
+                BlendMode.srcIn,
+              ),
             ),
           ),
-          const SizedBox(height: 48),
-          Expanded(
-            child: Center(
-              child: progress,
+          Positioned(
+            top: -110,
+            right: -90,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.brightGreen.withValues(alpha: 0.13),
+                    AppColors.brightGreen.withValues(alpha: 0),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 32),
-          Divider(
-            thickness: 1,
-            color: AppColors.white.withValues(alpha: 0.15),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            labels[current],
-            style: context.header2.copyWith(
-              color: AppColors.white,
-              decoration: TextDecoration.none,
+          Padding(
+            padding: EdgeInsets.only(
+              left: 44,
+              right: 44,
+              top: shortHeight ? 48 : 84,
+              bottom: shortHeight ? 28 : 48,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Step ${current + 1} of ${progress.totalSteps}',
-            style: context.caption.copyWith(
-              color: AppColors.white.withValues(alpha: 0.7),
-              decoration: TextDecoration.none,
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                SvgPicture.asset(
+                  SvgImages.icon,
+                  width: 96,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                SizedBox(height: shortHeight ? 28 : 44),
+                Expanded(
+                  child: Center(
+                    child: progress,
+                  ),
+                ),
+                SizedBox(height: shortHeight ? 20 : 32),
+                Divider(
+                  thickness: 1,
+                  color: AppColors.white.withValues(alpha: 0.15),
+                ),
+                SizedBox(height: shortHeight ? 14 : 20),
+                Text(
+                  labels[current],
+                  style: context.header2.copyWith(
+                    color: AppColors.white,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Step ${current + 1} of ${progress.totalSteps}',
+                  style: context.caption.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.7),
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

@@ -65,74 +65,25 @@ class StepProgress extends StatelessWidget {
     );
   }
 
+  /// Only ever rendered inside the auth brand panel, which is a fixed dark
+  /// gradient in both themes — so this variant uses [AppColors.brightGreen]
+  /// and white directly instead of the theme-adaptive getters (which would
+  /// resolve to the light theme's dark green and disappear on the navy).
   Widget _buildVertical(BuildContext context) {
     return Column(
       mainAxisSize: .min,
-      crossAxisAlignment: .start,
       children: List.generate(totalSteps, (index) {
         final isCompleted = index < currentStep;
         final isCurrent = index == currentStep;
         final isLast = index == totalSteps - 1;
 
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: .stretch,
-            children: [
-              SizedBox(
-                width: 44,
-                child: Column(
-                  children: [
-                    _StepCircle(
-                      step: index + 1,
-                      isCompleted: isCompleted,
-                      isCurrent: isCurrent,
-                    ),
-                    if (!isLast)
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: Container(
-                            width: 2,
-                            margin: const .symmetric(vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isCompleted
-                                  ? context.accentGreen
-                                  : AppColors.white.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: Spacing.xl),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: isLast ? 0 : Spacing.xxl,
-                  ),
-                  child: Center(
-                    heightFactor: 1,
-                    child: Text(
-                      labels![index],
-                      style: context.p1.copyWith(
-                        color: isCurrent
-                            ? AppColors.white
-                            : isCompleted
-                                ? AppColors.white.withValues(alpha: 0.9)
-                                : AppColors.white.withValues(alpha: 0.55),
-                        fontWeight: isCurrent
-                            ? FontWeight.w700
-                            : isCompleted
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        return Padding(
+          padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
+          child: _StepCard(
+            step: index + 1,
+            label: labels![index],
+            isCompleted: isCompleted,
+            isCurrent: isCurrent,
           ),
         );
       }),
@@ -140,14 +91,19 @@ class StepProgress extends StatelessWidget {
   }
 }
 
-class _StepCircle extends StatelessWidget {
-  const _StepCircle({
+/// One step rendered as a contained row card — completed/current states get
+/// a real surface and border so the list reads as designed UI rather than a
+/// bare circle-and-line stepper dropped onto the gradient.
+class _StepCard extends StatelessWidget {
+  const _StepCard({
     required this.step,
+    required this.label,
     required this.isCompleted,
     required this.isCurrent,
   });
 
   final int step;
+  final String label;
   final bool isCompleted;
   final bool isCurrent;
 
@@ -156,49 +112,99 @@ class _StepCircle extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
-      width: 44,
-      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? AppColors.white.withValues(alpha: 0.12)
+            : isCompleted
+                ? AppColors.white.withValues(alpha: 0.06)
+                : Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isCurrent
+              ? AppColors.brightGreen.withValues(alpha: 0.7)
+              : AppColors.white.withValues(
+                  alpha: isCompleted ? 0.14 : 0.09,
+                ),
+          width: isCurrent ? 1.5 : 1,
+        ),
+        boxShadow: isCurrent
+            ? [
+                BoxShadow(
+                  color: AppColors.brightGreen.withValues(alpha: 0.16),
+                  blurRadius: 20,
+                  offset: Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Row(
+        children: [
+          _circle(context),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: context.p1.copyWith(
+                color: isCurrent
+                    ? AppColors.white
+                    : isCompleted
+                        ? AppColors.white.withValues(alpha: 0.85)
+                        : AppColors.white.withValues(alpha: 0.5),
+                fontWeight: isCurrent
+                    ? FontWeight.w700
+                    : isCompleted
+                        ? FontWeight.w600
+                        : FontWeight.w400,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+          if (isCurrent)
+            Container(
+              width: 7,
+              height: 7,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.brightGreen,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _circle(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: 30,
+      height: 30,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isCompleted
-            ? context.accentGreen
+            ? AppColors.brightGreen
             : isCurrent
                 ? AppColors.white
                 : Colors.transparent,
         border: Border.all(
           color: isCompleted || isCurrent
-              ? context.accentGreen
-              : AppColors.white.withValues(alpha: 0.35),
-          width: 2,
+              ? (isCompleted ? AppColors.brightGreen : AppColors.white)
+              : AppColors.white.withValues(alpha: 0.3),
+          width: isCompleted || isCurrent ? 0 : 1.5,
         ),
-        boxShadow: isCompleted
-            ? [
-                BoxShadow(
-                  color: context.accentGreen.withValues(alpha: 0.35),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ]
-            : isCurrent
-                ? [
-                    BoxShadow(
-                      color: AppColors.black.withValues(alpha: 0.25),
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                    ),
-                  ]
-                : null,
       ),
       child: isCompleted
-          ? Icon(Icons.check_rounded, size: 22, color: AppColors.white)
+          ? Icon(Icons.check_rounded, size: 17, color: AppColors.white)
           : Center(
               child: Text(
                 '$step',
-                style: context.p1.copyWith(
+                style: context.header4.copyWith(
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: isCurrent
-                      ? context.accentGreen
-                      : AppColors.white.withValues(alpha: 0.6),
+                      ? AppColors.primary
+                      : AppColors.white.withValues(alpha: 0.55),
+                  decoration: TextDecoration.none,
                 ),
               ),
             ),
