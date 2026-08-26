@@ -462,6 +462,14 @@ class _AuthBrandPanel extends StatelessWidget {
           colors: AppGradients.walletCard.colors,
         ),
       ),
+      foregroundDecoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(
+            color: AppColors.white.withValues(alpha: 0.08),
+            width: 1,
+          ),
+        ),
+      ),
       // A flow with steps gets the full progress treatment — wordmark,
       // stepper, and a summary footer — instead of the generic brand
       // panel (wordmark + tagline), which stacked awkwardly above a step
@@ -586,11 +594,24 @@ class _AuthProgressPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      '${current + 1} / ${progress.totalSteps}',
-                      style: context.caption.copyWith(
-                        color: AppColors.white.withValues(alpha: 0.6),
-                        decoration: TextDecoration.none,
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${current + 1}',
+                            style: context.smallBold.copyWith(
+                              color: AppColors.white,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' / ${progress.totalSteps}',
+                            style: context.caption.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.6),
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -601,7 +622,7 @@ class _AuthProgressPanel extends StatelessWidget {
                   child: Stack(
                     children: [
                       Container(
-                        height: 5,
+                        height: 6,
                         color: AppColors.white.withValues(alpha: 0.12),
                       ),
                       FractionallySizedBox(
@@ -609,7 +630,7 @@ class _AuthProgressPanel extends StatelessWidget {
                         widthFactor: ((current + 1) / progress.totalSteps)
                             .clamp(0.0, 1.0),
                         child: Container(
-                          height: 5,
+                          height: 6,
                           decoration: BoxDecoration(
                             color: AppColors.brightGreen,
                             borderRadius: BorderRadius.circular(3),

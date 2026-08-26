@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -78,7 +80,7 @@ class StepProgress extends StatelessWidget {
         final isLast = index == totalSteps - 1;
 
         return Padding(
-          padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
+          padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
           child: _StepCard(
             step: index + 1,
             label: labels![index],
@@ -156,7 +158,7 @@ class _StepCard extends StatelessWidget {
   }
 
   Widget _circle(BuildContext context) {
-    return AnimatedContainer(
+    final circle = AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: 30,
       height: 30,
@@ -167,12 +169,15 @@ class _StepCard extends StatelessWidget {
             : isCurrent
                 ? AppColors.white
                 : Colors.transparent,
-        border: Border.all(
-          color: isCompleted || isCurrent
-              ? (isCompleted ? AppColors.brightGreen : AppColors.white)
-              : AppColors.white.withValues(alpha: 0.3),
-          width: isCompleted || isCurrent ? 0 : 1.5,
-        ),
+        boxShadow: isCurrent
+            ? [
+                BoxShadow(
+                  color: AppColors.black.withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: isCompleted
           ? Icon(Icons.check_rounded, size: 17, color: AppColors.white)
@@ -190,5 +195,37 @@ class _StepCard extends StatelessWidget {
               ),
             ),
     );
+
+    // Upcoming steps get a dashed outline — the conventional "not reached
+    // yet" cue, and softer than a solid ring around an empty circle.
+    if (!isCompleted && !isCurrent) {
+      return CustomPaint(
+        painter: _DashedCirclePainter(),
+        child: circle,
+      );
+    }
+    return circle;
   }
+}
+
+class _DashedCirclePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.white.withValues(alpha: 0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    final rect = Rect.fromCircle(
+      center: size.center(Offset.zero),
+      radius: size.shortestSide / 2 - 1,
+    );
+    const segments = 12;
+    const sweep = (2 * math.pi / segments) * 0.6;
+    for (var i = 0; i < segments; i++) {
+      canvas.drawArc(rect, i * (2 * math.pi / segments), sweep, false, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
