@@ -189,61 +189,63 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                         ),
                       ),
                       Expanded(
-                        child: AppRefreshIndicator(
-                          onRefresh: () async => _loadTransactions(),
-                          child: ProcessBuilder<MiniStatement>(
-                            event: () => _txEvent,
-                            builder: (context, snapshot) {
-                              if (snapshot.isLoading) {
-                                return ListView.builder(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: 6,
-                                  itemBuilder: (_, _) =>
-                                      const TransactionItemSkeleton(),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.error_outline_rounded,
-                                          size: 40,
-                                          color: AppColors.danger,
-                                        ),
-                                        const SizedBox(height: Spacing.lg),
-                                        Text(
-                                          snapshot.message ??
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.commonRetry,
-                                          textAlign: TextAlign.center,
-                                          style: context.p1Medium,
-                                        ),
-                                        const SizedBox(height: Spacing.xl),
-                                        FormButton(
-                                          text: AppLocalizations.of(
-                                            context,
-                                          )!.commonRetry,
-                                          onPressed: () {
-                                            MessageUtil.close(context);
-                                            _loadTransactions();
-                                          },
-                                        ),
-                                      ],
-                                    ),
+                        child: ProcessBuilder<MiniStatement>(
+                          event: () => _txEvent,
+                          builder: (context, snapshot) {
+                            if (snapshot.isLoading) {
+                              return ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: 6,
+                                itemBuilder: (_, _) =>
+                                    const TransactionItemSkeleton(),
+                              );
+                            }
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline_rounded,
+                                        size: 40,
+                                        color: AppColors.danger,
+                                      ),
+                                      const SizedBox(height: Spacing.lg),
+                                      Text(
+                                        snapshot.message ??
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.commonRetry,
+                                        textAlign: TextAlign.center,
+                                        style: context.p1Medium,
+                                      ),
+                                      const SizedBox(height: Spacing.xl),
+                                      FormButton(
+                                        text: AppLocalizations.of(
+                                          context,
+                                        )!.commonRetry,
+                                        onPressed: () {
+                                          MessageUtil.close(context);
+                                          _loadTransactions();
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                );
-                              }
-                              final transactions =
-                                  snapshot.data?.transactions ?? [];
-                              if (transactions.isEmpty) {
-                                return EmptyWalletTransactions();
-                              }
-                              return ListView.separated(
+                                ),
+                              );
+                            }
+                            final transactions =
+                                snapshot.data?.transactions ?? [];
+                            if (transactions.isEmpty) {
+                              return EmptyWalletTransactions(
+                                onRefresh: _loadTransactions,
+                              );
+                            }
+                            return AppRefreshIndicator(
+                              onRefresh: () async => _loadTransactions(),
+                              child: ListView.separated(
                                 controller: scrollController,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -255,9 +257,9 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 itemBuilder: (_, index) => TransactionListItem(
                                   transaction: transactions[index],
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -393,28 +395,35 @@ class TransactionListItem extends StatelessWidget {
 }
 
 class EmptyWalletTransactions extends StatelessWidget {
-  const EmptyWalletTransactions({super.key});
+  const EmptyWalletTransactions({super.key, required this.onRefresh});
+
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.3,
-        ),
-        Padding(
-          padding: const .only(
-            left: 30,
-            right: 30,
+    return AppRefreshIndicator(
+      onRefresh: () async => onRefresh(),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.sizeOf(context).height * 0.3,
           ),
-          child: EmptyState(
-            svgAsset: SvgImages.emptyWallet,
-            title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
-            subtitle: AppLocalizations.of(context)!.walletsNoTransactionsSubtitle,
+          Padding(
+            padding: const .only(
+              left: 30,
+              right: 30,
+            ),
+            child: EmptyState(
+              svgAsset: SvgImages.emptyWallet,
+              title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
+              subtitle: AppLocalizations.of(
+                context,
+              )!.walletsNoTransactionsSubtitle,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
