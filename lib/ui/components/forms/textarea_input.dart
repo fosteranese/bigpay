@@ -39,12 +39,14 @@ class FormTextAreaInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FormInput(
-      label: label,
-      placeholder: placeholder,
-      controller: controller,
-      height: 140,
-      maxLines: maxLines,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 140),
+      child: FormInput(
+        label: label,
+        placeholder: placeholder,
+        controller: controller,
+        maxLines: maxLines,
+      ),
     );
   }
 }
