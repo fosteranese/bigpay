@@ -10,6 +10,7 @@ import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/logger.dart';
 import 'package:bigpay/utils/app.util.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/connectivity.util.dart';
 
 void bootstrap() {
   runZonedGuarded(
@@ -24,6 +25,7 @@ void bootstrap() {
       await Database.init();
       await AppState.loadTheme();
       await AppState.loadLocale();
+      ConnectivityUtil.init();
 
       await init();
 

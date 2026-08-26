@@ -1755,6 +1755,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm code'**
   String get stepSigninCode;
+
+  /// No description provided for @connectivityLost.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get connectivityLost;
+
+  /// No description provided for @connectivityRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection restored'**
+  String get connectivityRestored;
 }
 
 class _AppLocalizationsDelegate

@@ -12,6 +12,7 @@ import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/models/actions/logout_action.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/connectivity_banner.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/pages/app_error.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
@@ -154,7 +155,9 @@ class BigPayApp extends StatelessWidget {
                     );
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(textScaler: scaler),
-                      child: child ?? SizedBox.shrink(),
+                      child: ConnectivityBanner(
+                        child: child ?? SizedBox.shrink(),
+                      ),
                     );
                   },
                 );

@@ -883,4 +883,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get stepSigninCode => 'Confirm code';
+
+  @override
+  String get connectivityLost => 'No internet connection';
+
+  @override
+  String get connectivityRestored => 'Connection restored';
 }

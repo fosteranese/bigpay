@@ -473,5 +473,8 @@
   "stepSigninSecurity": "Security check",
   "@stepSigninSecurity": { "description": "Sign-in flow step label: answering the secure phrase" },
   "stepSigninCode": "Confirm code",
-  "@stepSigninCode": { "description": "Sign-in flow step label: confirming the OTP code" }
+  "@stepSigninCode": { "description": "Sign-in flow step label: confirming the OTP code" },
+
+  "connectivityLost": "No internet connection",
+  "connectivityRestored": "Connection restored"
 }

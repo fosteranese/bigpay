@@ -322,5 +322,8 @@
 
   "stepSigninDetails": "Sign in",
   "stepSigninSecurity": "Security check",
-  "stepSigninCode": "Confirm code"
+  "stepSigninCode": "Confirm code",
+
+  "connectivityLost": "No internet connection",
+  "connectivityRestored": "Connection don come back"
 }
