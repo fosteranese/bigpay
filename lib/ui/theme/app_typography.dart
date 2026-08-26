@@ -12,6 +12,7 @@ class AppTypography {
     height: 1.2,
     letterSpacing: -0.5,
     color: AppColors.white,
+    decoration: TextDecoration.none,
   );
 
   /// Display 2 — 22px Bold (page titles, large headings)
@@ -20,6 +21,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.2,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Header 1 — 20px Bold (section titles like "Select Payment Mode")
@@ -29,6 +31,7 @@ class AppTypography {
     height: 1.2,
     letterSpacing: 0.2,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Header 2 — 18px Bold (secondary section headers)
@@ -37,6 +40,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.3,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Header 3 — 16px Bold (card titles, "Recent Activities", "Transactions")
@@ -45,6 +49,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Header 4 — 14px Bold (sub-section titles, "See all" links)
@@ -53,6 +58,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// P1 — 16px Regular (body text)
@@ -61,6 +67,7 @@ class AppTypography {
     fontWeight: FontWeight.w400,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// P1 Medium — 16px w500 (balance amounts, emphasized body)
@@ -69,6 +76,7 @@ class AppTypography {
     fontWeight: FontWeight.w500,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// P1 Bold — 16px Bold (emphasized body)
@@ -77,6 +85,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Small details — 14px Regular (secondary info, subtitles)
@@ -85,6 +94,7 @@ class AppTypography {
     fontWeight: FontWeight.w400,
     height: 1.4,
     color: AppColors.subtitleGrey,
+    decoration: TextDecoration.none,
   );
 
   /// Small details Medium — 14px w600
@@ -93,6 +103,7 @@ class AppTypography {
     fontWeight: FontWeight.w600,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Small details Bold — 14px Bold (action links, "See all")
@@ -101,6 +112,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Caption — 13px Regular (tiny labels like account numbers, tab labels)
@@ -109,6 +121,7 @@ class AppTypography {
     fontWeight: FontWeight.w400,
     height: 1.4,
     color: AppColors.flora,
+    decoration: TextDecoration.none,
   );
 
   /// Caption Medium — 13px w500 (balance visibility toggle, form hints)
@@ -117,6 +130,7 @@ class AppTypography {
     fontWeight: FontWeight.w500,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Caption Bold — 13px Bold (emphasized labels, prices)
@@ -125,6 +139,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Caption Semibold — 13px w600 (menu items, action labels)
@@ -133,6 +148,7 @@ class AppTypography {
     fontWeight: FontWeight.w600,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Small — 12px Regular (status text, secondary labels)
@@ -141,6 +157,7 @@ class AppTypography {
     fontWeight: FontWeight.w400,
     height: 1.4,
     color: AppColors.subtitleGrey,
+    decoration: TextDecoration.none,
   );
 
   /// Small Medium — 12px w500 (welcome prefix, form labels)
@@ -149,6 +166,7 @@ class AppTypography {
     fontWeight: FontWeight.w500,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Small Bold — 12px Bold (user name, important labels)
@@ -157,6 +175,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 
   /// Menu Links — 13px w600 (bottom navigation active labels)
@@ -165,6 +184,7 @@ class AppTypography {
     fontWeight: FontWeight.w600,
     height: 1.4,
     color: AppColors.primary,
+    decoration: TextDecoration.none,
   );
 
   /// Buttons — 16px w700 (primary button text)
@@ -173,6 +193,7 @@ class AppTypography {
     fontWeight: FontWeight.w700,
     height: 1.4,
     color: AppColors.white,
+    decoration: TextDecoration.none,
   );
 
   /// Form labels — 14px w600 (input field labels)
@@ -181,6 +202,7 @@ class AppTypography {
     fontWeight: FontWeight.w600,
     height: 1.4,
     color: AppColors.black,
+    decoration: TextDecoration.none,
   );
 }
 
