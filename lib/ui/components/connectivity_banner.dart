@@ -107,7 +107,7 @@ class _ConnectivityBannerState extends State<ConnectivityBanner>
 
         if (_visible)
           Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
+            top: MediaQuery.of(context).padding.top + 4,
             left: _cardMargin.left,
             right: _cardMargin.right,
             child: AnimatedBuilder(
@@ -148,7 +148,7 @@ class _NotificationCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: color,
           borderRadius: const BorderRadius.all(Radius.circular(14)),
@@ -160,46 +160,42 @@ class _NotificationCard extends StatelessWidget {
             ),
           ],
         ),
-        child: SafeArea(
-          bottom: false,
-          child: Row(
-            children: [
-              Icon(
-                isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  isOffline ? l10n.connectivityLost : l10n.connectivityRestored,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    height: 1.3,
-                  ),
+        child: Row(
+          children: [
+            Icon(
+              isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                isOffline ? l10n.connectivityLost : l10n.connectivityRestored,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: onDismiss,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.close_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: onDismiss,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 14,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
