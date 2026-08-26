@@ -165,120 +165,123 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                         child: CustomScrollView(
                           controller: scrollController,
                           slivers: [
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const .fromLTRB(16, 12, 10, 12),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.walletsRecentTransactions,
-                                      style: context.header1,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 130,
-                                    child: FormButton(
-                                      backgroundColor: context.avatarBg,
-                                      foregroundColor: context.textPrimary,
-                                      padding: .zero,
-                                      height: 44,
-                                      onPressed: _showDateFilter,
-                                      labelSize: 13,
-                                      text: AppLocalizations.of(
-                                        context,
-                                      )!.walletsViewStatement,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (snapshot.isLoading)
-                            SliverPadding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              sliver: SliverList.separated(
-                                itemCount: 6,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (_, _) =>
-                                    const TransactionItemSkeleton(),
-                              ),
-                            )
-                          else if (snapshot.hasError)
                             SliverToBoxAdapter(
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.error_outline_rounded,
-                                        size: 40,
-                                        color: AppColors.danger,
+                              child: Padding(
+                                padding: const .fromLTRB(16, 12, 10, 12),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.walletsRecentTransactions,
+                                        style: context.header1,
                                       ),
-                                      const SizedBox(height: Spacing.lg),
-                                      Text(
-                                        snapshot.message ??
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.commonRetry,
-                                        textAlign: TextAlign.center,
-                                        style: context.p1Medium,
-                                      ),
-                                      const SizedBox(height: Spacing.xl),
-                                      FormButton(
+                                    ),
+                                    SizedBox(
+                                      width: 130,
+                                      child: FormButton(
+                                        backgroundColor: context.avatarBg,
+                                        foregroundColor: context.textPrimary,
+                                        padding: .zero,
+                                        height: 44,
+                                        onPressed: _showDateFilter,
+                                        labelSize: 13,
                                         text: AppLocalizations.of(
                                           context,
-                                        )!.commonRetry,
-                                        onPressed: () {
-                                          MessageUtil.close(context);
-                                          _loadTransactions();
-                                        },
+                                        )!.walletsViewStatement,
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          else if ((snapshot.data?.transactions ?? []).isEmpty)
-                            SliverFillRemaining(
-                              hasScrollBody: false,
-                              child: Padding(
-                                padding: const .symmetric(horizontal: 30),
-                                child: EmptyState(
-                                  svgAsset: SvgImages.emptyWallet,
-                                  title: AppLocalizations.of(
-                                    context,
-                                  )!.walletsNoTransactionsYet,
-                                  subtitle: AppLocalizations.of(
-                                    context,
-                                  )!.walletsNoTransactionsSubtitle,
-                                ),
-                              ),
-                            )
-                          else
-                            SliverPadding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              sliver: SliverList.separated(
-                                itemCount: snapshot.data!.transactions!.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (_, index) => TransactionListItem(
-                                  transaction:
-                                      snapshot.data!.transactions![index],
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                        ],
+                            if (snapshot.isLoading)
+                              SliverPadding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                sliver: SliverList.separated(
+                                  itemCount: 6,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (_, _) =>
+                                      const TransactionItemSkeleton(),
+                                ),
+                              )
+                            else if (snapshot.hasError)
+                              SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline_rounded,
+                                          size: 40,
+                                          color: AppColors.danger,
+                                        ),
+                                        const SizedBox(height: Spacing.lg),
+                                        Text(
+                                          snapshot.message ??
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.commonRetry,
+                                          textAlign: TextAlign.center,
+                                          style: context.p1Medium,
+                                        ),
+                                        const SizedBox(height: Spacing.xl),
+                                        FormButton(
+                                          text: AppLocalizations.of(
+                                            context,
+                                          )!.commonRetry,
+                                          onPressed: () {
+                                            MessageUtil.close(context);
+                                            _loadTransactions();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else if ((snapshot.data?.transactions ?? [])
+                                .isEmpty)
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Padding(
+                                  padding: const .symmetric(horizontal: 30),
+                                  child: EmptyState(
+                                    svgAsset: SvgImages.emptyWallet,
+                                    title: AppLocalizations.of(
+                                      context,
+                                    )!.walletsNoTransactionsYet,
+                                    subtitle: AppLocalizations.of(
+                                      context,
+                                    )!.walletsNoTransactionsSubtitle,
+                                  ),
+                                ),
+                              )
+                            else
+                              SliverPadding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                sliver: SliverList.separated(
+                                  itemCount:
+                                      snapshot.data!.transactions!.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (_, index) =>
+                                      TransactionListItem(
+                                        transaction:
+                                            snapshot.data!.transactions![index],
+                                      ),
+                                ),
+                              ),
+                          ],
                         ),
                       );
                     },
@@ -361,51 +364,64 @@ class TransactionListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCredit = transaction.debitCreditFlag?.toLowerCase() == 'cr';
-    return ListTile(
-      leading: Stack(
-        alignment: .bottomRight,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: context.scaffoldBg,
+          Stack(
+            alignment: .bottomRight,
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: context.scaffoldBg,
+              ),
+              CircleAvatar(
+                backgroundColor: context.cardBg,
+                radius: 9,
+                child: Icon(
+                  Icons.north_east_outlined,
+                  color: isCredit ? AppColors.success : AppColors.danger,
+                  size: 10,
+                ),
+              ),
+            ],
           ),
-          CircleAvatar(
-            backgroundColor: context.cardBg,
-            radius: 9,
-            child: Icon(
-              Icons.north_east_outlined,
-              color: isCredit ? AppColors.success : AppColors.danger,
-              size: 10,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.transactionType ?? '',
+                  style: context.formLabels,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  transaction.postDate ?? '',
+                  style: context.caption,
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      title: Text(
-        transaction.transactionType ?? '',
-        style: context.formLabels,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(
-        transaction.postDate ?? '',
-        style: context.caption,
-      ),
-      trailing: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            transaction.amount ?? '',
-            style: context.captionSemibold.copyWith(
-              color: isCredit ? AppColors.success : AppColors.danger,
-            ),
-          ),
-          Text(
-            transaction.narration ?? '',
-            style: context.caption,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                transaction.amount ?? '',
+                style: context.captionSemibold.copyWith(
+                  color: isCredit ? AppColors.success : AppColors.danger,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                transaction.narration ?? '',
+                style: context.caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ],
       ),
