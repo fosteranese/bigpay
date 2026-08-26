@@ -6,10 +6,10 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/connectivity.util.dart';
 
-/// Listens to [ConnectivityUtil.isOnline] and shows professional SnackBar
-/// alerts on connectivity changes.  Renders [child] unchanged.
+/// Monitors [ConnectivityUtil.isOnline] and shows an elegant, dismissible
+/// notification card at the top of the screen on connectivity changes.
 ///
-/// Place inside a [ScaffoldMessenger]-aware subtree (e.g. [MaterialApp]).
+/// Drop into [MaterialApp.router.builder] wrapping the route [child].
 class ConnectivityBanner extends StatefulWidget {
   const ConnectivityBanner({super.key, required this.child});
 
@@ -19,20 +19,28 @@ class ConnectivityBanner extends StatefulWidget {
   State<ConnectivityBanner> createState() => _ConnectivityBannerState();
 }
 
-class _ConnectivityBannerState extends State<ConnectivityBanner> {
-  static const _onlineDismissDuration = Duration(seconds: 3);
-  static const _shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(12)),
-  );
+class _ConnectivityBannerState extends State<ConnectivityBanner>
+    with SingleTickerProviderStateMixin {
+  static const _slideDuration = Duration(milliseconds: 320);
+  static const _onlineAutoDismiss = Duration(seconds: 3);
+  static const _cardMargin = EdgeInsets.fromLTRB(20, 0, 20, 0);
 
-  late bool _previousOnline;
-  Timer? _autoDismissTimer;
+  late final AnimationController _slideCtrl;
+  late final Animation<double> _slideAnim;
+
+  bool _visible = false;
+  bool _isOffline = false;
+  late bool _prevOnline;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
     super.initState();
-    _previousOnline = ConnectivityUtil.isOnline.value;
-    ConnectivityUtil.isOnline.addListener(_onConnectivityChanged);
+    _prevOnline = ConnectivityUtil.isOnline.value;
+    ConnectivityUtil.isOnline.addListener(_onChanged);
+
+    _slideCtrl = AnimationController(vsync: this, duration: _slideDuration);
+    _slideAnim = CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOutCubic);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!ConnectivityUtil.isOnline.value) _showOffline();
@@ -41,103 +49,159 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
 
   @override
   void dispose() {
-    ConnectivityUtil.isOnline.removeListener(_onConnectivityChanged);
-    _autoDismissTimer?.cancel();
+    ConnectivityUtil.isOnline.removeListener(_onChanged);
+    _dismissTimer?.cancel();
+    _slideCtrl.dispose();
     super.dispose();
   }
 
-  void _onConnectivityChanged() {
+  // ── Connectivity listener ──────────────────────────────────────────────
+
+  void _onChanged() {
     if (!mounted) return;
     final online = ConnectivityUtil.isOnline.value;
 
-    if (_previousOnline && !online) {
+    if (_prevOnline && !online) {
       _showOffline();
-    } else if (!_previousOnline && online) {
+    } else if (!_prevOnline && online) {
       _showOnline();
     }
-    _previousOnline = online;
+    _prevOnline = online;
   }
 
-  // ── Offline ──────────────────────────────────────────────────────────────
+  // ── Show / hide ───────────────────────────────────────────────────────
 
   void _showOffline() {
-    _autoDismissTimer?.cancel();
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(_offlineSnackBar());
+    _dismissTimer?.cancel();
+    setState(() {
+      _isOffline = true;
+      _visible = true;
+    });
+    _slideCtrl.forward(from: 0);
   }
-
-  SnackBar _offlineSnackBar() {
-    final l10n = AppLocalizations.of(context)!;
-    return SnackBar(
-      content: Row(
-        children: [
-          const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              l10n.connectivityLost,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: AppColors.danger,
-      behavior: SnackBarBehavior.floating,
-      shape: _shape,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      duration: const Duration(days: 1), // stays until we dismiss it
-    );
-  }
-
-  // ── Online ───────────────────────────────────────────────────────────────
 
   void _showOnline() {
-    _autoDismissTimer?.cancel();
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(_onlineSnackBar());
+    _dismissTimer?.cancel();
+    setState(() {
+      _isOffline = false;
+      _visible = true;
+    });
+    _slideCtrl.forward(from: 0);
+    _dismissTimer = Timer(_onlineAutoDismiss, _dismiss);
+  }
 
-    _autoDismissTimer = Timer(_onlineDismissDuration, () {
-      if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      }
+  void _dismiss() {
+    _dismissTimer?.cancel();
+    _slideCtrl.reverse().then((_) {
+      if (mounted) setState(() => _visible = false);
     });
   }
 
-  SnackBar _onlineSnackBar() {
-    final l10n = AppLocalizations.of(context)!;
-    return SnackBar(
-      content: Row(
-        children: [
-          const Icon(Icons.wifi_rounded, color: Colors.white, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              l10n.connectivityRestored,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+  // ── Build ─────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        widget.child,
+
+        if (_visible)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: _cardMargin.left,
+            right: _cardMargin.right,
+            child: AnimatedBuilder(
+              animation: _slideAnim,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, -40 * (1 - _slideAnim.value)),
+                  child: Opacity(
+                    opacity: _slideAnim.value,
+                    child: child,
+                  ),
+                );
+              },
+              child: _NotificationCard(
+                isOffline: _isOffline,
+                onDismiss: _dismiss,
               ),
             ),
           ),
-        ],
-      ),
-      backgroundColor: AppColors.success,
-      behavior: SnackBarBehavior.floating,
-      shape: _shape,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      duration: _onlineDismissDuration,
+      ],
     );
   }
+}
 
-  // ── Build ────────────────────────────────────────────────────────────────
+// ── Notification card ────────────────────────────────────────────────────
+
+class _NotificationCard extends StatelessWidget {
+  const _NotificationCard({required this.isOffline, required this.onDismiss});
+
+  final bool isOffline;
+  final VoidCallback onDismiss;
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final color = isOffline ? AppColors.danger : AppColors.success;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.all(Radius.circular(14)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Row(
+            children: [
+              Icon(
+                isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  isOffline ? l10n.connectivityLost : l10n.connectivityRestored,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onDismiss,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
