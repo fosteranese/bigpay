@@ -60,12 +60,10 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
       widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
       widget.account == null;
 
-  String get _sourceValue =>
-      widget.account?.sources?.firstOrNull?.value ?? '';
+  String get _sourceValue => widget.account?.sources?.firstOrNull?.value ?? '';
 
   bool get _hasActiveFilter =>
-      _dateFromController.text.isNotEmpty ||
-      _dateToController.text.isNotEmpty;
+      _dateFromController.text.isNotEmpty || _dateToController.text.isNotEmpty;
 
   String _title(BuildContext context) =>
       widget.account?.title ??
@@ -167,8 +165,9 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                           children: [
                             Expanded(
                               child: Text(
-                                AppLocalizations.of(context)!
-                                    .walletsRecentTransactions,
+                                AppLocalizations.of(
+                                  context,
+                                )!.walletsRecentTransactions,
                                 style: context.header1,
                               ),
                             ),
@@ -181,67 +180,70 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 height: 44,
                                 onPressed: _showDateFilter,
                                 labelSize: 13,
-                                text: AppLocalizations.of(context)!
-                                    .walletsViewStatement,
+                                text: AppLocalizations.of(
+                                  context,
+                                )!.walletsViewStatement,
                               ),
                             ),
                           ],
                         ),
                       ),
                       Expanded(
-                        child: ProcessBuilder<MiniStatement>(
-                          event: () => _txEvent,
-                          builder: (context, snapshot) {
-                            if (snapshot.isLoading) {
-                              return ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: 6,
-                                itemBuilder: (_, _) =>
-                                    const TransactionItemSkeleton(),
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.error_outline_rounded,
-                                        size: 40,
-                                        color: AppColors.danger,
-                                      ),
-                                      const SizedBox(height: Spacing.lg),
-                                      Text(
-                                        snapshot.message ??
-                                            AppLocalizations.of(context)!
-                                                .commonRetry,
-                                        textAlign: TextAlign.center,
-                                        style: context.p1Medium,
-                                      ),
-                                      const SizedBox(height: Spacing.xl),
-                                      FormButton(
-                                        text: AppLocalizations.of(context)!
-                                            .commonRetry,
-                                        onPressed: () {
-                                          MessageUtil.close(context);
-                                          _loadTransactions();
-                                        },
-                                      ),
-                                    ],
+                        child: AppRefreshIndicator(
+                          onRefresh: () async => _loadTransactions(),
+                          child: ProcessBuilder<MiniStatement>(
+                            event: () => _txEvent,
+                            builder: (context, snapshot) {
+                              if (snapshot.isLoading) {
+                                return ListView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: 6,
+                                  itemBuilder: (_, _) =>
+                                      const TransactionItemSkeleton(),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline_rounded,
+                                          size: 40,
+                                          color: AppColors.danger,
+                                        ),
+                                        const SizedBox(height: Spacing.lg),
+                                        Text(
+                                          snapshot.message ??
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.commonRetry,
+                                          textAlign: TextAlign.center,
+                                          style: context.p1Medium,
+                                        ),
+                                        const SizedBox(height: Spacing.xl),
+                                        FormButton(
+                                          text: AppLocalizations.of(
+                                            context,
+                                          )!.commonRetry,
+                                          onPressed: () {
+                                            MessageUtil.close(context);
+                                            _loadTransactions();
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-                            final transactions =
-                                snapshot.data?.transactions ?? [];
-                            if (transactions.isEmpty) {
-                              return EmptyWalletTransactions();
-                            }
-                            return AppRefreshIndicator(
-                              onRefresh: () async => _loadTransactions(),
-                              child: ListView.separated(
+                                );
+                              }
+                              final transactions =
+                                  snapshot.data?.transactions ?? [];
+                              if (transactions.isEmpty) {
+                                return EmptyWalletTransactions();
+                              }
+                              return ListView.separated(
                                 controller: scrollController,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -250,13 +252,12 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 itemCount: transactions.length,
                                 separatorBuilder: (_, _) =>
                                     const SizedBox(height: 10),
-                                itemBuilder: (_, index) =>
-                                    TransactionListItem(
+                                itemBuilder: (_, index) => TransactionListItem(
                                   transaction: transactions[index],
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -338,8 +339,7 @@ class TransactionListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCredit =
-        transaction.debitCreditFlag?.toLowerCase() == 'cr';
+    final isCredit = transaction.debitCreditFlag?.toLowerCase() == 'cr';
     return ListTile(
       leading: Stack(
         alignment: .bottomRight,
@@ -397,16 +397,24 @@ class EmptyWalletTransactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const .symmetric(horizontal: 30),
-        child: EmptyState(
-          svgAsset: SvgImages.emptyWallet,
-          title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
-          subtitle:
-              AppLocalizations.of(context)!.walletsNoTransactionsSubtitle,
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.3,
         ),
-      ),
+        Padding(
+          padding: const .only(
+            left: 30,
+            right: 30,
+          ),
+          child: EmptyState(
+            svgAsset: SvgImages.emptyWallet,
+            title: AppLocalizations.of(context)!.walletsNoTransactionsYet,
+            subtitle: AppLocalizations.of(context)!.walletsNoTransactionsSubtitle,
+          ),
+        ),
+      ],
     );
   }
 }
