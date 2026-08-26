@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
 import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/data/models/account/mini_statement.dart';
@@ -420,20 +419,16 @@ class EmptyWalletTransactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiSliver(
+    return Column(
       children: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: .symmetric(horizontal: 20),
-            child: Text(
-              AppLocalizations.of(context)!.walletsRecentTransactions,
-              style: context.header1,
-            ),
+        Padding(
+          padding: .symmetric(horizontal: 20),
+          child: Text(
+            AppLocalizations.of(context)!.walletsRecentTransactions,
+            style: context.header1,
           ),
         ),
-        SliverFillRemaining(
-          fillOverscroll: true,
-          hasScrollBody: false,
+        Expanded(
           child: Padding(
             padding: const .symmetric(horizontal: 30),
             child: EmptyState(
