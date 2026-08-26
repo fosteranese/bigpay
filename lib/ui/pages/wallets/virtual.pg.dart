@@ -7,6 +7,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/wallet/get_wallet_transactions_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
@@ -159,9 +160,11 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                   child: ProcessBuilder<MiniStatement>(
                     event: () => _txEvent,
                     builder: (context, snapshot) {
-                      return CustomScrollView(
-                        controller: scrollController,
-                        slivers: [
+                      return AppRefreshIndicator(
+                        onRefresh: () async => _loadTransactions(),
+                        child: CustomScrollView(
+                          controller: scrollController,
+                          slivers: [
                           SliverToBoxAdapter(
                             child: Padding(
                               padding: const .fromLTRB(16, 12, 10, 12),
@@ -169,8 +172,9 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      AppLocalizations.of(context)!
-                                          .walletsRecentTransactions,
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.walletsRecentTransactions,
                                       style: context.header1,
                                     ),
                                   ),
@@ -183,8 +187,9 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                       height: 44,
                                       onPressed: _showDateFilter,
                                       labelSize: 13,
-                                      text: AppLocalizations.of(context)!
-                                          .walletsViewStatement,
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.walletsViewStatement,
                                     ),
                                   ),
                                 ],
@@ -220,15 +225,17 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                       const SizedBox(height: Spacing.lg),
                                       Text(
                                         snapshot.message ??
-                                            AppLocalizations.of(context)!
-                                                .commonRetry,
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.commonRetry,
                                         textAlign: TextAlign.center,
                                         style: context.p1Medium,
                                       ),
                                       const SizedBox(height: Spacing.xl),
                                       FormButton(
-                                        text: AppLocalizations.of(context)!
-                                            .commonRetry,
+                                        text: AppLocalizations.of(
+                                          context,
+                                        )!.commonRetry,
                                         onPressed: () {
                                           MessageUtil.close(context);
                                           _loadTransactions();
@@ -246,10 +253,12 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 padding: const .symmetric(horizontal: 30),
                                 child: EmptyState(
                                   svgAsset: SvgImages.emptyWallet,
-                                  title: AppLocalizations.of(context)!
-                                      .walletsNoTransactionsYet,
-                                  subtitle: AppLocalizations.of(context)!
-                                      .walletsNoTransactionsSubtitle,
+                                  title: AppLocalizations.of(
+                                    context,
+                                  )!.walletsNoTransactionsYet,
+                                  subtitle: AppLocalizations.of(
+                                    context,
+                                  )!.walletsNoTransactionsSubtitle,
                                 ),
                               ),
                             )
@@ -260,18 +269,17 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 vertical: 8,
                               ),
                               sliver: SliverList.separated(
-                                itemCount:
-                                    snapshot.data!.transactions!.length,
+                                itemCount: snapshot.data!.transactions!.length,
                                 separatorBuilder: (_, _) =>
                                     const SizedBox(height: 10),
-                                itemBuilder: (_, index) =>
-                                    TransactionListItem(
-                                      transaction: snapshot
-                                          .data!.transactions![index],
-                                    ),
+                                itemBuilder: (_, index) => TransactionListItem(
+                                  transaction:
+                                      snapshot.data!.transactions![index],
+                                ),
                               ),
                             ),
                         ],
+                        ),
                       );
                     },
                   ),
