@@ -79,107 +79,56 @@ class StepProgress extends StatelessWidget {
             crossAxisAlignment: .stretch,
             children: [
               SizedBox(
-                width: 32,
+                width: 44,
                 child: Column(
                   children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted
-                            ? context.accentGreen
-                            : isCurrent
-                                ? AppColors.white
-                                : Colors.transparent,
-                        border: isCompleted || isCurrent
-                            ? Border.all(
-                                color: context.accentGreen,
-                                width: 2,
-                              )
-                            : Border.all(
-                                color: context.textSecondary.withValues(alpha: 0.35),
-                                width: 1.5,
-                              ),
-                        boxShadow: isCompleted
-                            ? [
-                                BoxShadow(
-                                  color: context.accentGreen.withValues(alpha: 0.25),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: isCompleted
-                          ? Icon(Icons.check, size: 18, color: AppColors.white)
-                          : isCurrent
-                              ? Center(
-                                  child: Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: context.accentGreen,
-                                    ),
-                                  ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: context.caption.copyWith(
-                                      color: context.textSecondary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                    _StepCircle(
+                      step: index + 1,
+                      isCompleted: isCompleted,
+                      isCurrent: isCurrent,
                     ),
                     if (!isLast)
                       Expanded(
-                        child: Container(
-                          width: 1.5,
-                          margin: const .symmetric(vertical: 4),
-                          color: isCompleted
-                              ? context.accentGreen
-                              : context.textSecondary.withValues(alpha: 0.25),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: Container(
+                            width: 2,
+                            margin: const .symmetric(vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? context.accentGreen
+                                  : AppColors.white.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
                         ),
                       ),
                   ],
                 ),
               ),
-              const SizedBox(width: Spacing.lg),
+              const SizedBox(width: Spacing.xl),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(
-                    top: 5,
-                    bottom: isLast ? 0 : Spacing.lg,
+                    bottom: isLast ? 0 : Spacing.xxl,
                   ),
-                  child: Column(
-                    crossAxisAlignment: .start,
-                    mainAxisAlignment: .center,
-                    children: [
-                      Text(
-                        labels![index],
-                        style: isCurrent
-                            ? context.smallBold.copyWith(
-                                color: context.accentGreen,
-                              )
+                  child: Center(
+                    heightFactor: 1,
+                    child: Text(
+                      labels![index],
+                      style: context.p1.copyWith(
+                        color: isCurrent
+                            ? AppColors.white
                             : isCompleted
-                                ? context.smallMedium
-                                : context.small.copyWith(
-                                    color: context.textSecondary,
-                                  ),
+                                ? AppColors.white.withValues(alpha: 0.9)
+                                : AppColors.white.withValues(alpha: 0.55),
+                        fontWeight: isCurrent
+                            ? FontWeight.w700
+                            : isCompleted
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                       ),
-                      if (isCurrent) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          'Step ${index + 1} of $totalSteps',
-                          style: context.caption.copyWith(
-                            color: context.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -187,6 +136,72 @@ class StepProgress extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+class _StepCircle extends StatelessWidget {
+  const _StepCircle({
+    required this.step,
+    required this.isCompleted,
+    required this.isCurrent,
+  });
+
+  final int step;
+  final bool isCompleted;
+  final bool isCurrent;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted
+            ? context.accentGreen
+            : isCurrent
+                ? AppColors.white
+                : Colors.transparent,
+        border: Border.all(
+          color: isCompleted || isCurrent
+              ? context.accentGreen
+              : AppColors.white.withValues(alpha: 0.35),
+          width: 2,
+        ),
+        boxShadow: isCompleted
+            ? [
+                BoxShadow(
+                  color: context.accentGreen.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ]
+            : isCurrent
+                ? [
+                    BoxShadow(
+                      color: AppColors.black.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ]
+                : null,
+      ),
+      child: isCompleted
+          ? Icon(Icons.check_rounded, size: 22, color: AppColors.white)
+          : Center(
+              child: Text(
+                '$step',
+                style: context.p1.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: isCurrent
+                      ? context.accentGreen
+                      : AppColors.white.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
     );
   }
 }

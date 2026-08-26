@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
@@ -461,36 +462,103 @@ class _AuthBrandPanel extends StatelessWidget {
           colors: AppGradients.walletCard.colors,
         ),
       ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(48),
-          child: Column(
-            mainAxisSize: .min,
-            children: [
-              SvgPicture.asset(
-                SvgImages.icon,
-                width: 180,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.white,
-                  BlendMode.srcIn,
+      // A flow with steps gets the full progress treatment — wordmark,
+      // stepper, and a summary footer — instead of the generic brand
+      // panel (wordmark + tagline), which stacked awkwardly above a step
+      // list and competed with it for the same space.
+      child: (stepIndicator is StepProgress &&
+              (stepIndicator! as StepProgress).labels != null)
+          ? _AuthProgressPanel(progress: stepIndicator! as StepProgress)
+          : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  mainAxisSize: .min,
+                  children: [
+                    SvgPicture.asset(
+                      SvgImages.icon,
+                      width: 180,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      AppLocalizations.of(context)!.authBrandTagline,
+                      textAlign: .center,
+                      style: context.p1.copyWith(
+                        color: AppColors.white.withValues(alpha: 0.85),
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 32),
-              Text(
-                AppLocalizations.of(context)!.authBrandTagline,
-                textAlign: .center,
-                style: context.p1.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.85),
-                  decoration: TextDecoration.none,
-                ),
-              ),
-              if (stepIndicator != null) ...[
-                const SizedBox(height: 32),
-                stepIndicator!,
-              ],
-            ],
+            ),
+    );
+  }
+}
+
+/// Full-height progress panel for stepped auth flows — brand mark pinned at
+/// the top, the vertical stepper centered in the leftover space, and a
+/// summary footer (current step name + counter) anchoring the bottom, so
+/// the panel reads as a composed sidebar instead of a widget dropped into
+/// an empty gradient.
+class _AuthProgressPanel extends StatelessWidget {
+  const _AuthProgressPanel({required this.progress});
+
+  final StepProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final labels = progress.labels!;
+    final current = progress.currentStep.clamp(0, labels.length - 1);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: 48,
+        vertical: context.isShortHeight ? 32 : 56,
+      ),
+      child: Column(
+        crossAxisAlignment: .start,
+        children: [
+          SvgPicture.asset(
+            SvgImages.icon,
+            width: 112,
+            colorFilter: const ColorFilter.mode(
+              AppColors.white,
+              BlendMode.srcIn,
+            ),
           ),
-        ),
+          const SizedBox(height: 48),
+          Expanded(
+            child: Center(
+              child: progress,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Divider(
+            thickness: 1,
+            color: AppColors.white.withValues(alpha: 0.15),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            labels[current],
+            style: context.header2.copyWith(
+              color: AppColors.white,
+              decoration: TextDecoration.none,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Step ${current + 1} of ${progress.totalSteps}',
+            style: context.caption.copyWith(
+              color: AppColors.white.withValues(alpha: 0.7),
+              decoration: TextDecoration.none,
+            ),
+          ),
+        ],
       ),
     );
   }
