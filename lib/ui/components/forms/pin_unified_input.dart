@@ -60,6 +60,7 @@ class _FormPinUnifiedInputState extends State<FormPinUnifiedInput> {
           validator: widget.validator,
           maxLines: 1,
           suffix: IconButton(
+            tooltip: value ? 'Hide PIN' : 'Show PIN',
             onPressed: () {
               _isPassword.value = !_isPassword.value;
             },

@@ -139,10 +139,10 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
         bottomNav: ValueListenableBuilder(
           valueListenable: _otp,
           builder: (context, value, child) {
-            return FormButton(
-              onPressed: _onVerify,
-              enabled: value.length == 6,
-              text: AppLocalizations.of(context)!.commonContinue,
+              return FormButton(
+                onPressed: _onVerify,
+                enabled: value.length == (_data.otpData?.length ?? 6),
+                text: AppLocalizations.of(context)!.commonContinue,
             );
           },
         ),

@@ -10,6 +10,7 @@ import 'package:bigpay/ui/components/forms/select_input.dart';
 import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/validator.util.dart';
 
@@ -99,7 +100,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
                   }).toList() ??
                   [],
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               label: l10n.authAnswerToQuestionLabel,
               focusNode: _answerFocusNode,

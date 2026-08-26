@@ -426,7 +426,7 @@ class _SummaryPageState extends State<SummaryPage> {
       final isLast = index == _editableItems.length - 1;
       items.add(
         Padding(
-          padding: const .only(bottom: 15),
+          padding: const .only(bottom: Spacing.lg),
           child: FormFieldInput(
             datum: datum,
             controller: controller,

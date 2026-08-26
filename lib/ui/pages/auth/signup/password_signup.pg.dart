@@ -82,7 +82,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
               },
               onChanged: _onChanged,
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormPasswordInput(
               label: l10n.commonConfirmPasswordLabel,
               focusNode: _confirmPasswordFocusNode,

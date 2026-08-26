@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -54,15 +55,9 @@ class EmptyState extends StatelessWidget {
             ],
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: Spacing.xl),
-              FilledButton(
-                onPressed: onAction,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: AppRadius.pillAll,
-                  ),
-                ),
-                child: Text(actionLabel!),
+              FormButton(
+                onPressed: onAction!,
+                text: actionLabel!,
               ),
             ],
           ],

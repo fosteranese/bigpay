@@ -269,7 +269,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                   },
                 ),
 
-              SizedBox(height: 15),
+              SizedBox(height: Spacing.lg),
               FormPasswordInput(
                 label: l10n.commonPasswordLabel,
                 placeholder: l10n.commonPasswordPlaceholder,

@@ -10,6 +10,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/validator.util.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -114,7 +115,7 @@ class _StartForgotSecurePhrasePageState
                 onChanged: _onChanged,
                 textInputAction: .next,
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: Spacing.lg),
               FormInput(
                 label: AppLocalizations.of(context)!.authEmailAddressLabel,
                 focusNode: _emailFocusNode,

@@ -17,6 +17,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/process_flow/summary.pg.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 class ServiceFormPage extends StatefulWidget {
@@ -285,7 +286,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       final isLast = index == _formItems.length - 1;
       items.add(
         Padding(
-          padding: const .only(bottom: 15),
+          padding: const .only(bottom: Spacing.lg),
           child: FormFieldInput(
             datum: datum,
             controller: controller,

@@ -145,7 +145,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
                 },
                 onChanged: _onChanged,
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: Spacing.lg),
               FormPinUnifiedInput(
                 label: l10n.authConfirmPin,
                 length: 6,

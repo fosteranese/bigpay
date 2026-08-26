@@ -55,8 +55,8 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
   void _onChanged(String value) {
     final canSubmit =
         _emailAddressController.text.isNotEmpty &&
-        _digitalAddressController.text.isNotEmpty &&
-        _emailAddressController.text.isNotEmpty;
+        _streetAddressController.text.isNotEmpty &&
+        _digitalAddressController.text.isNotEmpty;
 
     _canSubmit.value = canSubmit;
   }

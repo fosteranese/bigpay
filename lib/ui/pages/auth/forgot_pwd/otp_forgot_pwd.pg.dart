@@ -139,7 +139,7 @@ class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
           builder: (context, value, child) {
             return FormButton(
               onPressed: _onVerify,
-              enabled: value.length == 6,
+              enabled: value.length == _length,
               text: AppLocalizations.of(context)!.commonContinue,
             );
           },

@@ -124,7 +124,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
                 },
                 onChanged: _onChanged,
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: Spacing.lg),
               FormPasswordInput(
                 label: l10n.commonConfirmPasswordLabel,
                 focusNode: _confirmPasswordFocusNode,

@@ -123,7 +123,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
                 },
                 onChanged: _onChanged,
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: Spacing.lg),
               FormPasswordInput(
                 label: AppLocalizations.of(context)!.authAnswerToSecurePhraseLabel,
                 focusNode: _securePhraseFocusNode,

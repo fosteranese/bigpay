@@ -47,9 +47,11 @@ class StepProgress extends StatelessWidget {
               horizontal: index == 0 || index == totalSteps - 1 ? 0 : 2,
             ),
             decoration: BoxDecoration(
-              color: isCompleted || isCurrent
+              color: isCompleted
                   ? context.accentGreen
-                  : context.textSecondary.withValues(alpha: 0.55),
+                  : isCurrent
+                      ? context.accentGreen.withValues(alpha: 0.7)
+                      : context.textSecondary.withValues(alpha: 0.55),
               borderRadius: BorderRadius.only(
                 topLeft: index == 0 ? Radius.circular(2) : Radius.zero,
                 bottomLeft: index == 0 ? Radius.circular(2) : Radius.zero,
