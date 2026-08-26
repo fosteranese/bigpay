@@ -161,21 +161,46 @@ class _NotificationCard extends StatelessWidget {
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
-              color: Colors.white,
-              size: 19,
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Icon(
+                isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                isOffline ? l10n.connectivityLost : l10n.connectivityRestored,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isOffline
+                        ? l10n.connectivityLostTitle
+                        : l10n.connectivityRestoredTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isOffline
+                        ? l10n.connectivityLostMessage
+                        : l10n.connectivityRestoredMessage,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 8),

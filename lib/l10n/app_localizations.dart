@@ -1756,17 +1756,29 @@ abstract class AppLocalizations {
   /// **'Confirm code'**
   String get stepSigninCode;
 
-  /// No description provided for @connectivityLost.
+  /// No description provided for @connectivityLostTitle.
   ///
   /// In en, this message translates to:
   /// **'No internet connection'**
-  String get connectivityLost;
+  String get connectivityLostTitle;
 
-  /// No description provided for @connectivityRestored.
+  /// No description provided for @connectivityLostMessage.
   ///
   /// In en, this message translates to:
-  /// **'Connection restored'**
-  String get connectivityRestored;
+  /// **'Check your network settings and try again.'**
+  String get connectivityLostMessage;
+
+  /// No description provided for @connectivityRestoredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re back online'**
+  String get connectivityRestoredTitle;
+
+  /// No description provided for @connectivityRestoredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection restored successfully.'**
+  String get connectivityRestoredMessage;
 }
 
 class _AppLocalizationsDelegate

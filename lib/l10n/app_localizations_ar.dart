@@ -869,8 +869,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get stepSigninCode => 'Confirm code';
 
   @override
-  String get connectivityLost => 'No internet connection';
+  String get connectivityLostTitle => 'No internet connection';
 
   @override
-  String get connectivityRestored => 'Connection restored';
+  String get connectivityLostMessage =>
+      'Check your network settings and try again.';
+
+  @override
+  String get connectivityRestoredTitle => 'You\'re back online';
+
+  @override
+  String get connectivityRestoredMessage => 'Connection restored successfully.';
 }

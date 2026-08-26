@@ -475,6 +475,8 @@
   "stepSigninCode": "Confirm code",
   "@stepSigninCode": { "description": "Sign-in flow step label: confirming the OTP code" },
 
-  "connectivityLost": "No internet connection",
-  "connectivityRestored": "Connection restored"
+  "connectivityLostTitle": "No internet connection",
+  "connectivityLostMessage": "Check your network settings and try again.",
+  "connectivityRestoredTitle": "You're back online",
+  "connectivityRestoredMessage": "Connection restored successfully."
 }

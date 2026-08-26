@@ -882,8 +882,15 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get stepSigninCode => 'Confirm code';
 
   @override
-  String get connectivityLost => 'No internet connection';
+  String get connectivityLostTitle => 'No internet connection';
 
   @override
-  String get connectivityRestored => 'Connection don come back';
+  String get connectivityLostMessage =>
+      'Check your network settings and try again.';
+
+  @override
+  String get connectivityRestoredTitle => 'You dey back online';
+
+  @override
+  String get connectivityRestoredMessage => 'Connection don restore well well.';
 }
