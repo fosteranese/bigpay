@@ -1,3 +1,4 @@
+import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/action.dart';
@@ -80,6 +81,14 @@ class _DashboardPageState extends State<DashboardPage>
         .firstOrNull
         ?.sources
         ?.firstOrNull;
+  }
+
+  Account? get _virtualAccount {
+    return AppState.currentUser?.customerData
+        ?.where((item) {
+          return item.mode?.toUpperCase() == 'VIRTUAL_WALLET';
+        })
+        .firstOrNull;
   }
 
   @override
@@ -312,8 +321,10 @@ class _DashboardPageState extends State<DashboardPage>
                       balance: _virtualBalance?.balance,
                       isVirtual: true,
                       showViewDetails: true,
-                      onViewDetails: () =>
-                          AppRouter.router.push(VirtualWalletPage.route.path),
+                      onViewDetails: () => AppRouter.router.push(
+                        VirtualWalletPage.route.path,
+                        extra: _virtualAccount,
+                      ),
                     ),
                   ),
                   if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)

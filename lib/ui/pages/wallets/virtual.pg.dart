@@ -2,20 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/data/models/account/mini_statement.dart';
+import 'package:bigpay/data/models/account/transaction.dart';
+import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/wallet/get_wallet_transactions_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
 import 'package:bigpay/ui/components/empty_state.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_modal.dart';
+import 'package:bigpay/utils/message.util.dart';
 
-/// A pushed full page wrapping [VirtualWalletView] — used on every device
-/// except a foldable in book mode, where [WalletsPage] shows the same view
-/// inline in the second pane instead (see [MasterDetailLayout]).
 class VirtualWalletPage extends StatelessWidget {
   const VirtualWalletPage({super.key, this.account});
   static PageRouteDefinition route = PageRouteDefinition(
@@ -33,16 +37,6 @@ class VirtualWalletPage extends StatelessWidget {
   }
 }
 
-/// Wallet details, independent of how it's hosted — a pushed page
-/// ([VirtualWalletPage]) or an inline pane in [WalletsPage]'s foldable
-/// book-mode split. For the virtual wallet it shows the balance design; for
-/// any other wallet it shows the wallet's title in place of the balance.
-///
-/// Built without a Scaffold anywhere in the tree (both here and in the
-/// [DashboardLayout] it wraps) — a Scaffold nested inside the Expanded pane
-/// of a MasterDetailLayout silently fails to render its body on a real device
-/// (confirmed on [TransactionDetailsView]'s equivalent bug). One Scaffold at
-/// a time avoids it, whichever ancestor happens to supply it.
 class VirtualWalletView extends StatefulWidget {
   const VirtualWalletView({
     super.key,
@@ -58,20 +52,16 @@ class VirtualWalletView extends StatefulWidget {
 }
 
 class _VirtualWalletViewState extends State<VirtualWalletView> {
-  // Statement date-range fields (shown in the "View Statement" sheet).
   final _dateFromController = TextEditingController();
   final _dateToController = TextEditingController();
-
-  @override
-  void dispose() {
-    _dateFromController.dispose();
-    _dateToController.dispose();
-    super.dispose();
-  }
+  ExecuteProcessEvent? _txEvent;
 
   bool get _isVirtual =>
       widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
       widget.account == null;
+
+  String get _sourceValue =>
+      widget.account?.sources?.firstOrNull?.value ?? '';
 
   String _title(BuildContext context) =>
       widget.account?.title ??
@@ -83,6 +73,41 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
 
   double get _height {
     return _isVirtual ? 160 : 160 - 55;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  void _loadTransactions({DateTime? startDate, DateTime? endDate}) {
+    String? start;
+    String? end;
+    if (startDate != null) {
+      start =
+          '${startDate.year.toString().padLeft(4)}-${startDate.month.toString().padLeft(2)}-${startDate.day.toString().padLeft(2)}';
+    }
+    if (endDate != null) {
+      end =
+          '${endDate.year.toString().padLeft(4)}-${endDate.month.toString().padLeft(2)}-${endDate.day.toString().padLeft(2)}';
+    }
+    _txEvent = context.dispatchProcess(
+      GetWalletTransactionsAction(
+        payload: MiniStatementPayload(
+          sourceValue: _sourceValue,
+          startDate: start,
+          endDate: end,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _dateFromController.dispose();
+    _dateToController.dispose();
+    super.dispose();
   }
 
   @override
@@ -105,9 +130,7 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
           title: _title(context),
           balance: _balance,
           onBack: widget.onBack,
-          builder: (blur, alpha) => [
-            // EmptyWalletTransactions(),
-          ],
+          builder: (blur, alpha) => [],
         ),
         DraggableScrollableSheet(
           snapSizes: [min, max],
@@ -116,8 +139,6 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
           maxChildSize: max,
           snap: true,
           builder: (context, scrollController) {
-            // Capped the same way DashboardLayout above caps itself, so the
-            // sheet doesn't disagree with the page on width on a wide screen.
             return BoundedContent(
               maxWidth: context.responsive<double>(
                 compact: double.infinity,
@@ -136,7 +157,8 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                           children: [
                             Expanded(
                               child: Text(
-                                AppLocalizations.of(context)!.walletsRecentTransactions,
+                                AppLocalizations.of(context)!
+                                    .walletsRecentTransactions,
                                 style: context.header1,
                               ),
                             ),
@@ -147,50 +169,80 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 foregroundColor: context.textPrimary,
                                 padding: .zero,
                                 height: 44,
-                                onPressed: () {
-                                  final l10n = AppLocalizations.of(context)!;
-                                  AppModal.showBottomModal(
-                                    context,
-                                    label: l10n.walletsChooseDateRange,
-                                    padding: .all(20),
-                                    children: [
-                                      Text(
-                                        l10n.walletsStatementEmailNotice,
-                                        style: context.caption,
-                                      ),
-                                      const SizedBox(height: Spacing.xl),
-                                      FormDateInput(
-                                        label: l10n.walletsDateFromLabel,
-                                        placeholder: l10n.commonDateFormatPlaceholder,
-                                        controller: _dateFromController,
-                                      ),
-                                      const SizedBox(height: 10),
-                                      FormDateInput(
-                                        label: l10n.walletsDateToLabel,
-                                        placeholder: l10n.commonDateFormatPlaceholder,
-                                        controller: _dateToController,
-                                      ),
-                                      const SizedBox(height: Spacing.xl),
-                                      FormButton(
-                                        height: 54,
-                                        onPressed: () {},
-                                        text: l10n.commonShowResults,
-                                      ),
-                                    ],
-                                  );
-                                },
+                                onPressed: _showDateFilter,
                                 labelSize: 13,
-                                text: AppLocalizations.of(context)!.walletsViewStatement,
+                                text: AppLocalizations.of(context)!
+                                    .walletsViewStatement,
                               ),
                             ),
                           ],
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
-                          controller: scrollController,
-                          itemBuilder: (context, index) {
-                            return TransactionListItem();
+                        child: ProcessBuilder<MiniStatement>(
+                          event: () => _txEvent,
+                          builder: (context, snapshot) {
+                            if (snapshot.isLoading) {
+                              return ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: 6,
+                                itemBuilder: (_, _) =>
+                                    const TransactionItemSkeleton(),
+                              );
+                            }
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline_rounded,
+                                        size: 40,
+                                        color: AppColors.danger,
+                                      ),
+                                      const SizedBox(height: Spacing.lg),
+                                      Text(
+                                        snapshot.message ??
+                                            AppLocalizations.of(context)!
+                                                .commonRetry,
+                                        textAlign: TextAlign.center,
+                                        style: context.p1Medium,
+                                      ),
+                                      const SizedBox(height: Spacing.xl),
+                                      FormButton(
+                                        text: AppLocalizations.of(context)!
+                                            .commonRetry,
+                                        onPressed: () {
+                                          MessageUtil.close(context);
+                                          _loadTransactions();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                            final transactions =
+                                snapshot.data?.transactions ?? [];
+                            if (transactions.isEmpty) {
+                              return EmptyWalletTransactions();
+                            }
+                            return ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              itemCount: transactions.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (_, index) =>
+                                  WalletTransactionItem(
+                                transaction: transactions[index],
+                              ),
+                            );
                           },
                         ),
                       ),
@@ -204,56 +256,116 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
       ],
     );
   }
+
+  void _showDateFilter() {
+    final l10n = AppLocalizations.of(context)!;
+    AppModal.showBottomModal(
+      context,
+      label: l10n.walletsChooseDateRange,
+      padding: .all(20),
+      children: [
+        Text(
+          l10n.walletsStatementEmailNotice,
+          style: context.caption,
+        ),
+        const SizedBox(height: Spacing.xl),
+        FormDateInput(
+          label: l10n.walletsDateFromLabel,
+          placeholder: l10n.commonDateFormatPlaceholder,
+          controller: _dateFromController,
+        ),
+        const SizedBox(height: 10),
+        FormDateInput(
+          label: l10n.walletsDateToLabel,
+          placeholder: l10n.commonDateFormatPlaceholder,
+          controller: _dateToController,
+        ),
+        const SizedBox(height: Spacing.xl),
+        FormButton(
+          height: 54,
+          onPressed: () {
+            final start = _parseDate(_dateFromController.text);
+            final end = _parseDate(_dateToController.text);
+            _loadTransactions(startDate: start, endDate: end);
+            AppRouter.router.pop();
+          },
+          text: l10n.commonShowResults,
+        ),
+      ],
+    );
+  }
+
+  DateTime? _parseDate(String text) {
+    if (text.isEmpty) return null;
+    try {
+      final parts = text.split('/');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+      }
+    } catch (_) {}
+    return null;
+  }
 }
 
-class TransactionListItem extends StatelessWidget {
-  const TransactionListItem({
-    super.key,
-  });
+class WalletTransactionItem extends StatelessWidget {
+  const WalletTransactionItem({super.key, required this.transaction});
+
+  final Transaction transaction;
+
+  bool get _isCredit =>
+      transaction.debitCreditFlag?.toLowerCase() == 'cr';
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Stack(
-        alignment: .bottomRight,
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.border, width: 1),
+      ),
+      child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: context.scaffoldBg,
-          ),
-          CircleAvatar(
-            backgroundColor: context.cardBg,
-            radius: 9,
-            child: Icon(
-              Icons.north_east_outlined,
-              color: AppColors.success,
-              size: 10,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.transactionType ?? '',
+                  style: context.formLabels,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  transaction.narration ?? '',
+                  style: context.caption,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      title: Text(
-        AppLocalizations.of(context)!.walletsFundWalletDemo,
-        style: context.formLabels,
-      ),
-      subtitle: Text(
-        '09-Jun-23 12:30pm',
-        style: context.caption,
-      ),
-      trailing: Column(
-        mainAxisSize: .max,
-        mainAxisAlignment: .center,
-        crossAxisAlignment: .end,
-        children: [
-          Text(
-            'GHS 12,000',
-            style: context.captionSemibold,
-          ),
-          Text(
-            AppLocalizations.of(context)!.commonSuccess,
-            style: context.caption.copyWith(
-              color: AppColors.success,
-            ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                transaction.amount ?? '',
+                style: context.captionSemibold.copyWith(
+                  color: _isCredit ? AppColors.success : AppColors.danger,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                transaction.postDate ?? '',
+                style: context.caption,
+              ),
+            ],
           ),
         ],
       ),
@@ -262,9 +374,7 @@ class TransactionListItem extends StatelessWidget {
 }
 
 class EmptyWalletTransactions extends StatelessWidget {
-  const EmptyWalletTransactions({
-    super.key,
-  });
+  const EmptyWalletTransactions({super.key});
 
   @override
   Widget build(BuildContext context) {
