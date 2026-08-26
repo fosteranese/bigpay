@@ -10,6 +10,8 @@ import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/forms/payee_input.dart';
 import 'package:bigpay/ui/components/forms/select_input.dart';
 import 'package:bigpay/ui/components/forms/textarea_input.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 /// Renders one general-flow form field with the input its `fieldType` /
 /// `fieldDataType` calls for — the bigpay adaptation of umb's
@@ -28,20 +30,16 @@ class FormFieldInput extends StatelessWidget {
     this.next,
     this.isLast = false,
     this.onPayeeSelected,
+    this.validator,
   });
 
   final GeneralFlowFieldsDatum datum;
   final TextEditingController controller;
   final FocusNode? focusNode;
   final void Function(String value)? next;
-
-  /// The last field in a form uses the "done" keyboard action instead of
-  /// advancing focus.
   final bool isLast;
-
-  /// Called when a payee field selects a saved recipient, so the parent form
-  /// can prefill its other fields from `payee.formData`.
   final void Function(Payee payee)? onPayeeSelected;
+  final String? Function(String? value)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +92,41 @@ class FormFieldInput extends StatelessWidget {
     }
   }
 
+  /// Builds a [validator] closure from the field's metadata. Returns `null`
+  /// when no validation applies (non-mandatory or non-applicable data type).
+  static String? Function(String?)? buildValidator(
+    GeneralFlowFieldsDatum datum,
+    AppLocalizations l10n,
+  ) {
+    final field = datum.field;
+    if (field == null) return null;
+
+    final mandatory = field.fieldMandatory == 1;
+    final dataType = field.fieldDataType;
+    final maxLength = field.fieldLength;
+
+    if (!mandatory && maxLength == null && dataType == null) return null;
+
+    return (String? value) {
+      if (mandatory && (value == null || value.trim().isEmpty)) {
+        return l10n.validationFieldRequired;
+      }
+      if (value == null || value.trim().isEmpty) return null;
+
+      if (dataType == FieldDataTypesConst.emailAddress) {
+        if (!Validator.email(value.trim())) {
+          return l10n.validationEmailInvalid;
+        }
+      }
+
+      if (maxLength != null && value.trim().length > maxLength) {
+        return l10n.validationFieldRequired;
+      }
+
+      return null;
+    };
+  }
+
   Widget _byDataType(
     String label,
     String? placeholder,
@@ -112,6 +145,7 @@ class FormFieldInput extends StatelessWidget {
         inputFormatters: formatters,
         textInputAction: isLast ? TextInputAction.done : TextInputAction.next,
         next: next,
+        validator: validator,
       );
     }
 
@@ -122,6 +156,7 @@ class FormFieldInput extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         next: next,
+        validator: validator,
       );
     }
 

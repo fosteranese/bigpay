@@ -40,6 +40,7 @@ class ServiceFormPage extends StatefulWidget {
 }
 
 class _ServiceFormPageState extends State<ServiceFormPage> {
+  final _formKey = GlobalKey<FormState>();
   final _canSubmit = ValueNotifier(false);
   ExecuteProcessEvent? _submitEvent;
   final Map<String, dynamic> _formData = {};
@@ -150,6 +151,9 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   /// shown on the summary screen (see the listener in [build]).
   void _submit() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
+
     _form.fieldsDatum?.forEach((item) {
       _formData[item.field?.fieldName ?? ''] = item.field?.defaultValue ?? '';
     });
@@ -262,6 +266,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
           },
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -274,6 +279,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   }
 
   List<Widget> get _buildFormFields {
+    final l10n = AppLocalizations.of(context)!;
     final items = <Widget>[];
     for (final (index, (datum, controller, focusNode)) in _formItems.indexed) {
       final isLast = index == _formItems.length - 1;
@@ -285,6 +291,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             controller: controller,
             focusNode: focusNode,
             isLast: isLast,
+            validator: FormFieldInput.buildValidator(datum, l10n),
             onPayeeSelected: _prefillFromPayee,
             next: (_) {
               if (isLast) {

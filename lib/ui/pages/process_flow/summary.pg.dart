@@ -66,6 +66,7 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _SummaryPageState extends State<SummaryPage> {
+  final _formKey = GlobalKey<FormState>();
   ExecuteProcessEvent? _processEvent;
   ExecuteProcessEvent? _payeeEvent;
 
@@ -180,6 +181,8 @@ class _SummaryPageState extends State<SummaryPage> {
 
   void _continue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     final payload = _buildPayload();
     final authModes = widget.verification?.authMode ?? const [];
@@ -379,6 +382,8 @@ class _SummaryPageState extends State<SummaryPage> {
             );
           },
         ),
+      child: Form(
+        key: _formKey,
         child: Column(
           mainAxisSize: .min,
           crossAxisAlignment: .stretch,
@@ -409,10 +414,12 @@ class _SummaryPageState extends State<SummaryPage> {
           ],
         ),
       ),
+      ),
     );
   }
 
   List<Widget> get _buildEditableFields {
+    final l10n = AppLocalizations.of(context)!;
     final items = <Widget>[];
     for (final (index, (datum, controller, focusNode))
         in _editableItems.indexed) {
@@ -425,6 +432,7 @@ class _SummaryPageState extends State<SummaryPage> {
             controller: controller,
             focusNode: focusNode,
             isLast: isLast,
+            validator: FormFieldInput.buildValidator(datum, l10n),
             onPayeeSelected: _prefillFromPayee,
             next: (_) {
               if (isLast) {
