@@ -6,11 +6,10 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/connectivity.util.dart';
 
-/// Slides a coloured banner in from the top of the screen when connectivity
-/// changes.  The offline banner stays until connectivity returns; the
-/// "back online" banner auto-dismisses after 3 seconds.
+/// Listens to [ConnectivityUtil.isOnline] and shows professional SnackBar
+/// alerts on connectivity changes.  Renders [child] unchanged.
 ///
-/// Drop this into [MaterialApp.router.builder] as a wrapper around [child].
+/// Place inside a [ScaffoldMessenger]-aware subtree (e.g. [MaterialApp]).
 class ConnectivityBanner extends StatefulWidget {
   const ConnectivityBanner({super.key, required this.child});
 
@@ -21,12 +20,11 @@ class ConnectivityBanner extends StatefulWidget {
 }
 
 class _ConnectivityBannerState extends State<ConnectivityBanner> {
-  static const _bannerHeight = 44.0;
-  static const _slideDuration = Duration(milliseconds: 280);
   static const _onlineDismissDuration = Duration(seconds: 3);
+  static const _shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  );
 
-  bool _showBanner = false;
-  bool _isOffline = false;
   late bool _previousOnline;
   Timer? _autoDismissTimer;
 
@@ -36,7 +34,6 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
     _previousOnline = ConnectivityUtil.isOnline.value;
     ConnectivityUtil.isOnline.addListener(_onConnectivityChanged);
 
-    // Show immediately if the device is offline at launch.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!ConnectivityUtil.isOnline.value) _showOffline();
     });
@@ -61,120 +58,86 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
     _previousOnline = online;
   }
 
+  // ── Offline ──────────────────────────────────────────────────────────────
+
   void _showOffline() {
     _autoDismissTimer?.cancel();
-    setState(() {
-      _showBanner = true;
-      _isOffline = true;
-    });
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(_offlineSnackBar());
   }
 
-  void _showOnline() {
-    _autoDismissTimer?.cancel();
-    setState(() {
-      _showBanner = true;
-      _isOffline = false;
-    });
-    _autoDismissTimer = Timer(_onlineDismissDuration, () {
-      if (mounted) setState(() => _showBanner = false);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
-
-    return Stack(
-      children: [
-        widget.child,
-
-        // Banner
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: AnimatedContainer(
-            duration: _slideDuration,
-            curve: Curves.easeInOut,
-            height: _showBanner ? topPadding + _bannerHeight : 0,
-            clipBehavior: Clip.hardEdge,
-            color: Colors.transparent,
-            child: SafeArea(
-              bottom: false,
-              child: SizedBox(
-                height: _bannerHeight,
-                child: _isOffline ? const _OfflineBanner() : const _OnlineBanner(),
+  SnackBar _offlineSnackBar() {
+    final l10n = AppLocalizations.of(context)!;
+    return SnackBar(
+      content: Row(
+        children: [
+          const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              l10n.connectivityLost,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+      backgroundColor: AppColors.danger,
+      behavior: SnackBarBehavior.floating,
+      shape: _shape,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      duration: const Duration(days: 1), // stays until we dismiss it
     );
   }
-}
 
-// ---------------------------------------------------------------------------
-// Offline banner
-// ---------------------------------------------------------------------------
+  // ── Online ───────────────────────────────────────────────────────────────
 
-class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner();
+  void _showOnline() {
+    _autoDismissTimer?.cancel();
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(_onlineSnackBar());
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      width: double.infinity,
-      color: AppColors.danger,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    _autoDismissTimer = Timer(_onlineDismissDuration, () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
+    });
+  }
+
+  SnackBar _onlineSnackBar() {
+    final l10n = AppLocalizations.of(context)!;
+    return SnackBar(
+      content: Row(
         children: [
-          const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            AppLocalizations.of(context)!.connectivityLost,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+          const Icon(Icons.wifi_rounded, color: Colors.white, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              l10n.connectivityRestored,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
       ),
+      backgroundColor: AppColors.success,
+      behavior: SnackBarBehavior.floating,
+      shape: _shape,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      duration: _onlineDismissDuration,
     );
   }
-}
 
-// ---------------------------------------------------------------------------
-// Online banner
-// ---------------------------------------------------------------------------
-
-class _OnlineBanner extends StatelessWidget {
-  const _OnlineBanner();
+  // ── Build ────────────────────────────────────────────────────────────────
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      width: double.infinity,
-      color: AppColors.success,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.wifi_rounded, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            AppLocalizations.of(context)!.connectivityRestored,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => widget.child;
 }
