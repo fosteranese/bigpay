@@ -8,6 +8,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/wallet/get_wallet_transactions_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
@@ -63,6 +64,10 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
   String get _sourceValue =>
       widget.account?.sources?.firstOrNull?.value ?? '';
 
+  bool get _hasActiveFilter =>
+      _dateFromController.text.isNotEmpty ||
+      _dateToController.text.isNotEmpty;
+
   String _title(BuildContext context) =>
       widget.account?.title ??
       widget.account?.sources?.firstOrNull?.tile ??
@@ -101,6 +106,12 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
         ),
       ),
     );
+  }
+
+  void _clearFilter() {
+    _dateFromController.clear();
+    _dateToController.clear();
+    _loadTransactions();
   }
 
   @override
@@ -162,6 +173,28 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 style: context.header1,
                               ),
                             ),
+                            if (_hasActiveFilter) ...[
+                              GestureDetector(
+                                onTap: _clearFilter,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.danger.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(context)!.historyClearFilter,
+                                    style: context.caption.copyWith(
+                                      color: AppColors.danger,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                             SizedBox(
                               width: 130,
                               child: FormButton(
@@ -229,18 +262,21 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                             if (transactions.isEmpty) {
                               return EmptyWalletTransactions();
                             }
-                            return ListView.separated(
-                              controller: scrollController,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              itemCount: transactions.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 10),
-                              itemBuilder: (_, index) =>
-                                  WalletTransactionItem(
-                                transaction: transactions[index],
+                            return AppRefreshIndicator(
+                              onRefresh: () async => _loadTransactions(),
+                              child: ListView.separated(
+                                controller: scrollController,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                itemCount: transactions.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 10),
+                                itemBuilder: (_, index) =>
+                                    TransactionListItem(
+                                  transaction: transactions[index],
+                                ),
                               ),
                             );
                           },
@@ -291,6 +327,19 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
           },
           text: l10n.commonShowResults,
         ),
+        if (_hasActiveFilter) ...[
+          const SizedBox(height: 10),
+          FormButton(
+            height: 54,
+            backgroundColor: context.cardBg,
+            foregroundColor: AppColors.danger,
+            onPressed: () {
+              _clearFilter();
+              AppRouter.router.pop();
+            },
+            text: l10n.historyClearFilter,
+          ),
+        ],
       ],
     );
   }
@@ -311,61 +360,60 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
   }
 }
 
-class WalletTransactionItem extends StatelessWidget {
-  const WalletTransactionItem({super.key, required this.transaction});
+class TransactionListItem extends StatelessWidget {
+  const TransactionListItem({super.key, required this.transaction});
 
   final Transaction transaction;
 
-  bool get _isCredit =>
-      transaction.debitCreditFlag?.toLowerCase() == 'cr';
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.border, width: 1),
-      ),
-      child: Row(
+    final isCredit =
+        transaction.debitCreditFlag?.toLowerCase() == 'cr';
+    return ListTile(
+      leading: Stack(
+        alignment: .bottomRight,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.transactionType ?? '',
-                  style: context.formLabels,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  transaction.narration ?? '',
-                  style: context.caption,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: context.scaffoldBg,
+          ),
+          CircleAvatar(
+            backgroundColor: context.cardBg,
+            radius: 9,
+            child: Icon(
+              Icons.north_east_outlined,
+              color: isCredit ? AppColors.success : AppColors.danger,
+              size: 10,
             ),
           ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                transaction.amount ?? '',
-                style: context.captionSemibold.copyWith(
-                  color: _isCredit ? AppColors.success : AppColors.danger,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                transaction.postDate ?? '',
-                style: context.caption,
-              ),
-            ],
+        ],
+      ),
+      title: Text(
+        transaction.transactionType ?? '',
+        style: context.formLabels,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        transaction.postDate ?? '',
+        style: context.caption,
+      ),
+      trailing: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            transaction.amount ?? '',
+            style: context.captionSemibold.copyWith(
+              color: isCredit ? AppColors.success : AppColors.danger,
+            ),
+          ),
+          Text(
+            transaction.narration ?? '',
+            style: context.caption,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
