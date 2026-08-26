@@ -5,6 +5,7 @@ import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/models/actions/forgot_pwd/start_forgot_pwd_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/forgot_pwd/verify_otp_forgot_pwd_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -84,7 +85,10 @@ class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
 
             if (snapshot.hasData) {
               ForgotPwd.requestId = snapshot.data ?? '';
-              AppRouter.router.push(
+              // pushReplacement, not push — once the OTP is verified it's
+              // consumed; leaving it in the back-stack would let the user
+              // navigate back to a stale, already-used OTP screen.
+              AppRouter.router.pushReplacement(
                 CreatePwdForgotPwdPage.route.path,
               );
             }
@@ -104,7 +108,7 @@ class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
         stepIndicator: StepProgress(
           currentStep: 1,
           totalSteps: 3,
-          labels: ['Verify', 'OTP', 'New Password'],
+          labels: AppLocalizations.of(context)!.forgotPwdSteps,
         ),
         subtitleWidget: Column(
           mainAxisSize: .min,

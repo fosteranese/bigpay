@@ -1,4 +1,5 @@
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
@@ -42,7 +43,7 @@ class _StartKycPageState extends State<StartKycPage> {
       stepIndicator: StepProgress(
         currentStep: 0,
         totalSteps: 3,
-        labels: ['ID', 'Selfie', 'Contact'],
+        labels: l10n.kycSteps,
       ),
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(

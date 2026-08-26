@@ -304,5 +304,23 @@
   "otpResendCode": "Resend Code",
   "otpResendCodeIn": "Resend code in {time}",
 
-  "authBrandTagline": "Send, receive, and manage your money — simple and safe."
+  "authBrandTagline": "Send, receive, and manage your money — simple and safe.",
+
+  "stepSignupPhone": "Your number",
+  "stepSignupCode": "Confirm code",
+  "stepSignupPassword": "Create password",
+  "stepSignupSecurity": "Security phrase",
+  "stepSignupPin": "Set your PIN",
+
+  "stepForgotVerify": "Verify it's you",
+  "stepForgotCode": "Confirm code",
+  "stepForgotPassword": "New password",
+
+  "stepKycId": "Your ID",
+  "stepKycSelfie": "Quick selfie",
+  "stepKycContact": "Contact info",
+
+  "stepSigninDetails": "Sign in",
+  "stepSigninSecurity": "Security check",
+  "stepSigninCode": "Confirm code"
 }

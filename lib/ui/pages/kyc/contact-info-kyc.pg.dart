@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/models/actions/ghana_card/auto_ghana_card_verification_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/step_progress.dart';
@@ -109,7 +110,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
         stepIndicator: StepProgress(
           currentStep: 2,
           totalSteps: 3,
-          labels: ['ID', 'Selfie', 'Contact'],
+          labels: l10n.kycSteps,
         ),
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(

@@ -10,6 +10,7 @@ import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
@@ -164,7 +165,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
         stepIndicator: StepProgress(
           currentStep: 0,
           totalSteps: 3,
-          labels: ['Credentials', 'Security', 'OTP'],
+          labels: l10n.signInSteps,
         ),
         subtitleWidget: Column(
           mainAxisSize: .min,

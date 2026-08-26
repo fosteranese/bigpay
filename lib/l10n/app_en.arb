@@ -441,5 +441,37 @@
   },
 
   "authBrandTagline": "Send, receive, and manage your money — simply and securely.",
-  "@authBrandTagline": { "description": "Supporting line under the logo on the auth pages' wide-screen brand panel" }
+  "@authBrandTagline": { "description": "Supporting line under the logo on the auth pages' wide-screen brand panel" },
+
+  "stepSignupPhone": "Your number",
+  "@stepSignupPhone": { "description": "Sign-up flow step label: entering the phone number" },
+  "stepSignupCode": "Confirm code",
+  "@stepSignupCode": { "description": "Sign-up flow step label: confirming the OTP code" },
+  "stepSignupPassword": "Create password",
+  "@stepSignupPassword": { "description": "Sign-up flow step label: creating the password" },
+  "stepSignupSecurity": "Security phrase",
+  "@stepSignupSecurity": { "description": "Sign-up flow step label: setting the secure phrase" },
+  "stepSignupPin": "Set your PIN",
+  "@stepSignupPin": { "description": "Sign-up flow step label: setting the security PIN" },
+
+  "stepForgotVerify": "Verify it's you",
+  "@stepForgotVerify": { "description": "Forgot-password flow step label: verifying identity" },
+  "stepForgotCode": "Confirm code",
+  "@stepForgotCode": { "description": "Forgot-password flow step label: confirming the OTP code" },
+  "stepForgotPassword": "New password",
+  "@stepForgotPassword": { "description": "Forgot-password flow step label: setting the new password" },
+
+  "stepKycId": "Your ID",
+  "@stepKycId": { "description": "KYC flow step label: Ghana Card details" },
+  "stepKycSelfie": "Quick selfie",
+  "@stepKycSelfie": { "description": "KYC flow step label: taking a selfie" },
+  "stepKycContact": "Contact info",
+  "@stepKycContact": { "description": "KYC flow step label: contact information" },
+
+  "stepSigninDetails": "Sign in",
+  "@stepSigninDetails": { "description": "Sign-in flow step label: entering credentials" },
+  "stepSigninSecurity": "Security check",
+  "@stepSigninSecurity": { "description": "Sign-in flow step label: answering the secure phrase" },
+  "stepSigninCode": "Confirm code",
+  "@stepSigninCode": { "description": "Sign-in flow step label: confirming the OTP code" }
 }

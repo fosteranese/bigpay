@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/signup/complete_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -99,7 +100,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
         stepIndicator: StepProgress(
           currentStep: 4,
           totalSteps: 5,
-          labels: ['Phone', 'OTP', 'Password', 'Security', 'PIN'],
+          labels: l10n.signupSteps,
         ),
         subtitleWidget: Column(
           mainAxisSize: .min,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/login/verify_secure_phrase_login_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -76,7 +77,7 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
         stepIndicator: StepProgress(
           currentStep: 1,
           totalSteps: 3,
-          labels: ['Credentials', 'Security', 'OTP'],
+          labels: AppLocalizations.of(context)!.signInSteps,
         ),
         subtitleWidget: Column(
           mainAxisSize: .min,

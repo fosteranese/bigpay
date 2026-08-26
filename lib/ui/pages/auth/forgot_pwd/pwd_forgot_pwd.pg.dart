@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/forgot_pwd/complete_forgot_pwd_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -89,7 +90,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
         stepIndicator: StepProgress(
           currentStep: 2,
           totalSteps: 3,
-          labels: ['Verify', 'OTP', 'New Password'],
+          labels: l10n.forgotPwdSteps,
         ),
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(

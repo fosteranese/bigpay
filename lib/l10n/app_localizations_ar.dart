@@ -825,4 +825,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get authBrandTagline => 'أرسل واستقبل وأدر أموالك — ببساطة وأمان.';
+
+  @override
+  String get stepSignupPhone => 'Your number';
+
+  @override
+  String get stepSignupCode => 'Confirm code';
+
+  @override
+  String get stepSignupPassword => 'Create password';
+
+  @override
+  String get stepSignupSecurity => 'Security phrase';
+
+  @override
+  String get stepSignupPin => 'Set your PIN';
+
+  @override
+  String get stepForgotVerify => 'Verify it\'s you';
+
+  @override
+  String get stepForgotCode => 'Confirm code';
+
+  @override
+  String get stepForgotPassword => 'New password';
+
+  @override
+  String get stepKycId => 'Your ID';
+
+  @override
+  String get stepKycSelfie => 'Quick selfie';
+
+  @override
+  String get stepKycContact => 'Contact info';
+
+  @override
+  String get stepSigninDetails => 'Sign in';
+
+  @override
+  String get stepSigninSecurity => 'Security check';
+
+  @override
+  String get stepSigninCode => 'Confirm code';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/step_progress.dart';
@@ -30,7 +31,7 @@ class _InfoKycPageState extends State<InfoKycPage> {
       stepIndicator: StepProgress(
         currentStep: 1,
         totalSteps: 3,
-        labels: ['ID', 'Selfie', 'Contact'],
+        labels: l10n.kycSteps,
       ),
       bottom: PreferredSize(
         preferredSize: Size.zero,

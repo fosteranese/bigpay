@@ -1671,6 +1671,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send, receive, and manage your money — simply and securely.'**
   String get authBrandTagline;
+
+  /// Sign-up flow step label: entering the phone number
+  ///
+  /// In en, this message translates to:
+  /// **'Your number'**
+  String get stepSignupPhone;
+
+  /// Sign-up flow step label: confirming the OTP code
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm code'**
+  String get stepSignupCode;
+
+  /// Sign-up flow step label: creating the password
+  ///
+  /// In en, this message translates to:
+  /// **'Create password'**
+  String get stepSignupPassword;
+
+  /// Sign-up flow step label: setting the secure phrase
+  ///
+  /// In en, this message translates to:
+  /// **'Security phrase'**
+  String get stepSignupSecurity;
+
+  /// Sign-up flow step label: setting the security PIN
+  ///
+  /// In en, this message translates to:
+  /// **'Set your PIN'**
+  String get stepSignupPin;
+
+  /// Forgot-password flow step label: verifying identity
+  ///
+  /// In en, this message translates to:
+  /// **'Verify it\'s you'**
+  String get stepForgotVerify;
+
+  /// Forgot-password flow step label: confirming the OTP code
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm code'**
+  String get stepForgotCode;
+
+  /// Forgot-password flow step label: setting the new password
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get stepForgotPassword;
+
+  /// KYC flow step label: Ghana Card details
+  ///
+  /// In en, this message translates to:
+  /// **'Your ID'**
+  String get stepKycId;
+
+  /// KYC flow step label: taking a selfie
+  ///
+  /// In en, this message translates to:
+  /// **'Quick selfie'**
+  String get stepKycSelfie;
+
+  /// KYC flow step label: contact information
+  ///
+  /// In en, this message translates to:
+  /// **'Contact info'**
+  String get stepKycContact;
+
+  /// Sign-in flow step label: entering credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get stepSigninDetails;
+
+  /// Sign-in flow step label: answering the secure phrase
+  ///
+  /// In en, this message translates to:
+  /// **'Security check'**
+  String get stepSigninSecurity;
+
+  /// Sign-in flow step label: confirming the OTP code
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm code'**
+  String get stepSigninCode;
 }
 
 class _AppLocalizationsDelegate
