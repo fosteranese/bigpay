@@ -347,14 +347,8 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
   DateTime? _parseDate(String text) {
     if (text.isEmpty) return null;
     try {
-      final parts = text.split('/');
-      if (parts.length == 3) {
-        return DateTime(
-          int.parse(parts[2]),
-          int.parse(parts[1]),
-          int.parse(parts[0]),
-        );
-      }
+      final date = DateTime.parse(text);
+      return date;
     } catch (_) {}
     return null;
   }
