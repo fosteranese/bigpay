@@ -58,6 +58,14 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
       return;
     }
 
+    // Synchronous, in this tap handler — not deferred to a post-frame
+    // callback from inside MasterDetailLayout's build (an earlier version
+    // of this did that, and it visibly glitched: the split rendered one
+    // frame at the old, sidebar-cramped width, then jumped wider a frame
+    // later once the sidebar actually collapsed). Setting it here, before
+    // setState, marks MainShell dirty in the same synchronous window as
+    // this page's own rebuild, so both resolve in one frame.
+    AppState.splitDetailOpenNotifier.value = true;
     setState(() {
       _selectedActivity = item;
       _selectedCategory = null;
@@ -81,6 +89,12 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
 
   @override
   void dispose() {
+    // Leaving the page entirely (e.g. switching tabs) with a split still
+    // open — don't leave the sidebar permanently collapsed with nothing
+    // left to justify it.
+    if (_selectedActivity != null) {
+      AppState.splitDetailOpenNotifier.value = false;
+    }
     _searchController.dispose();
     super.dispose();
   }

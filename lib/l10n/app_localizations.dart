@@ -394,6 +394,54 @@ abstract class AppLocalizations {
   /// **'Password is required'**
   String get authPasswordRequiredError;
 
+  /// Validation error when phone field is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number is required'**
+  String get validationPhoneRequired;
+
+  /// Validation error when phone number format is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Ghana phone number (e.g. 0241234567)'**
+  String get validationPhoneInvalid;
+
+  /// Validation error when email format is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address'**
+  String get validationEmailInvalid;
+
+  /// Validation error when password field is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get validationPasswordRequired;
+
+  /// Validation error when PIN field is empty
+  ///
+  /// In en, this message translates to:
+  /// **'PIN is required'**
+  String get validationPinRequired;
+
+  /// Validation error when confirm PIN does not match
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match'**
+  String get validationPinMismatch;
+
+  /// Validation error when security answer field is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Security answer is required'**
+  String get validationAnswerRequired;
+
+  /// Generic validation error for required fields
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get validationFieldRequired;
+
   /// Link to sign out and start a new-device sign-in as someone else
   ///
   /// In en, this message translates to:

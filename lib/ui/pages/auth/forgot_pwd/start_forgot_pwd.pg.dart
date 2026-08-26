@@ -17,6 +17,7 @@ import 'package:bigpay/ui/pages/auth/start_forgot_secure_phrase.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class StartForgotPasswordPage extends StatefulWidget {
   const StartForgotPasswordPage({super.key});
@@ -31,6 +32,7 @@ class StartForgotPasswordPage extends StatefulWidget {
 
 class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
   ExecuteProcessEvent? mainEvent;
+  final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
   final _securePhraseFocusNode = FocusNode();
 
@@ -103,6 +105,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
           },
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -112,6 +115,9 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
                 label: AppLocalizations.of(context)!.commonPhoneNumberLabel,
                 focusNode: _phoneNumberFocusNode,
                 controller: _phoneNumberController,
+                validator: Validator.phoneValidator(
+                  AppLocalizations.of(context)!.validationPhoneInvalid,
+                ),
                 next: (_) {
                   _securePhraseFocusNode.requestFocus();
                 },
@@ -122,6 +128,9 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
                 label: AppLocalizations.of(context)!.authAnswerToSecurePhraseLabel,
                 focusNode: _securePhraseFocusNode,
                 controller: _securePhraseController,
+                validator: Validator.requiredField(
+                  AppLocalizations.of(context)!.validationAnswerRequired,
+                ),
                 onChanged: _onChanged,
               ),
               Align(
@@ -157,6 +166,8 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
 
   void _onContinue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     mainEvent = context.dispatchProcess(
       StartForgotPwdAction(

@@ -16,6 +16,7 @@ import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class StartSignUpPage extends StatefulWidget {
   const StartSignUpPage({super.key});
@@ -28,6 +29,7 @@ class StartSignUpPage extends StatefulWidget {
 }
 
 class _StartSignUpPageState extends State<StartSignUpPage> {
+  final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
   final _phoneNumberController = TextEditingController();
   ExecuteProcessEvent? mainEvent;
@@ -152,6 +154,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
         ),
       ),
       child: Form(
+        key: _formKey,
         child: Column(
           children: [
             FormInput(
@@ -159,6 +162,9 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
               keyboardType: .phone,
               focusNode: _phoneNumberFocusNode,
               controller: _phoneNumberController,
+              validator: Validator.phoneValidator(
+                l10n.validationPhoneInvalid,
+              ),
               next: (_) {
                 _continue();
               },
@@ -172,6 +178,8 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
 
   void _continue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     final phone = _phoneNumberController.text.trim();
     if (phone.isEmpty) return;

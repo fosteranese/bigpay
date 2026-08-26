@@ -16,6 +16,7 @@ import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class CreatePwdForgotPwdPage extends StatefulWidget {
   const CreatePwdForgotPwdPage({super.key});
@@ -29,6 +30,7 @@ class CreatePwdForgotPwdPage extends StatefulWidget {
 
 class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
   ExecuteProcessEvent? mainEvent;
+  final _formKey = GlobalKey<FormState>();
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
 
@@ -104,6 +106,7 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
           },
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -113,6 +116,9 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
                 label: l10n.commonPasswordLabel,
                 focusNode: _passwordFocusNode,
                 controller: _passwordController,
+                validator: Validator.requiredField(
+                  l10n.validationPasswordRequired,
+                ),
                 next: (_) {
                   _confirmPasswordFocusNode.requestFocus();
                 },
@@ -123,6 +129,15 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
                 label: l10n.commonConfirmPasswordLabel,
                 focusNode: _confirmPasswordFocusNode,
                 controller: _confirmPasswordController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.validationPasswordRequired;
+                  }
+                  if (value != _passwordController.text) {
+                    return l10n.passwordMismatch;
+                  }
+                  return null;
+                },
                 onChanged: _onChanged,
               ),
               ValueListenableBuilder(
@@ -168,6 +183,8 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
 
   void _onContinue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     mainEvent = context.dispatchProcess(
       CompleteForgotPwdAction(

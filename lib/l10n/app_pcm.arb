@@ -58,6 +58,15 @@
   "authPasswordRequiredMessage": "Login with your password first before you fit use biometric login.",
   "authPasswordRequiredError": "Password dey required",
 
+  "validationPhoneRequired": "You go need phone number",
+  "validationPhoneInvalid": "Put valid Ghana phone number (e.g. 0241234567)",
+  "validationEmailInvalid": "Put valid email address",
+  "validationPasswordRequired": "Password dey required",
+  "validationPinRequired": "PIN dey required",
+  "validationPinMismatch": "PIN no match",
+  "validationAnswerRequired": "Security answer dey required",
+  "validationFieldRequired": "This field dey required",
+
   "authUseDifferentAccount": "Na no be you? Use another account",
   "authWelcomeBack": "Welcome back",
   "authSignInToContinue": "Sign in make you continue",

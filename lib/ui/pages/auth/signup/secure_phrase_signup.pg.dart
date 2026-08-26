@@ -11,6 +11,7 @@ import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class CreateSecurePhrasePage extends StatefulWidget {
   const CreateSecurePhrasePage({super.key});
@@ -23,6 +24,7 @@ class CreateSecurePhrasePage extends StatefulWidget {
 }
 
 class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
+  final _formKey = GlobalKey<FormState>();
   final _answerFocusNode = FocusNode();
   final _questionFocusNode = FocusNode();
 
@@ -73,6 +75,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
         },
       ),
       child: Form(
+        key: _formKey,
         child: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .start,
@@ -101,6 +104,9 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
               label: l10n.authAnswerToQuestionLabel,
               focusNode: _answerFocusNode,
               controller: _answerController,
+              validator: Validator.requiredField(
+                l10n.validationFieldRequired,
+              ),
               onChanged: _onChanged,
             ),
           ],
@@ -117,6 +123,8 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
 
   void _continue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     SignUp.secretQuestion = _questionController.text.trim();
     SignUp.secretAnswer = _answerController.text.trim();

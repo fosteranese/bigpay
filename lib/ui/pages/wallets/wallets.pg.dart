@@ -41,6 +41,12 @@ class _WalletsPageState extends State<WalletsPage> {
 
   void _openWallet(Account account) {
     if (context.usesSplitView) {
+      // Synchronous, before setState — see the matching comment in
+      // services.pg.dart's _openService. Marks MainShell dirty in the same
+      // window as this page's own rebuild instead of a frame later, so the
+      // sidebar collapsing and the split appearing happen in one frame
+      // instead of visibly jumping in two steps.
+      AppState.splitDetailOpenNotifier.value = true;
       setState(() => _selectedAccount = account);
       return;
     }
@@ -49,6 +55,11 @@ class _WalletsPageState extends State<WalletsPage> {
       VirtualWalletPage.route.path,
       extra: account,
     );
+  }
+
+  void _closeDetails() {
+    AppState.splitDetailOpenNotifier.value = false;
+    setState(() => _selectedAccount = null);
   }
 
   void _showContextMenu(BuildContext context) {
@@ -85,6 +96,17 @@ class _WalletsPageState extends State<WalletsPage> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    // Leaving the page entirely (e.g. switching tabs) with a split still
+    // open — don't leave the sidebar permanently collapsed with nothing
+    // left to justify it.
+    if (_selectedAccount != null) {
+      AppState.splitDetailOpenNotifier.value = false;
+    }
+    super.dispose();
+  }
+
   void _load() {
     mainEvent = context.dispatchProcess(
       GetWalletsAction(),
@@ -102,7 +124,7 @@ class _WalletsPageState extends State<WalletsPage> {
               // (Account extends Equatable, so this compares by value).
               key: ValueKey(_selectedAccount),
               account: _selectedAccount,
-              onBack: () => setState(() => _selectedAccount = null),
+              onBack: _closeDetails,
             ),
       master: _master(context),
     );

@@ -28,6 +28,7 @@ import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/phone.util.dart';
 import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class NewLoginPage extends StatefulWidget {
   const NewLoginPage({super.key});
@@ -40,6 +41,7 @@ class NewLoginPage extends StatefulWidget {
 }
 
 class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
+  final _formKey = GlobalKey<FormState>();
   final _phoneNumberController = TextEditingController();
   final _phoneNumberFocusNode = FocusNode();
   final _passwordController = TextEditingController();
@@ -201,6 +203,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
           text: l10n.authSignIn,
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -255,6 +258,9 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                   keyboardType: .phone,
                   focusNode: _phoneNumberFocusNode,
                   controller: _phoneNumberController,
+                  validator: Validator.phoneValidator(
+                    l10n.validationPhoneInvalid,
+                  ),
                   next: (_) {
                     _passwordFocusNode.requestFocus();
                   },
@@ -269,6 +275,9 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
                 placeholder: l10n.commonPasswordPlaceholder,
                 controller: _passwordController,
                 focusNode: _passwordFocusNode,
+                validator: Validator.requiredField(
+                  l10n.validationPasswordRequired,
+                ),
               ),
               Row(
                 mainAxisSize: .max,
@@ -333,6 +342,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
   void _onSave() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     if (_phoneNumberController.text.trim() ==
         AppState.currentUser?.user?.shortName?.toLocalPhone) {

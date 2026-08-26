@@ -16,6 +16,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/utils/app_modal.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -59,6 +60,12 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   void dispose() {
+    // Leaving the page entirely (e.g. switching tabs) with a split still
+    // open — don't leave the sidebar permanently collapsed with nothing
+    // left to justify it.
+    if (_selectedRecord != null) {
+      AppState.splitDetailOpenNotifier.value = false;
+    }
     _searchController.dispose();
     super.dispose();
   }
@@ -90,6 +97,12 @@ class _HistoryPageState extends State<HistoryPage> {
 
   void _openReceipt(RequestResponse record) {
     if (context.usesSplitView) {
+      // Synchronous, before setState — see the matching comment in
+      // services.pg.dart's _openService. Marks MainShell dirty in the same
+      // window as this page's own rebuild instead of a frame later, so the
+      // sidebar collapsing and the split appearing happen in one frame
+      // instead of visibly jumping in two steps.
+      AppState.splitDetailOpenNotifier.value = true;
       setState(() => _selectedRecord = record);
       return;
     }
@@ -100,6 +113,11 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
+  void _closeDetails() {
+    AppState.splitDetailOpenNotifier.value = false;
+    setState(() => _selectedRecord = null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MasterDetailLayout(
@@ -107,7 +125,7 @@ class _HistoryPageState extends State<HistoryPage> {
           ? null
           : TransactionDetailsView(
               receipt: _selectedRecord!,
-              onBack: () => setState(() => _selectedRecord = null),
+              onBack: _closeDetails,
             ),
       master: _master(context),
     );

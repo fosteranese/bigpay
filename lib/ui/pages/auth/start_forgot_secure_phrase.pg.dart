@@ -11,6 +11,7 @@ import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/validator.util.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class StartForgotSecurePhrasePage extends StatefulWidget {
@@ -27,6 +28,7 @@ class StartForgotSecurePhrasePage extends StatefulWidget {
 class _StartForgotSecurePhrasePageState
     extends State<StartForgotSecurePhrasePage> {
   ExecuteProcessEvent? mainEvent;
+  final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
   final _phoneNumberController = TextEditingController(
     text: ForgotPwd.phoneNumber,
@@ -93,6 +95,7 @@ class _StartForgotSecurePhrasePageState
           },
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -102,6 +105,9 @@ class _StartForgotSecurePhrasePageState
                 label: AppLocalizations.of(context)!.commonPhoneNumberLabel,
                 focusNode: _phoneNumberFocusNode,
                 controller: _phoneNumberController,
+                validator: Validator.phoneValidator(
+                  AppLocalizations.of(context)!.validationPhoneInvalid,
+                ),
                 next: (_) {
                   _emailFocusNode.requestFocus();
                 },
@@ -113,6 +119,9 @@ class _StartForgotSecurePhrasePageState
                 label: AppLocalizations.of(context)!.authEmailAddressLabel,
                 focusNode: _emailFocusNode,
                 controller: _emailController,
+                validator: Validator.emailValidator(
+                  AppLocalizations.of(context)!.validationEmailInvalid,
+                ),
                 next: (_) {
                   FocusScope.of(context).unfocus();
                 },
@@ -134,6 +143,8 @@ class _StartForgotSecurePhrasePageState
 
   void _onContinue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     mainEvent = context.dispatchProcess(
       ForgotSecurePhraseAction(

@@ -158,6 +158,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordRequiredError => 'Le mot de passe est requis';
 
   @override
+  String get validationPhoneRequired => 'Phone number is required';
+
+  @override
+  String get validationPhoneInvalid =>
+      'Enter a valid Ghana phone number (e.g. 0241234567)';
+
+  @override
+  String get validationEmailInvalid => 'Enter a valid email address';
+
+  @override
+  String get validationPasswordRequired => 'Password is required';
+
+  @override
+  String get validationPinRequired => 'PIN is required';
+
+  @override
+  String get validationPinMismatch => 'PINs do not match';
+
+  @override
+  String get validationAnswerRequired => 'Security answer is required';
+
+  @override
+  String get validationFieldRequired => 'This field is required';
+
+  @override
   String get authUseDifferentAccount =>
       'Ce n\'est pas vous ? Utilisez un autre compte';
 

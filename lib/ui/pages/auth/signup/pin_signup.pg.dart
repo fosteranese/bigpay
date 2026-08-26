@@ -31,6 +31,7 @@ class PinSignUpPage extends StatefulWidget {
 class _PinSignUpPageState extends State<PinSignUpPage> {
   ExecuteProcessEvent? mainEvent;
 
+  final _formKey = GlobalKey<FormState>();
   final _pinFocusNode = FocusNode();
   final _confirmPinFocusNode = FocusNode();
 
@@ -122,6 +123,7 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
           },
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -132,6 +134,12 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
                 length: 6,
                 focusNode: _pinFocusNode,
                 controller: _pinController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.validationPinRequired;
+                  }
+                  return null;
+                },
                 next: (_) {
                   _confirmPinFocusNode.requestFocus();
                 },
@@ -143,8 +151,16 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
                 length: 6,
                 focusNode: _confirmPinFocusNode,
                 controller: _confirmPinController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.validationPinRequired;
+                  }
+                  if (value != _pinController.text) {
+                    return l10n.validationPinMismatch;
+                  }
+                  return null;
+                },
                 onChanged: _onChanged,
-                // next: (_) => _onSave(),
               ),
             ],
           ),

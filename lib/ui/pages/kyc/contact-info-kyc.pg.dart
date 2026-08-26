@@ -13,6 +13,7 @@ import 'package:bigpay/ui/pages/kyc/kyc.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class ContactInfoKycPage extends StatefulWidget {
   const ContactInfoKycPage({super.key});
@@ -25,6 +26,7 @@ class ContactInfoKycPage extends StatefulWidget {
 }
 
 class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
+  final _formKey = GlobalKey<FormState>();
   final _emailAddressFocusNode = FocusNode();
   final _streetAddressFocusNode = FocusNode();
   final _digitalAddressFocusNode = FocusNode();
@@ -124,6 +126,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
           },
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
@@ -133,6 +136,9 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
                 focusNode: _emailAddressFocusNode,
                 controller: _emailAddressController,
                 label: l10n.profileEmailAddressLabel,
+                validator: Validator.emailValidator(
+                  l10n.validationEmailInvalid,
+                ),
                 onChanged: _onChanged,
                 next: (value) {
                   _streetAddressFocusNode.requestFocus();
@@ -168,6 +174,9 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
 
   void _continue() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
+
     mainEvent = context.dispatchProcess(
       AutoGhanaCardVerificationAction(
         payload: AutoGhanaCardVerificationActionPayload(

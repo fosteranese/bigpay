@@ -159,6 +159,31 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get authPasswordRequiredError => 'Password dey required';
 
   @override
+  String get validationPhoneRequired => 'You go need phone number';
+
+  @override
+  String get validationPhoneInvalid =>
+      'Put valid Ghana phone number (e.g. 0241234567)';
+
+  @override
+  String get validationEmailInvalid => 'Put valid email address';
+
+  @override
+  String get validationPasswordRequired => 'Password dey required';
+
+  @override
+  String get validationPinRequired => 'PIN dey required';
+
+  @override
+  String get validationPinMismatch => 'PIN no match';
+
+  @override
+  String get validationAnswerRequired => 'Security answer dey required';
+
+  @override
+  String get validationFieldRequired => 'This field dey required';
+
+  @override
   String get authUseDifferentAccount => 'Na no be you? Use another account';
 
   @override
