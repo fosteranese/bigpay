@@ -48,11 +48,7 @@ class _IntroKycPageState extends State<IntroKycPage> {
         },
         text: l10n.commonContinue,
       ),
-      builder: (_) => SliverFillRemaining(
-        fillOverscroll: true,
-        hasScrollBody: false,
-        child: SvgPicture.asset(SvgImages.ghanaCard),
-      ),
+      child: SvgPicture.asset(SvgImages.ghanaCard),
     );
   }
 }

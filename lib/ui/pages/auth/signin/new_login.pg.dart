@@ -209,65 +209,21 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
-              if (SignIn.phoneNumber.isNotEmpty)
-                Row(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: .spaceBetween,
-                  crossAxisAlignment: .center,
-                  children: [
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: l10n.authWelcomeBackPrefix,
-                            ),
-                            TextSpan(
-                              text: AppState.currentUser?.user?.name ?? '',
-                              style: context.p1Bold.copyWith(
-                                color: context.textPrimary,
-                              ),
-                            ),
-                            TextSpan(
-                              text: l10n.authEnterPasswordContinueSuffix,
-                            ),
-                          ],
-                          style: context.p1.copyWith(
-                            color: context.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 90,
-                      child: FormButton(
-                        height: 44,
-                        onPressed: () {
-                          setState(() {
-                            SignIn.phoneNumber = '';
-                          });
-                        },
-                        text: l10n.commonChange,
-                      ),
-                    ),
-                  ],
-                )
-              else
-                FormInput(
-                  label: l10n.commonPhoneNumberLabel,
-                  keyboardType: .phone,
-                  focusNode: _phoneNumberFocusNode,
-                  controller: _phoneNumberController,
-                  validator: Validator.phoneValidator(
-                    l10n.validationPhoneInvalid,
-                  ),
-                  next: (_) {
-                    _passwordFocusNode.requestFocus();
-                  },
-                  onChanged: (value) {
-                    SignIn.phoneNumber = value.trim();
-                  },
+              FormInput(
+                label: l10n.commonPhoneNumberLabel,
+                keyboardType: .phone,
+                focusNode: _phoneNumberFocusNode,
+                controller: _phoneNumberController,
+                validator: Validator.phoneValidator(
+                  l10n.validationPhoneInvalid,
                 ),
+                next: (_) {
+                  _passwordFocusNode.requestFocus();
+                },
+                onChanged: (value) {
+                  SignIn.phoneNumber = value.trim();
+                },
+              ),
 
               SizedBox(height: Spacing.lg),
               FormPasswordInput(
