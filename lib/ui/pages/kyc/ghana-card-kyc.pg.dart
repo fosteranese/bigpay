@@ -4,6 +4,7 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
 class GhanaCardKycPage extends StatefulWidget {
@@ -80,7 +81,7 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
                 _issueDateFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             Row(
               children: [
                 Expanded(
@@ -96,7 +97,7 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: Spacing.lg),
                 Expanded(
                   child: FormDateInput(
                     focusNode: _expiryDateFocusNode,

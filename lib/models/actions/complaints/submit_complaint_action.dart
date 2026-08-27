@@ -26,7 +26,7 @@ class SubmitComplaintPayload implements ActionPayloadSerializable {
 
   @override
   Map<String, dynamic> toJson() => {
-    'categoryId': categoryId,
+    'category': categoryId,
     'subject': subject,
     'message': message,
   };

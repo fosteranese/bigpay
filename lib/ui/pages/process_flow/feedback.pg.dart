@@ -197,13 +197,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     ),
                 ],
               ),
-              SizedBox(height: 15),
+              SizedBox(height: Spacing.lg),
               FormInput(
                 label: AppLocalizations.of(context)!.feedbackSubjectLabel,
                 controller: _subjectController,
                 focusNode: _subjectFocusNode,
               ),
-              SizedBox(height: 15),
+              SizedBox(height: Spacing.lg),
               FormTextAreaInput(
                 label: AppLocalizations.of(context)!.feedbackMessageLabel,
                 placeholder: AppLocalizations.of(context)!.feedbackMessagePlaceholder,

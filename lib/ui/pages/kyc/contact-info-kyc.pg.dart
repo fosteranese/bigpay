@@ -10,6 +10,7 @@ import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
@@ -144,7 +145,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
                   _streetAddressFocusNode.requestFocus();
                 },
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: Spacing.lg),
               FormInput(
                 focusNode: _streetAddressFocusNode,
                 controller: _streetAddressController,
@@ -154,7 +155,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
                   _digitalAddressFocusNode.requestFocus();
                 },
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: Spacing.lg),
               FormInput(
                 focusNode: _digitalAddressFocusNode,
                 controller: _digitalAddressController,

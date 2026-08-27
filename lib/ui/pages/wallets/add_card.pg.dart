@@ -176,7 +176,7 @@ class _AddCardPageState extends State<AddCardPage> {
                   label: l10n.walletsCvvLabel,
                 ),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: Spacing.lg),
               Expanded(
                 child: FormInput(
                   controller: _expiryController,

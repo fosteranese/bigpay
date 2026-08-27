@@ -1,5 +1,6 @@
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
@@ -94,7 +95,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _districtFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _districtFocusNode,
               controller: _districtController,
@@ -104,7 +105,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _cityFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _cityFocusNode,
               controller: _cityController,
@@ -114,7 +115,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _digitalAddressFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _digitalAddressFocusNode,
               controller: _digitalAddressController,
@@ -124,7 +125,7 @@ class _ResidentialInfoKycPageState extends State<ResidentialInfoKycPage> {
                 _countryFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormSelectInput(
               focusNode: _countryFocusNode,
               controller: _countryController,

@@ -1,5 +1,6 @@
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
@@ -101,7 +102,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                 _middleNameFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _middleNameFocusNode,
               controller: _middleNameController,
@@ -111,7 +112,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                 _lastNameFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _lastNameFocusNode,
               controller: _lastNameController,
@@ -121,7 +122,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                 _emailAddressFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _emailAddressFocusNode,
               controller: _emailAddressController,
@@ -131,7 +132,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                 _birthDateFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormDateInput(
               focusNode: _birthDateFocusNode,
               controller: _birthDateController,
@@ -143,7 +144,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                 _genderFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             Row(
               children: [
                 Expanded(
@@ -158,7 +159,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: Spacing.lg),
                 Expanded(
                   child: FormSelectInput(
                     focusNode: _nationalityFocusNode,
