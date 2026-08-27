@@ -82,22 +82,22 @@ class AppLocalizationsEs extends AppLocalizations {
       'La contraseña debe tener al menos 6 caracteres e incluir letras, números y caracteres especiales (p. ej., !\$@%).';
 
   @override
-  String get passwordRuleMinLength => 'At least 6 characters';
+  String get passwordRuleMinLength => 'Al menos 6 caracteres';
 
   @override
-  String get passwordRuleUppercase => 'At least one uppercase letter';
+  String get passwordRuleUppercase => 'Al menos una letra mayúscula';
 
   @override
-  String get passwordRuleLowercase => 'At least one lowercase letter';
+  String get passwordRuleLowercase => 'Al menos una letra minúscula';
 
   @override
-  String get passwordRuleNumber => 'At least one number';
+  String get passwordRuleNumber => 'Al menos un número';
 
   @override
-  String get passwordRuleSpecialChar => 'At least one special character';
+  String get passwordRuleSpecialChar => 'Al menos un carácter especial';
 
   @override
-  String get passwordMismatch => 'Passwords do not match';
+  String get passwordMismatch => 'Las contraseñas no coinciden';
 
   @override
   String get authSetSecurityPinTitle => 'Establecer PIN de seguridad';
@@ -158,29 +158,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authPasswordRequiredError => 'La contraseña es obligatoria';
 
   @override
-  String get validationPhoneRequired => 'Phone number is required';
+  String get validationPhoneRequired => 'El número de teléfono es obligatorio';
 
   @override
   String get validationPhoneInvalid =>
-      'Enter a valid Ghana phone number (e.g. 0241234567)';
+      'Introduce un número de teléfono de Ghana válido (ej. 0241234567)';
 
   @override
-  String get validationEmailInvalid => 'Enter a valid email address';
+  String get validationEmailInvalid =>
+      'Introduce una dirección de correo electrónico válida';
 
   @override
-  String get validationPasswordRequired => 'Password is required';
+  String get validationPasswordRequired => 'La contraseña es obligatoria';
 
   @override
-  String get validationPinRequired => 'PIN is required';
+  String get validationPinRequired => 'El PIN es obligatorio';
 
   @override
-  String get validationPinMismatch => 'PINs do not match';
+  String get validationPinMismatch => 'Los PIN no coinciden';
 
   @override
-  String get validationAnswerRequired => 'Security answer is required';
+  String get validationAnswerRequired =>
+      'La respuesta de seguridad es obligatoria';
 
   @override
-  String get validationFieldRequired => 'This field is required';
+  String get validationFieldRequired => 'Este campo es obligatorio';
 
   @override
   String get authUseDifferentAccount => '¿No eres tú? Usa otra cuenta';
@@ -281,7 +283,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get securitySignInWithBiometrics => 'Iniciar sesión con biometría';
 
   @override
-  String get securityUnlockBigPay => 'Unlock BigPay';
+  String get securityUnlockBigPay => 'Desbloquear BigPay';
 
   @override
   String get securityTransactWithBiometrics => 'Transaccionar con biometría';
@@ -865,57 +867,58 @@ class AppLocalizationsEs extends AppLocalizations {
       'Envía, recibe y gestiona tu dinero, de forma simple y segura.';
 
   @override
-  String get stepSignupPhone => 'Your number';
+  String get stepSignupPhone => 'Tu número';
 
   @override
-  String get stepSignupCode => 'Confirm code';
+  String get stepSignupCode => 'Confirmar código';
 
   @override
-  String get stepSignupPassword => 'Create password';
+  String get stepSignupPassword => 'Crear contraseña';
 
   @override
-  String get stepSignupSecurity => 'Security phrase';
+  String get stepSignupSecurity => 'Frase de seguridad';
 
   @override
-  String get stepSignupPin => 'Set your PIN';
+  String get stepSignupPin => 'Establece tu PIN';
 
   @override
-  String get stepForgotVerify => 'Verify it\'s you';
+  String get stepForgotVerify => 'Verifica que eres tú';
 
   @override
-  String get stepForgotCode => 'Confirm code';
+  String get stepForgotCode => 'Confirmar código';
 
   @override
-  String get stepForgotPassword => 'New password';
+  String get stepForgotPassword => 'Nueva contraseña';
 
   @override
-  String get stepKycId => 'Your ID';
+  String get stepKycId => 'Tu identificación';
 
   @override
-  String get stepKycSelfie => 'Quick selfie';
+  String get stepKycSelfie => 'Selfie rápida';
 
   @override
-  String get stepKycContact => 'Contact info';
+  String get stepKycContact => 'Información de contacto';
 
   @override
-  String get stepSigninDetails => 'Sign in';
+  String get stepSigninDetails => 'Iniciar sesión';
 
   @override
-  String get stepSigninSecurity => 'Security check';
+  String get stepSigninSecurity => 'Verificación de seguridad';
 
   @override
-  String get stepSigninCode => 'Confirm code';
+  String get stepSigninCode => 'Confirmar código';
 
   @override
-  String get connectivityLostTitle => 'No internet connection';
+  String get connectivityLostTitle => 'Sin conexión a internet';
 
   @override
   String get connectivityLostMessage =>
-      'Check your network settings and try again.';
+      'Revisa la configuración de tu red e inténtalo de nuevo.';
 
   @override
-  String get connectivityRestoredTitle => 'You\'re back online';
+  String get connectivityRestoredTitle => 'Has vuelto a estar en línea';
 
   @override
-  String get connectivityRestoredMessage => 'Connection restored successfully.';
+  String get connectivityRestoredMessage =>
+      'Conexión restablecida correctamente.';
 }

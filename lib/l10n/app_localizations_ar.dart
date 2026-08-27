@@ -82,22 +82,22 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل وتشمل حروفًا وأرقامًا ورموزًا خاصة (مثل !\$@%).';
 
   @override
-  String get passwordRuleMinLength => 'At least 6 characters';
+  String get passwordRuleMinLength => '6 أحرف على الأقل';
 
   @override
-  String get passwordRuleUppercase => 'At least one uppercase letter';
+  String get passwordRuleUppercase => 'حرف كبير واحد على الأقل';
 
   @override
-  String get passwordRuleLowercase => 'At least one lowercase letter';
+  String get passwordRuleLowercase => 'حرف صغير واحد على الأقل';
 
   @override
-  String get passwordRuleNumber => 'At least one number';
+  String get passwordRuleNumber => 'رقم واحد على الأقل';
 
   @override
-  String get passwordRuleSpecialChar => 'At least one special character';
+  String get passwordRuleSpecialChar => 'رمز خاص واحد على الأقل';
 
   @override
-  String get passwordMismatch => 'Passwords do not match';
+  String get passwordMismatch => 'كلمتا المرور غير متطابقتين';
 
   @override
   String get authSetSecurityPinTitle => 'تعيين رمز الأمان';
@@ -158,29 +158,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authPasswordRequiredError => 'كلمة المرور مطلوبة';
 
   @override
-  String get validationPhoneRequired => 'Phone number is required';
+  String get validationPhoneRequired => 'رقم الهاتف مطلوب';
 
   @override
   String get validationPhoneInvalid =>
-      'Enter a valid Ghana phone number (e.g. 0241234567)';
+      'أدخل رقم هاتف غانيًا صالحًا (مثال: 0241234567)';
 
   @override
-  String get validationEmailInvalid => 'Enter a valid email address';
+  String get validationEmailInvalid => 'أدخل عنوان بريد إلكتروني صالحًا';
 
   @override
-  String get validationPasswordRequired => 'Password is required';
+  String get validationPasswordRequired => 'كلمة المرور مطلوبة';
 
   @override
-  String get validationPinRequired => 'PIN is required';
+  String get validationPinRequired => 'رمز PIN مطلوب';
 
   @override
-  String get validationPinMismatch => 'PINs do not match';
+  String get validationPinMismatch => 'رمزا PIN غير متطابقين';
 
   @override
-  String get validationAnswerRequired => 'Security answer is required';
+  String get validationAnswerRequired => 'إجابة الأمان مطلوبة';
 
   @override
-  String get validationFieldRequired => 'This field is required';
+  String get validationFieldRequired => 'هذا الحقل مطلوب';
 
   @override
   String get authUseDifferentAccount => 'لست أنت؟ استخدم حسابًا آخر';
@@ -279,7 +279,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get securitySignInWithBiometrics => 'تسجيل الدخول بالبصمة';
 
   @override
-  String get securityUnlockBigPay => 'Unlock BigPay';
+  String get securityUnlockBigPay => 'فتح BigPay';
 
   @override
   String get securityTransactWithBiometrics => 'إجراء المعاملات بالبصمة';
@@ -852,57 +852,57 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authBrandTagline => 'أرسل واستقبل وأدر أموالك — ببساطة وأمان.';
 
   @override
-  String get stepSignupPhone => 'Your number';
+  String get stepSignupPhone => 'رقمك';
 
   @override
-  String get stepSignupCode => 'Confirm code';
+  String get stepSignupCode => 'تأكيد الرمز';
 
   @override
-  String get stepSignupPassword => 'Create password';
+  String get stepSignupPassword => 'إنشاء كلمة المرور';
 
   @override
-  String get stepSignupSecurity => 'Security phrase';
+  String get stepSignupSecurity => 'عبارة الأمان';
 
   @override
-  String get stepSignupPin => 'Set your PIN';
+  String get stepSignupPin => 'عيّن رمز PIN';
 
   @override
-  String get stepForgotVerify => 'Verify it\'s you';
+  String get stepForgotVerify => 'تحقق من أنك أنت';
 
   @override
-  String get stepForgotCode => 'Confirm code';
+  String get stepForgotCode => 'تأكيد الرمز';
 
   @override
-  String get stepForgotPassword => 'New password';
+  String get stepForgotPassword => 'كلمة مرور جديدة';
 
   @override
-  String get stepKycId => 'Your ID';
+  String get stepKycId => 'هويتك';
 
   @override
-  String get stepKycSelfie => 'Quick selfie';
+  String get stepKycSelfie => 'سيلفي سريع';
 
   @override
-  String get stepKycContact => 'Contact info';
+  String get stepKycContact => 'معلومات الاتصال';
 
   @override
-  String get stepSigninDetails => 'Sign in';
+  String get stepSigninDetails => 'تسجيل الدخول';
 
   @override
-  String get stepSigninSecurity => 'Security check';
+  String get stepSigninSecurity => 'فحص الأمان';
 
   @override
-  String get stepSigninCode => 'Confirm code';
+  String get stepSigninCode => 'تأكيد الرمز';
 
   @override
-  String get connectivityLostTitle => 'No internet connection';
+  String get connectivityLostTitle => 'لا يوجد اتصال بالإنترنت';
 
   @override
   String get connectivityLostMessage =>
-      'Check your network settings and try again.';
+      'تحقق من إعدادات الشبكة وحاول مرة أخرى.';
 
   @override
-  String get connectivityRestoredTitle => 'You\'re back online';
+  String get connectivityRestoredTitle => 'أنت متصل مرة أخرى';
 
   @override
-  String get connectivityRestoredMessage => 'Connection restored successfully.';
+  String get connectivityRestoredMessage => 'تمت استعادة الاتصال بنجاح.';
 }
