@@ -48,7 +48,19 @@ class _IntroKycPageState extends State<IntroKycPage> {
         },
         text: l10n.commonContinue,
       ),
-      child: SvgPicture.asset(SvgImages.ghanaCard),
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          Flexible(
+            child: AspectRatio(
+              aspectRatio: 1.4,
+              child: FittedBox(
+                child: SvgPicture.asset(SvgImages.ghanaCard),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
