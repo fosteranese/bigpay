@@ -30,6 +30,7 @@ class ServicePage extends StatefulWidget {
     required this.category,
     this.amDoing = AmDoing.transaction,
     this.useScaffold = true,
+    this.onBack,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/service',
@@ -44,6 +45,12 @@ class ServicePage extends StatefulWidget {
   /// its body on a real device. Pushed-page usage (the default) is
   /// unaffected.
   final bool useScaffold;
+
+  /// Clears the split pane's selection instead of popping a route — for
+  /// inline pane usage (see [useScaffold]), where there's nothing to pop
+  /// (the services list is still the top route). Left null for pushed-page
+  /// usage, which keeps the default back-pops-the-route behavior.
+  final VoidCallback? onBack;
 
   @override
   State<ServicePage> createState() => _ServicePageState();
@@ -142,6 +149,7 @@ class _ServicePageState extends State<ServicePage> {
       ],
       child: MainLayout(
         useScaffold: widget.useScaffold,
+        onBack: widget.onBack,
         bottomSize: 50,
         title: widget.activityDatum.activity?.activityName ?? '',
         onRefresh: _onRefresh,

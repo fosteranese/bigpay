@@ -79,6 +79,14 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
     });
   }
 
+  void _closeDetails() {
+    AppState.splitDetailOpenNotifier.value = false;
+    setState(() {
+      _selectedActivity = null;
+      _selectedCategory = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -174,6 +182,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
                 activityDatum: _selectedActivity!,
                 category: _selectedCategory!,
                 useScaffold: false,
+                onBack: _closeDetails,
               ),
         master: _master(context),
       ),
