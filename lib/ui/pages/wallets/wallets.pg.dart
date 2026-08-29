@@ -12,6 +12,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -33,6 +34,15 @@ class WalletsPage extends StatefulWidget {
 class _WalletsPageState extends State<WalletsPage> {
   final _buttonKey = GlobalKey();
   ExecuteProcessEvent? mainEvent;
+
+  /// The last successful result, retained so the list survives once the
+  /// detail pane's own fetches (e.g. [VirtualWalletView]'s mini-statement)
+  /// dispatch their own events — [ProcessBloc] tracks a single current
+  /// event/state pair, so once another event has been dispatched,
+  /// [mainEvent]'s own live snapshot goes stale (reads back empty) until it
+  /// is redispatched. Without this cache, going back from the split-view
+  /// detail pane briefly showed an empty wallets list.
+  List<Account>? _accounts;
 
   /// The wallet shown in the detail pane in split view
   /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
@@ -115,18 +125,26 @@ class _WalletsPageState extends State<WalletsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterDetailLayout(
-      detail: _selectedAccount == null
-          ? null
-          : VirtualWalletView(
-              // Without a key, switching the selection reuses the same
-              // State instead of creating a fresh one for the new account
-              // (Account extends Equatable, so this compares by value).
-              key: ValueKey(_selectedAccount),
-              account: _selectedAccount,
-              onBack: _closeDetails,
-            ),
-      master: _master(context),
+    return ProcessListener<List<Account>>(
+      event: () => mainEvent,
+      listener: (context, snapshot) {
+        if (snapshot.hasData) {
+          setState(() => _accounts = snapshot.data);
+        }
+      },
+      child: MasterDetailLayout(
+        detail: _selectedAccount == null
+            ? null
+            : VirtualWalletView(
+                // Without a key, switching the selection reuses the same
+                // State instead of creating a fresh one for the new account
+                // (Account extends Equatable, so this compares by value).
+                key: ValueKey(_selectedAccount),
+                account: _selectedAccount,
+                onBack: _closeDetails,
+              ),
+        master: _master(context),
+      ),
     );
   }
 
@@ -157,9 +175,21 @@ class _WalletsPageState extends State<WalletsPage> {
       child: ProcessBuilder<List<Account>>(
         event: () => mainEvent,
         builder: (context, snapshot) {
+          if (snapshot.isLoading && _accounts == null) {
+            return Column(
+              children: List.generate(
+                4,
+                (_) => const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: ListItemSkeleton(),
+                ),
+              ),
+            );
+          }
+
           return Column(
             children:
-                snapshot.data?.map((item) {
+                _accounts?.map((item) {
                   return WalletListItem(
                     data: item,
                     onTap: () => _openWallet(item),
