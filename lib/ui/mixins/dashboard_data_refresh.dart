@@ -14,11 +14,23 @@ mixin DashboardDataRefresh<T extends StatefulWidget> on State<T> {
   /// The in-flight refresh, correlated by [dashboardRefreshListener].
   ExecuteProcessEvent? dashboardRefreshEvent;
 
+  /// True from the moment a refresh is dispatched until its result (success
+  /// or error) lands — pages reading straight off [AppState.currentUser]
+  /// have no [ProcessBuilder] snapshot of their own to gate a loading state
+  /// on, so this is what they check instead to swap to a skeleton while a
+  /// pull-to-refresh is in flight, rather than leaving stale content up.
+  bool dashboardRefreshing = false;
+
   /// Dispatches the refresh and completes once it lands, so a
   /// [RefreshIndicator] can hold its spinner until the fresh data arrives.
   Future<void> refreshDashboardData() async {
     final event = context.dispatchProcess(const RefreshDashboardAction());
-    if (mounted) setState(() => dashboardRefreshEvent = event);
+    if (mounted) {
+      setState(() {
+        dashboardRefreshEvent = event;
+        dashboardRefreshing = true;
+      });
+    }
     await context.awaitProcess(event);
   }
 
@@ -27,8 +39,16 @@ mixin DashboardDataRefresh<T extends StatefulWidget> on State<T> {
       ProcessListenerConfig<AuthData>(
         event: () => dashboardRefreshEvent,
         listener: (context, snapshot) {
+          if (snapshot.isLoading) return;
           if (snapshot.hasData) {
-            setState(() => AppState.currentUser = snapshot.data);
+            setState(() {
+              AppState.currentUser = snapshot.data;
+              dashboardRefreshing = false;
+            });
+            return;
+          }
+          if (snapshot.hasError) {
+            setState(() => dashboardRefreshing = false);
           }
         },
       );

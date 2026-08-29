@@ -14,6 +14,7 @@ import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/components/empty_state.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
@@ -213,6 +214,16 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
         builder: (context) {
           final activities = _activities;
           final l10n = AppLocalizations.of(context)!;
+
+          if (dashboardRefreshing && activities.isNotEmpty) {
+            return SliverList.builder(
+              itemCount: activities.length,
+              itemBuilder: (_, _) => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5),
+                child: ListItemSkeleton(),
+              ),
+            );
+          }
 
           if (activities.isEmpty) {
             final searching = _query.isNotEmpty;

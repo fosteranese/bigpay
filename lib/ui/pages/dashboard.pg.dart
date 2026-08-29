@@ -8,6 +8,7 @@ import 'package:bigpay/models/actions/services/get_service_categories_action.dar
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/skeleton.dart';
 import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
 import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
 import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
@@ -355,18 +356,32 @@ class _DashboardPageState extends State<DashboardPage>
                             // instead of just showing more of them at their
                             // natural size, which is what more room should
                             // buy here.
-                            child: ListView.builder(
-                              scrollDirection: .horizontal,
-                              itemCount:
-                                  AppState.currentUser?.recentActivity
-                                      ?.length ??
-                                  0,
-                              itemBuilder: (context, index) {
-                                final item =
-                                    AppState.currentUser!.recentActivity![index];
-                                return FrequentServiceItem(data: item);
-                              },
-                            ),
+                            child: dashboardRefreshing
+                                ? ListView.builder(
+                                    scrollDirection: .horizontal,
+                                    itemCount: 4,
+                                    itemBuilder: (context, _) => Padding(
+                                      padding: const .only(left: 10),
+                                      child: SkeletonBox(
+                                        width: 140,
+                                        height: double.infinity,
+                                        borderRadius: 30,
+                                      ),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: .horizontal,
+                                    itemCount:
+                                        AppState.currentUser?.recentActivity
+                                            ?.length ??
+                                        0,
+                                    itemBuilder: (context, index) {
+                                      final item = AppState
+                                          .currentUser!
+                                          .recentActivity![index];
+                                      return FrequentServiceItem(data: item);
+                                    },
+                                  ),
                           ),
                         ],
                       ),
@@ -398,12 +413,24 @@ class _DashboardPageState extends State<DashboardPage>
                         mainAxisExtent: 124,
                       ),
                       delegate: SliverChildListDelegate(
-                        AppState.currentUser?.activities?.map((item) {
-                              return ActionButton(
-                                data: item,
-                              );
-                            }).toList() ??
-                            [],
+                        dashboardRefreshing &&
+                                (AppState.currentUser?.activities
+                                        ?.isNotEmpty ??
+                                    false)
+                            ? List.generate(
+                                AppState.currentUser!.activities!.length,
+                                (_) => const SkeletonBox(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  borderRadius: 14,
+                                ),
+                              )
+                            : AppState.currentUser?.activities?.map((item) {
+                                    return ActionButton(
+                                      data: item,
+                                    );
+                                  }).toList() ??
+                                  [],
                       ),
                     ),
                   ),
