@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/signup/start_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 class StartSignUpPage extends StatefulWidget {
   const StartSignUpPage({super.key});
@@ -26,11 +29,10 @@ class StartSignUpPage extends StatefulWidget {
 }
 
 class _StartSignUpPageState extends State<StartSignUpPage> {
+  final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
   final _phoneNumberController = TextEditingController();
   ExecuteProcessEvent? mainEvent;
-
-  late final _id = Uuid().v4();
 
   @override
   dispose() {
@@ -41,54 +43,66 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Sign Up',
-      titleStyle: AppTypography.display1,
-      subtitleWidget: Row(
+      maxWidth: 480,
+      title: l10n.authSignUpTitle,
+      titleStyle: context.display1,
+      stepIndicator: StepProgress(
+        currentStep: 0,
+        totalSteps: 5,
+        labels: l10n.signupSteps,
+      ),
+      subtitleWidget: Column(
+        mainAxisSize: .min,
         children: [
-          Text(
-            'Already have an account?',
-            style: AppTypography.smallDetails,
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              tapTargetSize: .shrinkWrap,
-            ),
-            onPressed: () {
-              AppRouter.router.push(
-                NewLoginPage.route.path,
-              );
-            },
-            child: Text(
-              'Sign in',
-              style: AppTypography.buttons.copyWith(
-                color: AppColors.secondary,
+          Row(
+            children: [
+              Text(
+                l10n.authAlreadyHaveAccount,
+                style: context.smallDetails,
               ),
-            ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  tapTargetSize: .shrinkWrap,
+                ),
+                onPressed: () {
+                  AppRouter.router.push(
+                    NewLoginPage.route.path,
+                  );
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.authSignInLink,
+                  style: context.buttons.copyWith(
+                    color: context.accentGreen,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      bottomNav: BlocListener<ProcessBloc, ProcessState>(
-        listenWhen: (previous, current) => current.event == mainEvent,
-        listener: (context, state) {
-          if (state is ExecutingProcess) {
+      bottomNav: ProcessListener<VerifyUserData>(
+        event: () => mainEvent,
+        listener: (context, snapshot) {
+          if (snapshot.isLoading) {
             MessageUtil.displayLoading(context);
             return;
           } else {
             MessageUtil.close(context);
           }
 
-          if (state is ProcessExecuted) {
+          if (snapshot.hasData) {
             AppRouter.router.push(
               OtpSignUpPage.route.path,
-              extra: state.result.data as StartSignUpData,
+              extra: snapshot.data,
             );
           }
 
-          if (state is ExecuteProcessError) {
+          if (snapshot.hasError) {
             MessageUtil.displayErrorDialog(
               context,
-              message: state.error.message,
+              message: snapshot.error!.message,
             );
             return;
           }
@@ -104,27 +118,27 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
               runAlignment: .start,
               children: [
                 Text(
-                  'By clicking on continue, you accept our ',
-                  style: AppTypography.smallDetails,
+                  l10n.authTermsPrefix,
+                  style: context.smallDetails,
                 ),
                 InkWell(
                   onTap: () {},
                   child: Text(
-                    'Terms of Use',
-                    style: AppTypography.smallDetailsMedium.copyWith(
+                    l10n.authTermsOfUse,
+                    style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),
                 ),
                 Text(
-                  ' and ',
-                  style: AppTypography.smallDetails,
+                  l10n.authAnd,
+                  style: context.smallDetails,
                 ),
                 InkWell(
                   onTap: () {},
                   child: Text(
-                    'Privacy Policy',
-                    style: AppTypography.smallDetailsMedium.copyWith(
+                    l10n.authPrivacyPolicy,
+                    style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),
@@ -134,19 +148,23 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
             const SizedBox(height: 10),
             FormButton(
               onPressed: _continue,
-              text: 'Continue',
+              text: l10n.commonContinue,
             ),
           ],
         ),
       ),
       child: Form(
+        key: _formKey,
         child: Column(
           children: [
             FormInput(
-              label: 'Phone Number',
+              label: l10n.commonPhoneNumberLabel,
               keyboardType: .phone,
               focusNode: _phoneNumberFocusNode,
               controller: _phoneNumberController,
+              validator: Validator.phoneValidator(
+                l10n.validationPhoneInvalid,
+              ),
               next: (_) {
                 _continue();
               },
@@ -161,18 +179,17 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
   void _continue() {
     FocusScope.of(context).unfocus();
 
+    if (!_formKey.currentState!.validate()) return;
+
     final phone = _phoneNumberController.text.trim();
     if (phone.isEmpty) return;
 
-    mainEvent = ExecuteProcessEvent(
-      id: _id,
-      action: StartSignUpAction(
+    mainEvent = context.dispatchProcess(
+      StartSignUpAction(
         payload: StartSignUpActionPayload(
           phoneNumber: phone,
         ),
       ),
     );
-
-    context.read<ProcessBloc>().add(mainEvent!);
   }
 }

@@ -1,45 +1,144 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
+import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/data/models/account/mini_statement.dart';
+import 'package:bigpay/data/models/account/transaction.dart';
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/wallet/get_wallet_transactions_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/dashboard.lo.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_modal.dart';
+import 'package:bigpay/utils/message.util.dart';
 
-class VirtualWalletPage extends StatefulWidget {
-  const VirtualWalletPage({super.key});
+class VirtualWalletPage extends StatelessWidget {
+  const VirtualWalletPage({super.key, this.account});
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/wallets/virtual',
   );
 
-  @override
-  State<VirtualWalletPage> createState() => _VirtualWalletPageState();
-}
+  final Account? account;
 
-class _VirtualWalletPageState extends State<VirtualWalletPage> {
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final statusBarHeight = MediaQuery.of(context).padding.top;
+    return VirtualWalletView(
+      account: account,
+      onBack: () => AppRouter.router.pop(),
+    );
+  }
+}
+
+class VirtualWalletView extends StatefulWidget {
+  const VirtualWalletView({
+    super.key,
+    this.account,
+    required this.onBack,
+  });
+
+  final Account? account;
+  final VoidCallback onBack;
+
+  @override
+  State<VirtualWalletView> createState() => _VirtualWalletViewState();
+}
+
+class _VirtualWalletViewState extends State<VirtualWalletView> {
+  final _dateFromController = TextEditingController();
+  final _dateToController = TextEditingController();
+  ExecuteProcessEvent? _txEvent;
+
+  bool get _isVirtual =>
+      widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
+      widget.account == null;
+
+  String get _sourceValue => widget.account?.sources?.firstOrNull?.value ?? '';
+
+  bool get _hasActiveFilter =>
+      _dateFromController.text.isNotEmpty || _dateToController.text.isNotEmpty;
+
+  String _title(BuildContext context) =>
+      widget.account?.title ??
+      widget.account?.sources?.firstOrNull?.tile ??
+      AppLocalizations.of(context)!.walletsVirtualWalletFallback;
+
+  String get _balance =>
+      widget.account?.sources?.firstOrNull?.balance ?? '0.00';
+
+  double get _height {
+    return _isVirtual ? 160 : 160 - 55;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  void _loadTransactions({DateTime? startDate, DateTime? endDate}) {
+    String? start;
+    String? end;
+    if (startDate != null) {
+      start =
+          '${startDate.year.toString().padLeft(4, '0')}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
+    }
+    if (endDate != null) {
+      end =
+          '${endDate.year.toString().padLeft(4, '0')}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
+    }
+    _txEvent = context.dispatchProcess(
+      GetWalletTransactionsAction(
+        payload: MiniStatementPayload(
+          sourceValue: _sourceValue,
+          startDate: start,
+          endDate: end,
+        ),
+      ),
+    );
+  }
+
+  void _clearFilter() {
+    _dateFromController.clear();
+    _dateToController.clear();
+    _loadTransactions();
+  }
+
+  @override
+  void dispose() {
+    _dateFromController.dispose();
+    _dateToController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final statusBarHeight = MediaQuery.paddingOf(context).top;
     const appBarHeight = kToolbarHeight;
     final totalAppBarHeight = statusBarHeight + appBarHeight;
 
-    (screenHeight - statusBarHeight) / screenHeight;
-
     final max = (screenHeight - statusBarHeight) / screenHeight;
     final min =
-        (screenHeight - (statusBarHeight + totalAppBarHeight + 160)) /
+        (screenHeight - (statusBarHeight + totalAppBarHeight + _height)) /
         screenHeight;
     return Stack(
       children: [
         DashboardLayout(
-          backgroundColor: AppColors.white,
-          builder: (blur, alpha) => [
-            // EmptyWalletTransactions(),
-          ],
+          backgroundColor: context.cardBg,
+          isVirtual: _isVirtual,
+          wallet: widget.account,
+          title: _title(context),
+          balance: _balance,
+          onBack: widget.onBack,
+          builder: (blur, alpha) => [],
         ),
         DraggableScrollableSheet(
           snapSizes: [min, max],
@@ -48,74 +147,145 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
           maxChildSize: max,
           snap: true,
           builder: (context, scrollController) {
-            return ClipRRect(
-              borderRadius: .vertical(top: .circular(20)),
-              child: Scaffold(
-                primary: false,
-                backgroundColor: AppColors.white,
-
-                appBar: AppBar(
-                  backgroundColor: AppColors.white,
-                  surfaceTintColor: AppColors.white,
-                  actionsPadding: .symmetric(horizontal: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: .vertical(top: .circular(20)),
+            return BoundedContent(
+              maxWidth: context.responsive<double>(
+                compact: double.infinity,
+                medium: 760,
+                expanded: 960,
+              ),
+              child: ClipRRect(
+                borderRadius: .vertical(top: .circular(20)),
+                child: Container(
+                  color: context.cardBg,
+                  child: ProcessBuilder<MiniStatement>(
+                    event: () => _txEvent,
+                    builder: (context, snapshot) {
+                      return AppRefreshIndicator(
+                        onRefresh: () async => _loadTransactions(),
+                        child: CustomScrollView(
+                          controller: scrollController,
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const .fromLTRB(16, 12, 10, 12),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.walletsRecentTransactions,
+                                        style: context.header1,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 130,
+                                      child: FormButton(
+                                        backgroundColor: context.avatarBg,
+                                        foregroundColor: context.textPrimary,
+                                        padding: .zero,
+                                        height: 44,
+                                        onPressed: _showDateFilter,
+                                        labelSize: 13,
+                                        text: AppLocalizations.of(
+                                          context,
+                                        )!.walletsViewStatement,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (snapshot.isLoading)
+                              SliverPadding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                sliver: SliverList.separated(
+                                  itemCount: 6,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (_, _) =>
+                                      const TransactionItemSkeleton(),
+                                ),
+                              )
+                            else if (snapshot.hasError)
+                              SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline_rounded,
+                                          size: 40,
+                                          color: AppColors.danger,
+                                        ),
+                                        const SizedBox(height: Spacing.lg),
+                                        Text(
+                                          snapshot.message ??
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.commonRetry,
+                                          textAlign: TextAlign.center,
+                                          style: context.p1Medium,
+                                        ),
+                                        const SizedBox(height: Spacing.xl),
+                                        FormButton(
+                                          text: AppLocalizations.of(
+                                            context,
+                                          )!.commonRetry,
+                                          onPressed: () {
+                                            MessageUtil.close(context);
+                                            _loadTransactions();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else if ((snapshot.data?.transactions ?? [])
+                                .isEmpty)
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Padding(
+                                  padding: const .symmetric(horizontal: 30),
+                                  child: EmptyState(
+                                    svgAsset: SvgImages.emptyWallet,
+                                    title: AppLocalizations.of(
+                                      context,
+                                    )!.walletsNoTransactionsYet,
+                                    subtitle: AppLocalizations.of(
+                                      context,
+                                    )!.walletsNoTransactionsSubtitle,
+                                  ),
+                                ),
+                              )
+                            else
+                              SliverPadding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                sliver: SliverList.separated(
+                                  itemCount:
+                                      snapshot.data!.transactions!.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (_, index) =>
+                                      TransactionListItem(
+                                        transaction:
+                                            snapshot.data!.transactions![index],
+                                      ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  primary: false,
-                  title: Text(
-                    'Recent Transactions',
-                    style: AppTypography.header1,
-                  ),
-                  actions: [
-                    SizedBox(
-                      width: 130,
-                      child: FormButton(
-                        backgroundColor: AppColors.tintShade3,
-                        foregroundColor: AppColors.black,
-                        padding: .zero,
-                        height: 30,
-                        onPressed: () {
-                          AppModal.showBottomModal(
-                            context,
-                            label: 'Choose a date range',
-                            padding: .all(20),
-                            children: [
-                              Text(
-                                'The statement will be sent to your email address',
-                                style: AppTypography.caption,
-                              ),
-                              const SizedBox(height: 20),
-                              FormDateInput(
-                                label: 'Date From',
-                                placeholder: 'DD/MM/YY',
-                                controller: TextEditingController(),
-                              ),
-                              const SizedBox(height: 10),
-                              FormDateInput(
-                                label: 'Date To',
-                                placeholder: 'DD/MM/YY',
-                                controller: TextEditingController(),
-                              ),
-                              const SizedBox(height: 20),
-                              FormButton(
-                                height: 54,
-                                onPressed: () {},
-                                text: 'Show Results',
-                              ),
-                            ],
-                          );
-                        },
-                        labelSize: 13,
-                        text: 'View Statement',
-                      ),
-                    ),
-                  ],
-                ),
-                body: ListView.builder(
-                  controller: scrollController,
-                  itemBuilder: (context, index) {
-                    return TransactionListItem();
-                  },
                 ),
               ),
             );
@@ -124,109 +294,137 @@ class _VirtualWalletPageState extends State<VirtualWalletPage> {
       ],
     );
   }
-}
 
-class TransactionListItem extends StatelessWidget {
-  const TransactionListItem({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Stack(
-        alignment: .bottomRight,
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.backgroundPale,
-          ),
-          CircleAvatar(
-            backgroundColor: AppColors.white,
-            radius: 9,
-            child: Icon(
-              Icons.north_east_outlined,
-              color: AppColors.success,
-              size: 10,
-            ),
+  void _showDateFilter() {
+    final l10n = AppLocalizations.of(context)!;
+    AppModal.showBottomModal(
+      context,
+      label: l10n.walletsChooseDateRange,
+      padding: .all(20),
+      children: [
+        Text(
+          l10n.walletsStatementEmailNotice,
+          style: context.caption,
+        ),
+        const SizedBox(height: Spacing.xl),
+        FormDateInput(
+          label: l10n.walletsDateFromLabel,
+          placeholder: l10n.commonDateFormatPlaceholder,
+          controller: _dateFromController,
+        ),
+        const SizedBox(height: 10),
+        FormDateInput(
+          label: l10n.walletsDateToLabel,
+          placeholder: l10n.commonDateFormatPlaceholder,
+          controller: _dateToController,
+        ),
+        const SizedBox(height: Spacing.xl),
+        FormButton(
+          height: 54,
+          onPressed: () {
+            final start = _parseDate(_dateFromController.text);
+            final end = _parseDate(_dateToController.text);
+            _loadTransactions(startDate: start, endDate: end);
+            AppRouter.router.pop();
+          },
+          text: l10n.commonShowResults,
+        ),
+        if (_hasActiveFilter) ...[
+          const SizedBox(height: 10),
+          FormButton(
+            height: 54,
+            backgroundColor: context.cardBg,
+            foregroundColor: AppColors.danger,
+            onPressed: () {
+              _clearFilter();
+              AppRouter.router.pop();
+            },
+            text: l10n.historyClearFilter,
           ),
         ],
-      ),
-      title: Text(
-        'Fund Wallet',
-        style: AppTypography.formLabels,
-      ),
-      subtitle: Text(
-        '09-Jun-23 12:30pm',
-        style: AppTypography.caption,
-      ),
-      trailing: Column(
-        mainAxisSize: .max,
-        mainAxisAlignment: .center,
-        crossAxisAlignment: .end,
-        children: [
-          Text(
-            'GHS 12,000',
-            style: AppTypography.captionSemibold,
-          ),
-          Text(
-            'Success',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.success,
-            ),
-          ),
-        ],
-      ),
+      ],
     );
+  }
+
+  DateTime? _parseDate(String text) {
+    if (text.isEmpty) return null;
+    try {
+      final date = DateTime.parse(text);
+      return date;
+    } catch (_) {}
+    return null;
   }
 }
 
-class EmptyWalletTransactions extends StatelessWidget {
-  const EmptyWalletTransactions({
-    super.key,
-  });
+class TransactionListItem extends StatelessWidget {
+  const TransactionListItem({super.key, required this.transaction});
+
+  final Transaction transaction;
 
   @override
   Widget build(BuildContext context) {
-    return MultiSliver(
-      children: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: .symmetric(horizontal: 20),
-            child: Text(
-              'Recent Transactions',
-              style: AppTypography.header1,
-            ),
+    final isCredit = transaction.debitCreditFlag?.toLowerCase() == 'cr';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Stack(
+            alignment: .bottomRight,
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: context.scaffoldBg,
+              ),
+              CircleAvatar(
+                backgroundColor: context.cardBg,
+                radius: 9,
+                child: Icon(
+                  Icons.north_east_outlined,
+                  color: isCredit ? AppColors.success : AppColors.danger,
+                  size: 10,
+                ),
+              ),
+            ],
           ),
-        ),
-        SliverFillRemaining(
-          fillOverscroll: true,
-          hasScrollBody: false,
-          child: Padding(
-            padding: const .symmetric(horizontal: 30),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
-              mainAxisSize: .max,
-              mainAxisAlignment: .center,
-              crossAxisAlignment: .center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Spacer(flex: 1),
-                SvgPicture.asset('assets/img/empty-wallet.svg'),
                 Text(
-                  'No transactions yet',
-                  textAlign: .center,
-                  style: AppTypography.p1Medium,
+                  transaction.transactionType ?? '',
+                  style: context.formLabels,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 2),
                 Text(
-                  'Your financial journey starts here. Once you send or receive funds, your activity will appear in this space',
-                  textAlign: .center,
-                  style: AppTypography.smallDetails,
+                  transaction.postDate ?? '',
+                  style: context.caption,
                 ),
-                const Spacer(flex: 3),
               ],
             ),
           ),
-        ),
-      ],
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                transaction.amount ?? '',
+                style: context.captionSemibold.copyWith(
+                  color: isCredit ? AppColors.success : AppColors.danger,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                transaction.narration ?? '',
+                style: context.caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

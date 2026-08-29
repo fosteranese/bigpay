@@ -1,9 +1,11 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/select_toggle.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 
 class AddMoMoPage extends StatefulWidget {
@@ -17,17 +19,27 @@ class AddMoMoPage extends StatefulWidget {
 }
 
 class _AddMoMoPageState extends State<AddMoMoPage> {
+  final _networkController = TextEditingController();
+  final _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _networkController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      miniTitle: 'Add MoMo Wallet',
-      title: 'Add Mobile Money Wallet',
-      subtitle:
-          'Securely connect your mobile money wallet for instant wallet top-ups and seamless payments.',
+      miniTitle: l10n.walletsAddMomoMiniTitle,
+      title: l10n.walletsAddMomoTitle,
+      subtitle: l10n.walletsAddMomoSubtitle,
       bottomNav: FormButton(
         onPressed: () {},
         enabled: false,
-        text: 'Save',
+        text: l10n.commonSave,
       ),
       child: Form(
         child: Column(
@@ -36,8 +48,8 @@ class _AddMoMoPageState extends State<AddMoMoPage> {
           crossAxisAlignment: .center,
           children: [
             FormSelectToggleInput(
-              label: 'Choose Network',
-              controller: TextEditingController(),
+              label: l10n.walletsChooseNetworkLabel,
+              controller: _networkController,
               options: [
                 .new(
                   label: 'MTN',
@@ -56,10 +68,10 @@ class _AddMoMoPageState extends State<AddMoMoPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             FormInput(
-              controller: TextEditingController(),
-              label: 'Phone Number',
+              controller: _phoneController,
+              label: l10n.commonPhoneNumberLabel,
             ),
           ],
         ),

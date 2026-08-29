@@ -15,6 +15,7 @@ class FormPinUnifiedInput extends StatefulWidget {
     this.next,
     this.onChanged,
     this.length = 4,
+    this.validator,
   });
   final TextEditingController controller;
   final String? label;
@@ -23,6 +24,7 @@ class FormPinUnifiedInput extends StatefulWidget {
   final void Function(String value)? next;
   final void Function(String value)? onChanged;
   final int length;
+  final String? Function(String? value)? validator;
 
   @override
   State<FormPinUnifiedInput> createState() => _FormPinUnifiedInputState();
@@ -55,8 +57,10 @@ class _FormPinUnifiedInputState extends State<FormPinUnifiedInput> {
           ],
           next: widget.next,
           onChanged: widget.onChanged,
+          validator: widget.validator,
           maxLines: 1,
           suffix: IconButton(
+            tooltip: value ? 'Hide PIN' : 'Show PIN',
             onPressed: () {
               _isPassword.value = !_isPassword.value;
             },

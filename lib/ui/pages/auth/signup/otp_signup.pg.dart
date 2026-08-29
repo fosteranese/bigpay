@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/signup/resend_otp_signup_action.dart';
 import 'package:bigpay/models/actions/signup/verify_otp_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/otp_input.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -21,7 +23,7 @@ class OtpSignUpPage extends StatefulWidget {
     required this.data,
   });
 
-  final StartSignUpData data;
+  final VerifyUserData data;
 
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/auth/otp-signup',
@@ -33,8 +35,7 @@ class OtpSignUpPage extends StatefulWidget {
 
 class _OtpSignUpPageState extends State<OtpSignUpPage> {
   final _otp = ValueNotifier('');
-  late StartSignUpData _data = widget.data;
-  final _id = Uuid().v4();
+  late VerifyUserData _data = widget.data;
   ExecuteProcessEvent? mainEvent;
   ExecuteProcessEvent? resentOtpEvent;
 
@@ -46,55 +47,58 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
+    return MultiProcessListener(
       listeners: [
-        BlocListener<ProcessBloc, ProcessState>(
-          listenWhen: (previous, current) => current.event == resentOtpEvent,
-          listener: (context, state) {
-            if (state is ExecutingProcess) {
+        ProcessListenerConfig<VerifyUserData>(
+          event: () => resentOtpEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
               MessageUtil.displayLoading(context);
               return;
             } else {
               MessageUtil.close(context);
             }
 
-            if (state is ProcessExecuted) {
-              _data = state.result.data as StartSignUpData;
+            if (snapshot.hasData) {
+              _data = snapshot.data!;
               return;
             }
 
-            if (state is ExecuteProcessError) {
+            if (snapshot.hasError) {
               MessageUtil.displayErrorDialog(
                 context,
-                message: state.error.message,
+                message: snapshot.error!.message,
               );
               return;
             }
           },
         ),
-        BlocListener<ProcessBloc, ProcessState>(
-          listenWhen: (previous, current) => current.event == mainEvent,
-          listener: (context, state) {
-            if (state is ExecutingProcess) {
+        ProcessListenerConfig<String>(
+          event: () => mainEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
               MessageUtil.displayLoading(context);
               return;
             } else {
               MessageUtil.close(context);
             }
 
-            if (state is ProcessExecuted) {
-              SignUp.registrationId = state.result.data as String;
-              AppRouter.router.push(
+            if (snapshot.hasData) {
+              SignUp.registrationId = snapshot.data!;
+              // pushReplacement, not push — once the OTP is verified it's
+              // consumed; leaving it in the back-stack would let the user
+              // navigate back to a stale, already-used OTP screen.
+              AppRouter.router.pushReplacement(
                 CreatePasswordSignUpPage.route.path,
               );
 
               return;
             }
 
-            if (state is ExecuteProcessError) {
+            if (snapshot.hasError) {
               MessageUtil.displayErrorDialog(
                 context,
-                message: state.error.message,
+                message: snapshot.error!.message,
               );
               return;
             }
@@ -102,32 +106,43 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
         ),
       ],
       child: MainLayout(
+        maxWidth: 480,
+        stepIndicator: StepProgress(
+          currentStep: 1,
+          totalSteps: 5,
+          labels: AppLocalizations.of(context)!.signupSteps,
+        ),
         subtitleWidget: Column(
           mainAxisSize: .min,
-          mainAxisAlignment: .center,
-          crossAxisAlignment: .center,
           children: [
-            Text(
-              'Enter OTP',
-              textAlign: .center,
-              style: AppTypography.display1.copyWith(
-                color: AppColors.black,
-              ),
-            ),
-            Text(
-              _data.otpData?.message ?? '',
-              textAlign: .center,
-              style: AppTypography.p1,
+            Column(
+              mainAxisSize: .min,
+              mainAxisAlignment: .center,
+              crossAxisAlignment: .center,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.authEnterOtp,
+                  textAlign: .center,
+                  style: context.display1.copyWith(
+                    color: context.textPrimary,
+                  ),
+                ),
+                Text(
+                  _data.otpData?.message ?? '',
+                  textAlign: .center,
+                  style: context.p1,
+                ),
+              ],
             ),
           ],
         ),
         bottomNav: ValueListenableBuilder(
           valueListenable: _otp,
           builder: (context, value, child) {
-            return FormButton(
-              onPressed: _onVerify,
-              enabled: value.length == 6,
-              text: 'Continue',
+              return FormButton(
+                onPressed: _onVerify,
+                enabled: value.length == (_data.otpData?.length ?? 6),
+                text: AppLocalizations.of(context)!.commonContinue,
             );
           },
         ),
@@ -156,31 +171,25 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
   void _resentOtp() {
     FocusScope.of(context).unfocus();
 
-    resentOtpEvent = ExecuteProcessEvent(
-      id: _id,
-      action: ResendOtpSignUpAction(
+    resentOtpEvent = context.dispatchProcess(
+      ResendOtpSignUpAction(
         payload: ResendOtpSignUpActionPayload(
           otpId: _data.otpData?.otpId ?? '',
         ),
       ),
     );
-
-    context.read<ProcessBloc>().add(resentOtpEvent!);
   }
 
   void _onVerify() {
     FocusScope.of(context).unfocus();
 
-    mainEvent = ExecuteProcessEvent(
-      id: _id,
-      action: VerifyOtpSignUpAction(
+    mainEvent = context.dispatchProcess(
+      VerifyOtpSignUpAction(
         payload: VerifyOtpSignUpActionPayload(
           otpId: _data.otpData?.otpId ?? '',
           otpValue: _otp.value,
         ),
       ),
     );
-
-    context.read<ProcessBloc>().add(mainEvent!);
   }
 }

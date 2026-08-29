@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+
 
 class InfoKycPage extends StatefulWidget {
   const InfoKycPage({super.key});
@@ -20,30 +26,38 @@ class InfoKycPage extends StatefulWidget {
 class _InfoKycPageState extends State<InfoKycPage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
+      stepIndicator: StepProgress(
+        currentStep: 1,
+        totalSteps: 3,
+        labels: l10n.kycSteps,
+      ),
       bottom: PreferredSize(
         preferredSize: Size.zero,
         child: SizedBox.shrink(),
       ),
       bottomNav: FormButton(
-        onPressed: () {},
-        text: 'Continue',
+        onPressed: () {
+          AppRouter.router.push(ContactInfoKycPage.route.path);
+        },
+        text: l10n.commonContinue,
       ),
       child: Column(
         mainAxisSize: .min,
         mainAxisAlignment: .start,
         crossAxisAlignment: .center,
         children: [
-          SvgPicture.asset('assets/img/selfie.svg'),
-          const SizedBox(height: 20),
+          SvgPicture.asset(SvgImages.selfie),
+          const SizedBox(height: Spacing.xl),
           ConstrainedBox(
             constraints: const BoxConstraints(
               maxWidth: 285,
             ),
             child: Text(
-              'Take a Quick Selfie',
+              l10n.kycTakeSelfieTitle,
               textAlign: .center,
-              style: AppTypography.display2,
+              style: context.display2,
             ),
           ),
           const SizedBox(height: 10),
@@ -52,22 +66,22 @@ class _InfoKycPageState extends State<InfoKycPage> {
               maxWidth: 285,
             ),
             child: Text(
-              'We will match your photo against the National Identification Authority (NIA) database to verify it\'s really you',
+              l10n.kycSelfieMatchSubtitle,
               textAlign: .center,
-              style: AppTypography.smallDetails,
+              style: context.smallDetails,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.xl),
           InfoItem(
             icon: 'assets/img/identify.svg',
-            title: 'Identity verification',
-            subtitle: 'Scan your Ghana Card front & back',
+            title: l10n.kycIdentityVerificationTitle,
+            subtitle: l10n.kycScanCardSubtitle,
           ),
           const SizedBox(height: 10),
           InfoItem(
             icon: 'assets/img/encrypted.svg',
-            title: 'Fully encrypted',
-            subtitle: 'Your data is encrypted and secure',
+            title: l10n.kycFullyEncryptedTitle,
+            subtitle: l10n.kycDataEncryptedSubtitle,
           ),
         ],
       ),
@@ -92,18 +106,18 @@ class InfoItem extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: .circular(12),
         side: .new(
-          color: AppColors.inactiveBorder,
+          color: context.border,
         ),
       ),
       leading: SvgPicture.asset(icon),
       title: Text(
         title,
-        style: AppTypography.header3,
+        style: context.header3,
       ),
       subtitle: Text(
         subtitle,
         // overflow: .ellipsis,
-        style: AppTypography.smallDetails,
+        style: context.smallDetails,
       ),
     );
   }

@@ -1,10 +1,12 @@
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
+import 'package:bigpay/ui/pages/auth/start_forgot_secure_phrase.pg.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
-import 'package:bigpay/ui/pages/auth/forgot_secure_phrase/forgot_secure_phrase.dart';
+import 'package:bigpay/ui/pages/auth/signin/otp_login.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
-import 'package:go_router/go_router.dart';
 
 GoRoute get authRoute => GoRoute(
   name: 'auth',
@@ -12,6 +14,19 @@ GoRoute get authRoute => GoRoute(
   redirect: (context, state) => null,
   routes: [
     NewLoginPage.route.toGoRoute(() => const NewLoginPage(), nested: true),
+    ExistingDeviceLoginPage.route.toGoRoute(
+      () => const ExistingDeviceLoginPage(),
+      nested: true,
+    ),
+    SecurePhraseLoginPage.route.toGoRoute(
+      () => const SecurePhraseLoginPage(),
+      nested: true,
+    ),
+    OtpLoginPage.route.toGoRoute(
+      () => const OtpLoginPage(),
+      nested: true,
+    ),
+
     BiometricLoginPage.route.toGoRoute(
       () => const BiometricLoginPage(),
       nested: true,
@@ -23,7 +38,7 @@ GoRoute get authRoute => GoRoute(
     OtpSignUpPage.route.toGoRouteWithState(
       (state) {
         return OtpSignUpPage(
-          data: state.extra as StartSignUpData,
+          data: state.extra as VerifyUserData,
         );
       },
       nested: true,
@@ -31,13 +46,18 @@ GoRoute get authRoute => GoRoute(
     CreatePasswordSignUpPage.route.toGoRoute(
       () => const CreatePasswordSignUpPage(),
       nested: true,
+      onExit: (context, state) {
+        Future.delayed(Duration(seconds: 1), () {
+          AppRouter.router.pop();
+        });
+        return true;
+      },
     ),
     CreateSecurePhrasePage.route.toGoRoute(
       () => const CreateSecurePhrasePage(),
       nested: true,
     ),
     PinSignUpPage.route.toGoRoute(() => const PinSignUpPage(), nested: true),
-    DoneSignUpPage.route.toGoRoute(() => const DoneSignUpPage(), nested: true),
     StartForgotPasswordPage.route.toGoRoute(
       () => const StartForgotPasswordPage(),
       nested: true,
@@ -50,16 +70,8 @@ GoRoute get authRoute => GoRoute(
       () => const CreatePwdForgotPwdPage(),
       nested: true,
     ),
-    DoneForgotPwdPage.route.toGoRoute(
-      () => const DoneForgotPwdPage(),
-      nested: true,
-    ),
     StartForgotSecurePhrasePage.route.toGoRoute(
       () => const StartForgotSecurePhrasePage(),
-      nested: true,
-    ),
-    DoneForgotSecurePhrasePage.route.toGoRoute(
-      () => const DoneForgotSecurePhrasePage(),
       nested: true,
     ),
   ],

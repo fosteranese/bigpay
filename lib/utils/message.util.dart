@@ -1,15 +1,16 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/components/glass_panel.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 
 final class MessageUtil {
   static void displayLoading(
@@ -30,6 +31,7 @@ final class MessageUtil {
           child: FadeIn(
             child: Dialog(
               backgroundColor: Colors.transparent,
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -41,7 +43,7 @@ final class MessageUtil {
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.header2.copyWith(
+                      style: context.header2.copyWith(
                         color: AppColors.white,
                       ),
                     ),
@@ -58,10 +60,12 @@ final class MessageUtil {
     BuildContext context, {
     String? title,
     String? message,
-    String okButtonText = 'Ok',
+    String? okButtonText,
     void Function()? onOkPressed,
     Widget? customButton,
   }) {
+    final resolvedOkButtonText =
+        okButtonText ?? AppLocalizations.of(context)!.commonOk;
     showDialog(
       barrierColor: Colors.black.withAlpha((0.8 * 224).toInt()),
       context: context,
@@ -70,11 +74,12 @@ final class MessageUtil {
       builder: (context) => ZoomIn(
         child: FadeIn(
           child: Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: context.cardBg,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             insetPadding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -90,7 +95,7 @@ final class MessageUtil {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: AppTypography.header1.copyWith(
+                      style: context.header1.copyWith(
                         color: AppColors.danger,
                       ),
                     ),
@@ -99,7 +104,7 @@ final class MessageUtil {
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.p1,
+                      style: context.p1,
                     ),
                   const SizedBox(height: 20),
                   FormButton(
@@ -110,7 +115,7 @@ final class MessageUtil {
                         onOkPressed();
                       }
                     },
-                    text: okButtonText,
+                    text: resolvedOkButtonText,
                   ),
                   ?customButton,
                 ],
@@ -136,11 +141,12 @@ final class MessageUtil {
       builder: (context) => ZoomIn(
         child: FadeIn(
           child: Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: context.cardBg,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             insetPadding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -160,14 +166,14 @@ final class MessageUtil {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: AppTypography.header1,
+                      style: context.header1,
                     ),
                   if (message != null) const SizedBox(height: 10),
                   if (message != null)
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.p1,
+                      style: context.p1,
                     ),
                   const SizedBox(height: 20),
                   FormButton(
@@ -178,7 +184,7 @@ final class MessageUtil {
                         onOk();
                       }
                     },
-                    text: 'OK',
+                    text: AppLocalizations.of(context)!.commonOk,
                   ),
                 ],
               ),
@@ -194,7 +200,7 @@ final class MessageUtil {
     String? title,
     required String message,
     void Function()? onOk,
-    String btnText = 'Ok',
+    String? btnText,
     Widget? successIcon,
     Widget? customBtn,
   }) {
@@ -219,7 +225,7 @@ final class MessageUtil {
                     AppRouter.router.pop();
                     onOk?.call();
                   },
-                  text: btnText,
+                  text: btnText ?? AppLocalizations.of(context)!.commonOk,
                 ),
             child: Column(
               mainAxisSize: .max,
@@ -236,15 +242,13 @@ final class MessageUtil {
                 if (title?.isNotEmpty ?? false)
                   Text(
                     title ?? '',
-                    style: AppTypography.display2,
+                    style: context.display2,
                     textAlign: .center,
                   ),
                 if (title?.isNotEmpty ?? false) const SizedBox(height: 10),
                 Text(
                   message,
-                  style: AppTypography.smallDetails.copyWith(
-                    color: AppColors.black,
-                  ),
+                  style: context.smallDetails,
                   textAlign: .center,
                 ),
               ],
@@ -263,21 +267,30 @@ final class MessageUtil {
     Color onConfirmButtonColor = AppColors.secondary,
     Color onConfirmButtonTextColor = AppColors.primary,
     Widget? icon,
-    String onConfirmText = 'Confirm',
+    String? onConfirmText,
   }) {
+    final resolvedOnConfirmText =
+        onConfirmText ?? AppLocalizations.of(context)!.commonConfirm;
     showDialog(
       barrierColor: Colors.black.withAlpha((0.8 * 224).toInt()),
       context: context,
       useRootNavigator: true,
       useSafeArea: true,
-      builder: (context) => ZoomIn(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final confirmColor =
+            isDark && onConfirmButtonColor == AppColors.secondary
+                ? AppColors.tint
+                : onConfirmButtonColor;
+        return ZoomIn(
         child: FadeIn(
           child: Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: context.cardBg,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             insetPadding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -294,14 +307,14 @@ final class MessageUtil {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: AppTypography.header1,
+                      style: context.header1,
                     ),
                   if (message != null) const SizedBox(height: 5),
                   if (message != null)
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: AppTypography.p1,
+                      style: context.p1,
                     ),
                   const SizedBox(height: 20),
                   Row(
@@ -312,20 +325,20 @@ final class MessageUtil {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          text: 'Cancel',
+                          text: AppLocalizations.of(context)!.commonCancel,
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: FormButton(
-                          backgroundColor: onConfirmButtonColor,
+                          backgroundColor: confirmColor,
                           foregroundColor: onConfirmButtonTextColor,
                           height: 50,
                           onPressed: () {
                             Navigator.pop(context);
                             onConfirm();
                           },
-                          text: onConfirmText,
+                          text: resolvedOnConfirmText,
                         ),
                       ),
                     ],
@@ -335,9 +348,10 @@ final class MessageUtil {
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   /// Dismisses the top-most dialog (e.g. the loading dialog).
   ///

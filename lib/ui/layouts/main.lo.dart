@@ -1,8 +1,14 @@
 import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({
@@ -10,6 +16,7 @@ class MainLayout extends StatefulWidget {
     this.title,
     this.subtitle,
     this.subtitleWidget,
+    this.stepIndicator,
     this.child,
     this.bottomNav,
     this.bottomSize = 100,
@@ -25,10 +32,16 @@ class MainLayout extends StatefulWidget {
     this.flexibleSpace,
     this.builder,
     this.backgroundColor = Colors.transparent,
+    this.onRefresh,
+    this.useScaffold = true,
+    this.maxWidth,
+    this.onBack,
+    this.bottomAlign = false,
   });
   final String? title;
   final String? subtitle;
   final Widget? subtitleWidget;
+  final Widget? stepIndicator;
   final Widget? child;
   final Widget? bottomNav;
   final double bottomSize;
@@ -45,43 +58,87 @@ class MainLayout extends StatefulWidget {
   final Widget? flexibleSpace;
   final Widget Function(ScrollController scrollController)? builder;
 
+  /// Pull-to-refresh handler. When set, the scroll body gets a
+  /// [RefreshIndicator]; the future should complete when the reload lands.
+  final Future<void> Function()? onRefresh;
+
+  /// False to render without an owning Scaffold — for use as inline pane
+  /// content in a [MasterDetailLayout] detail pane, where a Scaffold nested
+  /// inside the pane's Expanded silently fails to render its body on a real
+  /// device. Pushed-page usage (the default) is unaffected.
+  final bool useScaffold;
+
+  /// Overrides [BoundedContent]'s default width cap (640/720 at
+  /// medium/expanded) — for pages whose content is naturally much narrower
+  /// than a generic content page, e.g. a single-column auth form with one or
+  /// two fields and a button, which looks stretched-out at the generic cap.
+  final double? maxWidth;
+
+  /// Overrides the back button's action and forces it to show regardless of
+  /// [showBackBtn]/`AppRouter.router.canPop()` — for a detail view reused as
+  /// inline pane content in a [MasterDetailLayout] detail pane, where
+  /// there's nothing to pop (the master page is still the top route) but
+  /// "back" should still clear the pane's selection. Pushed-page usage
+  /// leaves this null and keeps the default pop-the-route behavior.
+  final VoidCallback? onBack;
+
+  /// True to anchor [child] + [bottomNav] to the bottom of the available
+  /// area on a bigger screen, instead of the default centering. A generic
+  /// form reads best centered, but a chat thread should sit at the bottom
+  /// the same way it does on phone (where [bottomNav] is docked to the
+  /// screen edge regardless of this flag) — a short conversation floating
+  /// mid-screen with equal blank margins above and below reads as broken,
+  /// not as a deliberate layout. Ignored when [BuildContext.isCompact]
+  /// (bottomNav docks to the Scaffold's own bottom bar there either way).
+  final bool bottomAlign;
+
   @override
   State<MainLayout> createState() => _MainLayoutState();
 }
 
 class _MainLayoutState extends State<MainLayout> {
   final ScrollController _scrollController = ScrollController();
-  double _blurOpacity = 0.0;
+
+  /// Drives the app-bar blur as the page scrolls. A notifier (not setState) so
+  /// scrolling repaints only the header overlay, not the whole scroll body.
+  final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      final opacity = (_scrollController.offset / 80).clamp(0.0, 1.0);
-      if (opacity != _blurOpacity) {
-        setState(() => _blurOpacity = opacity);
-      }
+      _blurOpacity.value = (_scrollController.offset / 80).clamp(0.0, 1.0);
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _blurOpacity.dispose();
     super.dispose();
   }
 
+  /// Past expanded width (with [MainLayout.maxWidth] set), the step
+  /// indicator moves into [_AuthBrandPanel] as a labeled vertical stepper
+  /// instead — showing the same slim bar again in the header here would be
+  /// a redundant second copy of it right next to the fuller version.
+  bool _usesBrandPanelStepIndicator(BuildContext context) =>
+      widget.maxWidth != null && context.isExpanded;
+
+  static const _headerStepIndicatorHeight = 20.0;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final page = Container(
       width: double.maxFinite,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           stops: [0.0, 0.3077],
           colors: [
-            AppColors.background,
-            AppColors.white,
+            context.scaffoldBg,
+            context.cardBg,
           ],
         ),
       ),
@@ -94,145 +151,613 @@ class _MainLayoutState extends State<MainLayout> {
               ],
             ),
     );
+
+    // A narrow single-purpose form (maxWidth set — the 14 auth pages) reads
+    // as an empty, unfinished phone screen stretched onto a wide window.
+    // Past expanded width there's room to do what onboarding flows elsewhere
+    // usually do with that space: a brand panel alongside the form instead
+    // of around it. The form pane below is untouched — same BoundedContent
+    // cap, same centering — just now sized against the remaining width
+    // instead of the whole window.
+    if (widget.maxWidth == null || !context.isExpanded) return page;
+
+    return Row(
+      crossAxisAlignment: .stretch,
+      children: [
+        _AuthBrandPanel(
+          width: context.isWide ? 480 : 420,
+          stepIndicator: widget.stepIndicator,
+        ),
+        Expanded(child: page),
+      ],
+    );
   }
 
-  Scaffold _buildMainPage() {
-    return Scaffold(
-      backgroundColor: widget.backgroundColor,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            floating: true,
-            snap: true,
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            automaticallyImplyLeading: false,
-            automaticallyImplyActions: false,
-            leadingWidth: 70,
-            title: (widget.miniTitle?.isNotEmpty ?? false)
-                ? Text(
-                    widget.miniTitle!,
-                    style: AppTypography.p1,
-                  )
-                : null,
-            leading: AppRouter.router.canPop() && widget.showBackBtn
-                ? IconButton.filled(
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.white,
-                      fixedSize: Size(28, 28),
+  Widget _wrapRefresh(Widget child) {
+    if (widget.onRefresh == null) return child;
+    // The app bar is a sliver inside the scroll view, so offset the indicator
+    // down by the header height — it then drops in from under the header, the
+    // way it does on the (real-AppBar) history layout.
+    final headerHeight =
+        widget.bottom?.preferredSize.height ?? widget.bottomSize;
+    return AppRefreshIndicator(
+      onRefresh: widget.onRefresh!,
+      edgeOffset:
+          MediaQuery.paddingOf(context).top + kToolbarHeight + headerHeight,
+      child: child,
+    );
+  }
+
+  Widget _buildMainPage() {
+    // On a phone, the CTA belongs docked to the screen's bottom edge (thumb
+    // reach, stays put above the keyboard) — that's untouched here. On a
+    // bigger screen that same docking is what stretches the gap between the
+    // last field and the button across the whole leftover viewport height,
+    // since the fields stay pinned to the top of a now much-taller body.
+    // Past medium width, fold the button back into the normal content flow
+    // instead (right after `child`) and center the resulting group — closes
+    // the gap to a normal in-flow spacing and reads as a deliberate,
+    // centered card rather than a phone layout stretched onto a big canvas.
+    final dockBottomNav = context.isCompact;
+
+    final bottomNavContent = widget.bottomNav == null
+        ? null
+        : (dockBottomNav
+              ? SafeArea(child: widget.bottomNav!)
+              : SafeArea(top: false, child: widget.bottomNav!));
+
+    final pageContent = (dockBottomNav || bottomNavContent == null)
+        ? widget.child
+        : (widget.child == null
+              ? bottomNavContent
+              : Column(
+                  mainAxisSize: .min,
+                  crossAxisAlignment: .stretch,
+                  children: [
+                    widget.child!,
+                    // A bit more room than the mobile in-form spacing here —
+                    // this gap now separates two visually distinct groups
+                    // (the content and the CTA) sitting on their own in the
+                    // middle of a big screen, not a button following the
+                    // next field down a phone's cramped column.
+                    SizedBox(
+                      height: context.responsiveSpacing(
+                        compact: 24,
+                        medium: 32,
+                        expanded: 40,
+                      ),
                     ),
-                    onPressed: () {
-                      AppRouter.router.pop();
-                    },
-                    icon: Icon(
-                      Icons.chevron_left_outlined,
+                    bottomNavContent,
+                  ],
+                ));
+
+    final body = BoundedContent(
+      maxWidth: widget.maxWidth,
+      child: _wrapRefresh(
+        CustomScrollView(
+          controller: _scrollController,
+          physics: widget.onRefresh != null
+              ? const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                )
+              : const ClampingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              floating: true,
+              snap: true,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+              automaticallyImplyActions: false,
+              leadingWidth: 70,
+              title: (widget.miniTitle?.isNotEmpty ?? false)
+                  ? Text(
+                      widget.miniTitle!,
+                      style: context.p1,
+                    )
+                  : null,
+              leading:
+                  widget.onBack != null ||
+                      (AppRouter.router.canPop() && widget.showBackBtn)
+                  ? IconButton.filled(
+                      tooltip: AppLocalizations.of(context)!.commonBack,
+                      style: IconButton.styleFrom(
+                        backgroundColor: context.cardBg,
+                        foregroundColor: context.textPrimary,
+                        fixedSize: Size(44, 44),
+                      ),
+                      onPressed: widget.onBack ?? AppRouter.router.pop,
+                      icon: Icon(
+                        Icons.chevron_left_outlined,
+                      ),
+                    )
+                  : null,
+              bottom:
+                  widget.bottom ??
+                  PreferredSize(
+                    preferredSize: Size(
+                      double.maxFinite,
+                      widget.bottomSize +
+                          (widget.stepIndicator != null &&
+                                  !_usesBrandPanelStepIndicator(context)
+                              ? _headerStepIndicatorHeight
+                              : 0),
                     ),
-                  )
-                : null,
-            bottom:
-                widget.bottom ??
-                PreferredSize(
-                  preferredSize: Size(double.maxFinite, widget.bottomSize),
-                  child: Container(
-                    width: double.maxFinite,
-                    padding: .only(left: 20, right: 20, bottom: 10),
-                    child: Column(
-                      mainAxisSize: .min,
-                      mainAxisAlignment: .center,
-                      crossAxisAlignment: .start,
-                      children: [
-                        SizedBox(height: 16),
-                        if (widget.title != null && widget.actions == null)
-                          FittedBox(
-                            child: Text(
-                              widget.title!,
-                              style:
-                                  (widget.titleStyle ?? AppTypography.display2)
-                                      .copyWith(
-                                        color: AppColors.black,
-                                      ),
-                            ),
-                          )
-                        else if (widget.title != null && widget.actions != null)
-                          Row(
-                            mainAxisSize: .max,
-                            crossAxisAlignment: .center,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.title!,
-                                  style: AppTypography.display1.copyWith(
-                                    color: AppColors.black,
+                    child: Container(
+                      width: double.maxFinite,
+                      padding: .only(
+                        left: context.gutter,
+                        right: context.gutter,
+                        bottom: context.isShortHeight ? 4 : 10,
+                      ),
+                      child: Column(
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .center,
+                        crossAxisAlignment: .start,
+                        children: [
+                          SizedBox(height: context.isShortHeight ? 8 : 16),
+                          if (widget.stepIndicator != null &&
+                              !_usesBrandPanelStepIndicator(context)) ...[
+                            widget.stepIndicator!,
+                            SizedBox(height: context.isShortHeight ? 8 : 12),
+                          ],
+                          if (widget.title != null && widget.actions == null)
+                            FittedBox(
+                              child: Text(
+                                widget.title!,
+                                style:
+                                    (widget.titleStyle ??
+                                            context.display2)
+                                        .copyWith(
+                                          color: context.textPrimary,
+                                        ),
+                              ),
+                            )
+                          else if (widget.title != null &&
+                              widget.actions != null)
+                            Row(
+                              mainAxisSize: .max,
+                              crossAxisAlignment: .center,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.title!,
+                                    style: context.display1.copyWith(
+                                      color: context.textPrimary,
+                                    ),
                                   ),
                                 ),
+                                if (widget.actions != null) widget.actions!,
+                              ],
+                            ),
+                          if (!context.isShortHeight && widget.subtitle != null)
+                            Text(
+                              widget.subtitle!,
+                              style: context.smallDetails,
+                            )
+                          else if (!context.isShortHeight &&
+                              widget.subtitleWidget != null)
+                            widget.subtitleWidget!,
+                        ],
+                      ),
+                    ),
+                  ),
+              flexibleSpace:
+                  widget.flexibleSpace ??
+                  ValueListenableBuilder<double>(
+                    valueListenable: _blurOpacity,
+                    builder: (context, blur, _) => ClipRect(
+                      child: BackdropFilter(
+                        filter: .blur(
+                          sigmaX: 12 * blur,
+                          sigmaY: 12 * blur,
+                        ),
+                        child: Container(
+                          margin: .only(
+                            bottom: widget.appBarBottomColor,
+                          ),
+                          color:
+                              widget.appBarColor ??
+                              context.appBarOverlay.withValues(
+                                alpha: blur,
                               ),
-                              if (widget.actions != null) widget.actions!,
+                        ),
+                      ),
+                    ),
+                  ),
+            ),
+
+            if (widget.builder != null)
+              widget.builder!(_scrollController)
+            else if (pageContent != null)
+              SliverFillRemaining(
+                fillOverscroll: true,
+                hasScrollBody: false,
+                child: Container(
+                  color: widget.bodyColor,
+                  padding: .all(context.gutter),
+                  alignment: dockBottomNav
+                      ? null
+                      : (widget.bottomAlign
+                            ? Alignment.bottomCenter
+                            : Alignment.center),
+                  // The step indicator used to be injected here (compact
+                  // width only) — moved into the header, right above the
+                  // title, so it reads as persistent flow progress instead
+                  // of scrolling away with the page's own content, and so
+                  // it shows at medium width too instead of only compact.
+                  child: pageContent,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    final Widget? dockedBottomNav = (!dockBottomNav || bottomNavContent == null)
+        ? null
+        : BoundedContent(
+            maxWidth: widget.maxWidth,
+            child: Container(
+              padding: .only(
+                right: context.gutter,
+                left: context.gutter,
+                top: 15,
+                bottom: 10,
+              ),
+              child: bottomNavContent,
+            ),
+          );
+
+    if (!widget.useScaffold) {
+      // Skipping Scaffold here (see the field doc on useScaffold) also
+      // drops the Material ancestor it normally provides — needed by
+      // ordinary Material widgets like TextField for ink splashes etc.
+      // Material.transparency supplies that ancestor without adding a
+      // color/elevation layer of its own.
+      return Material(
+        type: MaterialType.transparency,
+        child: Container(
+          color: widget.backgroundColor,
+          child: dockedBottomNav == null
+              ? body
+              : Column(
+                  children: [
+                    Expanded(child: body),
+                    dockedBottomNav,
+                  ],
+                ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: widget.backgroundColor,
+      body: body,
+      bottomNavigationBar: dockedBottomNav,
+    );
+  }
+}
+
+/// The wide-screen companion pane for a narrow auth/onboarding form — see
+/// [MainLayout.build]. Deliberately generic (no step-specific copy) since
+/// it's shared by all 14 sign-up/sign-in/forgot-password screens alike.
+class _AuthBrandPanel extends StatelessWidget {
+  const _AuthBrandPanel({required this.width, this.stepIndicator});
+
+  final double width;
+  final Widget? stepIndicator;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: AppGradients.walletCard.colors,
+        ),
+      ),
+      foregroundDecoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(
+            color: AppColors.white.withValues(alpha: 0.08),
+            width: 1,
+          ),
+        ),
+      ),
+      // A flow with steps gets the full progress treatment — wordmark,
+      // stepper, and a summary footer — instead of the generic brand
+      // panel (wordmark + tagline), which stacked awkwardly above a step
+      // list and competed with it for the same space.
+      child: (stepIndicator is StepProgress &&
+              (stepIndicator! as StepProgress).labels != null)
+          ? _AuthProgressPanel(progress: stepIndicator! as StepProgress)
+          : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  mainAxisSize: .min,
+                  children: [
+                    SvgPicture.asset(
+                      SvgImages.icon,
+                      width: 180,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      AppLocalizations.of(context)!.authBrandTagline,
+                      textAlign: .center,
+                      style: context.p1.copyWith(
+                        color: AppColors.white.withValues(alpha: 0.85),
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+/// Full-height progress panel for stepped auth flows — brand mark at the
+/// top, the vertical stepper centered in the leftover space, and a summary
+/// footer (current step name + counter) anchoring the bottom, so the panel
+/// reads as a composed sidebar instead of a widget dropped into an empty
+/// gradient.
+class _AuthProgressPanel extends StatelessWidget {
+  const _AuthProgressPanel({required this.progress});
+
+  final StepProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final labels = progress.labels!;
+    final current = progress.currentStep.clamp(0, labels.length - 1);
+    final shortHeight = context.isShortHeight;
+
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            right: -90,
+            bottom: -70,
+            child: SvgPicture.asset(
+              SvgImages.splashBgIcon,
+              width: 340,
+              colorFilter: ColorFilter.mode(
+                AppColors.white.withValues(alpha: 0.03),
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+          Positioned(
+            top: -110,
+            right: -90,
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.brightGreen.withValues(alpha: 0.09),
+                    AppColors.brightGreen.withValues(alpha: 0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: -100,
+            bottom: -90,
+            child: Container(
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.dashboardGradientStart.withValues(alpha: 0.16),
+                    AppColors.dashboardGradientStart.withValues(alpha: 0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.55, 1.0],
+                  colors: [
+                    AppColors.black.withValues(alpha: 0),
+                    AppColors.black.withValues(alpha: 0.16),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 44,
+              right: 44,
+              top: shortHeight ? 48 : 84,
+              bottom: shortHeight ? 28 : 48,
+            ),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      left: -32,
+                      top: -32,
+                      child: Container(
+                        width: 160,
+                        height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              AppColors.white.withValues(alpha: 0.07),
+                              AppColors.white.withValues(alpha: 0),
                             ],
                           ),
-                        if (widget.subtitle != null)
-                          Text(
-                            widget.subtitle!,
-                            style: AppTypography.smallDetails,
-                          )
-                        else if (widget.subtitleWidget != null)
-                          widget.subtitleWidget!,
+                        ),
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      SvgImages.icon,
+                      width: 96,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: shortHeight ? 28 : 44),
+                Expanded(
+                  child: Center(
+                    child: progress,
+                  ),
+                ),
+                SizedBox(height: shortHeight ? 20 : 32),
+                Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.white.withValues(alpha: 0),
+                        AppColors.white.withValues(alpha: 0.14),
+                        AppColors.white.withValues(alpha: 0),
                       ],
                     ),
                   ),
                 ),
-            flexibleSpace:
-                widget.flexibleSpace ??
-                ClipRect(
-                  child: BackdropFilter(
-                    filter: .blur(
-                      sigmaX: 12 * _blurOpacity,
-                      sigmaY: 12 * _blurOpacity,
-                    ),
-                    child: Container(
-                      margin: .only(
-                        bottom: widget.appBarBottomColor,
+                SizedBox(height: shortHeight ? 16 : 22),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'CURRENT STEP',
+                        style: context.caption.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.4,
+                          color: AppColors.white.withValues(alpha: 0.55),
+                          decoration: TextDecoration.none,
+                        ),
                       ),
-                      color:
-                          widget.appBarColor ??
-                          AppColors.white.withValues(
-                            alpha: 0.15 * _blurOpacity,
-                          ),
                     ),
+                    Text(
+                      '${(current + 1).toString().padLeft(2, '0')} / ${progress.totalSteps.toString().padLeft(2, '0')}',
+                      style: context.caption.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.4,
+                        color: AppColors.white.withValues(alpha: 0.75),
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: shortHeight ? 6 : 8),
+                Text(
+                  labels[current],
+                  style: context.header1.copyWith(
+                    color: AppColors.white,
+                    decoration: TextDecoration.none,
                   ),
                 ),
-          ),
-
-          if (widget.builder != null)
-            widget.builder!(_scrollController)
-          else if (widget.child != null)
-            SliverFillRemaining(
-              fillOverscroll: true,
-              hasScrollBody: false,
-              child: Container(
-                color: widget.bodyColor,
-                padding: const .all(20),
-                child: widget.child,
-              ),
+                SizedBox(height: shortHeight ? 12 : 18),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final fraction = ((current + 1) / progress.totalSteps)
+                        .clamp(0.0, 1.0);
+                    final fillWidth = constraints.maxWidth * fraction;
+                    return SizedBox(
+                      height: 14,
+                      child: Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          Container(
+                            width: double.maxFinite,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          Container(
+                            width: fillWidth,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.tertiaryBrand,
+                                  AppColors.brightGreen,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.brightGreen.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            left: (fillWidth - 7).clamp(0.0, double.maxFinite),
+                            top: 0,
+                            child: Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.white,
+                                border: Border.all(
+                                  color: AppColors.brightGreen,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.brightGreen.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
+          ),
         ],
       ),
-      bottomNavigationBar: widget.bottomNav != null
-          ? Container(
-              padding: .only(
-                right: 20,
-                left: 20,
-                top: 15,
-                bottom: 10,
-              ),
-              child: SafeArea(
-                child: widget.bottomNav!,
-              ),
-            )
-          : null,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,12 @@ class AppModal {
     EdgeInsetsGeometry padding = const .all(10),
     List<Widget> actions = const [],
   }) {
+    // Capped the same way page content is via BoundedContent, so the sheet
+    // doesn't stretch edge-to-edge on a tablet/desktop window — using
+    // showModalBottomSheet's own `constraints` param (its supported,
+    // documented way to do this) rather than fighting its layout with a
+    // custom wrapper.
+    final cap = contentCapWidth(context);
     showModalBottomSheet(
       isScrollControlled: true,
       requestFocus: true,
@@ -20,9 +27,9 @@ class AppModal {
       useSafeArea: true,
       useRootNavigator: true,
       isDismissible: true,
-      constraints: BoxConstraints(
-        minWidth: double.maxFinite,
-      ),
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),
       ),
@@ -31,7 +38,7 @@ class AppModal {
         margin: const .all(20),
         padding: padding,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardBg,
           borderRadius: .circular(16),
         ),
         child: SingleChildScrollView(
@@ -46,7 +53,7 @@ class AppModal {
                   Expanded(
                     child: Text(
                       label,
-                      style: AppTypography.header1,
+                      style: context.header1,
                     ),
                   ),
                   ...actions,
@@ -55,7 +62,7 @@ class AppModal {
                     style: IconButton.styleFrom(
                       alignment: .center,
                       tapTargetSize: .shrinkWrap,
-                      backgroundColor: AppColors.offWhite,
+                      backgroundColor: context.divider,
                       fixedSize: Size(35, 35),
                       minimumSize: Size(35, 35),
                       maximumSize: Size(35, 35),
@@ -66,7 +73,7 @@ class AppModal {
                     icon: Icon(
                       Icons.close,
                       size: 17,
-                      color: AppColors.black,
+                      color: context.textPrimary,
                     ),
                   ),
                 ],

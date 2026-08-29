@@ -1,12 +1,25 @@
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/radio_button.dart';
+import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/logger.dart';
+import 'package:bigpay/models/wallet/get_wallets_action.dart';
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/ui/components/forms/radio_button.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/variants.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/foldable.dart';
+import 'package:uuid/uuid.dart';
 
 class WalletsPage extends StatefulWidget {
   const WalletsPage({super.key});
@@ -20,12 +33,52 @@ class WalletsPage extends StatefulWidget {
 
 class _WalletsPageState extends State<WalletsPage> {
   final _buttonKey = GlobalKey();
+  ExecuteProcessEvent? mainEvent;
+
+  /// The last successful result, retained so the list survives once the
+  /// detail pane's own fetches (e.g. [VirtualWalletView]'s mini-statement)
+  /// dispatch their own events — [ProcessBloc] tracks a single current
+  /// event/state pair, so once another event has been dispatched,
+  /// [mainEvent]'s own live snapshot goes stale (reads back empty) until it
+  /// is redispatched. Without this cache, going back from the split-view
+  /// detail pane briefly showed an empty wallets list.
+  List<Account>? _accounts;
+
+  /// The wallet shown in the detail pane in split view
+  /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
+  /// device, where opening a wallet pushes [VirtualWalletPage] instead.
+  Account? _selectedAccount;
+
+  void _openWallet(Account account) {
+    if (context.usesSplitView) {
+      // Synchronous, before setState — see the matching comment in
+      // services.pg.dart's _openService. Marks MainShell dirty in the same
+      // window as this page's own rebuild instead of a frame later, so the
+      // sidebar collapsing and the split appearing happen in one frame
+      // instead of visibly jumping in two steps.
+      AppState.splitDetailOpenNotifier.value = true;
+      setState(() => _selectedAccount = account);
+      return;
+    }
+
+    AppRouter.router.push(
+      VirtualWalletPage.route.path,
+      extra: account,
+    );
+  }
+
+  void _closeDetails() {
+    AppState.splitDetailOpenNotifier.value = false;
+    setState(() => _selectedAccount = null);
+  }
+
   void _showContextMenu(BuildContext context) {
     // 2. Find the RenderBox of the button
     final RenderBox renderBox =
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
     final Offset buttonPosition = renderBox.localToGlobal(Offset.zero);
     final Size buttonSize = renderBox.size;
+    final l10n = AppLocalizations.of(context)!;
 
     // 3. Display the menu right below the button
     showMenu<String>(
@@ -39,65 +92,112 @@ class _WalletsPageState extends State<WalletsPage> {
         buttonPosition.dy,
       ),
       items: [
-        const PopupMenuItem(value: 'share', child: Text('Share')),
-        const PopupMenuItem(value: 'archive', child: Text('Archive')),
+        PopupMenuItem(value: 'share', child: Text(l10n.commonShare)),
+        PopupMenuItem(value: 'archive', child: Text(l10n.commonArchive)),
       ],
     ).then((value) {
-      if (value != null) print('Selected: $value');
+      if (value != null) logger.i('Selected: $value');
     });
   }
 
   @override
+  initState() {
+    _load();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // Leaving the page entirely (e.g. switching tabs) with a split still
+    // open — don't leave the sidebar permanently collapsed with nothing
+    // left to justify it.
+    if (_selectedAccount != null) {
+      AppState.splitDetailOpenNotifier.value = false;
+    }
+    super.dispose();
+  }
+
+  void _load() {
+    mainEvent = context.dispatchProcess(
+      GetWalletsAction(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return ProcessListener<List<Account>>(
+      event: () => mainEvent,
+      listener: (context, snapshot) {
+        if (snapshot.hasData) {
+          setState(() => _accounts = snapshot.data);
+        }
+      },
+      child: MasterDetailLayout(
+        detail: _selectedAccount == null
+            ? null
+            : VirtualWalletView(
+                // Without a key, switching the selection reuses the same
+                // State instead of creating a fresh one for the new account
+                // (Account extends Equatable, so this compares by value).
+                key: ValueKey(_selectedAccount),
+                account: _selectedAccount,
+                onBack: _closeDetails,
+              ),
+        master: _master(context),
+      ),
+    );
+  }
+
+  Widget _master(BuildContext context) {
     return MainLayout(
       bottomSize: 61,
-      title: 'Wallets',
+      title: AppLocalizations.of(context)!.walletsTitle,
+      onRefresh: () async {
+        setState(_load);
+        await context.awaitProcess(mainEvent);
+      },
       actions: SizedBox(
         width: 100,
         child: FormButton(
           key: _buttonKey,
           padding: .zero,
-          height: 35,
+          height: 44,
           labelSize: 13,
           onPressed: () {
             _showContextMenu(context);
           },
-          text: 'Add New',
+          text: AppLocalizations.of(context)!.commonAddNew,
           icon: Icons.add,
           buttonIconAlignment: .left,
           iconSize: 16,
         ),
       ),
-      child: Column(
-        children: [
-          WalletListItem(
-            id: '1',
-          ),
-          WalletListItem(
-            id: '2',
-          ),
-          WalletListItem(
-            id: '3',
-          ),
-          WalletListItem(
-            id: '4',
-          ),
-          WalletListItem(
-            id: '5',
-          ),
-          WalletListItem(
-            id: '6',
-          ),
-          WalletListItem(
-            id: '7',
-          ),
-          WalletListItem(
-            id: '8',
-          ),
-          WalletListItem(
-            id: '9',
-          ),
-        ],
+      child: ProcessBuilder<List<Account>>(
+        event: () => mainEvent,
+        builder: (context, snapshot) {
+          if (snapshot.isLoading && _accounts == null) {
+            return Column(
+              children: List.generate(
+                4,
+                (_) => const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: ListItemSkeleton(),
+                ),
+              ),
+            );
+          }
+
+          return Column(
+            children:
+                _accounts?.map((item) {
+                  return WalletListItem(
+                    data: item,
+                    onTap: () => _openWallet(item),
+                  );
+                }).toList() ??
+                [],
+          );
+        },
       ),
     );
   }
@@ -106,9 +206,11 @@ class _WalletsPageState extends State<WalletsPage> {
 class WalletListItem extends StatelessWidget {
   const WalletListItem({
     super.key,
-    required this.id,
+    required this.data,
+    this.onTap,
   });
-  final String id;
+  final Account data;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -119,11 +221,11 @@ class WalletListItem extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: .circular(10),
         border: .all(
-          color: AppColors.tertiary,
+          color: context.border,
         ),
       ),
       child: Dismissible(
-        key: ValueKey(id),
+        key: ValueKey(data.formId ?? data.activityId ?? Uuid().v4()),
         direction: DismissDirection.endToStart,
         dismissThresholds: const {
           DismissDirection.endToStart: 1,
@@ -135,10 +237,10 @@ class WalletListItem extends StatelessWidget {
             color: AppColors.danger,
             borderRadius: .circular(10),
             border: .all(
-              color: AppColors.tertiary,
+              color: context.border,
             ),
           ),
-          child: SvgPicture.asset('assets/img/trash.svg'),
+          child: SvgPicture.asset(SvgImages.trash),
         ),
         secondaryBackground: Container(
           padding: .all(20),
@@ -147,24 +249,41 @@ class WalletListItem extends StatelessWidget {
             color: AppColors.danger,
             borderRadius: .circular(10),
             border: .all(
-              color: AppColors.tertiary,
+              color: context.border,
             ),
           ),
-          child: SvgPicture.asset('assets/img/trash.svg'),
+          child: SvgPicture.asset(SvgImages.trash),
         ),
 
         child: ListTile(
           contentPadding: .symmetric(horizontal: 15),
-          leading: SvgPicture.asset('assets/img/bigpay-icon.svg'),
+          onTap:
+              onTap ??
+              () => AppRouter.router.push(
+                VirtualWalletPage.route.path,
+                extra: data,
+              ),
+          leading: CachedNetworkImage(
+            imageUrl:
+                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
+            placeholder: (context, url) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+            ),
+            errorWidget: (context, url, error) => Icon(
+              Icons.circle_outlined,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
           title: Text(
-            'BigPay Virtual Wallet',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.black,
+            data.sources?.first.tile ?? '',
+            style: context.caption.copyWith(
+              color: context.textPrimary,
             ),
           ),
           subtitle: Text(
-            'Balance - GHS 20,000.00',
-            style: AppTypography.caption,
+            data.sources?.first.balance ?? '0.00',
+            style: context.caption,
           ),
           trailing: FormRadioButton(selected: false),
         ),

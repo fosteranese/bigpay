@@ -1,3 +1,4 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
@@ -35,16 +36,16 @@ class _OtpMoMoPageState extends State<OtpMoMoPage> {
         crossAxisAlignment: .center,
         children: [
           Text(
-            'Enter OTP',
+            AppLocalizations.of(context)!.authEnterOtp,
             textAlign: .center,
-            style: AppTypography.display1.copyWith(
-              color: AppColors.black,
+            style: context.display1.copyWith(
+              color: context.textPrimary,
             ),
           ),
           Text(
-            'Enter the 6-digit code sent to +233********219',
+            AppLocalizations.of(context)!.walletsMomoOtpSubtitle,
             textAlign: .center,
-            style: AppTypography.p1,
+            style: context.p1,
           ),
         ],
       ),
@@ -54,7 +55,7 @@ class _OtpMoMoPageState extends State<OtpMoMoPage> {
           return FormButton(
             onPressed: () {},
             enabled: value.length == 6,
-            text: 'Continue',
+            text: AppLocalizations.of(context)!.commonContinue,
           );
         },
       ),

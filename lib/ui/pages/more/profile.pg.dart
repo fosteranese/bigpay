@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -19,23 +25,21 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       bottomSize: 100,
       flexibleSpace: Container(
-        color: AppColors.white,
+        color: context.cardBg,
         child: Stack(
           children: [
             Container(
-              height: 153,
+              height: 175,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   stops: const [0.5406, 1.0],
-                  colors: const [
-                    Color(0xFF221E55),
-                    Color(0xFF20428C),
-                  ],
+                  colors: AppGradients.walletCard.colors,
                 ),
               ),
             ),
@@ -44,21 +48,41 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       subtitleWidget: Row(
         children: [
-          CircleAvatar(
-            radius: 36,
-            backgroundColor: AppColors.white,
-            child: CircleAvatar(
-              radius: 33,
-              backgroundColor: AppColors.tintShade3,
-            ),
+          ProcessBuilder<String>(
+            event: () => GetProfilePictureAction.event,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                AppState.currentUser = AppState.currentUser!.copyWith(
+                  profilePicture: snapshot.data ?? '',
+                );
+                return CircleAvatar(
+                  radius: 18,
+                  backgroundColor: context.avatarBg,
+                  backgroundImage: MemoryImage(
+                    base64Decode(
+                      AppState.currentUser?.profilePicture ?? '',
+                    ),
+                  ),
+                );
+              }
+
+              return CircleAvatar(
+                radius: 36,
+                backgroundColor: context.cardBg,
+                child: CircleAvatar(
+                  radius: 33,
+                  backgroundColor: context.avatarBg,
+                ),
+              );
+            },
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Padding(
               padding: const .only(bottom: 30),
               child: Text(
-                'Tom Dockery Adjei Mensah',
-                style: AppTypography.formLabels.copyWith(
+                AppState.currentUser?.user?.name ?? '',
+                style: context.formLabels.copyWith(
                   color: AppColors.white,
                 ),
               ),
@@ -72,32 +96,42 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: .center,
         children: [
           FormInput(
-            label: 'First Name *',
-            controller: TextEditingController(),
+            label: l10n.profileFirstNameLabel,
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.firstName ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Middle Name',
-            controller: TextEditingController(),
+            label: l10n.profileMiddleNameLabel,
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.middleName ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Last Name *',
-            controller: TextEditingController(),
+            label: l10n.profileLastNameLabel,
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.lastName ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Email Address *',
-            controller: TextEditingController(),
+            label: l10n.profileEmailAddressLabel,
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.email ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
           FormInput(
-            label: 'Date of Birth *',
-            controller: TextEditingController(),
+            label: l10n.profileDateOfBirthLabel,
+            controller: TextEditingController(
+              text: AppState.currentUser?.user?.birthDate ?? '',
+            ),
             readOnly: true,
           ),
           const SizedBox(height: 10),
@@ -105,16 +139,20 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Expanded(
                 child: FormInput(
-                  label: 'Gender *',
-                  controller: TextEditingController(),
+                  label: l10n.profileGenderLabel,
+                  controller: TextEditingController(
+                    text: AppState.currentUser?.user?.gender ?? '',
+                  ),
                   readOnly: true,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: FormInput(
-                  label: 'Nationality',
-                  controller: TextEditingController(),
+                  label: l10n.profileNationalityLabel,
+                  controller: TextEditingController(
+                    text: AppState.currentUser?.user?.nationality ?? '',
+                  ),
                   readOnly: true,
                 ),
               ),

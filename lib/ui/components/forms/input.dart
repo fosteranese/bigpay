@@ -19,9 +19,9 @@ class FormInput extends StatefulWidget {
     this.maxLength,
     this.inputFormatters,
     this.onChanged,
-    this.height = 48,
     this.maxLines,
-    this.padding = const .symmetric(horizontal: 15),
+    this.padding = const .symmetric(horizontal: 15, vertical: 12),
+    this.validator,
   });
   final TextEditingController controller;
   final bool readOnly;
@@ -36,9 +36,9 @@ class FormInput extends StatefulWidget {
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String value)? onChanged;
-  final double height;
   final int? maxLines;
   final EdgeInsetsGeometry padding;
+  final String? Function(String? value)? validator;
 
   @override
   State<FormInput> createState() => _FormInputState();
@@ -67,48 +67,65 @@ class _FormInputState extends State<FormInput> {
               FormLabel(
                 label: widget.label!,
               ),
-            SizedBox(
-              height: widget.height,
-              child: TextFormField(
-                readOnly: widget.readOnly,
-                focusNode: widget.focusNode,
-                obscureText: widget.isPassword,
-                controller: widget.controller,
-                keyboardType: widget.keyboardType,
-                textInputAction: _textInputAction,
-                maxLength: widget.maxLength,
-                maxLines: widget.maxLines,
-                inputFormatters: widget.inputFormatters,
-                onFieldSubmitted: (value) {
-                  widget.next?.call(value);
-                },
-                onChanged: (value) {
-                  widget.onChanged?.call(value);
-                },
-                decoration: InputDecoration(
-                  contentPadding: widget.padding,
-                  hintText: widget.placeholder,
-                  hintStyle: AppTypography.caption,
-                  counterText: '',
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: .circular(10),
-                    borderSide: BorderSide(
-                      color: AppColors.tertiary,
-                      style: .solid,
-                    ),
+            TextFormField(
+              readOnly: widget.readOnly,
+              focusNode: widget.focusNode,
+              obscureText: widget.isPassword,
+              controller: widget.controller,
+              keyboardType: widget.keyboardType,
+              textInputAction: _textInputAction,
+              maxLength: widget.maxLength,
+              maxLines: widget.maxLines,
+              inputFormatters: widget.inputFormatters,
+              validator: widget.validator,
+              onFieldSubmitted: (value) {
+                widget.next?.call(value);
+              },
+              onChanged: (value) {
+                widget.onChanged?.call(value);
+              },
+              decoration: InputDecoration(
+                contentPadding: widget.padding,
+                hintText: widget.placeholder,
+                hintStyle: context.caption,
+                counterText: '',
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: .circular(10),
+                  borderSide: BorderSide(
+                    color: context.border,
+                    style: .solid,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: .circular(10),
-                    borderSide: BorderSide(
-                      color: AppColors.primary,
-                      style: .solid,
-                      width: 2,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.offWhite,
-                  suffixIcon: widget.suffix,
                 ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: .circular(10),
+                  borderSide: BorderSide(
+                    color: AppColors.primary,
+                    style: .solid,
+                    width: 2,
+                  ),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: .circular(10),
+                  borderSide: BorderSide(
+                    color: AppColors.danger,
+                    style: .solid,
+                  ),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: .circular(10),
+                  borderSide: BorderSide(
+                    color: AppColors.danger,
+                    style: .solid,
+                    width: 2,
+                  ),
+                ),
+                errorMaxLines: 2,
+                errorStyle: context.caption.copyWith(
+                  color: AppColors.danger,
+                ),
+                filled: true,
+                fillColor: context.inputBg,
+                suffixIcon: widget.suffix,
               ),
             ),
           ],
@@ -137,7 +154,7 @@ class FormLabel extends StatelessWidget {
       padding: const .only(bottom: 5),
       child: Text(
         label,
-        style: AppTypography.formLabels,
+        style: context.formLabels,
       ),
     );
   }

@@ -1,4 +1,6 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
@@ -51,6 +53,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
     _birthDateController.dispose();
     _genderController.dispose();
     _nationalityController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }
@@ -69,9 +72,10 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Personal Information',
-      titleStyle: AppTypography.display2,
+      title: l10n.kycPersonalInfoTitle,
+      titleStyle: context.display2,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
@@ -79,7 +83,7 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
           return FormButton(
             enabled: value,
             onPressed: () {},
-            text: 'Continue',
+            text: l10n.commonContinue,
           );
         },
       ),
@@ -92,47 +96,47 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
             FormInput(
               focusNode: _firstNameFocusNode,
               controller: _firstNameController,
-              label: 'First Name *',
+              label: l10n.profileFirstNameLabel,
               onChanged: _onChanged,
               next: (value) {
                 _middleNameFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _middleNameFocusNode,
               controller: _middleNameController,
-              label: 'Middle Name',
+              label: l10n.profileMiddleNameLabel,
               onChanged: _onChanged,
               next: (value) {
                 _lastNameFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _lastNameFocusNode,
               controller: _lastNameController,
-              label: 'Last Name *',
+              label: l10n.profileLastNameLabel,
               onChanged: _onChanged,
               next: (value) {
                 _emailAddressFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormInput(
               focusNode: _emailAddressFocusNode,
               controller: _emailAddressController,
-              label: 'Email Address *',
+              label: l10n.profileEmailAddressLabel,
               onChanged: _onChanged,
               next: (value) {
                 _birthDateFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormDateInput(
               focusNode: _birthDateFocusNode,
               controller: _birthDateController,
-              label: 'Date of Birth *',
+              label: l10n.profileDateOfBirthLabel,
               onChanged: (date) {
                 _onChanged(_birthDateController.text);
               },
@@ -140,28 +144,28 @@ class _PersonalInfoKycPageState extends State<PersonalInfoKycPage> {
                 _genderFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             Row(
               children: [
                 Expanded(
                   child: FormSelectInput(
                     focusNode: _genderFocusNode,
                     controller: _genderController,
-                    label: 'Gender *',
-                    placeholder: 'Select ...',
+                    label: l10n.profileGenderLabel,
+                    placeholder: l10n.kycSelectPlaceholder,
                     onChanged: _onChanged,
                     next: (value) {
                       _nationalityFocusNode.requestFocus();
                     },
                   ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: Spacing.lg),
                 Expanded(
                   child: FormSelectInput(
                     focusNode: _nationalityFocusNode,
                     controller: _nationalityController,
-                    label: 'Nationality *',
-                    placeholder: 'Select ...',
+                    label: l10n.kycNationalityLabel,
+                    placeholder: l10n.kycSelectPlaceholder,
                     onChanged: _onChanged,
                     next: (value) {
                       FocusScope.of(context).unfocus();

@@ -1,9 +1,10 @@
 // ─── Neumorphic Bottom Nav ────────────────────────────────────────────────────
 
+import 'package:bigpay/ui/components/nav_items.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
-class NeumorphicBottomNav extends StatefulWidget {
+class NeumorphicBottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTap;
 
@@ -13,262 +14,121 @@ class NeumorphicBottomNav extends StatefulWidget {
     required this.onTap,
   });
 
-  static const _navBg = Color(0xFFE8E8EC);
-  static const _shadowDark = Color(0xFFAFAFBD);
-  static const _shadowLight = Color(0xFFFFFFFF);
+  static const _activeColor = AppColors.tint; // brand green
 
-  @override
-  State<NeumorphicBottomNav> createState() => _NeumorphicBottomNavState();
-}
-
-class _NeumorphicBottomNavState extends State<NeumorphicBottomNav> {
-  int _selectedIndex = 0;
-
-  Widget _buildNavItemContent(
+  Widget _item(
+    BuildContext context,
     int index,
-    IconData icon,
-    String label,
-    bool isActive,
+    Color pillColor,
+    Color inactiveColor,
   ) {
-    final Color activeColor = AppColors.tint; // Precise Image 1 Green
-    final Color inactiveColor = const Color(
-      0xFF3A4250,
-    ); // Deep charcoal slate tint
+    final item = navBarItems(context)[index];
+    final isActive = selectedIndex == index;
+    final color = isActive ? _activeColor : inactiveColor;
 
-    return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: isActive ? 78 : null,
-        height: double.maxFinite,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(296),
-          backgroundBlendMode: BlendMode.multiply,
-          // Soft grey cavity color when pressed
-          color: isActive ? AppColors.tertiary : Colors.transparent,
-          // --- SUNKEN (INSET) ACTIVE MAPPING ---
-          // boxShadow: isActive
-          //     ? [
-          //         // Sunk Shadow Top-Left
-          //         BoxShadow(
-          //           color: Colors.black.withAlpha(26),
-          //           offset: const Offset(2.0, 2.5),
-          //           blurRadius: 3,
-          //         ),
-          //         // Relief Highlight Bottom-Right
-          //         BoxShadow(
-          //           color: Colors.white.withAlpha(255),
-          //           offset: const Offset(-1.5, -1.5),
-          //           blurRadius: 2,
-          //         ),
-          //       ]
-          //     : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isActive ? activeColor : inactiveColor,
-              size: 21,
+    final content = ExcludeSemantics(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(item.icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            item.label,
+            maxLines: 1,
+            overflow: TextOverflow.visible,
+            softWrap: false,
+            // A tab bar conventionally caps its own text scale (rather than
+            // ballooning the whole bar) so a large system font size doesn't
+            // clip against the bar's minimum height.
+            textScaler: MediaQuery.textScalerOf(
+              context,
+            ).clamp(maxScaleFactor: 1.3),
+            style: TextStyle(
+              color: color,
+              fontSize: 10.5,
+              height: 1.1,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
             ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                color: isActive ? activeColor : inactiveColor,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w600, // Thick character lines
-                letterSpacing: -0.1,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem({
-    required int index,
-    required IconData icon,
-    required String label,
-  }) {
-    final bool isActive = _selectedIndex == index;
-
-    if (isActive) {
-      return _buildNavItemContent(
-        index,
-        icon,
-        label,
-        isActive,
-      );
-    }
-
-    return Expanded(
-      child: _buildNavItemContent(
-        index,
-        icon,
-        label,
-        isActive,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 62,
-      decoration: BoxDecoration(
-        color: NeumorphicBottomNav._navBg,
-        borderRadius: .circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: NeumorphicBottomNav._shadowDark,
-            offset: Offset(6, 6),
-            blurRadius: 14,
-          ),
-          BoxShadow(
-            color: NeumorphicBottomNav._shadowLight,
-            offset: Offset(-6, -6),
-            blurRadius: 14,
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: .circular(999),
-        child: BackdropFilter(
-          filter: .blur(sigmaX: 7.0, sigmaY: 7.0),
-          child: Padding(
-            padding: const .all(8),
-            child: Row(
-              mainAxisSize: .max,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: .center,
-              children: [
-                // Standard Flex Distribution Items
-                _buildNavItem(
-                  index: 0,
-                  icon: Icons.home_outlined,
-                  label: 'Wallets',
-                ),
+    );
 
-                // Standard Flex Distribution Items
-                _buildNavItem(
-                  index: 1,
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'Wallets',
-                ),
-                _buildNavItem(
-                  index: 2,
-                  icon: Icons.description_outlined,
-                  label: 'Services',
-                ),
-                _buildNavItem(
-                  index: 3,
-                  icon: Icons.history,
-                  label: 'History',
-                ),
-                _buildNavItem(
-                  index: 4,
-                  icon: Icons.more_horiz,
-                  label: 'More',
-                ),
-              ],
-            ),
+    final navItem = Semantics(
+      label: item.label,
+      button: true,
+      selected: isActive,
+      child: GestureDetector(
+        behavior: .opaque,
+        onTap: () => onTap(index),
+        child: AnimatedContainer(
+          width: isActive ? 90 : null,
+          duration: const .new(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const .symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive ? pillColor : Colors.transparent,
+            borderRadius: .circular(38),
           ),
+          child: content,
         ),
       ),
     );
+
+    if (isActive) {
+      return navItem;
+    }
+
+    return Expanded(
+      child: navItem,
+    );
   }
-}
-
-class GlassCard extends StatelessWidget {
-  final Widget? child;
-  final double? width;
-  final double? height;
-
-  const GlassCard({
-    super.key,
-    this.child,
-    this.width,
-    this.height,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      // Accounts for the absolute position bleed: left/right/top/bottom: -4px
-      padding: const EdgeInsets.all(4.0),
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(296),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 40,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(296),
-          child: Stack(
-            children: [
-              // Layer 1: Fill + Shadow — blended background
-              _buildFillLayer(),
+    final barColor = context.navBarBg;
+    final pillColor = context.border;
+    final inactiveColor = context.textTertiary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-              // Layer 2: Glass Effect — subtle dark tint overlay
-              _buildGlassLayer(),
-
-              // Layer 3: Content
-              if (child != null) child!,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Simulates:
-  /// background: linear-gradient(0deg, #F7F7F7, #F7F7F7),
-  ///             linear-gradient(0deg, #778899, #778899),
-  ///             rgba(255, 255, 255, 0.65);
-  /// background-blend-mode: darken, color-burn, normal;
-  Widget _buildFillLayer() {
-    // The three layers blend to a light steel-grey.
-    // Closest solid approximation of darken + color-burn on these values:
-    // #F7F7F7 darkened over #778899 over white 65% ≈ #D8DDE3
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFE8ECEF), // top — lighter
-            Color(0xFFD4D9DF), // bottom — slightly darker (simulates blend)
-          ],
-        ),
-      ),
-      child: BackdropFilter(
-        filter: .blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7F7F7).withOpacity(0.65),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Simulates:
-  /// background: rgba(0, 0, 0, 0.004);
-  Widget _buildGlassLayer() {
-    return Container(
+      constraints: const BoxConstraints(minHeight: 62),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.004),
-        borderRadius: BorderRadius.circular(296),
+        color: barColor,
+        borderRadius: .circular(38),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : AppColors.navShadow,
+            offset: const Offset(5, 8),
+            blurRadius: 18,
+          ),
+          BoxShadow(
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+            offset: const Offset(-5, -5),
+            blurRadius: 14,
+          ),
+        ],
+        image: .new(
+          image: AssetImage(
+            isDark ? 'assets/img/navbar_dark.png' : 'assets/img/navbar.png',
+          ),
+          alignment: .center,
+          repeat: .noRepeat,
+          fit: .cover,
+        ),
+      ),
+      padding: const .symmetric(horizontal: 6),
+      child: Row(
+        mainAxisSize: .max,
+        mainAxisAlignment: .center,
+        crossAxisAlignment: .center,
+        children: [
+          for (var i = 0; i < navBarItems(context).length; i++)
+            _item(context, i, pillColor, inactiveColor),
+        ],
       ),
     );
   }

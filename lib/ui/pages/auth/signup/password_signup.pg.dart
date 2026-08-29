@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
+import 'package:bigpay/ui/components/password_checklist.dart';
+import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
 class CreatePasswordSignUpPage extends StatefulWidget {
@@ -26,19 +31,31 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
   final _confirmPasswordController = TextEditingController();
 
   final _canSubmit = ValueNotifier(false);
+  final _passwordMismatch = ValueNotifier(false);
 
   @override
   void dispose() {
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _canSubmit.dispose();
+    _passwordMismatch.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Create Password',
-      titleStyle: AppTypography.display1,
+      maxWidth: 480,
+      title: l10n.authCreatePasswordTitle,
+      titleStyle: context.display1,
+      stepIndicator: StepProgress(
+        currentStep: 2,
+        totalSteps: 5,
+        labels: l10n.signupSteps,
+      ),
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
@@ -46,7 +63,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
           return FormButton(
             enabled: value,
             onPressed: _continue,
-            text: 'Save Password',
+            text: l10n.authSavePassword,
           );
         },
       ),
@@ -57,7 +74,7 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
           crossAxisAlignment: .center,
           children: [
             FormPasswordInput(
-              label: 'Password',
+              label: l10n.commonPasswordLabel,
               focusNode: _passwordFocusNode,
               controller: _passwordController,
               next: (_) {
@@ -65,9 +82,9 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
               },
               onChanged: _onChanged,
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             FormPasswordInput(
-              label: 'Confirm Password',
+              label: l10n.commonConfirmPasswordLabel,
               focusNode: _confirmPasswordFocusNode,
               controller: _confirmPasswordController,
               onChanged: _onChanged,
@@ -75,11 +92,29 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
                 _continue();
               },
             ),
-            const SizedBox(height: 25),
-            Text(
-              'Password must be at least 6 characters and include letters, numbers, and special characters (e.g. !\$@%).',
-              style: AppTypography.caption,
-              textAlign: .center,
+            ValueListenableBuilder(
+              valueListenable: _passwordMismatch,
+              builder: (context, mismatch, _) {
+                if (!mismatch) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    l10n.passwordMismatch,
+                    style: context.smallDetails.copyWith(
+                      color: AppColors.danger,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder(
+              valueListenable: _passwordController,
+              builder: (context, _, _) {
+                return PasswordChecklist(
+                  password: _passwordController.text,
+                );
+              },
             ),
           ],
         ),
@@ -88,14 +123,18 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
   }
 
   void _onChanged(_) {
+    final password = _passwordController.text;
+    final confirm = _confirmPasswordController.text;
+    _passwordMismatch.value = confirm.isNotEmpty && password != confirm;
     _canSubmit.value =
-        _passwordController.text.isNotEmpty &&
-        _confirmPasswordController.text.isNotEmpty;
+        PasswordChecklist.allPassed(password) &&
+        confirm.isNotEmpty &&
+        password == confirm;
   }
 
   void _continue() {
     FocusScope.of(context).unfocus();
-    SignUp.registrationId = _passwordController.text;
+    SignUp.password = _passwordController.text;
 
     AppRouter.router.push(CreateSecurePhrasePage.route.path);
   }

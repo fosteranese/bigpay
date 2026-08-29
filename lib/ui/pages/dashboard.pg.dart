@@ -1,11 +1,35 @@
-import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/bottom_nav_bar.dart';
-import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/actions/action.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
+import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
+import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/skeleton/skeleton.dart';
+import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
+import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
+import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
+import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
+import 'package:bigpay/utils/message.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:bigpay/data/models/account/source.dart';
+import 'package:bigpay/data/models/auth_data/activity.dart';
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/auth_data/recent_activity.dart';
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/avatar.util.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -15,329 +39,406 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
-
+class _DashboardPageState extends State<DashboardPage>
+    with DashboardDataRefresh {
   final _scrollController = ScrollController();
-  double _blurOpacity = 0.0;
+
+  /// Drives the app-bar blur as the page scrolls. A notifier (not setState) so
+  /// scrolling repaints only the header overlay, not the whole dashboard.
+  final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      final opacity = (_scrollController.offset / 80).clamp(0.0, 1.0);
-      if (opacity != _blurOpacity) {
-        setState(() => _blurOpacity = opacity);
-      }
+      _blurOpacity.value = (_scrollController.offset / 80).clamp(0.0, 1.0);
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _blurOpacity.dispose();
     super.dispose();
+  }
+
+  /// Pull-to-refresh: re-fetches the user's dashboard data (activities,
+  /// most-used services, wallet balance) plus the avatar, holding the spinner
+  /// until the reload lands. Mirrors umb's `RefreshUserData`.
+  Future<void> _onRefresh() async {
+    GetProfilePictureAction.event = context.dispatchProcess(
+      returnSavedResponse: true,
+      saveActionResponse: true,
+      GetProfilePictureAction(payload: NoPayload()),
+    );
+    await refreshDashboardData();
+  }
+
+  Source? get _virtualBalance {
+    return AppState.currentUser?.customerData
+        ?.where((item) {
+          return item.mode?.toUpperCase() == 'VIRTUAL_WALLET';
+        })
+        .firstOrNull
+        ?.sources
+        ?.firstOrNull;
+  }
+
+  Account? get _virtualAccount {
+    return AppState.currentUser?.customerData
+        ?.where((item) {
+          return item.mode?.toUpperCase() == 'VIRTUAL_WALLET';
+        })
+        .firstOrNull;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: .topCenter,
-      width: double.maxFinite,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment(-0.11, -1.0), // Calculates the 176.94° angle
-          end: Alignment(0.11, 1.0),
-          colors: [
-            Color(0xFF385BA9),
-            Color(0xFFC5D8FF),
-            Color(0xFFF8F8F8),
-          ],
-          stops: [
-            0.0829, // 8.29%
-            0.2292, // 22.92%
-            0.3634, // 36.34%
-          ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return MultiProcessListener(
+      listeners: [
+        // Pull-to-refresh result: swap in the fresh dashboard data.
+        dashboardRefreshListener,
+        ProcessListenerConfig<GeneralFlowCategory>(
+          event: () => GetServiceCategoriesAction.event,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading &&
+                !snapshot.isSilent &&
+                !snapshot.isCached) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else if (!snapshot.isSilent && !snapshot.isCached) {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.hasData &&
+                !(snapshot.isSilent && !snapshot.isCached)) {
+              if (!snapshot.isSilent &&
+                  !snapshot.isCached &&
+                  (snapshot.data?.forms?.isEmpty ?? true)) {
+                MessageUtil.displayErrorDialog(
+                  context,
+                  title: AppLocalizations.of(context)!.commonServiceUnavailableTitle,
+                  message: AppLocalizations.of(context)!.commonServiceUnavailableMessage,
+                );
+                return;
+              }
+
+              AppRouter.router.push(
+                ServicePage.route.path,
+                extra: {
+                  'activityDatum': GetServiceCategoriesAction.activityDatum,
+                  'category': snapshot.data,
+                },
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+              return;
+            }
+          },
         ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              floating: true,
-              snap: true,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              automaticallyImplyLeading: false,
-              automaticallyImplyActions: false,
-              actionsPadding: .only(right: 15),
-              leadingWidth: 15 + 36,
-              leading: Padding(
-                padding: const .only(left: 15),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: AppColors.tintShade3,
-                ),
+        // A most-used/favourite tap fetches the form directly and jumps
+        // straight to the service form, skipping category selection.
+        ProcessListenerConfig<GeneralFlowFormData>(
+          event: () => GetServiceFormDataAction.event,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading &&
+                !snapshot.isSilent &&
+                !snapshot.isCached) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else if (!snapshot.isSilent && !snapshot.isCached) {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.hasData &&
+                !(snapshot.isSilent && !snapshot.isCached)) {
+              if (!snapshot.isSilent &&
+                  !snapshot.isCached &&
+                  (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
+                MessageUtil.displayErrorDialog(
+                  context,
+                  title: AppLocalizations.of(context)!.commonServiceUnavailableTitle,
+                  message: AppLocalizations.of(context)!.commonServiceUnavailableMessage,
+                );
+                return;
+              }
+
+              AppRouter.router.push(
+                ServiceFormPage.route.path,
+                extra: {
+                  'activityDatum': GetServiceFormDataAction.activityDatum,
+                  'category': const GeneralFlowCategory(),
+                  'formData': snapshot.data,
+                },
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+              return;
+            }
+          },
+        ),
+      ],
+      child: Container(
+        alignment: .topCenter,
+        width: double.maxFinite,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment(-0.11, -1.0), // Calculates the 176.94° angle
+            end: Alignment(0.11, 1.0),
+            colors: [
+              AppColors.dashboardGradientStart,
+              if (isDark) AppColors.dashboardGradientMidDark else AppColors.dashboardGradientMidLight,
+              isDark ? AppColors.dashboardGradientEndDark : AppColors.dashboardGradientEndLight,
+            ],
+            stops: [
+              0.0829, // 8.29%
+              0.2292, // 22.92%
+              0.3634, // 36.34%
+            ],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: AppRefreshIndicator(
+            onRefresh: _onRefresh,
+            // The app bar is a sliver, so drop the indicator in below it.
+            edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
+            child: BoundedContent(
+              maxWidth: context.responsive<double>(
+                compact: double.infinity,
+                medium: 760,
+                expanded: 960,
               ),
-              title: Column(
-                mainAxisSize: .min,
-                mainAxisAlignment: .center,
-                crossAxisAlignment: .start,
-                children: [
-                  Text(
-                    'Welcome Back',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.fade,
-                    ),
-                  ),
-                  Text(
-                    'Tom Dockery',
-                    style: AppTypography.p1Medium.copyWith(
-                      color: AppColors.white,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.white20,
-                  ),
-                  onPressed: () {},
-                  icon: SvgPicture.asset('assets/img/new-notification.svg'),
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
                 ),
-              ],
-              centerTitle: false,
-              flexibleSpace: ClipRect(
-                child: BackdropFilter(
-                  filter: .blur(
-                    sigmaX: 12 * _blurOpacity,
-                    sigmaY: 12 * _blurOpacity,
-                  ),
-                  child: Container(
-                    color: AppColors.white.withValues(
-                      alpha: 0.15 * _blurOpacity,
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    snap: true,
+                    backgroundColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    elevation: 0,
+                    scrolledUnderElevation: 0,
+                    automaticallyImplyLeading: false,
+                    automaticallyImplyActions: false,
+                    actionsPadding: .only(right: 15),
+                    leadingWidth: 15 + 36,
+                    leading: Padding(
+                      padding: const .only(left: 15),
+                      child: ProcessBuilder<String>(
+                        event: () => GetProfilePictureAction.event,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            AppState.currentUser = AppState.currentUser!
+                                .copyWith(
+                                  profilePicture: snapshot.data ?? '',
+                                );
+                            return CircleAvatar(
+                              radius: 18,
+                              backgroundColor: context.avatarBg,
+                              backgroundImage: avatarFromBase64(
+                                AppState.currentUser?.profilePicture,
+                              ),
+                            );
+                          }
+
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundColor: context.avatarBg,
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                width: double.maxFinite,
-                height: 177,
-                margin: const .all(15),
-                decoration: BoxDecoration(
-                  borderRadius: .circular(12),
-                  gradient: LinearGradient(
-                    begin: Alignment(
-                      0.84,
-                      0.44,
-                    ), // Calculates the 293.59° angle
-                    end: Alignment(-0.84, -0.44),
-                    colors: [
-                      Color(0xFF221E55),
-                      Color(0xFF20428C),
+                    title: Column(
+                      mainAxisSize: .min,
+                      mainAxisAlignment: .center,
+                      crossAxisAlignment: .start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.dashboardWelcomeBack,
+                          style: context.caption.copyWith(
+                            color: context.divider,
+                          ),
+                        ),
+                        Text(
+                          AppState.currentUser?.user?.name ?? '',
+                          style: context.p1Medium.copyWith(
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      IconButton(
+                        tooltip: AppLocalizations.of(context)!.dashboardNotificationsTooltip,
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.white20,
+                        ),
+                        onPressed: () =>
+                            AppRouter.router.push(NotificationsPage.route.path),
+                        icon: SvgPicture.asset(
+                          'assets/img/new-notification.svg',
+                        ),
+                      ),
                     ],
-                    stops: [
-                      0.17, // 17%
-                      0.5109, // 51.09%
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: .topRight,
-                      child: ClipRRect(
-                        borderRadius: .circular(12),
-                        child: SvgPicture.asset(
-                          'assets/img/card-corner-icon.svg',
+                    centerTitle: false,
+                    flexibleSpace: ValueListenableBuilder<double>(
+                      valueListenable: _blurOpacity,
+                      builder: (context, blur, _) => ClipRect(
+                        child: BackdropFilter(
+                          filter: .blur(
+                            sigmaX: 12 * blur,
+                            sigmaY: 12 * blur,
+                          ),
+                          child: Container(
+                            color: AppColors.white.withValues(
+                              alpha: 0.15 * blur,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const .symmetric(
-                        vertical: 22,
-                        horizontal: 18,
+                  ),
+                  SliverToBoxAdapter(
+                    child: VirtualWalletCard(
+                      label: _virtualBalance?.tile,
+                      balance: _virtualBalance?.balance,
+                      isVirtual: true,
+                      showViewDetails: true,
+                      onViewDetails: () => AppRouter.router.push(
+                        VirtualWalletPage.route.path,
+                        extra: _virtualAccount,
                       ),
+                    ),
+                  ),
+                  if (AppState.currentUser?.recentActivity?.isNotEmpty ?? false)
+                    SliverToBoxAdapter(
                       child: Column(
-                        mainAxisSize: .max,
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .start,
                         crossAxisAlignment: .start,
                         children: [
-                          Text(
-                            'Virtual Wallet Balance',
-                            style: AppTypography.smallDetails.copyWith(
-                              color: AppColors.white,
+                          Padding(
+                            padding: const .symmetric(horizontal: 20),
+                            child: Text(
+                              AppLocalizations.of(context)!.dashboardMostUsedServices,
+                              style: context.smallDetailsBold,
                             ),
                           ),
                           const SizedBox(height: 10),
-                          Row(
-                            mainAxisSize: .max,
-                            mainAxisAlignment: .start,
-                            crossAxisAlignment: .center,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: 'GHS ',
-                                      style: AppTypography.display1.copyWith(
-                                        color: AppColors.secondary,
+                          SizedBox(
+                            height: context.responsive(
+                              compact: 60,
+                              medium: 72,
+                              expanded: 84,
+                            ),
+                            // A plain horizontal list rather than a
+                            // fixed-fraction PageView — a fraction sized for
+                            // a phone (~0.6 of the width) would balloon each
+                            // pill to fill most of a wide/expanded window
+                            // instead of just showing more of them at their
+                            // natural size, which is what more room should
+                            // buy here.
+                            child: dashboardRefreshing
+                                ? ListView.builder(
+                                    scrollDirection: .horizontal,
+                                    itemCount: 4,
+                                    itemBuilder: (context, _) => Padding(
+                                      padding: const .only(left: 10),
+                                      child: SkeletonBox(
+                                        width: 140,
+                                        height: double.infinity,
+                                        borderRadius: 30,
                                       ),
                                     ),
-                                    TextSpan(
-                                      text: '20,000.00',
-                                      style: AppTypography.display1,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              IconButton.filled(
-                                style: IconButton.styleFrom(
-                                  alignment: .center,
-                                  padding: .all(5),
-                                  backgroundColor: AppColors.white11,
-                                  fixedSize: Size(25, 25),
-                                  minimumSize: Size(25, 25),
-                                  maximumSize: Size(25, 25),
-                                ),
-                                onPressed: () {},
-                                icon: SvgPicture.asset(
-                                  SvgImages.invisible,
-                                  colorFilter: .mode(AppColors.white, .srcIn),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FormButton(
-                                  backgroundColor: AppColors.white11,
-                                  height: 46,
-                                  onPressed: () {},
-                                  text: 'Fund Wallet',
-                                  labelSize: 13,
-                                  svgIcon: 'assets/img/wallet.svg',
-                                  iconSize: 15,
-                                  buttonIconAlignment: .left,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: FormButton(
-                                  backgroundColor: AppColors.white11,
-                                  height: 46,
-                                  onPressed: () {},
-                                  text: 'View Details',
-                                  labelSize: 13,
-                                  svgIcon: 'assets/img/trending-up.svg',
-                                  iconSize: 15,
-                                  buttonIconAlignment: .left,
-                                ),
-                              ),
-                            ],
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: .horizontal,
+                                    itemCount:
+                                        AppState.currentUser?.recentActivity
+                                            ?.length ??
+                                        0,
+                                    itemBuilder: (context, index) {
+                                      final item = AppState
+                                          .currentUser!
+                                          .recentActivity![index];
+                                      return FrequentServiceItem(data: item);
+                                    },
+                                  ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Column(
-                mainAxisSize: .min,
-                mainAxisAlignment: .start,
-                crossAxisAlignment: .start,
-                children: [
-                  Padding(
-                    padding: const .symmetric(horizontal: 20),
-                    child: Text(
-                      'Most used services',
-                      style: AppTypography.smallDetailsBold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 60,
-                    child: PageView(
-                      scrollDirection: .horizontal,
-                      pageSnapping: true,
-                      controller: PageController(
-                        viewportFraction: 0.60,
-                        keepPage: true,
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const .only(
+                        top: 20,
+                        left: 15,
+                        right: 15,
                       ),
-                      padEnds: false,
-                      children: [
-                        FrequentServiceItem(),
-                        FrequentServiceItem(),
-                        FrequentServiceItem(),
-                      ],
+                      child: Text(
+                        AppLocalizations.of(context)!.dashboardServicesHeader,
+                        style: context.header3,
+                      ),
                     ),
                   ),
+                  SliverPadding(
+                    padding: .all(15),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: context.responsive(
+                          compact: 2,
+                          medium: 3,
+                          expanded: 4,
+                        ),
+                        crossAxisSpacing: 15,
+                        mainAxisSpacing: 15,
+                        mainAxisExtent: 124,
+                      ),
+                      delegate: SliverChildListDelegate(
+                        dashboardRefreshing &&
+                                (AppState.currentUser?.activities
+                                        ?.isNotEmpty ??
+                                    false)
+                            ? List.generate(
+                                AppState.currentUser!.activities!.length,
+                                (_) => const SkeletonBox(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  borderRadius: 14,
+                                ),
+                              )
+                            : AppState.currentUser?.activities?.map((item) {
+                                    return ActionButton(
+                                      data: item,
+                                    );
+                                  }).toList() ??
+                                  [],
+                      ),
+                    ),
+                  ),
+                  // Clear the floating bottom nav so the last cards aren't hidden.
+                  const SliverToBoxAdapter(child: SizedBox(height: 110)),
                 ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const .only(
-                  top: 20,
-                  left: 15,
-                  right: 15,
-                ),
-                child: Text(
-                  'Services',
-                  style: AppTypography.header3,
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: .all(15),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  mainAxisExtent: 124, // 💡 Forces the exact height of 124
-                ),
-                delegate: SliverChildListDelegate([
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                  ActionButton(),
-                ]),
-              ),
-            ),
-          ],
-        ),
-
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          child: NeumorphicBottomNav(
-            selectedIndex: _selectedIndex,
-            onTap: (i) => setState(() => _selectedIndex = i),
           ),
         ),
       ),
@@ -348,36 +449,69 @@ class _DashboardPageState extends State<DashboardPage> {
 class ActionButton extends StatelessWidget {
   const ActionButton({
     super.key,
+    required this.data,
   });
+
+  final ActivityDatum data;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: .all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: .circular(14),
-      ),
-      child: Column(
-        mainAxisSize: .max,
-        crossAxisAlignment: .start,
-        children: [
-          SvgPicture.asset('assets/img/transfer.svg'),
-          const Spacer(flex: 4),
-          Text(
-            'Transfer Money',
-            overflow: .ellipsis,
-            maxLines: 1,
-            style: AppTypography.header4,
+    final item = data;
+    return InkWell(
+      borderRadius: .circular(14),
+      onTap: () {
+        GetServiceCategoriesAction.activityDatum = data;
+        GetServiceCategoriesAction.event = context.dispatchProcess(
+          saveActionResponse: true,
+          returnSavedResponse: true,
+          GetServiceCategoriesAction(
+            endpointFunc: () => GetServiceCategoriesAction.endpointFor(item),
           ),
-          const Spacer(flex: 1),
-          Text(
-            'Send funds anywhere securely',
-            overflow: .ellipsis,
-            maxLines: 2,
-            style: AppTypography.caption,
-          ),
-        ],
+        );
+      },
+      child: Container(
+        padding: .all(16),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: .circular(14),
+        ),
+        child: Column(
+          mainAxisSize: .max,
+          crossAxisAlignment: .start,
+          children: [
+            CachedNetworkImage(
+              imageUrl:
+                  '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.activity?.icon}',
+              width: 24,
+              height: 24,
+              placeholder: (context, url) => Icon(
+                Icons.circle_outlined,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              errorWidget: (context, url, error) => Icon(
+                Icons.circle_outlined,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+            ),
+            const Spacer(flex: 4),
+            Text(
+              data.activity?.activityName ??
+                  AppLocalizations.of(context)!.commonNotAvailable,
+              overflow: .ellipsis,
+              maxLines: 1,
+              style: context.header4,
+            ),
+            const Spacer(flex: 1),
+            Text(
+              data.activity?.description ?? '',
+              overflow: .ellipsis,
+              maxLines: 2,
+              style: context.caption,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -386,45 +520,133 @@ class ActionButton extends StatelessWidget {
 class FrequentServiceItem extends StatelessWidget {
   const FrequentServiceItem({
     super.key,
+    required this.data,
   });
+
+  final RecentActivity data;
+
+  /// Fetches this favourite's form directly and hands the result to the
+  /// dashboard's central listener, which jumps to the service form. Mirrors
+  /// [ActionButton] dispatching [GetServiceCategoriesAction].
+  void _open(BuildContext context) {
+    GetServiceFormDataAction.activityDatum = ActivityDatum(
+      activity: Activity(
+        activityId: data.activityId,
+        activityType: data.activityType,
+        activityName: data.activityName,
+        icon: data.icon,
+      ),
+    );
+    GetServiceFormDataAction.event = context.dispatchProcess(
+      saveActionResponse: true,
+      returnSavedResponse: true,
+      GetServiceFormDataAction(
+        payload: GetServiceFormDataActionPayload(
+          formId: data.formId,
+          insId: data.formId,
+        ),
+        endpointFunc: () =>
+            GetServiceFormDataAction.endpointFor(data.activityType),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: .centerLeft,
-      margin: .only(left: 10),
-      padding: .all(5),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: .circular(30),
-      ),
-      child: Row(
-        mainAxisSize: .max,
-        children: [
-          CircleAvatar(
-            backgroundColor: AppColors.tintShade3,
-          ),
-          const SizedBox(width: 5),
-          Column(
-            mainAxisSize: .max,
-            mainAxisAlignment: .center,
-            crossAxisAlignment: .start,
-            children: [
-              Text(
-                'Airtime Purchase',
-                textAlign: .start,
-                overflow: .ellipsis,
-                style: AppTypography.captionSemibold,
+    // Scales the pill up alongside the carousel's own responsive height
+    // (see the SizedBox wrapping this in the dashboard build) — otherwise
+    // a phone-sized pill just reads as small and cramped inside a taller,
+    // wider row on a bigger screen instead of using the extra space.
+    final iconSize = context.responsive<double>(
+      compact: 24,
+      medium: 28,
+      expanded: 32,
+    );
+    final padding = context.responsive<double>(
+      compact: 5,
+      medium: 8,
+      expanded: 10,
+    );
+    final gap = context.responsive<double>(compact: 5, medium: 8, expanded: 10);
+    final fontScale = context.responsive<double>(
+      compact: 1,
+      medium: 1.1,
+      expanded: 1.2,
+    );
+
+    return GestureDetector(
+      onTap: () => _open(context),
+      child: Container(
+        alignment: .centerLeft,
+        margin: .only(left: 10),
+        padding: .all(padding),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: .circular(30),
+        ),
+        child: Row(
+          mainAxisSize: .max,
+          children: [
+            CachedNetworkImage(
+              imageUrl:
+                  '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
+              imageBuilder: (context, imageProvider) {
+                return CircleAvatar(
+                  radius: iconSize / 2,
+                  backgroundColor: context.avatarBg,
+                  backgroundImage: imageProvider,
+                );
+              },
+              placeholder: (context, url) => Icon(
+                Icons.circle_outlined,
+                color: Theme.of(context).primaryColor,
+                size: iconSize,
               ),
-              Text(
-                'Airtime / Data',
-                textAlign: .start,
-                overflow: .ellipsis,
-                style: AppTypography.caption,
+              errorWidget: (context, url, error) => Icon(
+                Icons.circle_outlined,
+                color: Theme.of(context).primaryColor,
+                size: iconSize,
               ),
-            ],
-          ),
-        ],
+            ),
+
+            SizedBox(width: gap),
+            Column(
+              mainAxisSize: .max,
+              mainAxisAlignment: .center,
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  data.formName ?? '',
+                  textAlign: .start,
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  // This pill lives inside a fixed-height carousel; clamp
+                  // rather than let a large system text size overflow it.
+                  textScaler: MediaQuery.textScalerOf(
+                    context,
+                  ).clamp(maxScaleFactor: 1.3),
+                  style: context.captionSemibold.copyWith(
+                    fontSize: (context.captionSemibold.fontSize ?? 12) *
+                        fontScale,
+                  ),
+                ),
+                Text(
+                  data.activityName ?? '',
+                  textAlign: .start,
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  textScaler: MediaQuery.textScalerOf(
+                    context,
+                  ).clamp(maxScaleFactor: 1.3),
+                  style: context.caption.copyWith(
+                    fontSize: (context.caption.fontSize ?? 11) *
+                        fontScale,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

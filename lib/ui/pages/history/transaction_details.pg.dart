@@ -1,26 +1,68 @@
+import 'package:bigpay/data/models/general_flow/request_response.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/pages/dashboard.pg.dart';
+import 'package:bigpay/ui/pages/history/history.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 
-class TransactionDetailsPage extends StatefulWidget {
-  const TransactionDetailsPage({super.key});
+/// A pushed full page wrapping [TransactionDetailsView] — used on every
+/// device except a foldable in book mode, where [HistoryPage] shows the same
+/// view inline in the second pane instead (see [MasterDetailLayout]).
+class TransactionDetailsPage extends StatelessWidget {
+  const TransactionDetailsPage({
+    super.key,
+    required this.receipt,
+  });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/history/details',
   );
 
+  final RequestResponse receipt;
+
   @override
-  State<TransactionDetailsPage> createState() => _TransactionDetailsPageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: TransactionDetailsView(
+        receipt: receipt,
+        onBack: () => context.pop(),
+      ),
+    );
+  }
 }
 
-class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
+/// The transaction receipt content itself, independent of how it's hosted —
+/// a pushed page ([TransactionDetailsPage], [onBack] provided) or an inline
+/// pane in [HistoryPage]'s foldable book-mode split ([onBack] null, no back
+/// button since the master list stays visible alongside it).
+///
+/// Deliberately built from plain layout widgets (Column) rather than its own
+/// nested Scaffold: a Scaffold nested inside the Expanded pane of
+/// [MasterDetailLayout] silently fails to render its `body` slot (confirmed on
+/// a real device — the appBar/bottomNavigationBar render fine, the body
+/// doesn't, with no error). One Scaffold in the tree at a time avoids it —
+/// [TransactionDetailsPage] supplies the only one, in both hosting contexts.
+class TransactionDetailsView extends StatelessWidget {
+  const TransactionDetailsView({
+    super.key,
+    required this.receipt,
+    this.onBack,
+  });
+
+  final RequestResponse receipt;
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.scaffoldBg,
         image: DecorationImage(
           image: AssetImage('assets/img/trans-bg.jpg'),
           fit: .cover,
@@ -28,141 +70,154 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           opacity: 0.06,
         ),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          leadingWidth: 70,
-          leading: IconButton.filled(
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.white,
-              fixedSize: Size(28, 28),
-            ),
-            onPressed: () {},
-            icon: Icon(
-              Icons.chevron_left_outlined,
-            ),
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: .center,
-            children: [
-              _buildTitle(),
-              const SizedBox(height: 20),
-              Container(
-                margin: .symmetric(horizontal: 20),
-                padding: .all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: .circular(8),
+      child: Column(
+        children: [
+          if (onBack != null)
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const .fromLTRB(20, 12, 20, 0),
+                child: Align(
+                  alignment: .centerLeft,
+                  child: IconButton.filled(
+                    tooltip: AppLocalizations.of(context)!.commonBack,
+                    style: IconButton.styleFrom(
+                      backgroundColor: context.cardBg,
+                      foregroundColor: context.textPrimary,
+                      fixedSize: Size(44, 44),
+                    ),
+                    onPressed: onBack,
+                    icon: Icon(
+                      Icons.chevron_left_outlined,
+                    ),
+                  ),
                 ),
+              ),
+            ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: BoundedContent(
                 child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .center,
                   children: [
-                    TransactionDetailsItem(
-                      title: 'Service',
-                      value: 'Airtime Top Up',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Phone number',
-                      value: '0245075219',
-                    ),
-                    Divider(
-                      color: Color(0xffF4F5FF),
-                      thickness: 4,
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Payment source',
-                      value: 'Visa ***9876',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Amount',
-                      value: 'GHS 10.00',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Charges',
-                      value: 'GHS 0.00',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Total',
-                      value: 'GHS 10.00',
-                    ),
-                    Divider(
-                      color: Color(0xffF4F5FF),
-                      thickness: 4,
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Date',
-                      value: '12 January, 2024 13:45',
-                    ),
-                    TransactionDetailsItem(
-                      title: 'Transaction ID',
-                      value: '12345678900987',
+                    const SizedBox(height: Spacing.xl),
+                    _buildTitle(context),
+                    const SizedBox(height: Spacing.xl),
+                    Container(
+                      margin: .symmetric(horizontal: 20),
+                      padding: .all(24),
+                      decoration: BoxDecoration(
+                        color: context.cardBg,
+                        borderRadius: .circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          TransactionDetailsItem(
+                            title: AppLocalizations.of(context)!.historyServiceLabel,
+                            value: receipt.formName ?? '',
+                          ),
+                          TransactionDetailsItem(
+                            title: AppLocalizations.of(context)!.historyTransactionIdLabel,
+                            value: receipt.activityName ?? '',
+                          ),
+                          Divider(
+                            color: context.divider,
+                            thickness: 4,
+                          ),
+                          ...receipt.previewData.map((item) {
+                            return TransactionDetailsItem(
+                              title: item.key ?? '',
+                              value: item.value ?? '',
+                            );
+                          }),
+                          Divider(
+                            color: context.divider,
+                            thickness: 4,
+                          ),
+                          TransactionDetailsItem(
+                            title: AppLocalizations.of(context)!.commonDateLabel,
+                            value: receipt.receiptDateTime ?? '',
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const .symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              mainAxisSize: .min,
-              crossAxisAlignment: .center,
-              children: [
-                if ('success' == 'success')
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FormButton(
-                          backgroundColor: AppColors.white,
-                          foregroundColor: AppColors.black,
-                          onPressed: () {},
-                          text: 'Share',
-                          icon: Icons.share_outlined,
-                          buttonIconAlignment: .left,
-                          iconSize: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FormButton(
-                          backgroundColor: AppColors.white,
-                          foregroundColor: AppColors.black,
-                          onPressed: () {},
-                          text: 'Save',
-                          icon: Icons.group_outlined,
-                          buttonIconAlignment: .left,
-                          iconSize: 20,
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  FormButton(
-                    backgroundColor: AppColors.white,
-                    foregroundColor: AppColors.black,
-                    onPressed: () {},
-                    text: 'Submit a Complain',
-                    svgIcon: 'assets/img/complaint.svg',
-                    buttonIconAlignment: .left,
-                    iconSize: 20,
-                  ),
-                const SizedBox(height: 20),
-                FormButton(onPressed: () {}, text: 'Back to Home'),
-              ],
             ),
           ),
-        ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const .symmetric(horizontal: 20, vertical: 10),
+              child: BoundedContent(
+                child: Column(
+                  mainAxisSize: .min,
+                  crossAxisAlignment: .center,
+                  children: [
+                    if (receipt.status == 1)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FormButton(
+                              backgroundColor: context.cardBg,
+                              foregroundColor: context.textPrimary,
+                              onPressed: () {},
+                              text: AppLocalizations.of(context)!.commonShare,
+                              icon: Icons.share_outlined,
+                              buttonIconAlignment: .left,
+                              iconSize: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: FormButton(
+                              backgroundColor: context.cardBg,
+                              foregroundColor: context.textPrimary,
+                              onPressed: () {},
+                              text: AppLocalizations.of(context)!.commonSave,
+                              icon: Icons.group_outlined,
+                              buttonIconAlignment: .left,
+                              iconSize: 20,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      FormButton(
+                        backgroundColor: context.cardBg,
+                        foregroundColor: context.textPrimary,
+                        onPressed: () {},
+                        text: AppLocalizations.of(context)!.historySubmitComplain,
+                        svgIcon: 'assets/img/complaint.svg',
+                        buttonIconAlignment: .left,
+                        iconSize: 20,
+                      ),
+                    const SizedBox(height: Spacing.xl),
+                    FormButton(
+                      onPressed: () {
+                        AppRouter.router.popUntilNamedRoutes([
+                          DashboardPage.route.path,
+                          ServicePage.route.path,
+                          HistoryPage.route.path,
+                        ]);
+                      },
+                      text: AppLocalizations.of(context)!.commonBackToHome,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTitle() {
-    switch ('success') {
-      case 'success':
+  Widget _buildTitle(BuildContext context) {
+    switch (receipt.status) {
+      case 1:
         return Column(
           children: [
             Icon(
@@ -172,20 +227,20 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Transaction Successful',
-              style: AppTypography.display2,
+              AppLocalizations.of(context)!.historyTransactionSuccessful,
+              style: context.display2,
             ),
             Text(
-              'Your transaction is complete',
-              style: AppTypography.smallDetails.copyWith(
-                color: AppColors.black,
+              AppLocalizations.of(context)!.historyTransactionCompleteSubtitle,
+              style: context.smallDetails.copyWith(
+                color: context.textPrimary,
               ),
             ),
           ],
         );
 
-      case 'error':
-      case 'failed':
+      case 0:
+      case 3:
         return Column(
           children: [
             Icon(
@@ -195,8 +250,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Transaction Failed',
-              style: AppTypography.display2.copyWith(
+              AppLocalizations.of(context)!.historyTransactionFailed,
+              style: context.display2.copyWith(
                 color: AppColors.danger,
               ),
             ),
@@ -205,8 +260,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     }
 
     return Text(
-      'Transaction Receipt',
-      style: AppTypography.display2,
+      AppLocalizations.of(context)!.historyTransactionReceipt,
+      style: context.display2,
     );
   }
 }
@@ -235,21 +290,21 @@ class TransactionDetailsItem extends StatelessWidget {
               title,
               textAlign: .left,
               style: title.toLowerCase().contains('total')
-                  ? AppTypography.header4.copyWith(
-                      color: AppColors.black,
+                  ? context.header4.copyWith(
+                      color: context.textPrimary,
                     )
-                  : AppTypography.caption.copyWith(
-                      color: AppColors.fiat,
+                  : context.caption.copyWith(
+                      color: context.textSecondary,
                     ),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: Spacing.xl),
           Expanded(
             child: Text(
               value,
               textAlign: .right,
-              style: AppTypography.header4.copyWith(
-                color: AppColors.black,
+              style: context.header4.copyWith(
+                color: context.textPrimary,
               ),
             ),
           ),

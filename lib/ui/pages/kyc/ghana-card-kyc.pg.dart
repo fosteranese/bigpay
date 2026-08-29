@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
 class GhanaCardKycPage extends StatefulWidget {
@@ -35,6 +37,7 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
     _ghanaCardController.dispose();
     _issueDateController.dispose();
     _expiryDateController.dispose();
+    _canSubmit.dispose();
 
     super.dispose();
   }
@@ -50,9 +53,10 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Ghana Card Information',
-      titleStyle: AppTypography.display2,
+      title: l10n.kycGhanaCardInfoTitle,
+      titleStyle: context.display2,
       bottomSize: 60,
       bottomNav: ValueListenableBuilder(
         valueListenable: _canSubmit,
@@ -60,7 +64,7 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
           return FormButton(
             enabled: value,
             onPressed: () {},
-            text: 'Continue',
+            text: l10n.commonContinue,
           );
         },
       ),
@@ -77,14 +81,14 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
                 _issueDateFocusNode.requestFocus();
               },
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: Spacing.lg),
             Row(
               children: [
                 Expanded(
                   child: FormDateInput(
                     focusNode: _issueDateFocusNode,
                     controller: _issueDateController,
-                    label: 'Issue Date *',
+                    label: l10n.kycIssueDateLabel,
                     onChanged: (date) {
                       _onChanged(_issueDateController.text);
                     },
@@ -93,12 +97,12 @@ class _GhanaCardKycPageState extends State<GhanaCardKycPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: Spacing.lg),
                 Expanded(
                   child: FormDateInput(
                     focusNode: _expiryDateFocusNode,
                     controller: _expiryDateController,
-                    label: 'Expiry Date *',
+                    label: l10n.kycExpiryDateLabel,
                     onChanged: (date) {
                       _onChanged(_expiryDateController.text);
                     },
