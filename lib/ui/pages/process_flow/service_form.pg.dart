@@ -23,6 +23,7 @@ import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/summary.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -229,8 +230,15 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
         authModes: authModes,
         payload: _formData,
         complete: ({otp, required payload, pin, secretAnswer}) {
-          AppRouter.router.pop();
-          _process(otp: otp, payload: payload, pin: pin, secretAnswer: secretAnswer);
+          // Each auth step (PIN/OTP/secret answer) dismisses its own
+          // dialog before calling onSuccess, so there's nothing left to
+          // pop here.
+          _process(
+            otp: otp,
+            payload: payload,
+            pin: pin,
+            secretAnswer: secretAnswer,
+          );
         },
       );
       return;
@@ -361,6 +369,9 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
             if (snapshot.isSuccessful) {
               _processEvent = null;
+              // Dashboard/Wallets/History live in other shell branches and
+              // won't otherwise know this happened — see the notifier's doc.
+              AppState.notifyDataChanged();
               AppRouter.router.push(
                 TransactionDetailsPage.route.path,
                 extra: snapshot.data,
@@ -389,12 +400,22 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
             if (snapshot.isSuccessful) {
               _payeeEvent = null;
+              AppState.notifyDataChanged();
               MessageUtil.displaySuccessDialog(
                 context,
                 message:
                     snapshot.message ??
-                    AppLocalizations.of(context)!.summaryBeneficiarySavedMessage,
-                onOk: () => AppRouter.router.go(BeneficiariesPage.route.path),
+                    AppLocalizations.of(
+                      context,
+                    )!.summaryBeneficiarySavedMessage,
+                // Pops back through the flow (this page was only ever
+                // reached from BeneficiariesPage's own "add" button) rather
+                // than go(), so BeneficiariesPage's existing didPopNext
+                // refresh (see its RouteAware) actually fires and shows the
+                // new beneficiary.
+                onOk: () => AppRouter.router.popUntilNamed(
+                  BeneficiariesPage.route.name,
+                ),
               );
               return;
             }

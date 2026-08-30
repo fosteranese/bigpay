@@ -21,6 +21,7 @@ import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -192,8 +193,9 @@ class _SummaryPageState extends State<SummaryPage> {
         authModes: authModes,
         payload: payload,
         complete: ({otp, required payload, pin, secretAnswer}) {
-          // Dismiss the auth dialog before processing.
-          AppRouter.router.pop();
+          // Each auth step (PIN/OTP/secret answer) dismisses its own
+          // dialog before calling onSuccess, so there's nothing left to
+          // pop here.
           _process(
             otp: otp,
             payload: payload,
@@ -299,6 +301,9 @@ class _SummaryPageState extends State<SummaryPage> {
 
             if (snapshot.isSuccessful) {
               _processEvent = null;
+              // Dashboard/Wallets/History live in other shell branches and
+              // won't otherwise know this happened — see the notifier's doc.
+              AppState.notifyDataChanged();
               AppRouter.router.push(
                 TransactionDetailsPage.route.path,
                 extra: snapshot.data,
@@ -329,13 +334,20 @@ class _SummaryPageState extends State<SummaryPage> {
 
             if (snapshot.isSuccessful) {
               _payeeEvent = null;
+              AppState.notifyDataChanged();
               MessageUtil.displaySuccessDialog(
                 context,
                 message:
                     snapshot.message ??
-                    AppLocalizations.of(context)!.summaryBeneficiarySavedMessage,
-                onOk: () =>
-                    AppRouter.router.go(BeneficiariesPage.route.path),
+                    AppLocalizations.of(
+                      context,
+                    )!.summaryBeneficiarySavedMessage,
+                // See the matching comment in service_form.pg.dart —
+                // pops back rather than go() so BeneficiariesPage's own
+                // didPopNext refresh actually fires.
+                onOk: () => AppRouter.router.popUntilNamed(
+                  BeneficiariesPage.route.name,
+                ),
               );
               return;
             }
@@ -351,6 +363,10 @@ class _SummaryPageState extends State<SummaryPage> {
         ),
       ],
       child: MainLayout(
+        // Default (100) is too tight once the confirm description wraps to
+        // 2 lines — overflowing by a couple pixels on some devices/font
+        // sizes. Headroom added.
+        bottomSize: 130,
         subtitleWidget: Column(
           children: [
             Text(
@@ -382,38 +398,38 @@ class _SummaryPageState extends State<SummaryPage> {
             );
           },
         ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .stretch,
-          children: [
-            Container(
-              padding: .all(20),
-              decoration: BoxDecoration(
-                color: context.cardBg,
-                borderRadius: .circular(12),
-              ),
-              child: Column(
-                mainAxisSize: .min,
-                mainAxisAlignment: .start,
-                crossAxisAlignment: .center,
-                children: [
-                  for (final (index, (title, value)) in rows.indexed) ...[
-                    TransactionDetailsItem(title: title, value: value),
-                    if (index != rows.length - 1)
-                      Divider(color: context.divider),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: .min,
+            crossAxisAlignment: .stretch,
+            children: [
+              Container(
+                padding: .all(20),
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  borderRadius: .circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .start,
+                  crossAxisAlignment: .center,
+                  children: [
+                    for (final (index, (title, value)) in rows.indexed) ...[
+                      TransactionDetailsItem(title: title, value: value),
+                      if (index != rows.length - 1)
+                        Divider(color: context.divider),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (_editableItems.isNotEmpty) ...[
-              const SizedBox(height: Spacing.xl),
-              ..._buildEditableFields,
+              if (_editableItems.isNotEmpty) ...[
+                const SizedBox(height: Spacing.xl),
+                ..._buildEditableFields,
+              ],
             ],
-          ],
+          ),
         ),
-      ),
       ),
     );
   }
