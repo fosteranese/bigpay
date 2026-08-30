@@ -12,6 +12,9 @@ class SvgImages {
   static const String cardCornerIcon = '$baseImageUrl/card-corner-icon.svg';
   static const String newNotification = '$baseImageUrl/new-notification.svg';
   static const String visa = '$baseImageUrl/visa.svg';
+  static const String mastercard = '$baseImageUrl/mastercard.svg';
+  static const String amex = '$baseImageUrl/amex.svg';
+  static const String discover = '$baseImageUrl/discover.svg';
   static const String trash = '$baseImageUrl/trash.svg';
   static const String bigpayIcon = '$baseImageUrl/bigpay-icon.svg';
   static const String ghanaCard = '$baseImageUrl/ghana-card.svg';

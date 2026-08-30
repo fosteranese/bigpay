@@ -1,12 +1,16 @@
 import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/data/models/auth_data/activity.dart';
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/auth_data/recent_activity.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/message.util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/logger.dart';
 import 'package:bigpay/models/wallet/get_wallets_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -14,11 +18,13 @@ import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/wallets/add_card.pg.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
+import 'package:bigpay/utils/app_modal.dart';
 import 'package:uuid/uuid.dart';
 
 class WalletsPage extends StatefulWidget {
@@ -32,7 +38,6 @@ class WalletsPage extends StatefulWidget {
 }
 
 class _WalletsPageState extends State<WalletsPage> {
-  final _buttonKey = GlobalKey();
   ExecuteProcessEvent? mainEvent;
 
   /// The last successful result, retained so the list survives once the
@@ -72,39 +77,131 @@ class _WalletsPageState extends State<WalletsPage> {
     setState(() => _selectedAccount = null);
   }
 
-  void _showContextMenu(BuildContext context) {
-    // 2. Find the RenderBox of the button
-    final RenderBox renderBox =
-        _buttonKey.currentContext!.findRenderObject() as RenderBox;
-    final Offset buttonPosition = renderBox.localToGlobal(Offset.zero);
-    final Size buttonSize = renderBox.size;
-    final l10n = AppLocalizations.of(context)!;
+  /// The formId umb's own reference client (full_app_mode.dart) hardcodes
+  /// for "Link Mobile Wallet" — both apps run against the same backend, so
+  /// this identifies the same form here.
+  static const _linkWalletFormId = '1AD40BE3-4D10-4CE1-AC51-A168348055DA';
 
-    // 3. Display the menu right below the button
-    showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        buttonPosition.dx,
-        buttonPosition.dy +
-            buttonSize.height +
-            5, // Placed directly under the button
-        buttonPosition.dx + buttonSize.width,
-        buttonPosition.dy,
+  /// The backend-curated "quick action" for linking a new wallet (e.g.
+  /// "Link Mobile Wallet") — the same entry the Dashboard's most-used-
+  /// services carousel surfaces via [FrequentServiceItem]. There's no
+  /// dedicated add-wallet endpoint; this reuses that one.
+  RecentActivity? get _addWalletActivity {
+    final recent = AppState.currentUser?.recentActivity ?? const [];
+    for (final item in recent) {
+      if (item.formId?.toLowerCase() == _linkWalletFormId.toLowerCase()) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  /// Fetches the add-wallet form directly and hands the result to the
+  /// Dashboard's own listener (kept alive across tabs by
+  /// [StatefulNavigationShell]), which pushes the service form. Mirrors
+  /// [FrequentServiceItem]'s own dispatch — matching how umb's own
+  /// LinkMoMoWalletCard links a mobile wallet through the same generic,
+  /// backend-driven form rather than a bespoke screen.
+  void _addMobileWallet(BuildContext context) {
+    final activity = _addWalletActivity;
+    if (activity == null) {
+      final l10n = AppLocalizations.of(context)!;
+      MessageUtil.displayErrorDialog(
+        context,
+        title: l10n.commonServiceUnavailableTitle,
+        message: l10n.commonServiceUnavailableMessage,
+      );
+      return;
+    }
+
+    GetServiceFormDataAction.activityDatum = ActivityDatum(
+      activity: Activity(
+        activityId: activity.activityId,
+        activityType: activity.activityType,
+        activityName: activity.activityName,
+        icon: activity.icon,
       ),
-      items: [
-        PopupMenuItem(value: 'share', child: Text(l10n.commonShare)),
-        PopupMenuItem(value: 'archive', child: Text(l10n.commonArchive)),
+    );
+    GetServiceFormDataAction.event = context.dispatchProcess(
+      saveActionResponse: true,
+      returnSavedResponse: true,
+      GetServiceFormDataAction(
+        payload: GetServiceFormDataActionPayload(
+          formId: activity.formId,
+          insId: activity.formId,
+        ),
+        endpointFunc: () =>
+            GetServiceFormDataAction.endpointFor(activity.activityType),
+      ),
+    );
+  }
+
+  void _addCard() {
+    AppRouter.router.push(AddCardPage.route.path);
+  }
+
+  void _showAddWalletSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    AppModal.showBottomModal(
+      context,
+      label: l10n.walletsAddWalletSheetTitle,
+      padding: const .all(20),
+      children: [
+        const SizedBox(height: 10),
+        ListTile(
+          contentPadding: .zero,
+          leading: CircleAvatar(
+            backgroundColor: context.avatarBg,
+            child: Icon(
+              Icons.phone_android_outlined,
+              color: context.accentGreen,
+            ),
+          ),
+          title: Text(
+            l10n.walletsAddWalletMobileOption,
+            style: context.formLabels,
+          ),
+          trailing: Icon(Icons.chevron_right_outlined),
+          onTap: () {
+            AppRouter.router.pop();
+            _addMobileWallet(context);
+          },
+        ),
+        ListTile(
+          contentPadding: .zero,
+          leading: CircleAvatar(
+            backgroundColor: context.avatarBg,
+            child: Icon(Icons.credit_card_outlined, color: context.accentGreen),
+          ),
+          title: Text(
+            l10n.walletsAddWalletCardOption,
+            style: context.formLabels,
+          ),
+          trailing: Icon(Icons.chevron_right_outlined),
+          onTap: () {
+            AppRouter.router.pop();
+            _addCard();
+          },
+        ),
       ],
-    ).then((value) {
-      if (value != null) logger.i('Selected: $value');
-    });
+    );
   }
 
   @override
   initState() {
     _load();
+    // A wallet linked or a transaction processed elsewhere (a different
+    // shell branch, so no same-navigator pop to catch) — see the
+    // notifier's own doc for why this can't just be RouteAware.
+    AppState.dataChangedNotifier.addListener(_onDataChanged);
     super.initState();
   }
+
+  // setState(_load), not just _load — this fires from the notifier's own
+  // listener list, outside this widget's normal rebuild triggers, so
+  // without it the ProcessListener below wouldn't pick up the reassigned
+  // mainEvent until something else happened to rebuild this page.
+  void _onDataChanged() => setState(_load);
 
   @override
   void dispose() {
@@ -114,6 +211,7 @@ class _WalletsPageState extends State<WalletsPage> {
     if (_selectedAccount != null) {
       AppState.splitDetailOpenNotifier.value = false;
     }
+    AppState.dataChangedNotifier.removeListener(_onDataChanged);
     super.dispose();
   }
 
@@ -159,13 +257,10 @@ class _WalletsPageState extends State<WalletsPage> {
       actions: SizedBox(
         width: 100,
         child: FormButton(
-          key: _buttonKey,
           padding: .zero,
           height: 44,
           labelSize: 13,
-          onPressed: () {
-            _showContextMenu(context);
-          },
+          onPressed: () => _showAddWalletSheet(context),
           text: AppLocalizations.of(context)!.commonAddNew,
           icon: Icons.add,
           buttonIconAlignment: .left,
