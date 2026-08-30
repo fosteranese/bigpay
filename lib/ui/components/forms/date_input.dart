@@ -1,4 +1,5 @@
 import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -52,6 +53,12 @@ class _FormDateInputState extends State<FormDateInput> {
               SvgPicture.asset(
                 'assets/img/calendar.svg',
                 width: 24,
+                // Hardcoded to a black stroke in the SVG itself, so
+                // without this it's nearly invisible on a dark input field.
+                colorFilter: ColorFilter.mode(
+                  context.textPrimary,
+                  BlendMode.srcIn,
+                ),
               ),
             ],
           ),
@@ -63,8 +70,7 @@ class _FormDateInputState extends State<FormDateInput> {
   Future<void> _onTap() async {
     FocusScope.of(context).unfocus();
 
-    final first =
-        widget.firstDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final first = widget.firstDate ?? DateTime.fromMillisecondsSinceEpoch(0);
     final last =
         widget.lastDate ?? DateTime.now().add(const Duration(days: 365 * 100));
 
