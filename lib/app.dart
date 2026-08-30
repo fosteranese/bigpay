@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart' show CupertinoLocalizations;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
@@ -21,6 +23,34 @@ import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/biometric.util.dart';
+
+/// Flutter's built-in Material/Cupertino chrome translations (back-button
+/// tooltip, etc.) don't cover Nigerian Pidgin ('pcm') —
+/// `GlobalMaterialLocalizations.delegate.isSupported` returns false for it,
+/// so `Localizations` never loads a `MaterialLocalizations` for that locale,
+/// and any widget that force-unwraps `MaterialLocalizations.of(context)`
+/// (e.g. `SliverAppBar`'s auto-generated back button) crashes with a null
+/// check. The app's own [AppLocalizations] (from the ARB files) does support
+/// 'pcm' — only the framework's own chrome strings need a fallback — so
+/// these delegates claim support for 'pcm' and load English translations for
+/// it, leaving every other locale exactly as the real delegate would.
+class _PcmFallbackDelegate<T> extends LocalizationsDelegate<T> {
+  const _PcmFallbackDelegate(this._delegate);
+
+  final LocalizationsDelegate<T> _delegate;
+  static const _fallback = Locale('en');
+
+  @override
+  bool isSupported(Locale locale) =>
+      locale.languageCode == 'pcm' || _delegate.isSupported(locale);
+
+  @override
+  Future<T> load(Locale locale) =>
+      _delegate.load(locale.languageCode == 'pcm' ? _fallback : locale);
+
+  @override
+  bool shouldReload(_PcmFallbackDelegate<T> old) => false;
+}
 
 class BigPayApp extends StatelessWidget {
   const BigPayApp({super.key});
@@ -55,6 +85,7 @@ class BigPayApp extends StatelessWidget {
                       if (savedUser != null) {
                         AppState.currentUser = savedUser;
                       }
+                      await AppState.loadPhoneNumber();
                       SignIn.clear();
 
                       // A returning user (a saved login surfaced on the cached
@@ -89,6 +120,10 @@ class BigPayApp extends StatelessWidget {
             listener: (context, snapshot) {
               if (snapshot.hasData) {
                 AppState.currentUser = snapshot.data!;
+                // Before SignIn.clear() wipes it — the only place this
+                // number (as actually typed at login) is available to
+                // persist for the existing-device unlock screen next time.
+                AppState.savePhoneNumber(SignIn.phoneNumber);
                 SignIn.clear();
                 AppRouter.router.go(
                   DashboardPage.route.path,
@@ -147,7 +182,16 @@ class BigPayApp extends StatelessWidget {
                   themeMode: themeMode,
                   locale: locale,
                   supportedLocales: AppState.supportedLocales,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  localizationsDelegates: [
+                    AppLocalizations.delegate,
+                    _PcmFallbackDelegate<MaterialLocalizations>(
+                      GlobalMaterialLocalizations.delegate,
+                    ),
+                    _PcmFallbackDelegate<CupertinoLocalizations>(
+                      GlobalCupertinoLocalizations.delegate,
+                    ),
+                    GlobalWidgetsLocalizations.delegate,
+                  ],
                   routerConfig: AppRouter.router,
                   builder: (context, child) {
                     final scaler = MediaQuery.textScalerOf(context).clamp(

@@ -10,12 +10,10 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/auth/signin/existing_login.pg.dart';
+import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
-import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/phone.util.dart';
 import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -65,16 +63,19 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
       return;
     }
 
-    final result = await BiometricUtil.authenticate(AppLocalizations.of(context)!.securityUnlockBigPay);
+    final result = await BiometricUtil.authenticate(
+      AppLocalizations.of(context)!.securityUnlockBigPay,
+    );
     if (!mounted || result != BiometricResult.success) return;
-
-    final phone = AppState.currentUser?.user?.shortName?.toLocalPhone ?? '';
 
     setState(() {
       _loginEvent = context.dispatchProcess(
         ExistingLoginAction(
           payload: ExistingLoginActionPayload(
-            phoneNumber: phone,
+            // Not user.shortName — that's a display name, not a phone
+            // number. SignIn.phoneNumber is seeded from
+            // AppState.savedPhoneNumber by SignIn.clear() on startup.
+            phoneNumber: SignIn.phoneNumber,
             password: password,
           ),
         ),

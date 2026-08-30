@@ -1,7 +1,6 @@
 import 'package:bigpay/data/models/new_device_login_data.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/phone.util.dart';
 
 export 'biometric_login.pg.dart';
 export 'existing_login.pg.dart';
@@ -17,8 +16,10 @@ class SignIn {
   static VerifyUserData? verifyUserData;
 
   static void clear() {
-    phoneNumber =
-        AppState.currentUser?.user?.shortName?.toLocalPhone ?? '';
+    // Not user.shortName — that's a display name, not a phone number.
+    // AppState.savedPhoneNumber is set from the number actually typed in
+    // at login (see app.dart's AuthAction.event listener).
+    phoneNumber = AppState.savedPhoneNumber ?? '';
     password = '';
     newDeviceLoginData = null;
     verifyUserData = null;
