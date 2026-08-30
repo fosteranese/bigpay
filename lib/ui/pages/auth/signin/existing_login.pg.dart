@@ -209,7 +209,10 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
       child: MainLayout(
         maxWidth: 480,
         showBackBtn: false,
-        bottomSize: 60,
+        // Was 60 — too tight for the 50px logo plus its top/bottom padding,
+        // overflowing by a few pixels on some devices/font sizes. Headroom
+        // added.
+        bottomSize: 90,
         subtitleWidget: Align(
           alignment: .center,
           child: SvgPicture.asset(
