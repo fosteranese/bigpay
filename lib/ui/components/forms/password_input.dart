@@ -1,5 +1,6 @@
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:flutter/material.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -58,6 +59,10 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
             },
             icon: SvgPicture.asset(
               value ? SvgImages.visible : SvgImages.invisible,
+              // The SVGs themselves are hardcoded to near-black
+              // (#010101), so without this they're nearly invisible
+              // against a dark-theme input field.
+              colorFilter: ColorFilter.mode(context.textPrimary, BlendMode.srcIn),
             ),
           ),
         );

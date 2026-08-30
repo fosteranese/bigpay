@@ -93,8 +93,15 @@ extension ThemeColors on BuildContext {
   Color get border => _isDark ? const Color(0xFF3A3A4C) : AppColors.tertiary;
   Color get inputBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.white;
   Color get avatarBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.tintShade3;
+  // The header's flexibleSpace (main.lo.dart) replaces this color's alpha
+  // wholesale with a scroll-driven blur value rather than multiplying it —
+  // so at a high scroll offset this solidifies to its *base* color, not a
+  // washed-out tint of it. Base must be theme-aware (matching cardBg) or a
+  // full scroll on dark mode solidifies to opaque white regardless of
+  // theme, which is what happened when this was AppColors.white
+  // unconditionally.
   Color get appBarOverlay => _isDark
-      ? AppColors.white.withValues(alpha: 0.08)
+      ? const Color(0xFF1E1E2E).withValues(alpha: 0.08)
       : AppColors.white.withValues(alpha: 0.15);
   Color get navBarBg => _isDark ? const Color(0xFF1E1E2E) : const Color(0xFFECEDF1);
   Color get accentGreen => _isDark ? AppColors.brightGreen : AppColors.secondary;
