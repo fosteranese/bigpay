@@ -8,16 +8,22 @@ import 'package:bigpay/data/models/general_flow/form_verification_response.dart'
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
+import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/models/actions/services/process_request_action.dart';
 import 'package:bigpay/models/actions/services/verify_service_form_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
+import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/summary.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 class ServiceFormPage extends StatefulWidget {
@@ -44,7 +50,15 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _canSubmit = ValueNotifier(false);
   ExecuteProcessEvent? _submitEvent;
+
+  /// Set only on the [_submitDirect] path (see [_submit]) — processes the
+  /// request straight from this form's own data, without a verify/summary
+  /// round trip.
+  ExecuteProcessEvent? _processEvent;
+  ExecuteProcessEvent? _payeeEvent;
   final Map<String, dynamic> _formData = {};
+
+  bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
 
   /// The form definition currently on screen. Seeded from the one passed in,
   /// then replaced by a pull-to-refresh.
@@ -148,8 +162,14 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   String _lowerCamel(String value) =>
       value.isEmpty ? value : '${value[0].toLowerCase()}${value.substring(1)}';
 
-  /// Verifies the filled form on the backend; the confirmation it returns is
-  /// shown on the summary screen (see the listener in [build]).
+  /// [GeneralFlowForm.requireVerification] decides the route from here,
+  /// matching umb's `ProcessFormController.submit`: a form that requires
+  /// verification is verified on the backend first, with the confirmation it
+  /// returns shown on the summary screen (see the listener in [build]) for
+  /// the user to review before it's processed. A form that doesn't skips
+  /// straight to authenticating and processing this form's own data — no
+  /// verify call, no summary/review screen at all (e.g. Reset Authorisation
+  /// PIN: nothing to preview, so umb never shows one for it either).
   void _submit() {
     FocusScope.of(context).unfocus();
 
@@ -164,6 +184,11 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
         if (datum.field?.fieldName != null)
           datum.field!.fieldName!: controller.text.trim(),
     });
+
+    if (_form.form?.requireVerification != 1) {
+      _submitDirect();
+      return;
+    }
 
     _submitEvent = context.dispatchProcess(
       VerifyServiceFormAction(
@@ -188,6 +213,77 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       case ActivityTypesConst.enquiry:
       default:
         return '/FBLOnline/verifyForm';
+    }
+  }
+
+  /// The requireVerification-skipped path — authenticates (if this form's
+  /// own [GeneralFlowFormData.authMode] calls for it) then processes
+  /// straight away. Mirrors [SummaryPage._continue]/[SummaryPage._process],
+  /// just working off this form's own data instead of a verification
+  /// result.
+  void _submitDirect() {
+    final authModes = _form.authMode ?? const [];
+
+    if (authModes.isNotEmpty) {
+      AuthenticationUtil.start(
+        authModes: authModes,
+        payload: _formData,
+        complete: ({otp, required payload, pin, secretAnswer}) {
+          AppRouter.router.pop();
+          _process(otp: otp, payload: payload, pin: pin, secretAnswer: secretAnswer);
+        },
+      );
+      return;
+    }
+
+    _process(payload: _formData);
+  }
+
+  void _process({
+    String? otp,
+    required Map<String, dynamic> payload,
+    String? pin,
+    String? secretAnswer,
+  }) {
+    final paymentMode =
+        (payload['SourceAccount'] ?? payload['sourceAccount'] ?? '').toString();
+
+    final actionPayload = ProcessRequestActionPayload(
+      activityId: widget.activityDatum.activity?.activityId,
+      formId: _form.form?.formId,
+      formData: payload,
+      paymentMode: paymentMode,
+      otp: otp,
+      pin: pin,
+      secretAnswer: secretAnswer,
+    );
+
+    if (_isAddBeneficiary) {
+      _payeeEvent = context.dispatchProcess(
+        AddPayeeAction(payload: actionPayload),
+      );
+      return;
+    }
+
+    _processEvent = context.dispatchProcess(
+      ProcessRequestAction(
+        payload: actionPayload,
+        endpointFunc: _processEndpoint,
+      ),
+    );
+  }
+
+  String _processEndpoint() {
+    switch (_form.form?.activityType) {
+      case ActivityTypesConst.fblCollect:
+        return '/FBLCollect/processRequest';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/processRequest';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/processRequest';
     }
   }
 
@@ -250,6 +346,68 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             }
           },
         ),
+        // The requireVerification-skipped path (see [_submitDirect]) — same
+        // outcome as [SummaryPage]'s own process listener, just triggered
+        // straight from this page instead of after a review screen.
+        ProcessListenerConfig<RequestResponse>(
+          event: () => _processEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _processEvent = null;
+              AppRouter.router.push(
+                TransactionDetailsPage.route.path,
+                extra: snapshot.data,
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _processEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+        ProcessListenerConfig<bool>(
+          event: () => _payeeEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _payeeEvent = null;
+              MessageUtil.displaySuccessDialog(
+                context,
+                message:
+                    snapshot.message ??
+                    AppLocalizations.of(context)!.summaryBeneficiarySavedMessage,
+                onOk: () => AppRouter.router.go(BeneficiariesPage.route.path),
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _payeeEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
       ],
       child: MainLayout(
         bottomSize: 72,
@@ -262,7 +420,13 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             return FormButton(
               enabled: canSubmit,
               onPressed: _submit,
-              text: AppLocalizations.of(context)!.commonSubmit,
+              // "Continue" when this leads to a review/summary screen
+              // (matching that screen's own action), "Submit" when it
+              // processes directly from here — same distinction umb's
+              // form_submit_button.dart makes off requireVerification.
+              text: _form.form?.requireVerification == 1
+                  ? AppLocalizations.of(context)!.commonContinue
+                  : AppLocalizations.of(context)!.commonSubmit,
             );
           },
         ),
