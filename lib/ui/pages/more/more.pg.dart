@@ -61,7 +61,10 @@ class _MorePageState extends State<MorePage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      bottomSize: 150,
+      // Was 150 — too tight for the account card's actual height (avatar +
+      // name + padding) at larger text-scale factors, overflowing by a few
+      // pixels on some devices/font sizes. Headroom added.
+      bottomSize: 190,
       title: l10n.moreAccountTitle,
       subtitleWidget: InkWell(
         borderRadius: .circular(12),
@@ -211,6 +214,8 @@ class _MorePageState extends State<MorePage> {
             title: l10n.moreSignOutTitle,
             icon: Icons.logout_outlined,
           ),
+          // Clear the floating bottom nav so Sign Out isn't hidden behind it.
+          const SizedBox(height: 110),
         ],
       ),
     );
@@ -276,7 +281,12 @@ class _MorePageState extends State<MorePage> {
           selected: current == null,
           onTap: () {
             AppState.setLocale(null);
-            Navigator.pop(context);
+            // AppModal.showBottomModal shows on the root navigator, but this
+            // page sits inside the bottom-nav shell's own nested navigator —
+            // Navigator.pop(context) resolves to the nearest one to context
+            // (the shell branch's), not the sheet's. AppRouter.router.pop()
+            // always targets the right one.
+            AppRouter.router.pop();
           },
         ),
         for (final locale in AppState.supportedLocales)
@@ -285,7 +295,7 @@ class _MorePageState extends State<MorePage> {
             selected: current?.languageCode == locale.languageCode,
             onTap: () {
               AppState.setLocale(locale);
-              Navigator.pop(context);
+              AppRouter.router.pop();
             },
           ),
       ],

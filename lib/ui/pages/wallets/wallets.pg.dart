@@ -188,14 +188,16 @@ class _WalletsPageState extends State<WalletsPage> {
           }
 
           return Column(
-            children:
-                _accounts?.map((item) {
-                  return WalletListItem(
-                    data: item,
-                    onTap: () => _openWallet(item),
-                  );
-                }).toList() ??
-                [],
+            children: [
+              ...?_accounts?.map((item) {
+                return WalletListItem(
+                  data: item,
+                  onTap: () => _openWallet(item),
+                );
+              }),
+              // Clear the floating bottom nav so the last item isn't hidden.
+              const SizedBox(height: 110),
+            ],
           );
         },
       ),

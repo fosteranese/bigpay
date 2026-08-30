@@ -249,52 +249,56 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
             );
           }
 
-          return SliverList.builder(
-            itemCount: activities.length,
-            itemBuilder: (context, index) {
-              final item = activities[index];
-              return Padding(
-                padding: const .symmetric(
-                  horizontal: 20,
-                  vertical: 5,
-                ),
-                child: ListTile(
-                  onTap: () => _openService(item),
-                  contentPadding: .symmetric(
-                    horizontal: 15,
+          return SliverPadding(
+            // Clears the floating bottom nav so the last item isn't hidden.
+            padding: const EdgeInsets.only(bottom: 110),
+            sliver: SliverList.builder(
+              itemCount: activities.length,
+              itemBuilder: (context, index) {
+                final item = activities[index];
+                return Padding(
+                  padding: const .symmetric(
+                    horizontal: 20,
+                    vertical: 5,
                   ),
-                  tileColor: context.cardBg,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: .circular(14),
-                  ),
-                  leading: CachedNetworkImage(
-                    imageUrl:
-                        '${AppState.currentUser?.imageBaseUrl}${item.imageDirectory}/${item.activity?.icon}',
-                    width: 24,
-                    height: 24,
-                    placeholder: (context, url) => Icon(
-                      Icons.circle_outlined,
-                      color: Theme.of(context).primaryColor,
-                      size: 24,
+                  child: ListTile(
+                    onTap: () => _openService(item),
+                    contentPadding: .symmetric(
+                      horizontal: 15,
                     ),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.circle_outlined,
-                      color: Theme.of(context).primaryColor,
-                      size: 24,
+                    tileColor: context.cardBg,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: .circular(14),
                     ),
+                    leading: CachedNetworkImage(
+                      imageUrl:
+                          '${AppState.currentUser?.imageBaseUrl}${item.imageDirectory}/${item.activity?.icon}',
+                      width: 24,
+                      height: 24,
+                      placeholder: (context, url) => Icon(
+                        Icons.circle_outlined,
+                        color: Theme.of(context).primaryColor,
+                        size: 24,
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.circle_outlined,
+                        color: Theme.of(context).primaryColor,
+                        size: 24,
+                      ),
+                    ),
+                    title: Text(
+                      item.activity?.activityName ?? '',
+                      style: context.header4,
+                    ),
+                    subtitle: Text(
+                      item.activity?.description ?? '',
+                      style: context.caption,
+                    ),
+                    trailing: Icon(Icons.chevron_right_outlined),
                   ),
-                  title: Text(
-                    item.activity?.activityName ?? '',
-                    style: context.header4,
-                  ),
-                  subtitle: Text(
-                    item.activity?.description ?? '',
-                    style: context.caption,
-                  ),
-                  trailing: Icon(Icons.chevron_right_outlined),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

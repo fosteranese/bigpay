@@ -193,7 +193,7 @@ class _HistoryPageState extends State<HistoryPage> {
           }
         },
         builder: (context, snapshot) {
-          if (_source == null && snapshot.isLoading) {
+          if (snapshot.isLoading) {
             return ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -212,7 +212,9 @@ class _HistoryPageState extends State<HistoryPage> {
             physics: const AlwaysScrollableScrollPhysics(
               parent: ClampingScrollPhysics(),
             ),
-            padding: const .symmetric(vertical: 10),
+            // bottom: 120, not 10 — clears the floating bottom nav so the
+            // last item isn't hidden behind it.
+            padding: const .only(top: 10, bottom: 120),
             itemCount: items.length,
             separatorBuilder: (_, _) => Divider(
               height: 1,
