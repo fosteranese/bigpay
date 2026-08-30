@@ -133,6 +133,9 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'Answer to the Question';
 
   @override
+  String get authForgotSecurePhraseLink => 'You forget Secure Phrase?';
+
+  @override
   String get authSignIn => 'Sign In';
 
   @override
@@ -318,6 +321,9 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get complaintsNoMessages => 'No message yet.';
+
+  @override
+  String get complaintsOriginalRequestLabel => 'Wetin you first talk';
 
   @override
   String get complaintsReplyPlaceholder => 'Type your reply…';
@@ -690,6 +696,16 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get kycRetakeIfUnclear => 'Retake am if the picture no clear';
+
+  @override
+  String get kycCameraPermissionTitle => 'We need your camera';
+
+  @override
+  String get kycCameraPermissionMessage =>
+      'BigPay need to use your camera to check say na really you, with quick selfie.';
+
+  @override
+  String get kycOpenSettings => 'Open Settings';
 
   @override
   String get commonSubmit => 'Submit';

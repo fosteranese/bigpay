@@ -41,6 +41,7 @@
   "authSecurePhraseSubtitle": "Personaliza tu pregunta y respuesta privada para una verificación más rápida y pagos digitales más seguros.",
   "authChooseQuestionLabel": "Elegir una pregunta",
   "authAnswerToQuestionLabel": "Respuesta a la pregunta",
+  "authForgotSecurePhraseLink": "¿Olvidaste tu frase segura?",
 
   "authSignIn": "Iniciar sesión",
   "authDontHaveAccount": "¿No tienes una cuenta?",
@@ -104,6 +105,7 @@
   "complaintsEmptyTitle": "Aún no hay reclamos",
   "complaintsEmptySubtitle": "Los reclamos enviados y sus respuestas aparecerán aquí.",
   "complaintsNoMessages": "Aún no hay mensajes.",
+  "complaintsOriginalRequestLabel": "Solicitud original",
   "complaintsReplyPlaceholder": "Escribe una respuesta…",
   "complaintsSendMessageTooltip": "Enviar mensaje",
 
@@ -231,6 +233,9 @@
   "kycEvenLighting": "Iluminación uniforme, sin sombras duras",
   "kycSlightBlur": "Se detectó ligero desenfoque",
   "kycRetakeIfUnclear": "Vuelve a tomar la foto si la imagen no es clara",
+  "kycCameraPermissionTitle": "Se necesita acceso a la cámara",
+  "kycCameraPermissionMessage": "BigPay necesita acceder a tu cámara para verificar tu identidad con una selfie rápida.",
+  "kycOpenSettings": "Abrir configuración",
 
   "commonSubmit": "Enviar",
 

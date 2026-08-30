@@ -41,6 +41,7 @@
   "authSecurePhraseSubtitle": "خصّص سؤالك وجوابك الخاص للتحقق الأسرع والمدفوعات الرقمية الأكثر أمانًا.",
   "authChooseQuestionLabel": "اختر سؤالًا",
   "authAnswerToQuestionLabel": "الإجابة على السؤال",
+  "authForgotSecurePhraseLink": "نسيت عبارة الأمان؟",
 
   "authSignIn": "تسجيل الدخول",
   "authDontHaveAccount": "ليس لديك حساب؟",
@@ -104,6 +105,7 @@
   "complaintsEmptyTitle": "لا توجد شكاوى بعد",
   "complaintsEmptySubtitle": "ستظهر الشكاوى المقدمة وردودها هنا.",
   "complaintsNoMessages": "لا توجد رسائل بعد.",
+  "complaintsOriginalRequestLabel": "الطلب الأصلي",
   "complaintsReplyPlaceholder": "اكتب ردًا…",
   "complaintsSendMessageTooltip": "إرسال الرسالة",
 
@@ -231,6 +233,9 @@
   "kycEvenLighting": "إضاءة متساوية، بلا ظلال قاسية",
   "kycSlightBlur": "تم اكتشاف ضبابية طفيفة",
   "kycRetakeIfUnclear": "أعد الالتقاط إذا بدت الصورة غير واضحة",
+  "kycCameraPermissionTitle": "الوصول إلى الكاميرا مطلوب",
+  "kycCameraPermissionMessage": "يحتاج BigPay إلى الوصول إلى كاميرتك للتحقق من هويتك بصورة سيلفي سريعة.",
+  "kycOpenSettings": "فتح الإعدادات",
 
   "commonSubmit": "إرسال",
 

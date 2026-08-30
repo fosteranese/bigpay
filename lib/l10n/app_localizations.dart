@@ -346,6 +346,12 @@ abstract class AppLocalizations {
   /// **'Answer to the Question'**
   String get authAnswerToQuestionLabel;
 
+  /// Link to the forgot-secure-phrase flow, shown under the secure-phrase answer field during login
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Secure Phrase ?'**
+  String get authForgotSecurePhraseLink;
+
   /// Sign-in page title and button text
   ///
   /// In en, this message translates to:
@@ -699,6 +705,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No messages yet.'**
   String get complaintsNoMessages;
+
+  /// Label above the complaint's own original description, shown before the reply trail
+  ///
+  /// In en, this message translates to:
+  /// **'Original request'**
+  String get complaintsOriginalRequestLabel;
 
   /// Placeholder for the complaint reply composer
   ///
@@ -1401,6 +1413,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retake if image feels unclear'**
   String get kycRetakeIfUnclear;
+
+  /// No description provided for @kycCameraPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access needed'**
+  String get kycCameraPermissionTitle;
+
+  /// No description provided for @kycCameraPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'BigPay needs access to your camera to verify your identity with a quick selfie.'**
+  String get kycCameraPermissionMessage;
+
+  /// No description provided for @kycOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get kycOpenSettings;
 
   /// No description provided for @commonSubmit.
   ///

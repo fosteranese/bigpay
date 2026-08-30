@@ -132,6 +132,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'Answer to the Question';
 
   @override
+  String get authForgotSecurePhraseLink => 'Forgot Secure Phrase ?';
+
+  @override
   String get authSignIn => 'Sign In';
 
   @override
@@ -316,6 +319,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get complaintsNoMessages => 'No messages yet.';
+
+  @override
+  String get complaintsOriginalRequestLabel => 'Original request';
 
   @override
   String get complaintsReplyPlaceholder => 'Type a reply…';
@@ -686,6 +692,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kycRetakeIfUnclear => 'Retake if image feels unclear';
+
+  @override
+  String get kycCameraPermissionTitle => 'Camera access needed';
+
+  @override
+  String get kycCameraPermissionMessage =>
+      'BigPay needs access to your camera to verify your identity with a quick selfie.';
+
+  @override
+  String get kycOpenSettings => 'Open Settings';
 
   @override
   String get commonSubmit => 'Submit';

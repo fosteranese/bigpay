@@ -41,6 +41,7 @@
   "authSecurePhraseSubtitle": "Passen Sie Ihre private Sicherheitsfrage an für schnellere Verifizierung und sicherere digitale Zahlungen.",
   "authChooseQuestionLabel": "Frage auswählen",
   "authAnswerToQuestionLabel": "Antwort auf die Frage",
+  "authForgotSecurePhraseLink": "Sicherheitsfrage vergessen?",
 
   "authSignIn": "Anmelden",
   "authDontHaveAccount": "Noch kein Konto?",
@@ -104,6 +105,7 @@
   "complaintsEmptyTitle": "Noch keine Beschwerden",
   "complaintsEmptySubtitle": "Eingereichte Beschwerden und deren Antworten werden hier angezeigt.",
   "complaintsNoMessages": "Noch keine Nachrichten.",
+  "complaintsOriginalRequestLabel": "Ursprüngliche Anfrage",
   "complaintsReplyPlaceholder": "Antwort eingeben…",
   "complaintsSendMessageTooltip": "Nachricht senden",
 
@@ -231,6 +233,9 @@
   "kycEvenLighting": "Gleichmäßige Beleuchtung, keine harten Schatten",
   "kycSlightBlur": "Leichte Unschärfe erkannt",
   "kycRetakeIfUnclear": "Erneut aufnehmen, wenn das Bild unscharf wirkt",
+  "kycCameraPermissionTitle": "Kamerazugriff erforderlich",
+  "kycCameraPermissionMessage": "BigPay benötigt Zugriff auf Ihre Kamera, um Ihre Identität mit einem kurzen Selfie zu bestätigen.",
+  "kycOpenSettings": "Einstellungen öffnen",
 
   "commonSubmit": "Absenden",
 

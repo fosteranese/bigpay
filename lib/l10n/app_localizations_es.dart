@@ -132,6 +132,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'Respuesta a la pregunta';
 
   @override
+  String get authForgotSecurePhraseLink => '¿Olvidaste tu frase segura?';
+
+  @override
   String get authSignIn => 'Iniciar sesión';
 
   @override
@@ -318,6 +321,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get complaintsNoMessages => 'Aún no hay mensajes.';
+
+  @override
+  String get complaintsOriginalRequestLabel => 'Solicitud original';
 
   @override
   String get complaintsReplyPlaceholder => 'Escribe una respuesta…';
@@ -692,6 +698,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get kycRetakeIfUnclear =>
       'Vuelve a tomar la foto si la imagen no es clara';
+
+  @override
+  String get kycCameraPermissionTitle => 'Se necesita acceso a la cámara';
+
+  @override
+  String get kycCameraPermissionMessage =>
+      'BigPay necesita acceder a tu cámara para verificar tu identidad con una selfie rápida.';
+
+  @override
+  String get kycOpenSettings => 'Abrir configuración';
 
   @override
   String get commonSubmit => 'Enviar';

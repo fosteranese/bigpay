@@ -87,6 +87,8 @@
   "@authChooseQuestionLabel": { "description": "Label for the secure-phrase question dropdown" },
   "authAnswerToQuestionLabel": "Answer to the Question",
   "@authAnswerToQuestionLabel": { "description": "Label for the secure-phrase answer field" },
+  "authForgotSecurePhraseLink": "Forgot Secure Phrase ?",
+  "@authForgotSecurePhraseLink": { "description": "Link to the forgot-secure-phrase flow, shown under the secure-phrase answer field during login" },
 
   "authSignIn": "Sign In",
   "@authSignIn": { "description": "Sign-in page title and button text" },
@@ -219,6 +221,8 @@
   "@complaintsEmptySubtitle": { "description": "Empty-state message on the complaints list" },
   "complaintsNoMessages": "No messages yet.",
   "@complaintsNoMessages": { "description": "Empty-state message on a complaint's detail/chat trail" },
+  "complaintsOriginalRequestLabel": "Original request",
+  "@complaintsOriginalRequestLabel": { "description": "Label above the complaint's own original description, shown before the reply trail" },
   "complaintsReplyPlaceholder": "Type a reply…",
   "@complaintsReplyPlaceholder": { "description": "Placeholder for the complaint reply composer" },
   "complaintsSendMessageTooltip": "Send message",
@@ -383,6 +387,9 @@
   "kycEvenLighting": "Even lighting, no harsh shadows",
   "kycSlightBlur": "Slight blur detected",
   "kycRetakeIfUnclear": "Retake if image feels unclear",
+  "kycCameraPermissionTitle": "Camera access needed",
+  "kycCameraPermissionMessage": "BigPay needs access to your camera to verify your identity with a quick selfie.",
+  "kycOpenSettings": "Open Settings",
 
   "commonSubmit": "Submit",
 

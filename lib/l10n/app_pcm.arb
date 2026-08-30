@@ -47,6 +47,7 @@
   "authSecurePhraseSubtitle": "Customize your private Q&A make verification fast and your digital payments safe well well.",
   "authChooseQuestionLabel": "Choose Question",
   "authAnswerToQuestionLabel": "Answer to the Question",
+  "authForgotSecurePhraseLink": "You forget Secure Phrase?",
 
   "authSignIn": "Sign In",
   "authDontHaveAccount": "You no get account?",
@@ -120,6 +121,7 @@
   "complaintsEmptyTitle": "No complaint yet",
   "complaintsEmptySubtitle": "Complaints wey you raise and their replies go show here.",
   "complaintsNoMessages": "No message yet.",
+  "complaintsOriginalRequestLabel": "Wetin you first talk",
   "complaintsReplyPlaceholder": "Type your reply…",
   "complaintsSendMessageTooltip": "Send message",
 
@@ -247,6 +249,9 @@
   "kycEvenLighting": "Light dey even, no hard shadow",
   "kycSlightBlur": "We see small blur",
   "kycRetakeIfUnclear": "Retake am if the picture no clear",
+  "kycCameraPermissionTitle": "We need your camera",
+  "kycCameraPermissionMessage": "BigPay need to use your camera to check say na really you, with quick selfie.",
+  "kycOpenSettings": "Open Settings",
 
   "commonSubmit": "Submit",
 

@@ -1,5 +1,7 @@
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/otp_login.pg.dart';
+import 'package:bigpay/ui/pages/auth/start_forgot_secure_phrase.pg.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +16,7 @@ import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
 class SecurePhraseLoginPage extends StatefulWidget {
@@ -109,6 +112,23 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
                 focusNode: _answerFocusNode,
                 controller: _answerController,
                 onChanged: _onChanged,
+              ),
+              const SizedBox(height: Spacing.sm),
+              TextButton(
+                onPressed: () {
+                  ForgotPwd.phoneNumber = SignIn.phoneNumber;
+                  AppRouter.router.push(
+                    StartForgotSecurePhrasePage.route.path,
+                  );
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.authForgotSecurePhraseLink,
+                  style: context.smallDetails.copyWith(
+                    color: context.accentGreen,
+                    decoration: TextDecoration.underline,
+                    decorationColor: context.accentGreen,
+                  ),
+                ),
               ),
             ],
           ),
