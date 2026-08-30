@@ -35,6 +35,43 @@ class AppState {
   /// `detail` prop changes.
   static final splitDetailOpenNotifier = ValueNotifier<bool>(false);
 
+  /// Bumped whenever an action elsewhere completes in a way that should
+  /// invalidate a tab-root page's own list (a wallet linked, a transaction
+  /// processed) — those pages (Dashboard, Wallets, History) live in separate
+  /// [StatefulShellBranch] navigators from the process-flow pages that
+  /// trigger this, so they can't rely on a same-navigator pop/[RouteAware]
+  /// to know to refresh. Each listens in `initState` and re-loads its own
+  /// data when this changes, rather than trying to target one specific page
+  /// — cheap to over-refresh, not safe to miss one.
+  static final dataChangedNotifier = ValueNotifier<int>(0);
+
+  static void notifyDataChanged() {
+    dataChangedNotifier.value++;
+  }
+
+  static const _phoneKey = 'auth-phone-number';
+
+  /// The phone number this device last logged in with, persisted so the
+  /// existing-device unlock screen has one to send on a fresh app launch —
+  /// before that, it was read off [User.shortName], which is a display
+  /// name, not a phone number, and stopped working once the backend
+  /// actually started returning one there.
+  static String? savedPhoneNumber;
+
+  static Future<void> loadPhoneNumber() async {
+    try {
+      savedPhoneNumber = await db.readRaw(_phoneKey);
+    } catch (_) {}
+  }
+
+  static Future<void> savePhoneNumber(String phone) async {
+    if (phone.isEmpty) return;
+    savedPhoneNumber = phone;
+    try {
+      await db.add(key: _phoneKey, payload: phone);
+    } catch (_) {}
+  }
+
   static Future<void> loadTheme() async {
     try {
       final raw = await db.readRaw(_themeKey);
@@ -94,7 +131,8 @@ class AppState {
     final selected = localeNotifier.value;
     if (selected != null) return selected.languageCode;
 
-    final systemLanguageCode = ui.PlatformDispatcher.instance.locale.languageCode;
+    final systemLanguageCode =
+        ui.PlatformDispatcher.instance.locale.languageCode;
     final match = supportedLocales.firstWhere(
       (locale) => locale.languageCode == systemLanguageCode,
       orElse: () => supportedLocales.first,

@@ -53,10 +53,17 @@ class _DashboardPageState extends State<DashboardPage>
     _scrollController.addListener(() {
       _blurOpacity.value = (_scrollController.offset / 80).clamp(0.0, 1.0);
     });
+    // A wallet linked or a transaction processed elsewhere (a different
+    // shell branch, so no same-navigator pop to catch) — see the
+    // notifier's own doc for why this can't just be RouteAware.
+    AppState.dataChangedNotifier.addListener(_onDataChanged);
   }
+
+  void _onDataChanged() => refreshDashboardData();
 
   @override
   void dispose() {
+    AppState.dataChangedNotifier.removeListener(_onDataChanged);
     _scrollController.dispose();
     _blurOpacity.dispose();
     super.dispose();
@@ -85,11 +92,9 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Account? get _virtualAccount {
-    return AppState.currentUser?.customerData
-        ?.where((item) {
-          return item.mode?.toUpperCase() == 'VIRTUAL_WALLET';
-        })
-        .firstOrNull;
+    return AppState.currentUser?.customerData?.where((item) {
+      return item.mode?.toUpperCase() == 'VIRTUAL_WALLET';
+    }).firstOrNull;
   }
 
   @override
@@ -118,8 +123,12 @@ class _DashboardPageState extends State<DashboardPage>
                   (snapshot.data?.forms?.isEmpty ?? true)) {
                 MessageUtil.displayErrorDialog(
                   context,
-                  title: AppLocalizations.of(context)!.commonServiceUnavailableTitle,
-                  message: AppLocalizations.of(context)!.commonServiceUnavailableMessage,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.commonServiceUnavailableTitle,
+                  message: AppLocalizations.of(
+                    context,
+                  )!.commonServiceUnavailableMessage,
                 );
                 return;
               }
@@ -164,8 +173,12 @@ class _DashboardPageState extends State<DashboardPage>
                   (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
                 MessageUtil.displayErrorDialog(
                   context,
-                  title: AppLocalizations.of(context)!.commonServiceUnavailableTitle,
-                  message: AppLocalizations.of(context)!.commonServiceUnavailableMessage,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.commonServiceUnavailableTitle,
+                  message: AppLocalizations.of(
+                    context,
+                  )!.commonServiceUnavailableMessage,
                 );
                 return;
               }
@@ -200,8 +213,13 @@ class _DashboardPageState extends State<DashboardPage>
             end: Alignment(0.11, 1.0),
             colors: [
               AppColors.dashboardGradientStart,
-              if (isDark) AppColors.dashboardGradientMidDark else AppColors.dashboardGradientMidLight,
-              isDark ? AppColors.dashboardGradientEndDark : AppColors.dashboardGradientEndLight,
+              if (isDark)
+                AppColors.dashboardGradientMidDark
+              else
+                AppColors.dashboardGradientMidLight,
+              isDark
+                  ? AppColors.dashboardGradientEndDark
+                  : AppColors.dashboardGradientEndLight,
             ],
             stops: [
               0.0829, // 8.29%
@@ -273,8 +291,14 @@ class _DashboardPageState extends State<DashboardPage>
                       children: [
                         Text(
                           AppLocalizations.of(context)!.dashboardWelcomeBack,
+                          // Fixed, not theme-adaptive — like the name text
+                          // below it, this sits on the header's own blue
+                          // gradient regardless of app theme, not the
+                          // scaffold background. context.divider (a hairline
+                          // border color) went near-black in dark mode,
+                          // making this unreadable.
                           style: context.caption.copyWith(
-                            color: context.divider,
+                            color: AppColors.white.withValues(alpha: 0.7),
                           ),
                         ),
                         Text(
@@ -287,7 +311,9 @@ class _DashboardPageState extends State<DashboardPage>
                     ),
                     actions: [
                       IconButton(
-                        tooltip: AppLocalizations.of(context)!.dashboardNotificationsTooltip,
+                        tooltip: AppLocalizations.of(
+                          context,
+                        )!.dashboardNotificationsTooltip,
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.white20,
                         ),
@@ -338,7 +364,9 @@ class _DashboardPageState extends State<DashboardPage>
                           Padding(
                             padding: const .symmetric(horizontal: 20),
                             child: Text(
-                              AppLocalizations.of(context)!.dashboardMostUsedServices,
+                              AppLocalizations.of(
+                                context,
+                              )!.dashboardMostUsedServices,
                               style: context.smallDetailsBold,
                             ),
                           ),
@@ -372,7 +400,9 @@ class _DashboardPageState extends State<DashboardPage>
                                 : ListView.builder(
                                     scrollDirection: .horizontal,
                                     itemCount:
-                                        AppState.currentUser?.recentActivity
+                                        AppState
+                                            .currentUser
+                                            ?.recentActivity
                                             ?.length ??
                                         0,
                                     itemBuilder: (context, index) {
@@ -414,8 +444,7 @@ class _DashboardPageState extends State<DashboardPage>
                       ),
                       delegate: SliverChildListDelegate(
                         dashboardRefreshing &&
-                                (AppState.currentUser?.activities
-                                        ?.isNotEmpty ??
+                                (AppState.currentUser?.activities?.isNotEmpty ??
                                     false)
                             ? List.generate(
                                 AppState.currentUser!.activities!.length,
@@ -563,15 +592,29 @@ class FrequentServiceItem extends StatelessWidget {
       expanded: 32,
     );
     final padding = context.responsive<double>(
-      compact: 5,
-      medium: 8,
-      expanded: 10,
+      compact: 10,
+      medium: 13,
+      expanded: 15,
     );
-    final gap = context.responsive<double>(compact: 5, medium: 8, expanded: 10);
+    final gap = context.responsive<double>(
+      compact: 10,
+      medium: 13,
+      expanded: 15,
+    );
     final fontScale = context.responsive<double>(
       compact: 1,
       medium: 1.1,
       expanded: 1.2,
+    );
+    // The pill sizes to its content (see the comment on the carousel's
+    // SizedBox below), but with no width limit at all a long form/activity
+    // name pushed the text straight past the pill's rounded background
+    // instead of the maxLines/ellipsis on the Text widgets ever kicking in
+    // — that only clips once something upstream actually bounds the width.
+    final maxWidth = context.responsive<double>(
+      compact: 200,
+      medium: 240,
+      expanded: 280,
     );
 
     return GestureDetector(
@@ -580,6 +623,7 @@ class FrequentServiceItem extends StatelessWidget {
         alignment: .centerLeft,
         margin: .only(left: 10),
         padding: .all(padding),
+        constraints: BoxConstraints(maxWidth: maxWidth),
         decoration: BoxDecoration(
           color: context.cardBg,
           borderRadius: .circular(30),
@@ -610,40 +654,45 @@ class FrequentServiceItem extends StatelessWidget {
             ),
 
             SizedBox(width: gap),
-            Column(
-              mainAxisSize: .max,
-              mainAxisAlignment: .center,
-              crossAxisAlignment: .start,
-              children: [
-                Text(
-                  data.formName ?? '',
-                  textAlign: .start,
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  // This pill lives inside a fixed-height carousel; clamp
-                  // rather than let a large system text size overflow it.
-                  textScaler: MediaQuery.textScalerOf(
-                    context,
-                  ).clamp(maxScaleFactor: 1.3),
-                  style: context.captionSemibold.copyWith(
-                    fontSize: (context.captionSemibold.fontSize ?? 12) *
-                        fontScale,
+            // Without this, the Column sizes to its Text children's
+            // intrinsic width instead of the Row's remaining space, so the
+            // maxLines/ellipsis below never actually gets a width to clip
+            // against.
+            Expanded(
+              child: Column(
+                mainAxisSize: .max,
+                mainAxisAlignment: .center,
+                crossAxisAlignment: .start,
+                children: [
+                  Text(
+                    data.formName ?? '',
+                    textAlign: .start,
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    // This pill lives inside a fixed-height carousel; clamp
+                    // rather than let a large system text size overflow it.
+                    textScaler: MediaQuery.textScalerOf(
+                      context,
+                    ).clamp(maxScaleFactor: 1.3),
+                    style: context.captionSemibold.copyWith(
+                      fontSize:
+                          (context.captionSemibold.fontSize ?? 12) * fontScale,
+                    ),
                   ),
-                ),
-                Text(
-                  data.activityName ?? '',
-                  textAlign: .start,
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  textScaler: MediaQuery.textScalerOf(
-                    context,
-                  ).clamp(maxScaleFactor: 1.3),
-                  style: context.caption.copyWith(
-                    fontSize: (context.caption.fontSize ?? 11) *
-                        fontScale,
+                  Text(
+                    data.activityName ?? '',
+                    textAlign: .start,
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    textScaler: MediaQuery.textScalerOf(
+                      context,
+                    ).clamp(maxScaleFactor: 1.3),
+                    style: context.caption.copyWith(
+                      fontSize: (context.caption.fontSize ?? 11) * fontScale,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

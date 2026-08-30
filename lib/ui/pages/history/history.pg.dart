@@ -56,6 +56,11 @@ class _HistoryPageState extends State<HistoryPage> {
       () => setState(() => _query = _searchController.text.trim()),
     );
     _load();
+    // A transaction processed elsewhere (a different shell branch, so no
+    // same-navigator pop to catch) — see the notifier's own doc for why
+    // this can't just be RouteAware. _load already wraps its dispatch in
+    // setState.
+    AppState.dataChangedNotifier.addListener(_load);
   }
 
   @override
@@ -66,6 +71,7 @@ class _HistoryPageState extends State<HistoryPage> {
     if (_selectedRecord != null) {
       AppState.splitDetailOpenNotifier.value = false;
     }
+    AppState.dataChangedNotifier.removeListener(_load);
     _searchController.dispose();
     super.dispose();
   }
