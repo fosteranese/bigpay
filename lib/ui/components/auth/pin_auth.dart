@@ -73,6 +73,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
               builder: (context, value, child) {
                 return FormButton(
                   onPressed: () {
+                    widget.end();
                     widget.onSuccess(_otp.value);
                   },
                   enabled: value.length == _length,
@@ -91,6 +92,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
                 fixedSize: Size(48, 48),
               ),
               onPressed: () {
+                widget.end();
                 widget.onSuccess(_otp.value);
               },
               icon: SvgPicture.asset(
@@ -111,6 +113,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
               },
               onCompleted: (value) {
                 _otp.value = value;
+                widget.end();
                 widget.onSuccess(value);
               },
             ),

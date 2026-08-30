@@ -206,6 +206,12 @@ class FormOtpInputState extends State<FormOtpInput> {
               textAlign: TextAlign.center,
               obscureText: widget.obscureText,
               maxLength: 1,
+              // Enforced (the default) truncates pasted text down to a
+              // single character before onChanged ever sees it, so
+              // _onDigitChanged's own paste handling below was unreachable
+              // — pasting a full code into any box silently dropped
+              // everything but its first digit.
+              maxLengthEnforcement: MaxLengthEnforcement.none,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],

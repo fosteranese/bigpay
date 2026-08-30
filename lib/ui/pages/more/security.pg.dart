@@ -188,8 +188,8 @@ class _SecurityPageState extends State<SecurityPage> {
         'description': l10n.securityConfirmPinDescription,
       },
       onSuccess: (pin) {
-        // Dismiss the PIN dialog, then verify with the backend.
-        AppRouter.router.pop();
+        // PinAuthenticator already dismisses its own dialog before calling
+        // this back.
         _pendingPin = pin;
         final event = context.dispatchProcess(
           VerifyPinAction(payload: VerifyPinActionPayload(pin: pin)),
@@ -300,7 +300,7 @@ class _SecurityPageState extends State<SecurityPage> {
           },
           builder: (context, snapshot) {
             final forms = _category?.forms ?? const [];
-            final loading = _category == null && snapshot.isLoading;
+            final loading = snapshot.isLoading;
 
             return Column(
               children: [
@@ -319,12 +319,16 @@ class _SecurityPageState extends State<SecurityPage> {
                   height: 30,
                 ),
                 _biometricSwitch(
-                  title: AppLocalizations.of(context)!.securitySignInWithBiometrics,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.securitySignInWithBiometrics,
                   value: _loginEnabled,
                   onChanged: (value) => _toggle(isLogin: true, enabling: value),
                 ),
                 _biometricSwitch(
-                  title: AppLocalizations.of(context)!.securityTransactWithBiometrics,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.securityTransactWithBiometrics,
                   value: _transactionEnabled,
                   onChanged: (value) =>
                       _toggle(isLogin: false, enabling: value),

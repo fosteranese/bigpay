@@ -1,4 +1,6 @@
+import 'package:bigpay/ui/components/auth/otp_auth.dart';
 import 'package:bigpay/ui/components/auth/pin_auth.dart';
+import 'package:bigpay/ui/components/auth/secret_answer_auth.dart';
 import 'package:bigpay/utils/app_nav.util.dart';
 import 'package:flutter/material.dart';
 
@@ -123,11 +125,10 @@ class AuthenticationUtil {
       barrierColor: Colors.white.withAlpha(153),
       useSafeArea: false,
       builder: (BuildContext context) {
-        return Text('d');
-        // return SecretAnswerAuthenticator(
-        //   onSuccess: onSuccess,
-        //   end: () => end(context),
-        // );
+        return SecretAnswerAuthenticator(
+          onSuccess: onSuccess,
+          end: () => end(context),
+        );
       },
     );
   }
@@ -147,13 +148,12 @@ class AuthenticationUtil {
       barrierColor: Colors.white.withAlpha(153),
       useSafeArea: false,
       builder: (BuildContext context) {
-        return Text('d');
-        // return OtpAuthenticator(
-        //   authMode: authMode,
-        //   onSuccess: onSuccess,
-        //   onResendShortCode: onResendShortCode,
-        //   end: () => end(context),
-        // );
+        return OtpAuthenticator(
+          authMode: authMode,
+          onSuccess: onSuccess,
+          onResendShortCode: onResendShortCode,
+          end: () => end(context),
+        );
       },
     );
   }

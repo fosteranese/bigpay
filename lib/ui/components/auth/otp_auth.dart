@@ -10,16 +10,20 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 class OtpAuthenticator extends StatefulWidget {
   const OtpAuthenticator({
     super.key,
+    required this.authMode,
     required this.onSuccess,
     this.allowBiometric = false,
     required this.end,
+    this.onResendShortCode,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/otp-auth',
   );
+  final Map<String, dynamic> authMode;
   final void Function(String) onSuccess;
   final bool allowBiometric;
   final void Function() end;
+  final void Function()? onResendShortCode;
 
   @override
   State<OtpAuthenticator> createState() => _OtpAuthenticatorState();
@@ -27,6 +31,9 @@ class OtpAuthenticator extends StatefulWidget {
 
 class _OtpAuthenticatorState extends State<OtpAuthenticator> {
   final _otp = ValueNotifier('');
+
+  Map<String, dynamic> get _data => widget.authMode['data'] ?? {};
+  int get _length => _data['fieldLength'] ?? 6;
 
   @override
   void dispose() {
@@ -44,14 +51,14 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
         crossAxisAlignment: .center,
         children: [
           Text(
-            l10n.authEnterOtp,
+            _data['fieldCaption'] ?? l10n.authEnterOtp,
             textAlign: .center,
             style: context.display1.copyWith(
               color: context.textPrimary,
             ),
           ),
           Text(
-            l10n.otpAuthDescription,
+            _data['description'] ?? l10n.otpAuthDescription,
             textAlign: .center,
             style: context.caption,
           ),
@@ -64,8 +71,11 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
               valueListenable: _otp,
               builder: (context, value, child) {
                 return FormButton(
-                  onPressed: () {},
-                  enabled: value.length == 6,
+                  onPressed: () {
+                    widget.end();
+                    widget.onSuccess(_otp.value);
+                  },
+                  enabled: value.length == _length,
                   text: l10n.commonContinue,
                 );
               },
@@ -76,15 +86,22 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
       child: Form(
         child: Column(
           children: [
-            FormPinInput(
-              count: 4,
+            FormOtpInput(
+              count: _length,
               autoFocus: true,
+              // Not FormPinInput — that's the PIN-entry wrapper and hardcodes
+              // enableAutofill: false, which also disables paste (see
+              // FormOtpInput's maxLengthEnforcement). This field gets an
+              // SMS-delivered code, not a PIN, so it needs both.
               onChanged: (value) {
                 _otp.value = value;
               },
               onCompleted: (value) {
                 _otp.value = value;
+                widget.end();
+                widget.onSuccess(value);
               },
+              onResend: widget.onResendShortCode,
             ),
           ],
         ),
