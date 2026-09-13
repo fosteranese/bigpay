@@ -206,8 +206,6 @@ class FormOtpInputState extends State<FormOtpInput> {
               style: AppTypography.header1,
               decoration: InputDecoration(
                 counterText: '',
-                filled: true,
-                fillColor: AppColors.offWhite,
                 border: const UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
