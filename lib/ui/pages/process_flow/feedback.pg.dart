@@ -13,6 +13,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/validator.util.dart';
 
 /// The new-complaint form: pick a category (from `complaintCategories`), add a
 /// subject and a message, and open the complaint via `submitComplaint`.
@@ -27,10 +28,12 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
+  final _formKey = GlobalKey<FormState>();
   final _categoryController = TextEditingController();
   final _subjectController = TextEditingController();
   final _messageController = TextEditingController();
   final _subjectFocusNode = FocusNode();
+  final _messageFocusNode = FocusNode();
 
   final _canSubmit = ValueNotifier(false);
 
@@ -59,6 +62,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     _subjectController.dispose();
     _messageController.dispose();
     _subjectFocusNode.dispose();
+    _messageFocusNode.dispose();
     _canSubmit.dispose();
     super.dispose();
   }
@@ -88,6 +92,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
+    if (!_formKey.currentState!.validate()) return;
+
     _submitEvent = context.dispatchProcess(
       SubmitComplaintAction(
         payload: SubmitComplaintPayload(
@@ -178,14 +184,19 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ],
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
               FormSelectInput(
-                label: AppLocalizations.of(context)!.feedbackSelectCategoryLabel,
-                placeholder: AppLocalizations.of(context)!.feedbackCategorySearchPlaceholder,
+                label: AppLocalizations.of(
+                  context,
+                )!.feedbackSelectCategoryLabel,
+                placeholder: AppLocalizations.of(
+                  context,
+                )!.feedbackCategorySearchPlaceholder,
                 controller: _categoryController,
                 onChanged: _onCategorySelected,
                 next: (_) => _subjectFocusNode.requestFocus(),
@@ -202,12 +213,22 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 label: AppLocalizations.of(context)!.feedbackSubjectLabel,
                 controller: _subjectController,
                 focusNode: _subjectFocusNode,
+                validator: Validator.requiredField(
+                  AppLocalizations.of(context)!.validationFieldRequired,
+                ),
+                next: (_) => _messageFocusNode.requestFocus(),
               ),
               SizedBox(height: Spacing.lg),
               FormTextAreaInput(
                 label: AppLocalizations.of(context)!.feedbackMessageLabel,
-                placeholder: AppLocalizations.of(context)!.feedbackMessagePlaceholder,
+                focusNode: _messageFocusNode,
+                placeholder: AppLocalizations.of(
+                  context,
+                )!.feedbackMessagePlaceholder,
                 controller: _messageController,
+                validator: Validator.requiredField(
+                  AppLocalizations.of(context)!.validationFieldRequired,
+                ),
               ),
             ],
           ),

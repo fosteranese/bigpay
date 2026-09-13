@@ -32,9 +32,21 @@ class WalletCardSkeleton extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              Expanded(child: SkeletonBox(width: double.infinity, height: 46, borderRadius: 8)),
+              Expanded(
+                child: SkeletonBox(
+                  width: double.infinity,
+                  height: 46,
+                  borderRadius: 8,
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: SkeletonBox(width: double.infinity, height: 46, borderRadius: 8)),
+              Expanded(
+                child: SkeletonBox(
+                  width: double.infinity,
+                  height: 46,
+                  borderRadius: 8,
+                ),
+              ),
             ],
           ),
         ],
@@ -95,6 +107,45 @@ class ListItemSkeleton extends StatelessWidget {
           SkeletonBox(width: 24, height: 24, borderRadius: 4),
         ],
       ),
+    );
+  }
+}
+
+/// A chat trail's loading state — a handful of pill-shaped shimmer blocks
+/// alternating sides at varied widths, echoing the eventual bubble layout
+/// instead of a generic row skeleton (which doesn't remotely resemble what
+/// a chat thread actually looks like) sitting awkwardly in the middle of
+/// the pane.
+class ChatBubbleSkeleton extends StatelessWidget {
+  const ChatBubbleSkeleton({super.key});
+
+  static const _bubbles = [
+    (alignEnd: false, width: 190.0),
+    (alignEnd: true, width: 230.0),
+    (alignEnd: true, width: 130.0),
+    (alignEnd: false, width: 250.0),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final bubble in _bubbles)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Align(
+              alignment: bubble.alignEnd
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: SkeletonBox(
+                width: bubble.width,
+                height: 40,
+                borderRadius: 20,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

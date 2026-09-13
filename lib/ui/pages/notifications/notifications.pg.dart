@@ -34,6 +34,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> _load() async {
+    // Cleared up front (not just on the first load) so a pull-to-refresh on
+    // an already-populated list shows the skeleton again instead of leaving
+    // stale items on screen until the reload lands.
+    setState(() => _items = null);
     final items = await NotificationStore.all();
     if (!mounted) return;
     setState(() => _items = items);
@@ -83,10 +87,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
             )
           : null,
       child: _items == null
-          ? ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 8,
-              itemBuilder: (_, _) => const ListItemSkeleton(),
+          ? Column(
+              mainAxisSize: .min,
+              children: List.generate(
+                8,
+                (_) => const ListItemSkeleton(),
+              ),
             )
           : items.isEmpty
           ? _buildEmptyState()

@@ -1,13 +1,19 @@
+import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/actions/beneficiary/save_beneficiary_action.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:bigpay/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
@@ -48,7 +54,7 @@ class TransactionDetailsPage extends StatelessWidget {
 /// a real device — the appBar/bottomNavigationBar render fine, the body
 /// doesn't, with no error). One Scaffold in the tree at a time avoids it —
 /// [TransactionDetailsPage] supplies the only one, in both hosting contexts.
-class TransactionDetailsView extends StatelessWidget {
+class TransactionDetailsView extends StatefulWidget {
   const TransactionDetailsView({
     super.key,
     required this.receipt,
@@ -59,7 +65,79 @@ class TransactionDetailsView extends StatelessWidget {
   final VoidCallback? onBack;
 
   @override
+  State<TransactionDetailsView> createState() => _TransactionDetailsViewState();
+}
+
+class _TransactionDetailsViewState extends State<TransactionDetailsView> {
+  RequestResponse get receipt => widget.receipt;
+  VoidCallback? get onBack => widget.onBack;
+
+  ExecuteProcessEvent? _saveBeneficiaryEvent;
+
+  void _share(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final lines = [
+      receipt.formName,
+      receipt.activityName,
+      if (receipt.amount != null) '${l10n.historyServiceLabel}: ${receipt.amount}',
+      ...receipt.previewData.map((item) => '${item.key}: ${item.value}'),
+      if (receipt.reference != null) '${l10n.historyTransactionIdLabel}: ${receipt.reference}',
+      if (receipt.receiptDateTime != null) '${l10n.commonDateLabel}: ${receipt.receiptDateTime}',
+    ].whereType<String>().join('\n');
+
+    SharePlus.instance.share(
+      ShareParams(
+        text: lines,
+        subject: receipt.formName,
+      ),
+    );
+  }
+
+  void _saveBeneficiary(BuildContext context) {
+    setState(() {
+      _saveBeneficiaryEvent = context.dispatchProcess(
+        SaveBeneficiaryAction(
+          endpoint: receipt.beneficiaryEndpoint!,
+          payload: SaveBeneficiaryActionPayload(receiptId: receipt.receiptId),
+        ),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return ProcessListener<bool>(
+      event: () => _saveBeneficiaryEvent,
+      listener: (context, snapshot) {
+        if (snapshot.isLoading) {
+          MessageUtil.displayLoading(context);
+          return;
+        } else {
+          MessageUtil.close(context);
+        }
+
+        if (snapshot.isSuccessful) {
+          _saveBeneficiaryEvent = null;
+          MessageUtil.displaySuccessDialog(
+            context,
+            message: AppLocalizations.of(context)!.summaryBeneficiarySavedMessage,
+          );
+          return;
+        }
+
+        if (snapshot.hasError) {
+          _saveBeneficiaryEvent = null;
+          MessageUtil.displayErrorDialog(
+            context,
+            message: snapshot.error!.message,
+          );
+        }
+      },
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: context.scaffoldBg,
@@ -163,32 +241,39 @@ class TransactionDetailsView extends StatelessWidget {
                             child: FormButton(
                               backgroundColor: context.cardBg,
                               foregroundColor: context.textPrimary,
-                              onPressed: () {},
+                              onPressed: () => _share(context),
                               text: AppLocalizations.of(context)!.commonShare,
                               icon: Icons.share_outlined,
                               buttonIconAlignment: .left,
                               iconSize: 20,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: FormButton(
-                              backgroundColor: context.cardBg,
-                              foregroundColor: context.textPrimary,
-                              onPressed: () {},
-                              text: AppLocalizations.of(context)!.commonSave,
-                              icon: Icons.group_outlined,
-                              buttonIconAlignment: .left,
-                              iconSize: 20,
+                          // The backend already knows whether this receipt's
+                          // counterparty makes sense as a beneficiary (e.g. a
+                          // bill payment doesn't) — no flag means no button,
+                          // not a button that fails when tapped.
+                          if (receipt.saveBeneficiary == 1 &&
+                              (receipt.beneficiaryEndpoint ?? '').isNotEmpty) ...[
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: FormButton(
+                                backgroundColor: context.cardBg,
+                                foregroundColor: context.textPrimary,
+                                onPressed: () => _saveBeneficiary(context),
+                                text: AppLocalizations.of(context)!.commonSave,
+                                icon: Icons.group_outlined,
+                                buttonIconAlignment: .left,
+                                iconSize: 20,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       )
                     else
                       FormButton(
                         backgroundColor: context.cardBg,
                         foregroundColor: context.textPrimary,
-                        onPressed: () {},
+                        onPressed: () => AppRouter.router.push(FeedbackPage.route.path),
                         text: AppLocalizations.of(context)!.historySubmitComplain,
                         svgIcon: 'assets/img/complaint.svg',
                         buttonIconAlignment: .left,
