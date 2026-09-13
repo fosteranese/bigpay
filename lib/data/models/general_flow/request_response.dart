@@ -17,6 +17,8 @@ class RequestResponse extends Equatable {
     this.receiptDate,
     this.receiptDateTime,
     this.previewData = const [],
+    this.saveBeneficiary,
+    this.beneficiaryEndpoint,
   });
 
   final String? receiptId;
@@ -30,6 +32,16 @@ class RequestResponse extends Equatable {
   final String? receiptDate;
   final String? receiptDateTime;
   final List<PreviewData> previewData;
+
+  /// Whether this receipt's counterparty can be saved as a beneficiary — the
+  /// backend already knows (from the form used) whether one makes sense here,
+  /// so this gates the button rather than showing it unconditionally.
+  final int? saveBeneficiary;
+
+  /// Where to POST `{'receiptId': receiptId}` to actually save it — the
+  /// backend resolves the beneficiary's own details server-side, so no
+  /// name/account/phone fields are needed on this model for it.
+  final String? beneficiaryEndpoint;
 
   factory RequestResponse.fromMap(Map<String, dynamic> data) {
     return RequestResponse(
@@ -49,6 +61,10 @@ class RequestResponse extends Equatable {
                 .map(PreviewData.fromMap)
                 .toList()
           : const [],
+      // "saveBenficiary" — matching the backend's own field name (a typo
+      // that's part of the API contract, not ours to fix on the wire).
+      saveBeneficiary: data['saveBenficiary'] as int?,
+      beneficiaryEndpoint: data['benficiaryEndpoint'] as String?,
     );
   }
 
@@ -65,5 +81,7 @@ class RequestResponse extends Equatable {
     receiptDate,
     receiptDateTime,
     previewData,
+    saveBeneficiary,
+    beneficiaryEndpoint,
   ];
 }

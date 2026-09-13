@@ -243,11 +243,13 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
             }
           },
           builder: (context, snapshot) {
-            if (_payees == null && snapshot.isLoading) {
-              return ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 6,
-                itemBuilder: (_, _) => const ListItemSkeleton(),
+            if (snapshot.isLoading) {
+              return Column(
+                mainAxisSize: .min,
+                children: List.generate(
+                  6,
+                  (_) => const ListItemSkeleton(),
+                ),
               );
             }
 

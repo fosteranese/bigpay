@@ -133,7 +133,10 @@ class FormFieldInput extends StatelessWidget {
     bool readOnly,
     int? maxLength,
   ) {
-    Widget text({TextInputType? keyboardType, List<TextInputFormatter>? formatters}) {
+    Widget text({
+      TextInputType? keyboardType,
+      List<TextInputFormatter>? formatters,
+    }) {
       return FormInput(
         label: label,
         placeholder: placeholder,
@@ -175,6 +178,8 @@ class FormFieldInput extends StatelessWidget {
         readOnly: readOnly,
         keyboardType: keyboardType,
         formId: formId,
+        next: next,
+        validator: validator,
         onSelected: onPayeeSelected,
       );
     }
