@@ -1,4 +1,5 @@
 import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
@@ -311,13 +312,6 @@ class _SecurityPageState extends State<SecurityPage> {
                   )
                 else
                   for (final form in forms) _buildFormItem(form),
-                Divider(
-                  color: context.divider,
-                  thickness: 4,
-                  indent: 10,
-                  endIndent: 10,
-                  height: 30,
-                ),
                 _biometricSwitch(
                   title: AppLocalizations.of(
                     context,
@@ -359,9 +353,10 @@ class _SecurityPageState extends State<SecurityPage> {
     return ProfileItem(
       title: title,
       icon: Icons.fingerprint,
-      trailing: Switch(
+      trailing: CupertinoSwitch(
         value: value,
         onChanged: onChanged,
+        activeTrackColor: context.accentGreen,
       ),
     );
   }
