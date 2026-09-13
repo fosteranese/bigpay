@@ -77,10 +77,12 @@ class _SecretAnswerAuthenticatorState extends State<SecretAnswerAuthenticator> {
           ),
         ],
       ),
-      child: Form(
-        child: FormPasswordInput(
-          label: l10n.authAnswerToQuestionLabel,
-          controller: _controller,
+      child: Center(
+        child: Form(
+          child: FormPasswordInput(
+            label: l10n.authAnswerToQuestionLabel,
+            controller: _controller,
+          ),
         ),
       ),
     );

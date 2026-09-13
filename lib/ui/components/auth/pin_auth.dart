@@ -7,6 +7,7 @@ import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/biometric.util.dart';
 
 class PinAuthenticator extends StatefulWidget {
   const PinAuthenticator({
@@ -31,6 +32,17 @@ class PinAuthenticator extends StatefulWidget {
 
 class _PinAuthenticatorState extends State<PinAuthenticator> {
   final _otp = ValueNotifier('');
+  bool _biometricEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.allowBiometric) {
+      BiometricUtil.isTransactionEnabled.then((enabled) {
+        if (mounted) setState(() => _biometricEnabled = enabled);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -40,6 +52,20 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
 
   int get _length {
     return widget.data['fieldLength'];
+  }
+
+  Future<void> _authenticateWithBiometric() async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await BiometricUtil.authenticate(
+      l10n.authBiometricTransactionReason,
+    );
+    if (result != BiometricResult.success) return;
+
+    final pin = await BiometricUtil.readPin();
+    if (!mounted || pin == null || pin.isEmpty) return;
+
+    widget.end();
+    widget.onSuccess(pin);
   }
 
   @override
@@ -82,8 +108,8 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
               },
             ),
           ),
-          if (widget.allowBiometric) const SizedBox(width: 10),
-          if (widget.allowBiometric)
+          if (_biometricEnabled) const SizedBox(width: 10),
+          if (_biometricEnabled)
             IconButton(
               style: IconButton.styleFrom(
                 side: BorderSide(
@@ -91,10 +117,7 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
                 ),
                 fixedSize: Size(48, 48),
               ),
-              onPressed: () {
-                widget.end();
-                widget.onSuccess(_otp.value);
-              },
+              onPressed: _authenticateWithBiometric,
               icon: SvgPicture.asset(
                 'assets/img/biometric.svg',
                 colorFilter: .mode(context.textPrimary, .srcIn),
@@ -102,22 +125,24 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
             ),
         ],
       ),
-      child: Form(
-        child: Column(
-          children: [
-            FormPinInput(
-              count: _length,
-              autoFocus: true,
-              onChanged: (value) {
-                _otp.value = value;
-              },
-              onCompleted: (value) {
-                _otp.value = value;
-                widget.end();
-                widget.onSuccess(value);
-              },
-            ),
-          ],
+      child: Center(
+        child: Form(
+          child: Column(
+            children: [
+              FormPinInput(
+                count: _length,
+                autoFocus: true,
+                onChanged: (value) {
+                  _otp.value = value;
+                },
+                onCompleted: (value) {
+                  _otp.value = value;
+                  widget.end();
+                  widget.onSuccess(value);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

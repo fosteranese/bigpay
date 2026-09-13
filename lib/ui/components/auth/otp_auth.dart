@@ -83,27 +83,29 @@ class _OtpAuthenticatorState extends State<OtpAuthenticator> {
           ),
         ],
       ),
-      child: Form(
-        child: Column(
-          children: [
-            FormOtpInput(
-              count: _length,
-              autoFocus: true,
-              // Not FormPinInput — that's the PIN-entry wrapper and hardcodes
-              // enableAutofill: false, which also disables paste (see
-              // FormOtpInput's maxLengthEnforcement). This field gets an
-              // SMS-delivered code, not a PIN, so it needs both.
-              onChanged: (value) {
-                _otp.value = value;
-              },
-              onCompleted: (value) {
-                _otp.value = value;
-                widget.end();
-                widget.onSuccess(value);
-              },
-              onResend: widget.onResendShortCode,
-            ),
-          ],
+      child: Center(
+        child: Form(
+          child: Column(
+            children: [
+              FormOtpInput(
+                count: _length,
+                autoFocus: true,
+                // Not FormPinInput — that's the PIN-entry wrapper and hardcodes
+                // enableAutofill: false, which also disables paste (see
+                // FormOtpInput's maxLengthEnforcement). This field gets an
+                // SMS-delivered code, not a PIN, so it needs both.
+                onChanged: (value) {
+                  _otp.value = value;
+                },
+                onCompleted: (value) {
+                  _otp.value = value;
+                  widget.end();
+                  widget.onSuccess(value);
+                },
+                onResend: widget.onResendShortCode,
+              ),
+            ],
+          ),
         ),
       ),
     );

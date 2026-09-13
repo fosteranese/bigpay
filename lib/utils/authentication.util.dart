@@ -161,15 +161,4 @@ class AuthenticationUtil {
   static void end(BuildContext context) {
     Navigator.of(context).pop();
   }
-
-  static Future<String> getPin(BuildContext context) async {
-    var pin = ''; //context.read<AuthBloc>().pin;
-
-    if (pin.isNotEmpty) {
-      return pin;
-    }
-
-    pin = ''; // await AppState.auth.getCurrentUserPin() ?? '';
-    return pin;
-  }
 }
