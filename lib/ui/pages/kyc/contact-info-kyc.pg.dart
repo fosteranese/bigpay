@@ -10,7 +10,6 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:bigpay/utils/validator.util.dart';
 
@@ -175,7 +174,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
       AutoGhanaCardVerificationAction(
         payload: AutoGhanaCardVerificationActionPayload(
           cardNumber: Kyc.ghanaCardNumber,
-          picture: AppState.currentUser?.profilePicture ?? '',
+          picture: Kyc.passportPicture,
           email: _emailAddressController.text.trim(),
           streetAddress: _streetAddressController.text.trim(),
           digitalAddress: _digitalAddressController.text.trim(),

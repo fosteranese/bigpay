@@ -5,11 +5,10 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/face-capture-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-
 
 class InfoKycPage extends StatefulWidget {
   const InfoKycPage({super.key});
@@ -32,7 +31,7 @@ class _InfoKycPageState extends State<InfoKycPage> {
       ),
       bottomNav: FormButton(
         onPressed: () {
-          AppRouter.router.push(ContactInfoKycPage.route.path);
+          AppRouter.router.push(FaceCaptureKycPage.route.path);
         },
         text: l10n.commonContinue,
       ),

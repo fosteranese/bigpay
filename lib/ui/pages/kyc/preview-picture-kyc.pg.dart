@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/kyc.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -23,6 +27,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final picture = Kyc.passportPicture;
     return MainLayout(
       titleStyle: context.display2,
       bottomSize: 0,
@@ -32,12 +37,17 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
         crossAxisAlignment: .center,
         children: [
           FormButton(
-            onPressed: () {},
+            onPressed: () {
+              AppRouter.router.push(ContactInfoKycPage.route.path);
+            },
             text: l10n.kycVerifyPhoto,
           ),
           const SizedBox(height: 10),
           FormOutlineButton(
-            onPressed: () {},
+            // Pops back to the still-live FaceCaptureKycPage — its own
+            // "Retake" control (shown once it has a captured shot) hands
+            // control back to the live camera for another attempt.
+            onPressed: () => AppRouter.router.pop(),
             text: l10n.kycRetakePicture,
           ),
         ],
@@ -69,11 +79,16 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
                     child: CircleAvatar(
                       radius: 70.5,
                       backgroundColor: AppColors.tintShade1,
-                      child: const Icon(
-                        Icons.person,
-                        size: 100,
-                        color: AppColors.white,
-                      ),
+                      backgroundImage: picture.isEmpty
+                          ? null
+                          : MemoryImage(base64Decode(picture)),
+                      child: picture.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              size: 100,
+                              color: AppColors.white,
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -95,15 +110,17 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
             ),
             const SizedBox(height: 30),
             CheckListItem(
+              isChecked: !Kyc.faceHasObstructions,
               title: l10n.kycFaceClearlyVisible,
               subtitle: l10n.kycNoObstructions,
             ),
             CheckListItem(
+              isChecked: Kyc.faceIsWellLighted,
               title: l10n.kycWellLit,
               subtitle: l10n.kycEvenLighting,
             ),
             CheckListItem(
-              isChecked: false,
+              isChecked: !Kyc.faceIsBlur,
               title: l10n.kycSlightBlur,
               subtitle: l10n.kycRetakeIfUnclear,
             ),
