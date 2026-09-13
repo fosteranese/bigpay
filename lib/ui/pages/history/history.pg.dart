@@ -6,6 +6,7 @@ import 'package:bigpay/data/models/general_flow/history_response.dart';
 import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/models/actions/history/get_history_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/history/history_transaction_item.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -14,6 +15,7 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/list.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/utils/app_modal.dart';
 import 'package:bigpay/utils/app_state.util.dart';
@@ -265,32 +267,10 @@ class _HistoryPageState extends State<HistoryPage> {
         ? l10n.historyNoFilterResults(_filterName)
         : l10n.walletsNoTransactionsYet;
 
-    return Center(
-      child: Padding(
-        padding: const .symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 56,
-              color: context.textSecondary,
-            ),
-            const SizedBox(height: Spacing.lg),
-            Text(
-              label,
-              textAlign: .center,
-              style: context.p1Medium,
-            ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              AppLocalizations.of(context)!.historyEmptySubtitle,
-              textAlign: .center,
-              style: context.smallDetails,
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      svgAsset: SvgImages.emptyWallet,
+      title: label,
+      subtitle: AppLocalizations.of(context)!.historyEmptySubtitle,
     );
   }
 
