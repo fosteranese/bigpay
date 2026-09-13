@@ -46,12 +46,6 @@ GoRoute get authRoute => GoRoute(
     CreatePasswordSignUpPage.route.toGoRoute(
       () => const CreatePasswordSignUpPage(),
       nested: true,
-      onExit: (context, state) {
-        Future.delayed(Duration(seconds: 1), () {
-          AppRouter.router.pop();
-        });
-        return true;
-      },
     ),
     CreateSecurePhrasePage.route.toGoRoute(
       () => const CreateSecurePhrasePage(),

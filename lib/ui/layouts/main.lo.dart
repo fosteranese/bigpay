@@ -37,6 +37,7 @@ class MainLayout extends StatefulWidget {
     this.maxWidth,
     this.onBack,
     this.bottomAlign = false,
+    this.bodyHorizontalPadding,
   });
   final String? title;
   final String? subtitle;
@@ -91,6 +92,13 @@ class MainLayout extends StatefulWidget {
   /// not as a deliberate layout. Ignored when [BuildContext.isCompact]
   /// (bottomNav docks to the Scaffold's own bottom bar there either way).
   final bool bottomAlign;
+
+  /// Overrides [BuildContext.gutter] for the body's left/right padding only
+  /// (vertical padding is unaffected) — for content that wants tighter side
+  /// margins than a generic page's, e.g. a chat thread, where bubbles are
+  /// already visually distinct blocks that don't need the same breathing
+  /// room from the edge as a form or a list.
+  final double? bodyHorizontalPadding;
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -308,12 +316,10 @@ class _MainLayoutState extends State<MainLayout> {
                             FittedBox(
                               child: Text(
                                 widget.title!,
-                                style:
-                                    (widget.titleStyle ??
-                                            context.display2)
-                                        .copyWith(
-                                          color: context.textPrimary,
-                                        ),
+                                style: (widget.titleStyle ?? context.display2)
+                                    .copyWith(
+                                      color: context.textPrimary,
+                                    ),
                               ),
                             )
                           else if (widget.title != null &&
@@ -378,7 +384,10 @@ class _MainLayoutState extends State<MainLayout> {
                 hasScrollBody: false,
                 child: Container(
                   color: widget.bodyColor,
-                  padding: .all(context.gutter),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: widget.bodyHorizontalPadding ?? context.gutter,
+                    vertical: context.gutter,
+                  ),
                   alignment: dockBottomNav
                       ? null
                       : (widget.bottomAlign
@@ -399,16 +408,27 @@ class _MainLayoutState extends State<MainLayout> {
 
     final Widget? dockedBottomNav = (!dockBottomNav || bottomNavContent == null)
         ? null
-        : BoundedContent(
-            maxWidth: widget.maxWidth,
-            child: Container(
-              padding: .only(
-                right: context.gutter,
-                left: context.gutter,
-                top: 15,
-                bottom: 10,
+        : Padding(
+            // Scaffold's own resizeToAvoidBottomInset wasn't lifting
+            // bottomNavigationBar clear of the keyboard here (it stayed
+            // fully hidden behind it rather than merely crowded) — pushing
+            // it up by the live keyboard height directly, instead of
+            // relying on that automatic resize, works regardless of
+            // whatever in this page's layout was defeating it.
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: BoundedContent(
+              maxWidth: widget.maxWidth,
+              child: Container(
+                padding: EdgeInsets.only(
+                  right: widget.bodyHorizontalPadding ?? context.gutter,
+                  left: widget.bodyHorizontalPadding ?? context.gutter,
+                  top: 15,
+                  bottom: 10,
+                ),
+                child: bottomNavContent,
               ),
-              child: bottomNavContent,
             ),
           );
 
@@ -435,6 +455,15 @@ class _MainLayoutState extends State<MainLayout> {
     }
 
     return Scaffold(
+      // dockedBottomNav already pushes itself up by the live keyboard
+      // height directly (see above) — turning this off for that (compact)
+      // case avoids double compensation, which put it too high with a dead
+      // gap underneath. The wide/centered case has no such docked nav and
+      // no other keyboard handling, so it needs the opposite: leaving this
+      // on shrinks `body`'s height by the keyboard height, which re-centers
+      // the form+button group higher up instead of leaving it fixed in the
+      // middle of the full screen with the keyboard drawn on top of it.
+      resizeToAvoidBottomInset: !dockBottomNav,
       backgroundColor: widget.backgroundColor,
       body: body,
       bottomNavigationBar: dockedBottomNav,
@@ -474,7 +503,8 @@ class _AuthBrandPanel extends StatelessWidget {
       // stepper, and a summary footer — instead of the generic brand
       // panel (wordmark + tagline), which stacked awkwardly above a step
       // list and competed with it for the same space.
-      child: (stepIndicator is StepProgress &&
+      child:
+          (stepIndicator is StepProgress &&
               (stepIndicator! as StepProgress).labels != null)
           ? _AuthProgressPanel(progress: stepIndicator! as StepProgress)
           : Center(

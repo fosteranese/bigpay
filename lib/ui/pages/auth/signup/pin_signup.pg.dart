@@ -171,11 +171,15 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
 
   void _onChanged(_) {
     _canSubmit.value =
-        _pinController.text.isNotEmpty && _confirmPinController.text.isNotEmpty;
+        _pinController.text.length == 6 &&
+        _confirmPinController.text.length == 6 &&
+        _pinController.text == _confirmPinController.text;
   }
 
   void _onSave() {
     FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
 
     mainEvent = context.dispatchProcess(
       CompleteSignUpAction(

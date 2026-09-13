@@ -7,7 +7,7 @@ import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/signup/start_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/forms/phone_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -15,8 +15,9 @@ import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
-import 'package:bigpay/utils/validator.util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StartSignUpPage extends StatefulWidget {
   const StartSignUpPage({super.key});
@@ -31,13 +32,13 @@ class StartSignUpPage extends StatefulWidget {
 class _StartSignUpPageState extends State<StartSignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
-  final _phoneNumberController = TextEditingController();
+  final _phone = PhoneNumberController();
   ExecuteProcessEvent? mainEvent;
 
   @override
   dispose() {
     _phoneNumberFocusNode.dispose();
-    _phoneNumberController.dispose();
+    _phone.dispose();
     super.dispose();
   }
 
@@ -122,7 +123,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
                   style: context.smallDetails,
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => _openLink(AppState.data?.help?.termsUrl),
                   child: Text(
                     l10n.authTermsOfUse,
                     style: context.smallDetailsMedium.copyWith(
@@ -135,7 +136,7 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
                   style: context.smallDetails,
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => _openLink(AppState.data?.help?.privacyUrl),
                   child: Text(
                     l10n.authPrivacyPolicy,
                     style: context.smallDetailsMedium.copyWith(
@@ -157,12 +158,11 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
         key: _formKey,
         child: Column(
           children: [
-            FormInput(
+            PhoneNumberInput(
               label: l10n.commonPhoneNumberLabel,
-              keyboardType: .phone,
               focusNode: _phoneNumberFocusNode,
-              controller: _phoneNumberController,
-              validator: Validator.phoneValidator(
+              controller: _phone,
+              validator: _phone.validator(
                 l10n.validationPhoneInvalid,
               ),
               next: (_) {
@@ -176,18 +176,22 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
     );
   }
 
+  void _openLink(String? url) {
+    if (url == null || url.isEmpty) return;
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
   void _continue() {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
 
-    final phone = _phoneNumberController.text.trim();
-    if (phone.isEmpty) return;
+    if (_phone.text.text.trim().isEmpty) return;
 
     mainEvent = context.dispatchProcess(
       StartSignUpAction(
         payload: StartSignUpActionPayload(
-          phoneNumber: phone,
+          phoneNumber: _phone.international,
         ),
       ),
     );

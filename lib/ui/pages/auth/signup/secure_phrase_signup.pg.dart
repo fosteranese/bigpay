@@ -33,6 +33,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
   final _questionController = TextEditingController();
 
   final _canSubmit = ValueNotifier(false);
+  String _questionLabel = '';
 
   @override
   void dispose() {
@@ -90,7 +91,13 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
               next: (_) {
                 _questionFocusNode.requestFocus();
               },
-              onChanged: _onChanged,
+              // The controller's own text is the option's id (see
+              // FormSelectInput), not something to send to the backend —
+              // onChanged is the label, which is the actual question text.
+              onChanged: (label) {
+                _questionLabel = label;
+                _onChanged(label);
+              },
               options:
                   AppState.data?.secretQuestions?.map((item) {
                     return FormSelectOption(
@@ -127,7 +134,7 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
 
     if (!_formKey.currentState!.validate()) return;
 
-    SignUp.secretQuestion = _questionController.text.trim();
+    SignUp.secretQuestion = _questionLabel;
     SignUp.secretAnswer = _answerController.text.trim();
 
     AppRouter.router.push(PinSignUpPage.route.path);
