@@ -40,6 +40,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void initState() {
     super.initState();
     _filteredOptions = widget.options;
+    _maybeAutoSelectOnlyOption();
   }
 
   @override
@@ -47,7 +48,30 @@ class _FormSelectInputState extends State<FormSelectInput> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options != widget.options) {
       _filteredOptions = widget.options;
+      _maybeAutoSelectOnlyOption();
     }
+  }
+
+  /// A single-option field has nothing to actually choose, so it selects
+  /// itself rather than making the user open a picker just to tap the one
+  /// row in it. Skipped once something's already selected — including
+  /// whatever this same auto-select just set on a prior call — so it never
+  /// clobbers a real (or already-applied) choice.
+  void _maybeAutoSelectOnlyOption() {
+    if (widget.options.length != 1) return;
+    if (widget.controller.text.isNotEmpty) return;
+
+    final option = widget.options.first;
+    _controller.text = option.label;
+    widget.controller.text = option.id;
+
+    // Deferred: this can run from initState, before this widget's own
+    // first build — calling widget.onChanged synchronously there risks
+    // triggering setState on an ancestor still in the middle of building.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onChanged?.call(option.label);
+    });
   }
 
   @override

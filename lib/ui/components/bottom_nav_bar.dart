@@ -120,7 +120,10 @@ class NeumorphicBottomNav extends StatelessWidget {
           fit: .cover,
         ),
       ),
-      padding: const .symmetric(horizontal: 6),
+      padding: const .symmetric(
+        horizontal: 10,
+        vertical: 10,
+      ),
       child: Row(
         mainAxisSize: .max,
         mainAxisAlignment: .center,

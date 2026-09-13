@@ -11,6 +11,7 @@ import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/data/models/collection/lov.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_field.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/date_input.dart';
 import 'package:bigpay/ui/components/forms/form_field_input.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
@@ -20,8 +21,10 @@ import 'package:bigpay/ui/components/forms/select_input.dart';
 import 'package:bigpay/ui/components/forms/textarea_input.dart';
 
 Future<void> _pump(WidgetTester tester, GeneralFlowFieldsDatum datum) async {
-  // A ProcessBloc is provided because a payee field subscribes to it; it is
-  // never driven here, so its store is never touched.
+  // A ProcessBloc is provided because a payee field prefetches through it on
+  // mount. There's no test HTTP client wired up, so that fetch harmlessly
+  // fails (logged, not asserted on) and the field settles into its
+  // not-yet-loaded/retry state — which is what these tests exercise.
   await tester.pumpWidget(
     BlocProvider<ProcessBloc>(
       create: (_) => ProcessBloc(
@@ -31,6 +34,8 @@ Future<void> _pump(WidgetTester tester, GeneralFlowFieldsDatum datum) async {
         ),
       ),
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: FormFieldInput(
             datum: datum,
@@ -63,7 +68,9 @@ GeneralFlowFieldsDatum _field({
 }
 
 void main() {
-  testWidgets('list-of-values renders a select with the LOV options', (tester) async {
+  testWidgets('list-of-values renders a select with the LOV options', (
+    tester,
+  ) async {
     await _pump(
       tester,
       _field(
@@ -95,7 +102,9 @@ void main() {
     expect(find.byType(FormPasswordInput), findsOneWidget);
   });
 
-  testWidgets('date-after-current data type renders a bounded date input', (tester) async {
+  testWidgets('date-after-current data type renders a bounded date input', (
+    tester,
+  ) async {
     await _pump(
       tester,
       _field(
@@ -116,10 +125,15 @@ void main() {
       ),
     );
     final input = tester.widget<FormInput>(find.byType(FormInput));
-    expect(input.keyboardType, const TextInputType.numberWithOptions(decimal: true));
+    expect(
+      input.keyboardType,
+      const TextInputType.numberWithOptions(decimal: true),
+    );
   });
 
-  testWidgets('payee data type with a formId renders the payee picker', (tester) async {
+  testWidgets('payee data type with a formId renders the payee picker', (
+    tester,
+  ) async {
     await _pump(
       tester,
       _field(
@@ -131,7 +145,9 @@ void main() {
     expect(find.byType(FormPayeeInput), findsOneWidget);
   });
 
-  testWidgets('payee data type without a formId degrades to text', (tester) async {
+  testWidgets('payee data type without a formId degrades to text', (
+    tester,
+  ) async {
     await _pump(
       tester,
       _field(

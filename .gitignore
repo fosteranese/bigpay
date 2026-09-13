@@ -52,3 +52,5 @@ app.*.map.json
 
 # Secrets
 figma_token.md
+# Widget Preview related
+.widget_preview/

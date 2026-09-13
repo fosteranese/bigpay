@@ -280,78 +280,78 @@ final class MessageUtil {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final confirmColor =
             isDark && onConfirmButtonColor == AppColors.secondary
-                ? AppColors.tint
-                : onConfirmButtonColor;
+            ? AppColors.tint
+            : onConfirmButtonColor;
         return ZoomIn(
-        child: FadeIn(
-          child: Dialog(
-            backgroundColor: context.cardBg,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            insetPadding: const EdgeInsets.all(20),
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Padding(
-              padding: const EdgeInsets.all(30),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  icon ??
-                      const Icon(
-                        Icons.help_outline,
-                        color: AppColors.primary,
-                        size: 50,
-                      ),
-                  const SizedBox(height: 10),
-                  if (title != null)
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: context.header1,
-                    ),
-                  if (message != null) const SizedBox(height: 5),
-                  if (message != null)
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: context.p1,
-                    ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FormOutlineButton(
-                          height: 50,
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          text: AppLocalizations.of(context)!.commonCancel,
+          child: FadeIn(
+            child: Dialog(
+              backgroundColor: context.cardBg,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              insetPadding: const EdgeInsets.all(20),
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Padding(
+                padding: const EdgeInsets.all(30),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    icon ??
+                        const Icon(
+                          Icons.help_outline,
+                          color: AppColors.primary,
+                          size: 50,
                         ),
+                    const SizedBox(height: 10),
+                    if (title != null)
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: context.header1,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FormButton(
-                          backgroundColor: confirmColor,
-                          foregroundColor: onConfirmButtonTextColor,
-                          height: 50,
-                          onPressed: () {
-                            Navigator.pop(context);
-                            onConfirm();
-                          },
-                          text: resolvedOnConfirmText,
+                    if (message != null) const SizedBox(height: 5),
+                    if (message != null)
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: context.p1,
+                      ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FormOutlineButton(
+                            height: 50,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            text: AppLocalizations.of(context)!.commonCancel,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FormButton(
+                            backgroundColor: confirmColor,
+                            foregroundColor: onConfirmButtonTextColor,
+                            height: 50,
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onConfirm();
+                            },
+                            text: resolvedOnConfirmText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   /// Dismisses the top-most dialog (e.g. the loading dialog).
   ///

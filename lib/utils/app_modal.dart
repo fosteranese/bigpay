@@ -1,8 +1,8 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class AppModal {
   AppModal._();
@@ -68,7 +68,12 @@ class AppModal {
                       maximumSize: Size(35, 35),
                     ),
                     onPressed: () {
-                      context.pop();
+                      // This sheet shows on the root navigator
+                      // (useRootNavigator: true above), but `context` here
+                      // can resolve its nearest Navigator to a shell branch's
+                      // own nested one instead — AppRouter.router.pop()
+                      // always targets the right one.
+                      AppRouter.router.pop();
                     },
                     icon: Icon(
                       Icons.close,
