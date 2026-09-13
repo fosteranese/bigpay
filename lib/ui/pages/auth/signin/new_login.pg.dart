@@ -12,8 +12,8 @@ import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
+import 'package:bigpay/ui/components/forms/phone_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
@@ -40,7 +40,7 @@ class NewLoginPage extends StatefulWidget {
 
 class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   final _formKey = GlobalKey<FormState>();
-  final _phoneNumberController = TextEditingController();
+  final _phone = PhoneNumberController();
   final _phoneNumberFocusNode = FocusNode();
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
@@ -50,7 +50,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
   @override
   void initState() {
-    _phoneNumberController.text = SignIn.phoneNumber;
+    _phone.text.text = SignIn.phoneNumber;
     super.initState();
   }
 
@@ -68,14 +68,14 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   /// the latest [SignIn.phoneNumber] here.
   @override
   void didPopNext() {
-    _phoneNumberController.text = SignIn.phoneNumber;
+    _phone.text.text = SignIn.phoneNumber;
     ForgotPwd.clear();
   }
 
   @override
   dispose() {
     appRouteObserver.unsubscribe(this);
-    _phoneNumberController.dispose();
+    _phone.dispose();
     _passwordController.dispose();
 
     _phoneNumberFocusNode.dispose();
@@ -99,7 +99,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
             }
 
             if (snapshot.hasData) {
-              SignIn.phoneNumber = _phoneNumberController.text.trim();
+              SignIn.phoneNumber = _phone.text.text.trim();
               SignIn.password = _passwordController.text.trim();
               SignIn.newDeviceLoginData = snapshot.data!;
               AppRouter.router.push(
@@ -202,12 +202,11 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
-              FormInput(
+              PhoneNumberInput(
                 label: l10n.commonPhoneNumberLabel,
-                keyboardType: .phone,
                 focusNode: _phoneNumberFocusNode,
-                controller: _phoneNumberController,
-                validator: Validator.phoneValidator(
+                controller: _phone,
+                validator: _phone.validator(
                   l10n.validationPhoneInvalid,
                 ),
                 next: (_) {
@@ -294,12 +293,12 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
     if (!_formKey.currentState!.validate()) return;
 
-    if (_phoneNumberController.text.trim() ==
+    if (_phone.text.text.trim() ==
         AppState.currentUser?.user?.shortName?.toLocalPhone) {
       existingLoginEvent = context.dispatchProcess(
         ExistingLoginAction(
           payload: ExistingLoginActionPayload(
-            phoneNumber: _phoneNumberController.text,
+            phoneNumber: _phone.international,
             password: _passwordController.text,
           ),
         ),
@@ -310,7 +309,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
     newLoginEvent = context.dispatchProcess(
       NewLoginAction(
         payload: NewLoginActionPayload(
-          phoneNumber: _phoneNumberController.text,
+          phoneNumber: _phone.international,
           password: _passwordController.text,
         ),
       ),

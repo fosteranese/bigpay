@@ -1,7 +1,9 @@
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/models/actions/forgot_secure_phrase_action.dart';
+import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
+import 'package:bigpay/ui/pages/more/help.pg.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +11,7 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/forms/phone_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -31,18 +34,16 @@ class _StartForgotSecurePhrasePageState
   ExecuteProcessEvent? mainEvent;
   final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
-  final _phoneNumberController = TextEditingController(
-    text: ForgotPwd.phoneNumber,
-  );
+  final _phone = PhoneNumberController(national: ForgotPwd.phoneNumber);
   final _emailFocusNode = FocusNode();
   final _emailController = TextEditingController();
 
-  final _canSubmit = ValueNotifier(false);
+  final _canSubmit = ValueNotifier(ForgotPwd.phoneNumber.isNotEmpty);
 
   @override
   void dispose() {
     _phoneNumberFocusNode.dispose();
-    _phoneNumberController.dispose();
+    _phone.dispose();
 
     _emailFocusNode.dispose();
     _emailController.dispose();
@@ -68,6 +69,27 @@ class _StartForgotSecurePhrasePageState
           MessageUtil.displaySuccessFullDialog(
             context,
             message: state.result.message,
+            customBtn: Column(
+              mainAxisSize: .min,
+              mainAxisAlignment: .end,
+              crossAxisAlignment: .center,
+              children: [
+                FormButton(
+                  onPressed: () {
+                    AppRouter.router.pop();
+                  },
+                  text: AppLocalizations.of(context)!.commonOk,
+                ),
+                const SizedBox(height: Spacing.md),
+                FormOutlineButton(
+                  onPressed: () {
+                    AppRouter.router.pop();
+                    AppRouter.router.push(HelpPage.route.path);
+                  },
+                  text: AppLocalizations.of(context)!.helpTitle,
+                ),
+              ],
+            ),
           );
           return;
         }
@@ -102,11 +124,11 @@ class _StartForgotSecurePhrasePageState
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
-              FormInput(
+              PhoneNumberInput(
                 label: AppLocalizations.of(context)!.commonPhoneNumberLabel,
                 focusNode: _phoneNumberFocusNode,
-                controller: _phoneNumberController,
-                validator: Validator.phoneValidator(
+                controller: _phone,
+                validator: _phone.validator(
                   AppLocalizations.of(context)!.validationPhoneInvalid,
                 ),
                 next: (_) {
@@ -138,8 +160,7 @@ class _StartForgotSecurePhrasePageState
 
   void _onChanged(_) {
     _canSubmit.value =
-        _phoneNumberController.text.isNotEmpty ||
-        _emailController.text.isNotEmpty;
+        _phone.text.text.isNotEmpty || _emailController.text.isNotEmpty;
   }
 
   void _onContinue() {
@@ -150,7 +171,7 @@ class _StartForgotSecurePhrasePageState
     mainEvent = context.dispatchProcess(
       ForgotSecurePhraseAction(
         payload: ForgotSecurePhraseActionPayload(
-          phoneNumber: _phoneNumberController.text.trim(),
+          phoneNumber: _phone.international,
           email: _emailController.text.trim(),
         ),
       ),

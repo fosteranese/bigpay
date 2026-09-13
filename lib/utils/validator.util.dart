@@ -20,11 +20,6 @@ class Validator {
     return regex.firstMatch(value) != null;
   }
 
-  static bool ghanaPhoneLoose(String value) {
-    var regex = RegExp(r'^0[0-9]{9}$');
-    return regex.firstMatch(value) != null;
-  }
-
   static String? Function(String?) requiredField(String message) {
     return (String? value) {
       if (value == null || value.trim().isEmpty) return message;
@@ -36,14 +31,6 @@ class Validator {
     return (String? value) {
       if (value == null || value.trim().isEmpty) return null;
       if (!email(value.trim())) return message;
-      return null;
-    };
-  }
-
-  static String? Function(String?) phoneValidator(String message) {
-    return (String? value) {
-      if (value == null || value.trim().isEmpty) return null;
-      if (!ghanaPhoneLoose(value.trim())) return message;
       return null;
     };
   }

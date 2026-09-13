@@ -6,8 +6,8 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/forgot_pwd/start_forgot_pwd_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
+import 'package:bigpay/ui/components/forms/phone_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
@@ -34,9 +34,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
   final _phoneNumberFocusNode = FocusNode();
   final _securePhraseFocusNode = FocusNode();
 
-  final _phoneNumberController = TextEditingController(
-    text: ForgotPwd.phoneNumber,
-  );
+  final _phone = PhoneNumberController(national: ForgotPwd.phoneNumber);
   final _securePhraseController = TextEditingController();
 
   final _canSubmit = ValueNotifier(false);
@@ -46,7 +44,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
     _phoneNumberFocusNode.dispose();
     _securePhraseFocusNode.dispose();
 
-    _phoneNumberController.dispose();
+    _phone.dispose();
     _securePhraseController.dispose();
 
     _canSubmit.dispose();
@@ -66,7 +64,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
         }
 
         if (snapshot.hasData) {
-          ForgotPwd.phoneNumber = _phoneNumberController.text.trim();
+          ForgotPwd.phoneNumber = _phone.text.text.trim();
           ForgotPwd.securePhrase = _securePhraseController.text.trim();
           ForgotPwd.verifyUserData = snapshot.data;
           AppRouter.router.push(
@@ -104,11 +102,11 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
-              FormInput(
+              PhoneNumberInput(
                 label: AppLocalizations.of(context)!.commonPhoneNumberLabel,
                 focusNode: _phoneNumberFocusNode,
-                controller: _phoneNumberController,
-                validator: Validator.phoneValidator(
+                controller: _phone,
+                validator: _phone.validator(
                   AppLocalizations.of(context)!.validationPhoneInvalid,
                 ),
                 next: (_) {
@@ -118,7 +116,9 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
               ),
               const SizedBox(height: Spacing.lg),
               FormPasswordInput(
-                label: AppLocalizations.of(context)!.authAnswerToSecurePhraseLabel,
+                label: AppLocalizations.of(
+                  context,
+                )!.authAnswerToSecurePhraseLabel,
                 focusNode: _securePhraseFocusNode,
                 controller: _securePhraseController,
                 validator: Validator.requiredField(
@@ -153,8 +153,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
 
   void _onChanged(_) {
     _canSubmit.value =
-        _phoneNumberController.text.isNotEmpty &&
-        _securePhraseController.text.isNotEmpty;
+        _phone.text.text.isNotEmpty && _securePhraseController.text.isNotEmpty;
   }
 
   void _onContinue() {
@@ -165,7 +164,7 @@ class _StartForgotPasswordPageState extends State<StartForgotPasswordPage> {
     mainEvent = context.dispatchProcess(
       StartForgotPwdAction(
         payload: StartForgotPwdActionPayload(
-          phoneNumber: _phoneNumberController.text.trim(),
+          phoneNumber: _phone.international,
           securityAnswer: _securePhraseController.text,
         ),
       ),

@@ -11,6 +11,7 @@ class FormInput extends StatefulWidget {
     this.readOnly = false,
     this.placeholder,
     this.suffix,
+    this.prefix,
     this.isPassword = false,
     this.focusNode,
     this.next,
@@ -28,6 +29,7 @@ class FormInput extends StatefulWidget {
   final String? label;
   final String? placeholder;
   final Widget? suffix;
+  final Widget? prefix;
   final bool isPassword;
   final FocusNode? focusNode;
   final void Function(String value)? next;
@@ -126,6 +128,10 @@ class _FormInputState extends State<FormInput> {
                 filled: true,
                 fillColor: context.inputBg,
                 suffixIcon: widget.suffix,
+                prefixIcon: widget.prefix,
+                prefixIconConstraints: widget.prefix == null
+                    ? null
+                    : const BoxConstraints(minWidth: 0, minHeight: 0),
               ),
             ),
           ],
