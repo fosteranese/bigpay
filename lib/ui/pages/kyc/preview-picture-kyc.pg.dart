@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:bigpay/ui/components/forms/outline_button.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/kyc.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
@@ -20,8 +26,10 @@ class PicturePreviewKycPage extends StatefulWidget {
 class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final picture = Kyc.passportPicture;
     return MainLayout(
-      titleStyle: AppTypography.display2,
+      titleStyle: context.display2,
       bottomSize: 0,
       bottomNav: Column(
         mainAxisSize: .min,
@@ -29,13 +37,18 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
         crossAxisAlignment: .center,
         children: [
           FormButton(
-            onPressed: () {},
-            text: 'Verify Photo',
+            onPressed: () {
+              AppRouter.router.push(ContactInfoKycPage.route.path);
+            },
+            text: l10n.kycVerifyPhoto,
           ),
           const SizedBox(height: 10),
           FormOutlineButton(
-            onPressed: () {},
-            text: 'Retake Picture',
+            // Pops back to the still-live FaceCaptureKycPage — its own
+            // "Retake" control (shown once it has a captured shot) hands
+            // control back to the live camera for another attempt.
+            onPressed: () => AppRouter.router.pop(),
+            text: l10n.kycRetakePicture,
           ),
         ],
       ),
@@ -43,7 +56,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
         child: Column(
           mainAxisSize: .min,
           mainAxisAlignment: .start,
-          crossAxisAlignment: .start,
+          crossAxisAlignment: .center,
           children: [
             ConstrainedBox(
               constraints: .new(
@@ -59,32 +72,37 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
                     decoration: BoxDecoration(
                       borderRadius: .circular(100),
                       border: .all(
-                        color: AppColors.secondary,
+                        color: context.accentGreen,
                         width: 1,
                       ),
                     ),
                     child: CircleAvatar(
                       radius: 70.5,
                       backgroundColor: AppColors.tintShade1,
-                      child: const Icon(
-                        Icons.person,
-                        size: 100,
-                        color: Colors.white,
-                      ),
+                      backgroundImage: picture.isEmpty
+                          ? null
+                          : MemoryImage(base64Decode(picture)),
+                      child: picture.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              size: 100,
+                              color: AppColors.white,
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Review your photo',
+                    l10n.kycReviewPhotoTitle,
                     textAlign: .center,
-                    style: AppTypography.display2,
+                    style: context.display2,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Make sure your face is clearly visible before continuing',
+                    l10n.kycReviewPhotoSubtitle,
                     textAlign: .center,
-                    style: AppTypography.p1.copyWith(
-                      color: AppColors.subtitleGrey,
+                    style: context.p1.copyWith(
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -92,17 +110,19 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
             ),
             const SizedBox(height: 30),
             CheckListItem(
-              title: 'Face clearly visible',
-              subtitle: 'No obstructions or glasses',
+              isChecked: !Kyc.faceHasObstructions,
+              title: l10n.kycFaceClearlyVisible,
+              subtitle: l10n.kycNoObstructions,
             ),
             CheckListItem(
-              title: 'Well lit',
-              subtitle: 'Even lighting, no harsh shadows',
+              isChecked: Kyc.faceIsWellLighted,
+              title: l10n.kycWellLit,
+              subtitle: l10n.kycEvenLighting,
             ),
             CheckListItem(
-              isChecked: false,
-              title: 'Slight blur detected',
-              subtitle: 'Retake if image feels unclear',
+              isChecked: !Kyc.faceIsBlur,
+              title: l10n.kycSlightBlur,
+              subtitle: l10n.kycRetakeIfUnclear,
             ),
           ],
         ),
@@ -129,7 +149,7 @@ class CheckListItem extends StatelessWidget {
       leading: isChecked
           ? CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.tintShade3,
+              backgroundColor: context.avatarBg,
               child: const Icon(
                 Icons.check,
                 size: 20,
@@ -142,16 +162,16 @@ class CheckListItem extends StatelessWidget {
               child: const Icon(
                 Icons.warning_amber_rounded,
                 size: 20,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
       title: Text(
         title,
-        style: AppTypography.header3,
+        style: context.header3,
       ),
       subtitle: Text(
         subtitle,
-        style: AppTypography.caption,
+        style: context.caption,
       ),
     );
   }

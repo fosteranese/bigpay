@@ -33,6 +33,12 @@ class _FormSelectToggleInputState extends State<FormSelectToggleInput> {
   }
 
   @override
+  void dispose() {
+    _selected.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: .min,
@@ -47,17 +53,17 @@ class _FormSelectToggleInputState extends State<FormSelectToggleInput> {
           width: double.maxFinite,
           height: 67,
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: context.cardBg,
             borderRadius: .circular(10),
             border: Border.all(
-              color: AppColors.border,
+              color: context.border,
             ),
             boxShadow: [
               BoxShadow(
                 offset: Offset(0, 4),
                 blurRadius: 0.06,
                 spreadRadius: 0,
-                color: AppColors.black.withValues(alpha: 0.06),
+                color: context.textPrimary.withValues(alpha: 0.06),
               ),
             ],
           ),
@@ -79,8 +85,8 @@ class _FormSelectToggleInputState extends State<FormSelectToggleInput> {
                             },
                           ),
                           if (item != widget.options.last)
-                            const VerticalDivider(
-                              color: AppColors.fade,
+                            VerticalDivider(
+                              color: context.divider,
                               width: 0,
                             ),
                         ];
@@ -111,30 +117,38 @@ class FormSelectToggleListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSelected = option.value == selected.value;
     return Expanded(
-      child: InkWell(
-        onTap: onSelected,
-        child: Container(
-          height: double.maxFinite,
-          width: double.maxFinite,
-          color: option.value == selected.value ? AppColors.tintShade1 : null,
-          child: Row(
-            mainAxisSize: .max,
-            mainAxisAlignment: .center,
-            crossAxisAlignment: .center,
-            children: [
-              CircleAvatar(
-                radius: 11.5,
-                backgroundColor: AppColors.tintShade3,
+      child: Semantics(
+        label: option.label,
+        button: true,
+        selected: isSelected,
+        child: InkWell(
+          onTap: onSelected,
+          child: Container(
+            height: double.maxFinite,
+            width: double.maxFinite,
+            color: isSelected ? AppColors.tintShade1 : null,
+            child: ExcludeSemantics(
+              child: Row(
+                mainAxisSize: .max,
+                mainAxisAlignment: .center,
+                crossAxisAlignment: .center,
+                children: [
+                  CircleAvatar(
+                    radius: 11.5,
+                    backgroundColor: context.avatarBg,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    option.label,
+                    style: context.smallDetails.copyWith(
+                      color: context.textPrimary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text(
-                option.label,
-                style: AppTypography.smallDetails.copyWith(
-                  color: AppColors.black,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

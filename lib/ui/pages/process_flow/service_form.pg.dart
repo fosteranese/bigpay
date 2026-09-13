@@ -1,0 +1,497 @@
+import 'package:flutter/material.dart';
+
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/constants/am_doing.const.dart';
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/general_flow/form_verification_response.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
+import 'package:bigpay/data/models/general_flow/request_response.dart';
+import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
+import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/models/actions/services/process_request_action.dart';
+import 'package:bigpay/models/actions/services/verify_service_form_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
+import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
+import 'package:bigpay/ui/pages/process_flow/summary.pg.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/authentication.util.dart';
+import 'package:bigpay/utils/message.util.dart';
+
+class ServiceFormPage extends StatefulWidget {
+  const ServiceFormPage({
+    super.key,
+    required this.activityDatum,
+    required this.category,
+    required this.formData,
+    this.amDoing = AmDoing.transaction,
+  });
+  static PageRouteDefinition route = PageRouteDefinition(
+    path: '/services/form',
+  );
+  final ActivityDatum activityDatum;
+  final GeneralFlowCategory category;
+  final GeneralFlowFormData formData;
+  final AmDoing amDoing;
+
+  @override
+  State<ServiceFormPage> createState() => _ServiceFormPageState();
+}
+
+class _ServiceFormPageState extends State<ServiceFormPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _canSubmit = ValueNotifier(false);
+  ExecuteProcessEvent? _submitEvent;
+
+  /// Set only on the [_submitDirect] path (see [_submit]) — processes the
+  /// request straight from this form's own data, without a verify/summary
+  /// round trip.
+  ExecuteProcessEvent? _processEvent;
+  ExecuteProcessEvent? _payeeEvent;
+  final Map<String, dynamic> _formData = {};
+
+  bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
+
+  /// The form definition currently on screen. Seeded from the one passed in,
+  /// then replaced by a pull-to-refresh.
+  late GeneralFlowFormData _form;
+
+  /// The in-flight form-definition refresh, correlated by the listener.
+  ExecuteProcessEvent? _refreshEvent;
+
+  List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)> _formItems =
+      [];
+
+  @override
+  void initState() {
+    super.initState();
+    _form = widget.formData;
+    _buildFormItems();
+    _recomputeCanSubmit();
+  }
+
+  /// Builds the editable field list from [_form]. Disposes any prior controllers
+  /// first, so it's safe to call again on a refresh.
+  void _buildFormItems() {
+    _disposeFormItems();
+
+    // Matching umb's `_generateField`: when the form needs verification, only
+    // the fields required for it are collected here — the rest are gathered on
+    // the summary/confirmation screen. Otherwise every visible, editable field
+    // is shown. The amount field is floated to the top when present.
+    final requireVerification = _form.form?.requireVerification == 1;
+    final visible = (_form.fieldsDatum ?? [])
+        .where(
+          (f) =>
+              f.field?.fieldVisible == 1 &&
+              f.field?.readOnly != 1 &&
+              (!requireVerification || f.field?.requiredForVerification == 1),
+        )
+        .toList();
+    final amountIndex = visible.indexWhere((f) => f.field?.isAmount == 1);
+    if (amountIndex > 0) {
+      visible.insert(0, visible.removeAt(amountIndex));
+    }
+
+    _formItems = visible.map((item) {
+      final controller = TextEditingController(
+        text: item.field?.defaultValue ?? '',
+      )..addListener(_recomputeCanSubmit);
+      return (item, controller, FocusNode());
+    }).toList();
+  }
+
+  void _disposeFormItems() {
+    for (final (_, controller, focusNode) in _formItems) {
+      controller.removeListener(_recomputeCanSubmit);
+      controller.dispose();
+      focusNode.dispose();
+    }
+  }
+
+  /// Pull-to-refresh: re-fetches this form's definition and rebuilds the fields,
+  /// holding the spinner until it lands. Any half-entered values are reset to
+  /// the fresh defaults.
+  Future<void> _onRefresh() async {
+    final event = context.dispatchProcess(
+      GetServiceFormDataAction(
+        payload: GetServiceFormDataActionPayload(
+          formId: _form.form?.formId,
+          insId: _form.form?.formId,
+        ),
+        endpointFunc: () =>
+            GetServiceFormDataAction.endpointFor(_form.form?.activityType),
+      ),
+    );
+    setState(() => _refreshEvent = event);
+    await context.awaitProcess(event);
+  }
+
+  /// Submit is enabled once every mandatory visible field has a value.
+  void _recomputeCanSubmit() {
+    _canSubmit.value = _formItems.every((item) {
+      final mandatory = item.$1.field?.fieldMandatory == 1;
+      return !mandatory || item.$2.text.trim().isNotEmpty;
+    });
+  }
+
+  /// Prefills the other fields from a selected payee's saved values, matching
+  /// on field name (the backend stores the keys lower-camel).
+  void _prefillFromPayee(Payee payee) {
+    final saved = payee.formData;
+    if (saved == null) return;
+
+    for (final (datum, controller, _) in _formItems) {
+      final name = datum.field?.fieldName;
+      if (name == null) continue;
+      final value = saved[name] ?? saved[_lowerCamel(name)];
+      if (value != null) controller.text = value.toString();
+    }
+
+    _recomputeCanSubmit();
+  }
+
+  String _lowerCamel(String value) =>
+      value.isEmpty ? value : '${value[0].toLowerCase()}${value.substring(1)}';
+
+  /// [GeneralFlowForm.requireVerification] decides the route from here,
+  /// matching umb's `ProcessFormController.submit`: a form that requires
+  /// verification is verified on the backend first, with the confirmation it
+  /// returns shown on the summary screen (see the listener in [build]) for
+  /// the user to review before it's processed. A form that doesn't skips
+  /// straight to authenticating and processing this form's own data — no
+  /// verify call, no summary/review screen at all (e.g. Reset Authorisation
+  /// PIN: nothing to preview, so umb never shows one for it either).
+  void _submit() {
+    FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
+
+    _form.fieldsDatum?.forEach((item) {
+      _formData[item.field?.fieldName ?? ''] = item.field?.defaultValue ?? '';
+    });
+
+    _formData.addAll(<String, dynamic>{
+      for (final (datum, controller, _) in _formItems)
+        if (datum.field?.fieldName != null)
+          datum.field!.fieldName!: controller.text.trim(),
+    });
+
+    if (_form.form?.requireVerification != 1) {
+      _submitDirect();
+      return;
+    }
+
+    _submitEvent = context.dispatchProcess(
+      VerifyServiceFormAction(
+        payload: VerifyServiceFormActionPayload(
+          insId: _form.institution?.insId,
+          formId: _form.form?.formId,
+          formData: _formData,
+        ),
+        endpointFunc: _verifyEndpoint,
+      ),
+    );
+  }
+
+  String _verifyEndpoint() {
+    switch (_form.form?.activityType) {
+      case ActivityTypesConst.fblCollect:
+      case ActivityTypesConst.fblCollectCategory:
+        return '/FBLCollect/verifyForm';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/verifyForm';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/verifyForm';
+    }
+  }
+
+  /// The requireVerification-skipped path — authenticates (if this form's
+  /// own [GeneralFlowFormData.authMode] calls for it) then processes
+  /// straight away. Mirrors [SummaryPage._continue]/[SummaryPage._process],
+  /// just working off this form's own data instead of a verification
+  /// result.
+  void _submitDirect() {
+    final authModes = _form.authMode ?? const [];
+
+    if (authModes.isNotEmpty) {
+      AuthenticationUtil.start(
+        authModes: authModes,
+        payload: _formData,
+        complete: ({otp, required payload, pin, secretAnswer}) {
+          // Each auth step (PIN/OTP/secret answer) dismisses its own
+          // dialog before calling onSuccess, so there's nothing left to
+          // pop here.
+          _process(
+            otp: otp,
+            payload: payload,
+            pin: pin,
+            secretAnswer: secretAnswer,
+          );
+        },
+      );
+      return;
+    }
+
+    _process(payload: _formData);
+  }
+
+  void _process({
+    String? otp,
+    required Map<String, dynamic> payload,
+    String? pin,
+    String? secretAnswer,
+  }) {
+    final paymentMode =
+        (payload['SourceAccount'] ?? payload['sourceAccount'] ?? '').toString();
+
+    final actionPayload = ProcessRequestActionPayload(
+      activityId: widget.activityDatum.activity?.activityId,
+      formId: _form.form?.formId,
+      formData: payload,
+      paymentMode: paymentMode,
+      otp: otp,
+      pin: pin,
+      secretAnswer: secretAnswer,
+    );
+
+    if (_isAddBeneficiary) {
+      _payeeEvent = context.dispatchProcess(
+        AddPayeeAction(payload: actionPayload),
+      );
+      return;
+    }
+
+    _processEvent = context.dispatchProcess(
+      ProcessRequestAction(
+        payload: actionPayload,
+        endpointFunc: _processEndpoint,
+      ),
+    );
+  }
+
+  String _processEndpoint() {
+    switch (_form.form?.activityType) {
+      case ActivityTypesConst.fblCollect:
+      case ActivityTypesConst.fblCollectCategory:
+        return '/FBLCollect/initiatePayment';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/processRequest';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/processRequest';
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeFormItems();
+    _canSubmit.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProcessListener(
+      listeners: [
+        // Pull-to-refresh result: rebuild the fields from the fresh definition.
+        ProcessListenerConfig<GeneralFlowFormData>(
+          event: () => _refreshEvent,
+          listener: (context, snapshot) {
+            if (snapshot.hasData &&
+                (snapshot.data?.fieldsDatum?.isNotEmpty ?? false)) {
+              setState(() {
+                _form = snapshot.data!;
+                _buildFormItems();
+              });
+              _recomputeCanSubmit();
+            }
+          },
+        ),
+        ProcessListenerConfig<FormVerificationResponse>(
+          event: () => _submitEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.hasData) {
+              _submitEvent = null;
+              AppRouter.router.push(
+                SummaryPage.route.path,
+                extra: {
+                  'activityDatum': widget.activityDatum,
+                  'category': widget.category,
+                  'formData': _form,
+                  'amDoing': widget.amDoing,
+                  'verification': snapshot.data,
+                },
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _submitEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+        // The requireVerification-skipped path (see [_submitDirect]) — same
+        // outcome as [SummaryPage]'s own process listener, just triggered
+        // straight from this page instead of after a review screen.
+        ProcessListenerConfig<RequestResponse>(
+          event: () => _processEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _processEvent = null;
+              // Dashboard/Wallets/History live in other shell branches and
+              // won't otherwise know this happened — see the notifier's doc.
+              AppState.notifyDataChanged();
+              AppRouter.router.push(
+                TransactionDetailsPage.route.path,
+                extra: snapshot.data,
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _processEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+        ProcessListenerConfig<bool>(
+          event: () => _payeeEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _payeeEvent = null;
+              AppState.notifyDataChanged();
+              MessageUtil.displaySuccessDialog(
+                context,
+                message:
+                    snapshot.message ??
+                    AppLocalizations.of(
+                      context,
+                    )!.summaryBeneficiarySavedMessage,
+                // Pops back through the flow (this page was only ever
+                // reached from BeneficiariesPage's own "add" button) rather
+                // than go(), so BeneficiariesPage's existing didPopNext
+                // refresh (see its RouteAware) actually fires and shows the
+                // new beneficiary.
+                onOk: () => AppRouter.router.popUntilNamed(
+                  BeneficiariesPage.route.name,
+                ),
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _payeeEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+      ],
+      child: MainLayout(
+        bottomSize: 72,
+        title: _form.form?.formName ?? '',
+        subtitle: _form.form?.description ?? '',
+        onRefresh: _onRefresh,
+        bottomNav: ValueListenableBuilder(
+          valueListenable: _canSubmit,
+          builder: (context, canSubmit, child) {
+            return FormButton(
+              enabled: canSubmit,
+              onPressed: _submit,
+              // "Continue" when this leads to a review/summary screen
+              // (matching that screen's own action), "Submit" when it
+              // processes directly from here — same distinction umb's
+              // form_submit_button.dart makes off requireVerification.
+              text: _form.form?.requireVerification == 1
+                  ? AppLocalizations.of(context)!.commonContinue
+                  : AppLocalizations.of(context)!.commonSubmit,
+            );
+          },
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: .min,
+            mainAxisAlignment: .start,
+            crossAxisAlignment: .center,
+            children: _buildFormFields,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> get _buildFormFields {
+    final l10n = AppLocalizations.of(context)!;
+    final items = <Widget>[];
+    for (final (index, (datum, controller, focusNode)) in _formItems.indexed) {
+      final isLast = index == _formItems.length - 1;
+      items.add(
+        Padding(
+          padding: const .only(bottom: Spacing.lg),
+          child: FormFieldInput(
+            datum: datum,
+            controller: controller,
+            focusNode: focusNode,
+            isLast: isLast,
+            validator: FormFieldInput.buildValidator(datum, l10n),
+            onPayeeSelected: _prefillFromPayee,
+            next: (_) {
+              if (isLast) {
+                FocusScope.of(context).unfocus();
+              } else {
+                _formItems[index + 1].$3.requestFocus();
+              }
+            },
+          ),
+        ),
+      );
+    }
+    return items;
+  }
+}

@@ -77,6 +77,7 @@ class MainRemote {
     Map<String, dynamic> data = {
       'meta': appInfo.toMap(),
     };
+    data['meta']['locale'] = AppState.effectiveLocaleCode;
 
     if (body != null) {
       final finalBody = Map<String, dynamic>.from(body);
@@ -85,8 +86,8 @@ class MainRemote {
       data['payLoad'] = finalBody;
     }
 
-    if (isAuthenticated) {
-      data['meta']['sessionId'] = AppState.currentUser.sessionId;
+    if (isAuthenticated && AppState.currentUser != null) {
+      data['meta']['sessionId'] = AppState.currentUser!.sessionId;
     }
 
     if (encrypt) {

@@ -114,7 +114,14 @@ class Database {
     try {
       await checkBeforeOperation();
       final record = await Database.box.get(key) as String?;
-      return record;
+      if (record == null) {
+        return null;
+      }
+
+      // add() always json.encode()s its payload (so a String payload comes
+      // back quoted, e.g. `"en"`) — decode here so callers get back exactly
+      // what they originally passed in.
+      return json.decode(record).toString();
     } catch (ex) {
       logger.e('DB readRaw error: $ex');
       return null;
