@@ -132,6 +132,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'الإجابة على السؤال';
 
   @override
+  String get authSecretAnswerTitle => 'أدخل إجابتك السرية';
+
+  @override
   String get authForgotSecurePhraseLink => 'نسيت عبارة الأمان؟';
 
   @override
@@ -259,6 +262,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileNationalityLabel => 'الجنسية';
 
   @override
+  String get profileUpdatePictureTitle => 'تحديث صورة الملف الشخصي';
+
+  @override
+  String get profileTakePicture => 'التقاط صورة';
+
+  @override
+  String get profileChooseFromGallery => 'الاختيار من المعرض';
+
+  @override
+  String get profilePictureUpdatedMessage => 'تم تحديث صورة الملف الشخصي بنجاح';
+
+  @override
   String get securityTitle => 'الأمان';
 
   @override
@@ -270,6 +285,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get securityConfirmBiometricAccess => 'أكّد لتفعيل الوصول بالبصمة';
+
+  @override
+  String get authBiometricTransactionReason =>
+      'تحقق من هويتك للموافقة على هذه المعاملة';
 
   @override
   String get securityEnterPinTooltip => 'أدخل رمز الأمان';
@@ -425,6 +444,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'رحلتك المالية تبدأ هنا. بمجرد إرسال أو استلام الأموال، سيظهر نشاطك في هذا القسم';
 
   @override
+  String get walletsAddWalletSheetTitle => 'إضافة محفظة جديدة';
+
+  @override
+  String get walletsAddWalletMobileOption => 'محفظة الهاتف المحمول';
+
+  @override
+  String get walletsAddWalletCardOption => 'بطاقة';
+
+  @override
   String get walletsAddCardTitle => 'إضافة بطاقة';
 
   @override
@@ -441,6 +469,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get walletsExpiryDateLabel => 'تاريخ الانتهاء';
+
+  @override
+  String get walletsCardNamePlaceholder => 'اسمك';
 
   @override
   String get walletsBigPayVirtualWalletDemo => 'محفظة BigPay الافتراضية';
@@ -866,48 +897,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get authBrandTagline => 'أرسل واستقبل وأدر أموالك — ببساطة وأمان.';
-
-  @override
-  String get stepSignupPhone => 'رقمك';
-
-  @override
-  String get stepSignupCode => 'تأكيد الرمز';
-
-  @override
-  String get stepSignupPassword => 'إنشاء كلمة المرور';
-
-  @override
-  String get stepSignupSecurity => 'عبارة الأمان';
-
-  @override
-  String get stepSignupPin => 'عيّن رمز PIN';
-
-  @override
-  String get stepForgotVerify => 'تحقق من أنك أنت';
-
-  @override
-  String get stepForgotCode => 'تأكيد الرمز';
-
-  @override
-  String get stepForgotPassword => 'كلمة مرور جديدة';
-
-  @override
-  String get stepKycId => 'هويتك';
-
-  @override
-  String get stepKycSelfie => 'سيلفي سريع';
-
-  @override
-  String get stepKycContact => 'معلومات الاتصال';
-
-  @override
-  String get stepSigninDetails => 'تسجيل الدخول';
-
-  @override
-  String get stepSigninSecurity => 'فحص الأمان';
-
-  @override
-  String get stepSigninCode => 'تأكيد الرمز';
 
   @override
   String get connectivityLostTitle => 'لا يوجد اتصال بالإنترنت';

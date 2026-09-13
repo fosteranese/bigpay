@@ -346,6 +346,12 @@ abstract class AppLocalizations {
   /// **'Answer to the Question'**
   String get authAnswerToQuestionLabel;
 
+  /// Heading on the secret-answer authentication step, shown mid-transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Your Secret Answer'**
+  String get authSecretAnswerTitle;
+
   /// Link to the forgot-secure-phrase flow, shown under the secure-phrase answer field during login
   ///
   /// In en, this message translates to:
@@ -592,6 +598,30 @@ abstract class AppLocalizations {
   /// **'Nationality'**
   String get profileNationalityLabel;
 
+  /// Header on the sheet offering ways to change the profile picture
+  ///
+  /// In en, this message translates to:
+  /// **'Update Profile Picture'**
+  String get profileUpdatePictureTitle;
+
+  /// Option to open the camera to take a new profile picture
+  ///
+  /// In en, this message translates to:
+  /// **'Take a Picture'**
+  String get profileTakePicture;
+
+  /// Option to pick an existing photo as the profile picture
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get profileChooseFromGallery;
+
+  /// Success message after changing the profile picture
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture updated successfully'**
+  String get profilePictureUpdatedMessage;
+
   /// Security settings page title
   ///
   /// In en, this message translates to:
@@ -615,6 +645,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm to enable biometric access'**
   String get securityConfirmBiometricAccess;
+
+  /// System biometric prompt reason when approving a transaction with a saved PIN
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticate to approve this transaction'**
+  String get authBiometricTransactionReason;
 
   /// PIN prompt heading when confirming a biometric setting change
   ///
@@ -916,6 +952,24 @@ abstract class AppLocalizations {
   /// **'Your financial journey starts here. Once you send or receive funds, your activity will appear in this space'**
   String get walletsNoTransactionsSubtitle;
 
+  /// Header on the sheet offering the choice of wallet type to add
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Wallet'**
+  String get walletsAddWalletSheetTitle;
+
+  /// Option to link a mobile money wallet, on the add-wallet choice sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Wallet'**
+  String get walletsAddWalletMobileOption;
+
+  /// Option to add a debit/credit card, on the add-wallet choice sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get walletsAddWalletCardOption;
+
   /// No description provided for @walletsAddCardTitle.
   ///
   /// In en, this message translates to:
@@ -951,6 +1005,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expiry Date'**
   String get walletsExpiryDateLabel;
+
+  /// Placeholder shown on the card preview before the holder name is typed
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR NAME'**
+  String get walletsCardNamePlaceholder;
 
   /// No description provided for @walletsBigPayVirtualWalletDemo.
   ///
@@ -1749,90 +1809,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send, receive, and manage your money — simply and securely.'**
   String get authBrandTagline;
-
-  /// Sign-up flow step label: entering the phone number
-  ///
-  /// In en, this message translates to:
-  /// **'Your number'**
-  String get stepSignupPhone;
-
-  /// Sign-up flow step label: confirming the OTP code
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm code'**
-  String get stepSignupCode;
-
-  /// Sign-up flow step label: creating the password
-  ///
-  /// In en, this message translates to:
-  /// **'Create password'**
-  String get stepSignupPassword;
-
-  /// Sign-up flow step label: setting the secure phrase
-  ///
-  /// In en, this message translates to:
-  /// **'Security phrase'**
-  String get stepSignupSecurity;
-
-  /// Sign-up flow step label: setting the security PIN
-  ///
-  /// In en, this message translates to:
-  /// **'Set your PIN'**
-  String get stepSignupPin;
-
-  /// Forgot-password flow step label: verifying identity
-  ///
-  /// In en, this message translates to:
-  /// **'Verify it\'s you'**
-  String get stepForgotVerify;
-
-  /// Forgot-password flow step label: confirming the OTP code
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm code'**
-  String get stepForgotCode;
-
-  /// Forgot-password flow step label: setting the new password
-  ///
-  /// In en, this message translates to:
-  /// **'New password'**
-  String get stepForgotPassword;
-
-  /// KYC flow step label: Ghana Card details
-  ///
-  /// In en, this message translates to:
-  /// **'Your ID'**
-  String get stepKycId;
-
-  /// KYC flow step label: taking a selfie
-  ///
-  /// In en, this message translates to:
-  /// **'Quick selfie'**
-  String get stepKycSelfie;
-
-  /// KYC flow step label: contact information
-  ///
-  /// In en, this message translates to:
-  /// **'Contact info'**
-  String get stepKycContact;
-
-  /// Sign-in flow step label: entering credentials
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
-  String get stepSigninDetails;
-
-  /// Sign-in flow step label: answering the secure phrase
-  ///
-  /// In en, this message translates to:
-  /// **'Security check'**
-  String get stepSigninSecurity;
-
-  /// Sign-in flow step label: confirming the OTP code
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm code'**
-  String get stepSigninCode;
 
   /// No description provided for @connectivityLostTitle.
   ///

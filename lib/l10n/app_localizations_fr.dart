@@ -132,6 +132,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'Réponse à la question';
 
   @override
+  String get authSecretAnswerTitle => 'Saisissez votre réponse secrète';
+
+  @override
   String get authForgotSecurePhraseLink => 'Phrase sécurisée oubliée ?';
 
   @override
@@ -262,6 +265,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileNationalityLabel => 'Nationalité';
 
   @override
+  String get profileUpdatePictureTitle => 'Mettre à jour la photo de profil';
+
+  @override
+  String get profileTakePicture => 'Prendre une photo';
+
+  @override
+  String get profileChooseFromGallery => 'Choisir depuis la galerie';
+
+  @override
+  String get profilePictureUpdatedMessage =>
+      'Photo de profil mise à jour avec succès';
+
+  @override
   String get securityTitle => 'Sécurité';
 
   @override
@@ -274,6 +290,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get securityConfirmBiometricAccess =>
       'Confirmez pour activer l\'accès biométrique';
+
+  @override
+  String get authBiometricTransactionReason =>
+      'Authentifiez-vous pour approuver cette transaction';
 
   @override
   String get securityEnterPinTooltip => 'Saisir le code PIN de sécurité';
@@ -430,6 +450,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Votre parcours financier commence ici. Dès que vous enverrez ou recevrez des fonds, votre activité apparaîtra ici.';
 
   @override
+  String get walletsAddWalletSheetTitle => 'Ajouter un nouveau portefeuille';
+
+  @override
+  String get walletsAddWalletMobileOption => 'Portefeuille mobile';
+
+  @override
+  String get walletsAddWalletCardOption => 'Carte';
+
+  @override
   String get walletsAddCardTitle => 'Ajouter une carte';
 
   @override
@@ -446,6 +475,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get walletsExpiryDateLabel => 'Date d\'expiration';
+
+  @override
+  String get walletsCardNamePlaceholder => 'VOTRE NOM';
 
   @override
   String get walletsBigPayVirtualWalletDemo => 'Portefeuille virtuel BigPay';
@@ -882,48 +914,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get authBrandTagline =>
       'Envoyez, recevez et gérez votre argent — simplement et en toute sécurité.';
-
-  @override
-  String get stepSignupPhone => 'Votre numéro';
-
-  @override
-  String get stepSignupCode => 'Confirmer le code';
-
-  @override
-  String get stepSignupPassword => 'Créer un mot de passe';
-
-  @override
-  String get stepSignupSecurity => 'Phrase de sécurité';
-
-  @override
-  String get stepSignupPin => 'Définissez votre code PIN';
-
-  @override
-  String get stepForgotVerify => 'Vérifiez qu\'il s\'agit bien de vous';
-
-  @override
-  String get stepForgotCode => 'Confirmer le code';
-
-  @override
-  String get stepForgotPassword => 'Nouveau mot de passe';
-
-  @override
-  String get stepKycId => 'Votre pièce d\'identité';
-
-  @override
-  String get stepKycSelfie => 'Selfie rapide';
-
-  @override
-  String get stepKycContact => 'Coordonnées';
-
-  @override
-  String get stepSigninDetails => 'Connexion';
-
-  @override
-  String get stepSigninSecurity => 'Vérification de sécurité';
-
-  @override
-  String get stepSigninCode => 'Confirmer le code';
 
   @override
   String get connectivityLostTitle => 'Pas de connexion internet';

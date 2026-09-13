@@ -132,6 +132,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'Respuesta a la pregunta';
 
   @override
+  String get authSecretAnswerTitle => 'Ingresa tu respuesta secreta';
+
+  @override
   String get authForgotSecurePhraseLink => '¿Olvidaste tu frase segura?';
 
   @override
@@ -262,6 +265,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileNationalityLabel => 'Nacionalidad';
 
   @override
+  String get profileUpdatePictureTitle => 'Actualizar foto de perfil';
+
+  @override
+  String get profileTakePicture => 'Tomar una foto';
+
+  @override
+  String get profileChooseFromGallery => 'Elegir de la galería';
+
+  @override
+  String get profilePictureUpdatedMessage =>
+      'Foto de perfil actualizada correctamente';
+
+  @override
   String get securityTitle => 'Seguridad';
 
   @override
@@ -274,6 +290,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get securityConfirmBiometricAccess =>
       'Confirma para habilitar el acceso biométrico';
+
+  @override
+  String get authBiometricTransactionReason =>
+      'Autentícate para aprobar esta transacción';
 
   @override
   String get securityEnterPinTooltip => 'Ingresa el PIN de seguridad';
@@ -430,6 +450,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tu recorrido financiero comienza aquí. Cuando envíes o recibas fondos, tu actividad aparecerá en este espacio.';
 
   @override
+  String get walletsAddWalletSheetTitle => 'Agregar nueva billetera';
+
+  @override
+  String get walletsAddWalletMobileOption => 'Billetera móvil';
+
+  @override
+  String get walletsAddWalletCardOption => 'Tarjeta';
+
+  @override
   String get walletsAddCardTitle => 'Agregar tarjeta';
 
   @override
@@ -446,6 +475,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get walletsExpiryDateLabel => 'Fecha de vencimiento';
+
+  @override
+  String get walletsCardNamePlaceholder => 'TU NOMBRE';
 
   @override
   String get walletsBigPayVirtualWalletDemo => 'Billetera virtual BigPay';
@@ -881,48 +913,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get authBrandTagline =>
       'Envía, recibe y gestiona tu dinero, de forma simple y segura.';
-
-  @override
-  String get stepSignupPhone => 'Tu número';
-
-  @override
-  String get stepSignupCode => 'Confirmar código';
-
-  @override
-  String get stepSignupPassword => 'Crear contraseña';
-
-  @override
-  String get stepSignupSecurity => 'Frase de seguridad';
-
-  @override
-  String get stepSignupPin => 'Establece tu PIN';
-
-  @override
-  String get stepForgotVerify => 'Verifica que eres tú';
-
-  @override
-  String get stepForgotCode => 'Confirmar código';
-
-  @override
-  String get stepForgotPassword => 'Nueva contraseña';
-
-  @override
-  String get stepKycId => 'Tu identificación';
-
-  @override
-  String get stepKycSelfie => 'Selfie rápida';
-
-  @override
-  String get stepKycContact => 'Información de contacto';
-
-  @override
-  String get stepSigninDetails => 'Iniciar sesión';
-
-  @override
-  String get stepSigninSecurity => 'Verificación de seguridad';
-
-  @override
-  String get stepSigninCode => 'Confirmar código';
 
   @override
   String get connectivityLostTitle => 'Sin conexión a internet';

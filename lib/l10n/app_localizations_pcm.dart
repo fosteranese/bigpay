@@ -133,6 +133,9 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get authAnswerToQuestionLabel => 'Answer to the Question';
 
   @override
+  String get authSecretAnswerTitle => 'Enter Your Secret Answer';
+
+  @override
   String get authForgotSecurePhraseLink => 'You forget Secure Phrase?';
 
   @override
@@ -261,6 +264,19 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get profileNationalityLabel => 'Nationality';
 
   @override
+  String get profileUpdatePictureTitle => 'Update Profile Picture';
+
+  @override
+  String get profileTakePicture => 'Take Picture';
+
+  @override
+  String get profileChooseFromGallery => 'Pick from Gallery';
+
+  @override
+  String get profilePictureUpdatedMessage =>
+      'Profile picture don update well well';
+
+  @override
   String get securityTitle => 'Security';
 
   @override
@@ -274,6 +290,10 @@ class AppLocalizationsPcm extends AppLocalizations {
   @override
   String get securityConfirmBiometricAccess =>
       'Confirm make you enable biometric access';
+
+  @override
+  String get authBiometricTransactionReason =>
+      'Confirm make you approve this transaction';
 
   @override
   String get securityEnterPinTooltip => 'Enter Security PIN';
@@ -430,6 +450,15 @@ class AppLocalizationsPcm extends AppLocalizations {
       'Your money journey dey start here. Once you send or receive money, your activity go show for this space';
 
   @override
+  String get walletsAddWalletSheetTitle => 'Add New Wallet';
+
+  @override
+  String get walletsAddWalletMobileOption => 'Mobile Wallet';
+
+  @override
+  String get walletsAddWalletCardOption => 'Card';
+
+  @override
   String get walletsAddCardTitle => 'Add Card';
 
   @override
@@ -446,6 +475,9 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get walletsExpiryDateLabel => 'Expiry Date';
+
+  @override
+  String get walletsCardNamePlaceholder => 'YOUR NAME';
 
   @override
   String get walletsBigPayVirtualWalletDemo => 'BigPay Virtual Wallet';
@@ -879,48 +911,6 @@ class AppLocalizationsPcm extends AppLocalizations {
   @override
   String get authBrandTagline =>
       'Send, receive, and manage your money — simple and safe.';
-
-  @override
-  String get stepSignupPhone => 'Your number';
-
-  @override
-  String get stepSignupCode => 'Confirm code';
-
-  @override
-  String get stepSignupPassword => 'Create password';
-
-  @override
-  String get stepSignupSecurity => 'Security phrase';
-
-  @override
-  String get stepSignupPin => 'Set your PIN';
-
-  @override
-  String get stepForgotVerify => 'Verify it\'s you';
-
-  @override
-  String get stepForgotCode => 'Confirm code';
-
-  @override
-  String get stepForgotPassword => 'New password';
-
-  @override
-  String get stepKycId => 'Your ID';
-
-  @override
-  String get stepKycSelfie => 'Quick selfie';
-
-  @override
-  String get stepKycContact => 'Contact info';
-
-  @override
-  String get stepSigninDetails => 'Sign in';
-
-  @override
-  String get stepSigninSecurity => 'Security check';
-
-  @override
-  String get stepSigninCode => 'Confirm code';
 
   @override
   String get connectivityLostTitle => 'No internet connection';
