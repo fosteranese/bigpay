@@ -86,6 +86,7 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
           }
           switch (item.activity?.activityType) {
             case ActivityTypesConst.fblCollect:
+            case ActivityTypesConst.fblCollectCategory:
               return '/FBLCollect/categories/${item.activity?.activityId}';
             case ActivityTypesConst.quickFlow:
             case ActivityTypesConst.quickFlowAlt:

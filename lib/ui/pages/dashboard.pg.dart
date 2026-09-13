@@ -1,3 +1,4 @@
+import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
@@ -6,6 +7,7 @@ import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/models/actions/services/resolve_collection_institution_action.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/skeleton/skeleton.dart';
@@ -28,6 +30,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/remote.util.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/avatar.util.dart';
 
@@ -557,7 +560,44 @@ class FrequentServiceItem extends StatelessWidget {
   /// Fetches this favourite's form directly and hands the result to the
   /// dashboard's central listener, which jumps to the service form. Mirrors
   /// [ActionButton] dispatching [GetServiceCategoriesAction].
-  void _open(BuildContext context) {
+  ///
+  /// An FBLCollect favourite only carries `activityId`/`formId` — there's no
+  /// institution id to call `formsDataByInsId` with, unlike the Services-tab
+  /// path where the institution was just picked from a list. So for that
+  /// activity type this first resolves the real `insId` via
+  /// `FBLCollect/formDataByFormId` (mirrors umb's two-step
+  /// `retrieveFormData`), then proceeds exactly as before.
+  Future<void> _open(BuildContext context) async {
+    var insId = data.formId;
+    final isCollect =
+        data.activityType == ActivityTypesConst.fblCollect ||
+        data.activityType == ActivityTypesConst.fblCollectCategory;
+
+    if (isCollect) {
+      MessageUtil.displayLoading(context);
+      try {
+        final resolved = await RemoteUtil.makeCall(
+          ResolveCollectionInstitutionAction(
+            payload: ResolveCollectionInstitutionActionPayload(
+              activityId: data.activityId,
+              formId: data.formId,
+            ),
+          ),
+        );
+        final resolvedInsId = ResolveCollectionInstitutionAction.insIdFrom(
+          resolved.data,
+        );
+        if (resolvedInsId != null && resolvedInsId.isNotEmpty) {
+          insId = resolvedInsId;
+        }
+      } catch (_) {
+        // Falls through with formId — the formsDataByInsId call below then
+        // surfaces its own "unavailable" error through the normal error UI.
+      }
+      if (!context.mounted) return;
+      MessageUtil.close(context);
+    }
+
     GetServiceFormDataAction.activityDatum = ActivityDatum(
       activity: Activity(
         activityId: data.activityId,
@@ -572,7 +612,7 @@ class FrequentServiceItem extends StatelessWidget {
       GetServiceFormDataAction(
         payload: GetServiceFormDataActionPayload(
           formId: data.formId,
-          insId: data.formId,
+          insId: insId,
         ),
         endpointFunc: () =>
             GetServiceFormDataAction.endpointFor(data.activityType),

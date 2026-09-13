@@ -30,6 +30,7 @@ final class GetServiceCategoriesAction
     final id = activity?.activityId;
     switch (activity?.activityType) {
       case ActivityTypesConst.fblCollect:
+      case ActivityTypesConst.fblCollectCategory:
         return '/FBLCollect/categories/$id';
       case ActivityTypesConst.quickFlow:
       case ActivityTypesConst.quickFlowAlt:

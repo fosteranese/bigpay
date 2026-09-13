@@ -206,6 +206,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   String _verifyEndpoint() {
     switch (_form.form?.activityType) {
       case ActivityTypesConst.fblCollect:
+      case ActivityTypesConst.fblCollectCategory:
         return '/FBLCollect/verifyForm';
       case ActivityTypesConst.quickFlow:
       case ActivityTypesConst.quickFlowAlt:
@@ -284,7 +285,8 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   String _processEndpoint() {
     switch (_form.form?.activityType) {
       case ActivityTypesConst.fblCollect:
-        return '/FBLCollect/processRequest';
+      case ActivityTypesConst.fblCollectCategory:
+        return '/FBLCollect/initiatePayment';
       case ActivityTypesConst.quickFlow:
       case ActivityTypesConst.quickFlowAlt:
         return '/QuickFlow/processRequest';

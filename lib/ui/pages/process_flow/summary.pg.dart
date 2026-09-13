@@ -249,7 +249,8 @@ class _SummaryPageState extends State<SummaryPage> {
   String _processEndpoint() {
     switch (widget.formData?.form?.activityType) {
       case ActivityTypesConst.fblCollect:
-        return '/FBLCollect/processRequest';
+      case ActivityTypesConst.fblCollectCategory:
+        return '/FBLCollect/initiatePayment';
       case ActivityTypesConst.quickFlow:
       case ActivityTypesConst.quickFlowAlt:
         return '/QuickFlow/processRequest';

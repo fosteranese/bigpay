@@ -74,6 +74,7 @@ class VirtualWalletCard extends StatelessWidget {
         endpointFunc: () {
           switch (_topUpActivityType) {
             case ActivityTypesConst.fblCollect:
+            case ActivityTypesConst.fblCollectCategory:
               return '/FBLCollect/formsDataByInsId';
             case ActivityTypesConst.quickFlow:
             case ActivityTypesConst.quickFlowAlt:

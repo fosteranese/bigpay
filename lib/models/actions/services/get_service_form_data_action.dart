@@ -38,6 +38,7 @@ final class GetServiceFormDataAction
   static String endpointFor(String? activityType) {
     switch (activityType) {
       case ActivityTypesConst.fblCollect:
+      case ActivityTypesConst.fblCollectCategory:
         return '/FBLCollect/formsDataByInsId';
       case ActivityTypesConst.quickFlow:
       case ActivityTypesConst.quickFlowAlt:
