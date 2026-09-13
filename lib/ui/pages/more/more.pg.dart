@@ -122,16 +122,6 @@ class _MorePageState extends State<MorePage> {
       ),
       child: Column(
         children: [
-          _buildThemeSwitcher(),
-          const SizedBox(height: Spacing.sm),
-          _buildLanguageSwitcher(),
-          Divider(
-            color: context.divider,
-            thickness: 4,
-            indent: 10,
-            endIndent: 10,
-          ),
-          const SizedBox(height: Spacing.sm),
           ProfileItem(
             onPressed: () {
               AppRouter.router.push(BeneficiariesPage.route.path);
@@ -179,6 +169,16 @@ class _MorePageState extends State<MorePage> {
             title: l10n.morePrivacyStatement,
             icon: Icons.privacy_tip_outlined,
           ),
+          Divider(
+            color: context.divider,
+            thickness: 4,
+            indent: 10,
+            endIndent: 10,
+          ),
+          const SizedBox(height: Spacing.sm),
+          _buildThemeSwitcher(),
+          const SizedBox(height: Spacing.sm),
+          _buildLanguageSwitcher(),
           Divider(
             color: context.divider,
             thickness: 4,
