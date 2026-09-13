@@ -2,12 +2,10 @@ import 'package:bigpay/utils/app_state.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/select_input.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -52,11 +50,6 @@ class _CreateSecurePhrasePageState extends State<CreateSecurePhrasePage> {
       maxWidth: 480,
       title: l10n.authCreateSecurePhraseTitle,
       titleStyle: context.display1,
-      stepIndicator: StepProgress(
-        currentStep: 3,
-        totalSteps: 5,
-        labels: l10n.signupSteps,
-      ),
       subtitleWidget: Column(
         mainAxisSize: .min,
         children: [

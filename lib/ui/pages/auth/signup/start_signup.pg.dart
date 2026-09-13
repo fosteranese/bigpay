@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/signup/start_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/phone_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
@@ -49,11 +47,6 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
       maxWidth: 480,
       title: l10n.authSignUpTitle,
       titleStyle: context.display1,
-      stepIndicator: StepProgress(
-        currentStep: 0,
-        totalSteps: 5,
-        labels: l10n.signupSteps,
-      ),
       subtitleWidget: Column(
         mainAxisSize: .min,
         children: [

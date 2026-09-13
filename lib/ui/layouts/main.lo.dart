@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/app_refresh_indicator.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
@@ -16,7 +15,6 @@ class MainLayout extends StatefulWidget {
     this.title,
     this.subtitle,
     this.subtitleWidget,
-    this.stepIndicator,
     this.child,
     this.bottomNav,
     this.bottomSize = 100,
@@ -42,7 +40,6 @@ class MainLayout extends StatefulWidget {
   final String? title;
   final String? subtitle;
   final Widget? subtitleWidget;
-  final Widget? stepIndicator;
   final Widget? child;
   final Widget? bottomNav;
   final double bottomSize;
@@ -126,15 +123,6 @@ class _MainLayoutState extends State<MainLayout> {
     super.dispose();
   }
 
-  /// Past expanded width (with [MainLayout.maxWidth] set), the step
-  /// indicator moves into [_AuthBrandPanel] as a labeled vertical stepper
-  /// instead — showing the same slim bar again in the header here would be
-  /// a redundant second copy of it right next to the fuller version.
-  bool _usesBrandPanelStepIndicator(BuildContext context) =>
-      widget.maxWidth != null && context.isExpanded;
-
-  static const _headerStepIndicatorHeight = 20.0;
-
   @override
   Widget build(BuildContext context) {
     final page = Container(
@@ -174,7 +162,6 @@ class _MainLayoutState extends State<MainLayout> {
       children: [
         _AuthBrandPanel(
           width: context.isWide ? 480 : 420,
-          stepIndicator: widget.stepIndicator,
         ),
         Expanded(child: page),
       ],
@@ -288,11 +275,7 @@ class _MainLayoutState extends State<MainLayout> {
                   PreferredSize(
                     preferredSize: Size(
                       double.maxFinite,
-                      widget.bottomSize +
-                          (widget.stepIndicator != null &&
-                                  !_usesBrandPanelStepIndicator(context)
-                              ? _headerStepIndicatorHeight
-                              : 0),
+                      widget.bottomSize,
                     ),
                     child: Container(
                       width: double.maxFinite,
@@ -307,11 +290,6 @@ class _MainLayoutState extends State<MainLayout> {
                         crossAxisAlignment: .start,
                         children: [
                           SizedBox(height: context.isShortHeight ? 8 : 16),
-                          if (widget.stepIndicator != null &&
-                              !_usesBrandPanelStepIndicator(context)) ...[
-                            widget.stepIndicator!,
-                            SizedBox(height: context.isShortHeight ? 8 : 12),
-                          ],
                           if (widget.title != null && widget.actions == null)
                             FittedBox(
                               child: Text(
@@ -475,10 +453,9 @@ class _MainLayoutState extends State<MainLayout> {
 /// [MainLayout.build]. Deliberately generic (no step-specific copy) since
 /// it's shared by all 14 sign-up/sign-in/forgot-password screens alike.
 class _AuthBrandPanel extends StatelessWidget {
-  const _AuthBrandPanel({required this.width, this.stepIndicator});
+  const _AuthBrandPanel({required this.width});
 
   final double width;
-  final Widget? stepIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -499,294 +476,32 @@ class _AuthBrandPanel extends StatelessWidget {
           ),
         ),
       ),
-      // A flow with steps gets the full progress treatment — wordmark,
-      // stepper, and a summary footer — instead of the generic brand
-      // panel (wordmark + tagline), which stacked awkwardly above a step
-      // list and competed with it for the same space.
-      child:
-          (stepIndicator is StepProgress &&
-              (stepIndicator! as StepProgress).labels != null)
-          ? _AuthProgressPanel(progress: stepIndicator! as StepProgress)
-          : Center(
-              child: Padding(
-                padding: const EdgeInsets.all(48),
-                child: Column(
-                  mainAxisSize: .min,
-                  children: [
-                    SvgPicture.asset(
-                      SvgImages.icon,
-                      width: 180,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      AppLocalizations.of(context)!.authBrandTagline,
-                      textAlign: .center,
-                      style: context.p1.copyWith(
-                        color: AppColors.white.withValues(alpha: 0.85),
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              SvgPicture.asset(
+                SvgImages.icon,
+                width: 180,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.white,
+                  BlendMode.srcIn,
                 ),
               ),
-            ),
-    );
-  }
-}
-
-/// Full-height progress panel for stepped auth flows — brand mark at the
-/// top, the vertical stepper centered in the leftover space, and a summary
-/// footer (current step name + counter) anchoring the bottom, so the panel
-/// reads as a composed sidebar instead of a widget dropped into an empty
-/// gradient.
-class _AuthProgressPanel extends StatelessWidget {
-  const _AuthProgressPanel({required this.progress});
-
-  final StepProgress progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final labels = progress.labels!;
-    final current = progress.currentStep.clamp(0, labels.length - 1);
-    final shortHeight = context.isShortHeight;
-
-    return ClipRect(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned(
-            right: -90,
-            bottom: -70,
-            child: SvgPicture.asset(
-              SvgImages.splashBgIcon,
-              width: 340,
-              colorFilter: ColorFilter.mode(
-                AppColors.white.withValues(alpha: 0.03),
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
-          Positioned(
-            top: -110,
-            right: -90,
-            child: Container(
-              width: 260,
-              height: 260,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.brightGreen.withValues(alpha: 0.09),
-                    AppColors.brightGreen.withValues(alpha: 0),
-                  ],
+              const SizedBox(height: 32),
+              Text(
+                AppLocalizations.of(context)!.authBrandTagline,
+                textAlign: .center,
+                style: context.p1.copyWith(
+                  color: AppColors.white.withValues(alpha: 0.85),
+                  decoration: TextDecoration.none,
                 ),
               ),
-            ),
+            ],
           ),
-          Positioned(
-            left: -100,
-            bottom: -90,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.dashboardGradientStart.withValues(alpha: 0.16),
-                    AppColors.dashboardGradientStart.withValues(alpha: 0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.55, 1.0],
-                  colors: [
-                    AppColors.black.withValues(alpha: 0),
-                    AppColors.black.withValues(alpha: 0.16),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 44,
-              right: 44,
-              top: shortHeight ? 48 : 84,
-              bottom: shortHeight ? 28 : 48,
-            ),
-            child: Column(
-              crossAxisAlignment: .start,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: -32,
-                      top: -32,
-                      child: Container(
-                        width: 160,
-                        height: 160,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              AppColors.white.withValues(alpha: 0.07),
-                              AppColors.white.withValues(alpha: 0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    SvgPicture.asset(
-                      SvgImages.icon,
-                      width: 96,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: shortHeight ? 28 : 44),
-                Expanded(
-                  child: Center(
-                    child: progress,
-                  ),
-                ),
-                SizedBox(height: shortHeight ? 20 : 32),
-                Container(
-                  height: 1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.white.withValues(alpha: 0),
-                        AppColors.white.withValues(alpha: 0.14),
-                        AppColors.white.withValues(alpha: 0),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: shortHeight ? 16 : 22),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'CURRENT STEP',
-                        style: context.caption.copyWith(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.4,
-                          color: AppColors.white.withValues(alpha: 0.55),
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '${(current + 1).toString().padLeft(2, '0')} / ${progress.totalSteps.toString().padLeft(2, '0')}',
-                      style: context.caption.copyWith(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.4,
-                        color: AppColors.white.withValues(alpha: 0.75),
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: shortHeight ? 6 : 8),
-                Text(
-                  labels[current],
-                  style: context.header1.copyWith(
-                    color: AppColors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                SizedBox(height: shortHeight ? 12 : 18),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final fraction = ((current + 1) / progress.totalSteps)
-                        .clamp(0.0, 1.0);
-                    final fillWidth = constraints.maxWidth * fraction;
-                    return SizedBox(
-                      height: 14,
-                      child: Stack(
-                        alignment: Alignment.centerLeft,
-                        children: [
-                          Container(
-                            width: double.maxFinite,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: AppColors.white.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          ),
-                          Container(
-                            width: fillWidth,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  AppColors.tertiaryBrand,
-                                  AppColors.brightGreen,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.brightGreen.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            left: (fillWidth - 7).clamp(0.0, double.maxFinite),
-                            top: 0,
-                            child: Container(
-                              width: 14,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.white,
-                                border: Border.all(
-                                  color: AppColors.brightGreen,
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.brightGreen.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    blurRadius: 6,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

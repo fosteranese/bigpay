@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/forgot_pwd/complete_forgot_pwd_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/password_checklist.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
@@ -89,11 +87,6 @@ class _CreatePwdForgotPwdPageState extends State<CreatePwdForgotPwdPage> {
         maxWidth: 480,
         title: l10n.authCreatePasswordTitle,
         titleStyle: context.display1,
-        stepIndicator: StepProgress(
-          currentStep: 2,
-          totalSteps: 3,
-          labels: l10n.forgotPwdSteps,
-        ),
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,

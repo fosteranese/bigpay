@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -28,11 +26,6 @@ class _InfoKycPageState extends State<InfoKycPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      stepIndicator: StepProgress(
-        currentStep: 1,
-        totalSteps: 3,
-        labels: l10n.kycSteps,
-      ),
       bottom: PreferredSize(
         preferredSize: Size.zero,
         child: SizedBox.shrink(),

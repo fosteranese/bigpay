@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/models/actions/ghana_card/auto_ghana_card_verification_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
@@ -110,11 +108,6 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
       child: MainLayout(
         title: l10n.kycContactInfoTitle,
         titleStyle: context.display2,
-        stepIndicator: StepProgress(
-          currentStep: 2,
-          totalSteps: 3,
-          labels: l10n.kycSteps,
-        ),
         bottomSize: 60,
         bottomNav: ValueListenableBuilder(
           valueListenable: _canSubmit,

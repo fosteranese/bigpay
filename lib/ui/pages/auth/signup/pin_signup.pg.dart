@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/signup/complete_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/pin_unified_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -98,11 +96,6 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
         maxWidth: 480,
         title: l10n.authSetSecurityPinTitle,
         titleStyle: context.display1,
-        stepIndicator: StepProgress(
-          currentStep: 4,
-          totalSteps: 5,
-          labels: l10n.signupSteps,
-        ),
         subtitleWidget: Column(
           mainAxisSize: .min,
           children: [

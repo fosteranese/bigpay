@@ -10,13 +10,11 @@ import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/forgot_pwd/forgot_pwd.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
@@ -164,11 +162,6 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
         maxWidth: 480,
         title: l10n.authSignIn,
         titleStyle: context.display1,
-        stepIndicator: StepProgress(
-          currentStep: 0,
-          totalSteps: 3,
-          labels: l10n.signInSteps,
-        ),
         subtitleWidget: Column(
           mainAxisSize: .min,
           children: [

@@ -6,14 +6,12 @@ import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/l10n/flow_steps.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/models/actions/signup/resend_otp_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/otp_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
-import 'package:bigpay/ui/components/step_progress.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -108,11 +106,6 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
       ],
       child: MainLayout(
         maxWidth: 480,
-        stepIndicator: StepProgress(
-          currentStep: 2,
-          totalSteps: 3,
-          labels: AppLocalizations.of(context)!.signInSteps,
-        ),
         subtitleWidget: Column(
           mainAxisSize: .min,
           children: [
