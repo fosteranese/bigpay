@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_theme.dart';
 
 class AppTypography {
   AppTypography._();
 
   /// Display 1 — 28px Bold (GHS balance, hero numbers)
-  static TextStyle get display1 => GoogleFonts.mulish(
+  static TextStyle get display1 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 28,
     fontWeight: FontWeight.w700,
     height: 1.2,
@@ -16,7 +16,8 @@ class AppTypography {
   );
 
   /// Display 2 — 22px Bold (page titles, large headings)
-  static TextStyle get display2 => GoogleFonts.mulish(
+  static TextStyle get display2 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 22,
     fontWeight: FontWeight.w700,
     height: 1.2,
@@ -25,7 +26,8 @@ class AppTypography {
   );
 
   /// Header 1 — 20px Bold (section titles like "Select Payment Mode")
-  static TextStyle get header1 => GoogleFonts.mulish(
+  static TextStyle get header1 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 20,
     fontWeight: FontWeight.w700,
     height: 1.2,
@@ -35,7 +37,8 @@ class AppTypography {
   );
 
   /// Header 2 — 18px Bold (secondary section headers)
-  static TextStyle get header2 => GoogleFonts.mulish(
+  static TextStyle get header2 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 18,
     fontWeight: FontWeight.w700,
     height: 1.3,
@@ -44,7 +47,8 @@ class AppTypography {
   );
 
   /// Header 3 — 16px Bold (card titles, "Recent Activities", "Transactions")
-  static TextStyle get header3 => GoogleFonts.mulish(
+  static TextStyle get header3 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 16,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -53,7 +57,8 @@ class AppTypography {
   );
 
   /// Header 4 — 14px Bold (sub-section titles, "See all" links)
-  static TextStyle get header4 => GoogleFonts.mulish(
+  static TextStyle get header4 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 14,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -62,7 +67,8 @@ class AppTypography {
   );
 
   /// P1 — 16px Regular (body text)
-  static TextStyle get p1 => GoogleFonts.mulish(
+  static TextStyle get p1 => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 1.4,
@@ -71,7 +77,8 @@ class AppTypography {
   );
 
   /// P1 Medium — 16px w500 (balance amounts, emphasized body)
-  static TextStyle get p1Medium => GoogleFonts.mulish(
+  static TextStyle get p1Medium => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 16,
     fontWeight: FontWeight.w500,
     height: 1.4,
@@ -80,7 +87,8 @@ class AppTypography {
   );
 
   /// P1 Bold — 16px Bold (emphasized body)
-  static TextStyle get p1Bold => GoogleFonts.mulish(
+  static TextStyle get p1Bold => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 16,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -89,7 +97,8 @@ class AppTypography {
   );
 
   /// Small details — 14px Regular (secondary info, subtitles)
-  static TextStyle get smallDetails => GoogleFonts.mulish(
+  static TextStyle get smallDetails => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.4,
@@ -98,7 +107,8 @@ class AppTypography {
   );
 
   /// Small details Medium — 14px w600
-  static TextStyle get smallDetailsMedium => GoogleFonts.mulish(
+  static TextStyle get smallDetailsMedium => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.4,
@@ -107,7 +117,8 @@ class AppTypography {
   );
 
   /// Small details Bold — 14px Bold (action links, "See all")
-  static TextStyle get smallDetailsBold => GoogleFonts.mulish(
+  static TextStyle get smallDetailsBold => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 14,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -116,7 +127,8 @@ class AppTypography {
   );
 
   /// Caption — 13px Regular (tiny labels like account numbers, tab labels)
-  static TextStyle get caption => GoogleFonts.mulish(
+  static TextStyle get caption => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 13,
     fontWeight: FontWeight.w400,
     height: 1.4,
@@ -125,7 +137,8 @@ class AppTypography {
   );
 
   /// Caption Medium — 13px w500 (balance visibility toggle, form hints)
-  static TextStyle get captionMedium => GoogleFonts.mulish(
+  static TextStyle get captionMedium => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 13,
     fontWeight: FontWeight.w500,
     height: 1.4,
@@ -134,7 +147,8 @@ class AppTypography {
   );
 
   /// Caption Bold — 13px Bold (emphasized labels, prices)
-  static TextStyle get captionBold => GoogleFonts.mulish(
+  static TextStyle get captionBold => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 13,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -143,7 +157,8 @@ class AppTypography {
   );
 
   /// Caption Semibold — 13px w600 (menu items, action labels)
-  static TextStyle get captionSemibold => GoogleFonts.mulish(
+  static TextStyle get captionSemibold => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 13,
     fontWeight: FontWeight.w600,
     height: 1.4,
@@ -152,7 +167,8 @@ class AppTypography {
   );
 
   /// Small — 12px Regular (status text, secondary labels)
-  static TextStyle get small => GoogleFonts.mulish(
+  static TextStyle get small => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.4,
@@ -161,7 +177,8 @@ class AppTypography {
   );
 
   /// Small Medium — 12px w500 (welcome prefix, form labels)
-  static TextStyle get smallMedium => GoogleFonts.mulish(
+  static TextStyle get smallMedium => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 1.4,
@@ -170,7 +187,8 @@ class AppTypography {
   );
 
   /// Small Bold — 12px Bold (user name, important labels)
-  static TextStyle get smallBold => GoogleFonts.mulish(
+  static TextStyle get smallBold => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 12,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -179,7 +197,8 @@ class AppTypography {
   );
 
   /// Menu Links — 13px w600 (bottom navigation active labels)
-  static TextStyle get menuLinks => GoogleFonts.mulish(
+  static TextStyle get menuLinks => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 13,
     fontWeight: FontWeight.w600,
     height: 1.4,
@@ -188,7 +207,8 @@ class AppTypography {
   );
 
   /// Buttons — 16px w700 (primary button text)
-  static TextStyle get buttons => GoogleFonts.mulish(
+  static TextStyle get buttons => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 16,
     fontWeight: FontWeight.w700,
     height: 1.4,
@@ -197,7 +217,8 @@ class AppTypography {
   );
 
   /// Form labels — 14px w600 (input field labels)
-  static TextStyle get formLabels => GoogleFonts.mulish(
+  static TextStyle get formLabels => TextStyle(
+    fontFamily: 'SF Pro',
     fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.4,
