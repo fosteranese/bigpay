@@ -229,7 +229,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                     Padding(
                       padding: const EdgeInsets.only(top: 5, bottom: 10),
                       child: SizedBox(
-                        height: 45,
+                        height: 48,
                         child: TextField(
                           controller: searchController,
                           decoration: InputDecoration(

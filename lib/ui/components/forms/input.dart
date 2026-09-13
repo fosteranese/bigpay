@@ -87,6 +87,9 @@ class _FormInputState extends State<FormInput> {
                 widget.onChanged?.call(value);
               },
               decoration: InputDecoration(
+                constraints: (widget.maxLines ?? 1) == 1
+                    ? const BoxConstraints(minHeight: 48)
+                    : null,
                 contentPadding: widget.padding,
                 hintText: widget.placeholder,
                 hintStyle: context.caption,

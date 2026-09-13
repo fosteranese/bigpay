@@ -240,7 +240,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
                     bottom: 10,
                   ),
                   child: SizedBox(
-                    height: 45,
+                    height: 48,
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
