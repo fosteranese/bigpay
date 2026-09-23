@@ -31,11 +31,29 @@ class FaceCaptureKycPage extends StatefulWidget {
 
 class _FaceCaptureKycPageState extends State<FaceCaptureKycPage> {
   var _access = _CameraAccess.checking;
+  late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
     super.initState();
     _checkPermission();
+    // Android keeps the app alive while the user flips the toggle in
+    // Settings, so re-read on return. Status only — requesting here would
+    // loop, since the permission dialog itself triggers a resume.
+    _lifecycle = AppLifecycleListener(onResume: _recheckPermission);
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  Future<void> _recheckPermission() async {
+    if (_access != _CameraAccess.denied) return;
+    final status = await Permission.camera.status;
+    if (!mounted || !status.isGranted) return;
+    setState(() => _access = _CameraAccess.granted);
   }
 
   Future<void> _checkPermission() async {
