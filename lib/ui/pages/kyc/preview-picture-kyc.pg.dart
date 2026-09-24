@@ -121,33 +121,45 @@ class CheckListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: isChecked
-          ? CircleAvatar(
-              radius: 18,
-              backgroundColor: context.avatarBg,
-              child: const Icon(
-                Icons.check,
-                size: 20,
-                color: AppColors.tertiaryBrand,
-              ),
-            )
-          : CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.pending,
-              child: const Icon(
-                Icons.warning_amber_rounded,
-                size: 20,
-                color: AppColors.white,
-              ),
+    // A plain Row, not a ListTile: ListTile under-reports its intrinsic
+    // height, and this page's SliverFillRemaining sizes the column from
+    // intrinsics — so three of them overflowed on small phones.
+    final leading = isChecked
+        ? CircleAvatar(
+            radius: 18,
+            backgroundColor: context.avatarBg,
+            child: const Icon(
+              Icons.check,
+              size: 20,
+              color: AppColors.tertiaryBrand,
             ),
-      title: Text(
-        title,
-        style: context.header3,
-      ),
-      subtitle: Text(
-        subtitle,
-        style: context.smallDetails,
+          )
+        : CircleAvatar(
+            radius: 18,
+            backgroundColor: AppColors.pending,
+            child: const Icon(
+              Icons.warning_amber_rounded,
+              size: 20,
+              color: AppColors.white,
+            ),
+          );
+    return Padding(
+      padding: const .symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
+      child: Row(
+        children: [
+          leading,
+          const SizedBox(width: Spacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(title, style: context.header3),
+                const SizedBox(height: 2),
+                Text(subtitle, style: context.smallDetails),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

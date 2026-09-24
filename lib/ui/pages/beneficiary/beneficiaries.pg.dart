@@ -114,7 +114,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
 
   Future<bool> _confirmDelete(Payee payee) {
     final l10n = AppLocalizations.of(context)!;
-    return showDestructiveConfirm(
+    return showConfirmSheet(
       context,
       icon: Icons.person_remove_outlined,
       title: l10n.beneficiariesRemoveTitle,

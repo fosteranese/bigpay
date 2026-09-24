@@ -48,14 +48,14 @@ class _IntroKycPageState extends State<IntroKycPage> {
         mainAxisSize: .min,
         children: [
           if (edgeToEdge)
-            // FittedBox, not SvgPicture(width: infinity): the body has
-            // unbounded height, and FittedBox derives it from the art's
-            // aspect ratio once the width is tight.
-            SizedBox(
-              width: double.infinity,
-              child: FittedBox(
+            // AspectRatio (the artwork's own 375x447), not a FittedBox: it
+            // knows its height from the width before the SVG has loaded, so
+            // the page's SliverFillRemaining sizes the column correctly.
+            AspectRatio(
+              aspectRatio: 375 / 447,
+              child: SvgPicture.asset(
+                SvgImages.ghanaCard,
                 fit: BoxFit.fitWidth,
-                child: SvgPicture.asset(SvgImages.ghanaCard),
               ),
             )
           else

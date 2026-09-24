@@ -73,7 +73,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
 
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDestructiveConfirm(
+    final confirmed = await showConfirmSheet(
       context,
       icon: Icons.person_remove_outlined,
       title: l10n.beneficiariesRemoveTitle,
