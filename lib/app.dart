@@ -19,6 +19,7 @@ import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/pages/app_error.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
+import 'package:bigpay/ui/pages/kyc/verify_identity_prompt.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
@@ -168,46 +169,53 @@ class BigPayApp extends StatelessWidget {
             },
           ),
         ],
-        child: ValueListenableBuilder<ThemeMode>(
-          valueListenable: AppState.themeNotifier,
-          builder: (context, themeMode, _) {
-            return ValueListenableBuilder<Locale?>(
-              valueListenable: AppState.localeNotifier,
-              builder: (context, locale, _) {
-                return MaterialApp.router(
-                  title: 'BigPay',
-                  debugShowCheckedModeBanner: false,
-                  theme: AppTheme.light,
-                  darkTheme: AppTheme.dark,
-                  themeMode: themeMode,
-                  locale: locale,
-                  supportedLocales: AppState.supportedLocales,
-                  localizationsDelegates: [
-                    AppLocalizations.delegate,
-                    _PcmFallbackDelegate<MaterialLocalizations>(
-                      GlobalMaterialLocalizations.delegate,
-                    ),
-                    _PcmFallbackDelegate<CupertinoLocalizations>(
-                      GlobalCupertinoLocalizations.delegate,
-                    ),
-                    GlobalWidgetsLocalizations.delegate,
-                  ],
-                  routerConfig: AppRouter.router,
-                  builder: (context, child) {
-                    final scaler = MediaQuery.textScalerOf(context).clamp(
-                      maxScaleFactor: 1.3,
-                    );
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaler: scaler),
-                      child: ConnectivityBanner(
-                        child: child ?? SizedBox.shrink(),
+        // App-wide: any request that comes back 6000 (identity verification
+        // required) prompts KYC, wherever it was made.
+        child: VerifyIdentityGate(
+          navigatorKey: rootNavigatorKey,
+          child: ValueListenableBuilder<ThemeMode>(
+            valueListenable: AppState.themeNotifier,
+            builder: (context, themeMode, _) {
+              return ValueListenableBuilder<Locale?>(
+                valueListenable: AppState.localeNotifier,
+                builder: (context, locale, _) {
+                  return MaterialApp.router(
+                    title: 'BigPay',
+                    debugShowCheckedModeBanner: false,
+                    theme: AppTheme.light,
+                    darkTheme: AppTheme.dark,
+                    themeMode: themeMode,
+                    locale: locale,
+                    supportedLocales: AppState.supportedLocales,
+                    localizationsDelegates: [
+                      AppLocalizations.delegate,
+                      _PcmFallbackDelegate<MaterialLocalizations>(
+                        GlobalMaterialLocalizations.delegate,
                       ),
-                    );
-                  },
-                );
-              },
-            );
-          },
+                      _PcmFallbackDelegate<CupertinoLocalizations>(
+                        GlobalCupertinoLocalizations.delegate,
+                      ),
+                      GlobalWidgetsLocalizations.delegate,
+                    ],
+                    routerConfig: AppRouter.router,
+                    builder: (context, child) {
+                      final scaler = MediaQuery.textScalerOf(context).clamp(
+                        maxScaleFactor: 1.3,
+                      );
+                      return MediaQuery(
+                        data: MediaQuery.of(
+                          context,
+                        ).copyWith(textScaler: scaler),
+                        child: ConnectivityBanner(
+                          child: child ?? SizedBox.shrink(),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

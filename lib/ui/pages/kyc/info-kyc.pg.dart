@@ -6,6 +6,7 @@ import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/face-capture-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/kyc_hero.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -25,10 +26,7 @@ class _InfoKycPageState extends State<InfoKycPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      bottom: PreferredSize(
-        preferredSize: Size.zero,
-        child: SizedBox.shrink(),
-      ),
+      bottomSize: 0,
       bottomNav: FormButton(
         onPressed: () {
           AppRouter.router.push(FaceCaptureKycPage.route.path);
@@ -40,38 +38,20 @@ class _InfoKycPageState extends State<InfoKycPage> {
         mainAxisAlignment: .start,
         crossAxisAlignment: .center,
         children: [
-          SvgPicture.asset(SvgImages.selfie),
-          const SizedBox(height: Spacing.xl),
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 285,
-            ),
-            child: Text(
-              l10n.kycTakeSelfieTitle,
-              textAlign: .center,
-              style: context.display2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 285,
-            ),
-            child: Text(
-              l10n.kycSelfieMatchSubtitle,
-              textAlign: .center,
-              style: context.smallDetails,
-            ),
+          KycHero(
+            visual: SvgPicture.asset(SvgImages.selfie),
+            title: l10n.kycTakeSelfieTitle,
+            subtitle: l10n.kycSelfieMatchSubtitle,
           ),
           const SizedBox(height: Spacing.xl),
           InfoItem(
-            icon: 'assets/img/identify.svg',
+            icon: SvgImages.identify,
             title: l10n.kycIdentityVerificationTitle,
             subtitle: l10n.kycScanCardSubtitle,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: Spacing.md),
           InfoItem(
-            icon: 'assets/img/encrypted.svg',
+            icon: SvgImages.encrypted,
             title: l10n.kycFullyEncryptedTitle,
             subtitle: l10n.kycDataEncryptedSubtitle,
           ),

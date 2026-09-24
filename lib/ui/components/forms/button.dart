@@ -94,6 +94,7 @@ class FormButton extends StatelessWidget {
     return Text(
       text,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: context.buttons.copyWith(
         fontSize: labelSize ?? 16,
         fontWeight: fontWeight ?? .bold,
@@ -129,7 +130,7 @@ class FormButton extends StatelessWidget {
         children: [
           _icon,
           SizedBox(width: iconSpacerBeforeAfter ?? 10),
-          _text(context),
+          Flexible(child: _text(context)),
         ],
       );
     }
@@ -138,7 +139,7 @@ class FormButton extends StatelessWidget {
       mainAxisAlignment: .center,
       crossAxisAlignment: .center,
       children: [
-        _text(context),
+        Flexible(child: _text(context)),
         SizedBox(width: iconSpacerBeforeAfter ?? 10),
         _icon,
       ],

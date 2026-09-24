@@ -1,8 +1,8 @@
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/start-kyc.pg.dart';
-import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/pages/kyc/kyc_hero.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/routes/app_router.dart';
@@ -24,41 +24,49 @@ class _IntroKycPageState extends State<IntroKycPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Candybar: the card art is drawn at phone width, so it bleeds edge to
+    // edge. Body gutter drops to 0 and the docked CTA re-adds its own.
+    final edgeToEdge = context.isCompact;
     return MainLayout(
-      subtitleWidget: Column(
-        children: [
-          Text(
-            l10n.kycIntroTitle,
-            textAlign: .center,
-            style: context.display1.copyWith(
-              color: context.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.kycIntroSubtitle,
-            textAlign: .center,
-            style: context.smallDetails,
-          ),
-        ],
+      bodyHorizontalPadding: edgeToEdge ? 0 : null,
+      subtitleWidget: KycHero(
+        title: l10n.kycIntroTitle,
+        subtitle: l10n.kycIntroSubtitle,
       ),
-      bottomNav: FormButton(
-        onPressed: () {
-          AppRouter.router.push(StartKycPage.route.path);
-        },
-        text: l10n.commonContinue,
+      bottomNav: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: edgeToEdge ? context.gutter : 0,
+        ),
+        child: FormButton(
+          onPressed: () {
+            AppRouter.router.push(StartKycPage.route.path);
+          },
+          text: l10n.commonContinue,
+        ),
       ),
       child: Column(
         mainAxisSize: .min,
         children: [
-          Flexible(
-            child: AspectRatio(
-              aspectRatio: 1.4,
+          if (edgeToEdge)
+            // FittedBox, not SvgPicture(width: infinity): the body has
+            // unbounded height, and FittedBox derives it from the art's
+            // aspect ratio once the width is tight.
+            SizedBox(
+              width: double.infinity,
               child: FittedBox(
+                fit: BoxFit.fitWidth,
                 child: SvgPicture.asset(SvgImages.ghanaCard),
               ),
+            )
+          else
+            Flexible(
+              child: AspectRatio(
+                aspectRatio: 1.4,
+                child: FittedBox(
+                  child: SvgPicture.asset(SvgImages.ghanaCard),
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

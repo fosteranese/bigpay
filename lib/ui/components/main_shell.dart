@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bigpay/ui/components/app_sidebar.dart';
 import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/side_nav_rail.dart';
+import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
@@ -31,6 +32,26 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // go_router pops a branch's own pushed pages (and a page's PopScope,
+    // e.g. an open split-view detail) before this is reached, so this only
+    // fires when there's nowhere left to go back to: offer sign-out instead
+    // of silently closing the app. From another tab, back lands on Home
+    // first; only Home's root offers sign-out.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (navigationShell.currentIndex != 0) {
+          _goBranch(0);
+        } else {
+          showSignOutDialog(context);
+        }
+      },
+      child: _buildChrome(context),
+    );
+  }
+
+  Widget _buildChrome(BuildContext context) {
     // Book mode gets the same chrome as any other window this wide —
     // an unfolded/half-opened foldable at expanded+ width has the same
     // real estate as a tablet or desktop, so it should look like one,
@@ -62,9 +83,7 @@ class MainShell extends StatelessWidget {
           final sidebarWidth = hinge != null && hinge.left >= 200
               ? hinge.left
               : null;
-          final gapWidth = hinge != null
-              ? math.max(hinge.width, 1.0)
-              : null;
+          final gapWidth = hinge != null ? math.max(hinge.width, 1.0) : null;
 
           return Scaffold(
             backgroundColor: Colors.transparent,

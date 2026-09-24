@@ -7,11 +7,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
 import 'package:bigpay/ui/pages/kyc/preview-picture-kyc.pg.dart';
+import 'package:bigpay/ui/pages/kyc/kyc_hero.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
-import 'package:bigpay/ui/theme/app_typography.dart';
 
 enum _CameraAccess { checking, granted, denied }
 
@@ -100,56 +101,29 @@ class _CameraPermissionDenied extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
+      bottomSize: 0,
       bottomNav: Column(
         mainAxisSize: .min,
-        mainAxisAlignment: .start,
-        crossAxisAlignment: .center,
         children: [
           FormButton(
             onPressed: openAppSettings,
             text: l10n.kycOpenSettings,
           ),
-          const SizedBox(height: 10),
-          TextButton(
+          const SizedBox(height: Spacing.md),
+          FormOutlineButton(
             onPressed: () => AppRouter.router.pop(),
-            child: Text(
-              l10n.commonBack,
-              style: context.smallDetails.copyWith(
-                color: context.textPrimary,
-              ),
-            ),
+            text: l10n.commonBack,
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: .min,
-        mainAxisAlignment: .start,
-        crossAxisAlignment: .center,
-        children: [
-          Icon(
-            Icons.camera_alt_outlined,
-            size: 72,
-            color: context.textSecondary,
-          ),
-          const SizedBox(height: Spacing.xl),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 285),
-            child: Text(
-              l10n.kycCameraPermissionTitle,
-              textAlign: .center,
-              style: context.display2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 285),
-            child: Text(
-              l10n.kycCameraPermissionMessage,
-              textAlign: .center,
-              style: context.smallDetails,
-            ),
-          ),
-        ],
+      child: KycHero(
+        visual: Icon(
+          Icons.camera_alt_outlined,
+          size: 72,
+          color: context.textSecondary,
+        ),
+        title: l10n.kycCameraPermissionTitle,
+        subtitle: l10n.kycCameraPermissionMessage,
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/routes/app_router.dart';
 
 class Kyc {
@@ -20,7 +21,11 @@ class Kyc {
   static bool faceIsWellLighted = true;
 
   static PageRouteDefinition? route;
+
+  /// Re-runs the request that hit `6000` once KYC succeeds — only honoured
+  /// when that request was [retryEvent] (see verify_identity_prompt.dart).
   static void Function()? onSuccess;
+  static ProcessEvent? retryEvent;
 
   static void clear() {
     ghanaCardNumber = '';
@@ -30,5 +35,6 @@ class Kyc {
     faceIsWellLighted = true;
     route = null;
     onSuccess = null;
+    retryEvent = null;
   }
 }

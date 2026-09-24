@@ -5,11 +5,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
-import 'package:bigpay/models/actions/logout_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/more/complaints/complaints.pg.dart';
 import 'package:bigpay/ui/pages/more/help.pg.dart';
@@ -23,7 +22,6 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_modal.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/avatar.util.dart';
-import 'package:bigpay/utils/message.util.dart';
 
 /// Each supported language's own name, in that language — shown in the
 /// picker regardless of the app's current display language, so a user can
@@ -187,28 +185,7 @@ class _MorePageState extends State<MorePage> {
             height: 30,
           ),
           ProfileItem(
-            onPressed: () {
-              MessageUtil.displayActionDialog(
-                context,
-                title: l10n.moreSignOutTitle,
-                message: l10n.moreSignOutConfirm,
-                onConfirmText: l10n.moreSignOutTitle,
-                onConfirmButtonColor: AppColors.danger,
-                onConfirmButtonTextColor: AppColors.white,
-                icon: Icon(
-                  Icons.logout_outlined,
-                  color: AppColors.danger,
-                  size: 50,
-                ),
-                onConfirm: () {
-                  LogoutAction.event = context.dispatchProcess(
-                    LogoutAction(
-                      payload: NoPayload(),
-                    ),
-                  );
-                },
-              );
-            },
+            onPressed: () => showSignOutDialog(context),
             backgroundColor: AppColors.danger.withValues(alpha: 0.2),
             iconColor: AppColors.danger,
             title: l10n.moreSignOutTitle,

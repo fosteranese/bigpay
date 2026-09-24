@@ -19,6 +19,8 @@ class SvgImages {
   static const String bigpayIcon = '$baseImageUrl/bigpay-icon.svg';
   static const String ghanaCard = '$baseImageUrl/ghana-card.svg';
   static const String selfie = '$baseImageUrl/selfie.svg';
+  static const String identify = '$baseImageUrl/identify.svg';
+  static const String encrypted = '$baseImageUrl/encrypted.svg';
 }
 
 class PngImages {

@@ -127,65 +127,73 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProcessListener(
-      listeners: [
-        dashboardRefreshListener,
-        ProcessListenerConfig<GeneralFlowCategory>(
-          event: () => _categoryEvent,
-          listener: (context, snapshot) {
-            if (snapshot.isLoading &&
-                !snapshot.isSilent &&
-                !snapshot.isCached) {
-              MessageUtil.displayLoading(context);
-              return;
-            } else if (!snapshot.isSilent && !snapshot.isCached) {
-              MessageUtil.close(context);
-            }
+    // Back closes an open split-view detail before it can reach
+    // MainShell's back-at-root sign-out prompt.
+    return PopScope(
+      canPop: _selectedActivity == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _closeDetails();
+      },
+      child: MultiProcessListener(
+        listeners: [
+          dashboardRefreshListener,
+          ProcessListenerConfig<GeneralFlowCategory>(
+            event: () => _categoryEvent,
+            listener: (context, snapshot) {
+              if (snapshot.isLoading &&
+                  !snapshot.isSilent &&
+                  !snapshot.isCached) {
+                MessageUtil.displayLoading(context);
+                return;
+              } else if (!snapshot.isSilent && !snapshot.isCached) {
+                MessageUtil.close(context);
+              }
 
-            if (snapshot.hasData &&
-                !(snapshot.isSilent && !snapshot.isCached)) {
-              if (!snapshot.isSilent &&
-                  !snapshot.isCached &&
-                  (snapshot.data?.forms?.isEmpty ?? true)) {
-                final l10n = AppLocalizations.of(context)!;
-                MessageUtil.displayErrorDialog(
-                  context,
-                  title: l10n.commonServiceUnavailableTitle,
-                  message: l10n.commonServiceUnavailableMessage,
-                );
+              if (snapshot.hasData &&
+                  !(snapshot.isSilent && !snapshot.isCached)) {
+                if (!snapshot.isSilent &&
+                    !snapshot.isCached &&
+                    (snapshot.data?.forms?.isEmpty ?? true)) {
+                  final l10n = AppLocalizations.of(context)!;
+                  MessageUtil.displayErrorDialog(
+                    context,
+                    title: l10n.commonServiceUnavailableTitle,
+                    message: l10n.commonServiceUnavailableMessage,
+                  );
+                  return;
+                }
+
+                setState(() => _selectedCategory = snapshot.data);
                 return;
               }
 
-              setState(() => _selectedCategory = snapshot.data);
-              return;
-            }
-
-            if (snapshot.hasError) {
-              MessageUtil.displayErrorDialog(
-                context,
-                message: snapshot.error!.message,
-              );
-              return;
-            }
-          },
+              if (snapshot.hasError) {
+                MessageUtil.displayErrorDialog(
+                  context,
+                  message: snapshot.error!.message,
+                );
+                return;
+              }
+            },
+          ),
+        ],
+        child: MasterDetailLayout(
+          detail: _selectedActivity == null || _selectedCategory == null
+              ? null
+              : ServicePage(
+                  // Without a key, switching the selection reuses the same
+                  // State — a stale `_category` (set by a prior pull-to-
+                  // refresh on a different activity) would then shadow the
+                  // new `widget.category` instead of a fresh State starting
+                  // from it. ActivityDatum extends Equatable.
+                  key: ValueKey(_selectedActivity),
+                  activityDatum: _selectedActivity!,
+                  category: _selectedCategory!,
+                  useScaffold: false,
+                  onBack: _closeDetails,
+                ),
+          master: _master(context),
         ),
-      ],
-      child: MasterDetailLayout(
-        detail: _selectedActivity == null || _selectedCategory == null
-            ? null
-            : ServicePage(
-                // Without a key, switching the selection reuses the same
-                // State — a stale `_category` (set by a prior pull-to-
-                // refresh on a different activity) would then shadow the
-                // new `widget.category` instead of a fresh State starting
-                // from it. ActivityDatum extends Equatable.
-                key: ValueKey(_selectedActivity),
-                activityDatum: _selectedActivity!,
-                category: _selectedCategory!,
-                useScaffold: false,
-                onBack: _closeDetails,
-              ),
-        master: _master(context),
       ),
     );
   }

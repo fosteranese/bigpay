@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/action.dart';
 
@@ -183,6 +184,21 @@ class ProcessBuilder<T> extends StatelessWidget {
   }
 }
 
+/// What a screen's own listener sees. A `6000` (identity verification
+/// required) is handled once, app-wide, by the root listener in app.dart
+/// (the "Verify your identity" prompt) — so it's stripped here, leaving a
+/// settled, error-free snapshot: the screen still closes its loading overlay
+/// but doesn't also show the raw message as an error dialog.
+ProcessSnapshot<T> _forScreen<T>(ProcessSnapshot<T> snapshot) {
+  if (snapshot.error?.code != StatusCodeConstants.verifyIdentify) {
+    return snapshot;
+  }
+  return ProcessSnapshot<T>(
+    isCached: snapshot.isCached,
+    isSilent: snapshot.isSilent,
+  );
+}
+
 /// Runs [listener] for its side effects on every state belonging to the event
 /// returned by [event], with the typed snapshot. Renders [child] unchanged.
 ///
@@ -208,7 +224,7 @@ class ProcessListener<T> extends StatelessWidget {
       listenWhen: (previous, current) => current.event == event(),
       listener: (context, state) => listener(
         context,
-        _snapshotOf<T>(state, event()),
+        _forScreen(_snapshotOf<T>(state, event())),
       ),
       child: child,
     );
@@ -240,7 +256,7 @@ class ProcessConsumer<T> extends StatelessWidget {
       listenWhen: (previous, current) => current.event == event(),
       listener: (context, state) => listener(
         context,
-        _snapshotOf<T>(state, event()),
+        _forScreen(_snapshotOf<T>(state, event())),
       ),
       buildWhen: (previous, current) => current.event == event(),
       builder: (context, state) => builder(

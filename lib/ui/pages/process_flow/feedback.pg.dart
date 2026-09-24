@@ -128,11 +128,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
             if (snapshot.isSuccessful) {
               _submitEvent = null;
-              MessageUtil.displaySuccessDialog(
+              final l10n = AppLocalizations.of(context)!;
+              // The same full-screen success page the auth flow ends on.
+              MessageUtil.displaySuccessFullDialog(
                 context,
+                title: l10n.feedbackSubmittedTitle,
                 message:
-                    snapshot.message ??
-                    AppLocalizations.of(context)!.feedbackSubmittedMessage,
+                    '${snapshot.message ?? l10n.feedbackSubmittedMessage}\n'
+                    '${l10n.feedbackResponseTimeNotice}',
                 onOk: () => AppRouter.router.pop(),
               );
               return;

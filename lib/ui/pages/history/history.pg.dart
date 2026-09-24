@@ -128,14 +128,22 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MasterDetailLayout(
-      detail: _selectedRecord == null
-          ? null
-          : TransactionDetailsView(
-              receipt: _selectedRecord!,
-              onBack: _closeDetails,
-            ),
-      master: _master(context),
+    // Back closes an open split-view detail before it can reach
+    // MainShell's back-at-root sign-out prompt.
+    return PopScope(
+      canPop: _selectedRecord == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _closeDetails();
+      },
+      child: MasterDetailLayout(
+        detail: _selectedRecord == null
+            ? null
+            : TransactionDetailsView(
+                receipt: _selectedRecord!,
+                onBack: _closeDetails,
+              ),
+        master: _master(context),
+      ),
     );
   }
 

@@ -223,25 +223,33 @@ class _WalletsPageState extends State<WalletsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ProcessListener<List<Account>>(
-      event: () => mainEvent,
-      listener: (context, snapshot) {
-        if (snapshot.hasData) {
-          setState(() => _accounts = snapshot.data);
-        }
+    // Back closes an open split-view detail before it can reach
+    // MainShell's back-at-root sign-out prompt.
+    return PopScope(
+      canPop: _selectedAccount == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _closeDetails();
       },
-      child: MasterDetailLayout(
-        detail: _selectedAccount == null
-            ? null
-            : VirtualWalletView(
-                // Without a key, switching the selection reuses the same
-                // State instead of creating a fresh one for the new account
-                // (Account extends Equatable, so this compares by value).
-                key: ValueKey(_selectedAccount),
-                account: _selectedAccount,
-                onBack: _closeDetails,
-              ),
-        master: _master(context),
+      child: ProcessListener<List<Account>>(
+        event: () => mainEvent,
+        listener: (context, snapshot) {
+          if (snapshot.hasData) {
+            setState(() => _accounts = snapshot.data);
+          }
+        },
+        child: MasterDetailLayout(
+          detail: _selectedAccount == null
+              ? null
+              : VirtualWalletView(
+                  // Without a key, switching the selection reuses the same
+                  // State instead of creating a fresh one for the new account
+                  // (Account extends Equatable, so this compares by value).
+                  key: ValueKey(_selectedAccount),
+                  account: _selectedAccount,
+                  onBack: _closeDetails,
+                ),
+          master: _master(context),
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/complaints/get_complaint_categories_action.dart';
 import 'package:bigpay/models/actions/complaints/get_my_complaints_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/complaints/complaint_status.dart';
 import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -39,6 +40,9 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
   List<ComplaintCategory> _categories = const [];
   final _searchController = TextEditingController();
   String _query = '';
+
+  /// Status filter chip selection; null shows every complaint.
+  ComplaintStage? _stage;
 
   /// The complaint shown in the detail pane in split view
   /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
@@ -108,7 +112,9 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
   /// everything visible on a row (subject, category, reference, status, and
   /// the last-message preview), so search matches what the user can see.
   List<Complaint> get _filtered {
-    final all = _complaints ?? const [];
+    final all = (_complaints ?? const <Complaint>[])
+        .where((c) => _stage == null || complaintStage(c.statusLabel) == _stage)
+        .toList();
     if (_query.isEmpty) return all;
     final query = _query.toLowerCase();
     return all.where((c) {
@@ -118,22 +124,6 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
           (c.statusLabel ?? '').toLowerCase().contains(query) ||
           (c.lastMessage ?? '').toLowerCase().contains(query);
     }).toList();
-  }
-
-  Color _statusColor(BuildContext context, String? status) {
-    switch (status?.toLowerCase()) {
-      case 'resolved':
-      case 'closed':
-      case 'success':
-        return AppColors.success;
-      case 'open':
-      case 'pending':
-      case 'in progress':
-      case 'processing':
-        return AppColors.pending;
-      default:
-        return context.textSecondary;
-    }
   }
 
   @override
@@ -218,10 +208,13 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
           }
 
           final complaints = _filtered;
+          // Filters only make sense once there's something to filter.
+          final showFilters = _complaints?.isNotEmpty ?? false;
+          final Widget content;
           if (complaints.isEmpty) {
-            return SliverFillRemaining(
+            content = SliverFillRemaining(
               hasScrollBody: false,
-              child: _query.isNotEmpty
+              child: (_query.isNotEmpty || _stage != null)
                   ? EmptyState(
                       icon: Icons.search_off_outlined,
                       title: l10n.commonNoMatches,
@@ -232,17 +225,25 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
                       subtitle: l10n.complaintsEmptySubtitle,
                     ),
             );
+          } else {
+            // No divider lines between rows — each row's own padding plus
+            // the avatar's status dot is enough separation, and reads as a
+            // cleaner, less cluttered inbox than a hairline under every item.
+            content = SliverPadding(
+              padding: const .symmetric(vertical: 6),
+              sliver: SliverList.builder(
+                itemCount: complaints.length,
+                itemBuilder: (context, index) => _buildItem(complaints[index]),
+              ),
+            );
           }
 
-          // No divider lines between rows — each row's own padding plus the
-          // avatar's status dot is enough separation, and reads as a
-          // cleaner, less cluttered inbox than a hairline under every item.
-          return SliverPadding(
-            padding: const .symmetric(vertical: 6),
-            sliver: SliverList.builder(
-              itemCount: complaints.length,
-              itemBuilder: (context, index) => _buildItem(complaints[index]),
-            ),
+          if (!showFilters) return content;
+          return SliverMainAxisGroup(
+            slivers: [
+              SliverToBoxAdapter(child: _buildFilters(l10n)),
+              content,
+            ],
           );
         },
       ),
@@ -269,9 +270,45 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
     return (resolved?.isNotEmpty ?? false) ? resolved : null;
   }
 
+  Widget _buildFilters(AppLocalizations l10n) {
+    final options = <(ComplaintStage?, String)>[
+      (null, l10n.complaintsFilterAll),
+      (ComplaintStage.open, l10n.complaintsFilterOpen),
+      (ComplaintStage.resolved, l10n.complaintsFilterResolved),
+    ];
+    return Padding(
+      // Lines the chips up with the row content below (row inset + padding).
+      padding: const .fromLTRB(Spacing.xxl, Spacing.sm, Spacing.xxl, 0),
+      child: Wrap(
+        spacing: Spacing.sm,
+        runSpacing: Spacing.sm,
+        children: [
+          for (final (stage, label) in options)
+            ChoiceChip(
+              label: Text(label),
+              selected: _stage == stage,
+              showCheckmark: false,
+              onSelected: (_) => setState(() => _stage = stage),
+              shape: const StadiumBorder(),
+              side: BorderSide(
+                color: _stage == stage ? AppColors.primary : context.border,
+              ),
+              selectedColor: AppColors.primary.withValues(alpha: 0.12),
+              backgroundColor: Colors.transparent,
+              labelStyle: context.smallDetailsMedium.copyWith(
+                color: _stage == stage
+                    ? context.textPrimary
+                    : context.textSecondary,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildItem(Complaint complaint) {
     final l10n = AppLocalizations.of(context)!;
-    final color = _statusColor(context, complaint.statusLabel);
+    final color = complaintStatusColor(context, complaint.statusLabel);
     final isOpen = context.usesSplitView && complaint == _selectedComplaint;
     // A touch bigger on a wide/desktop-class window — rows have the room and
     // the extra presence matches a full inbox layout better than a
@@ -396,22 +433,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
                           ),
                           if (complaint.statusLabel?.isNotEmpty ?? false) ...[
                             const SizedBox(width: Spacing.sm),
-                            Container(
-                              padding: const .symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.1),
-                                borderRadius: .circular(6),
-                              ),
-                              child: Text(
-                                complaint.statusLabel!,
-                                style: context.smallBold.copyWith(
-                                  color: color,
-                                ),
-                              ),
-                            ),
+                            ComplaintStatusChip(status: complaint.statusLabel!),
                           ],
                         ],
                       ),

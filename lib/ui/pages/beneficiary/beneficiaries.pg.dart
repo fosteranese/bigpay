@@ -13,6 +13,7 @@ import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/beneficiary/add_beneficiary.pg.dart';
 import 'package:bigpay/ui/pages/beneficiary/beneficiary_details.pg.dart';
+import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
@@ -111,48 +112,15 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
         .toList();
   }
 
-  Future<bool> _confirmDelete(Payee payee) async {
+  Future<bool> _confirmDelete(Payee payee) {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const .all(20),
-        padding: const .all(20),
-        decoration: BoxDecoration(
-          color: context.cardBg,
-          borderRadius: .circular(16),
-        ),
-        child: Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .stretch,
-          children: [
-            Text(
-              l10n.beneficiariesRemoveTitle,
-              style: context.header3,
-            ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              l10n.beneficiariesRemoveConfirm(payee.displayName),
-              style: context.smallDetails,
-            ),
-            const SizedBox(height: Spacing.xl),
-            FormButton(
-              backgroundColor: AppColors.danger,
-              onPressed: () => AppRouter.router.pop(true),
-              text: l10n.commonRemove,
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () => AppRouter.router.pop(false),
-              child: Text(l10n.commonCancel, style: context.formLabels),
-            ),
-          ],
-        ),
-      ),
+    return showDestructiveConfirm(
+      context,
+      icon: Icons.person_remove_outlined,
+      title: l10n.beneficiariesRemoveTitle,
+      message: l10n.beneficiariesRemoveConfirm(payee.displayName),
+      confirmText: l10n.commonRemove,
     );
-    return confirmed ?? false;
   }
 
   void _delete(Payee payee) {

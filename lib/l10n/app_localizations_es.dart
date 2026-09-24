@@ -725,7 +725,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get kycEvenLighting => 'Iluminación uniforme, sin sombras duras';
 
   @override
-  String get kycSlightBlur => 'Se detectó ligero desenfoque';
+  String get kycImageSharp => 'Nítida y enfocada';
 
   @override
   String get kycRetakeIfUnclear =>
@@ -927,4 +927,27 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get connectivityRestoredMessage =>
       'Conexión restablecida correctamente.';
+
+  @override
+  String get commonCopy => 'Copiar';
+
+  @override
+  String get commonCopied => 'Copiado';
+
+  @override
+  String get complaintsFilterAll => 'Todas';
+
+  @override
+  String get complaintsFilterOpen => 'Abiertas';
+
+  @override
+  String get complaintsFilterResolved => 'Resueltas';
+
+  @override
+  String complaintsReference(String reference) {
+    return 'Ref. $reference';
+  }
+
+  @override
+  String get feedbackSubmittedTitle => 'Queja enviada';
 }

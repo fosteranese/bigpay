@@ -10,6 +10,7 @@ import 'package:bigpay/models/actions/complaints/get_complaint_detail_action.dar
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/complaints/complaint_bubble.dart';
+import 'package:bigpay/ui/components/complaints/complaint_status.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/skeleton/variants.dart';
@@ -111,34 +112,68 @@ class _ComplaintDetailViewState extends State<ComplaintDetailView> {
     return (resolved?.isNotEmpty ?? false) ? resolved : null;
   }
 
-  /// The complaint's own original description, shown above the reply
-  /// trail — `Complaint` has no dedicated field for it, but for a fresh
-  /// complaint (before any replies) `lastMessage` *is* that original text.
-  /// Skipped if the trail already opens with the exact same line, so it
-  /// never shows twice.
-  Widget? _originalMessageCard(BuildContext context) {
-    final message = widget.complaint?.lastMessage;
-    if (message == null || message.isEmpty) return null;
-    if (message == _detail?.messages.firstOrNull?.message) return null;
+  /// The pinned summary above the reply trail: status and reference, then
+  /// the complaint's own original description. `Complaint` has no dedicated
+  /// field for that description, but for a fresh complaint (before any
+  /// replies) `lastMessage` *is* that original text — skipped if the trail
+  /// already opens with the exact same line, so it never shows twice.
+  Widget? _summaryCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final complaint = widget.complaint;
+    final status = complaint?.statusLabel;
+    final reference = complaint?.reference;
+    var message = complaint?.lastMessage;
+    if (message != null &&
+        (message.isEmpty ||
+            message == _detail?.messages.firstOrNull?.message)) {
+      message = null;
+    }
+    final hasStatus = status?.isNotEmpty ?? false;
+    final hasReference = reference?.isNotEmpty ?? false;
+    if (!hasStatus && !hasReference && message == null) return null;
 
     return Container(
-      margin: const .only(bottom: 12),
-      padding: const .all(12),
+      margin: const .only(bottom: Spacing.md),
+      padding: const .all(Spacing.lg),
       decoration: BoxDecoration(
         color: context.cardBg,
-        borderRadius: .circular(12),
+        borderRadius: .circular(16),
         border: .all(color: context.border),
       ),
       child: Column(
         crossAxisAlignment: .start,
         mainAxisSize: .min,
         children: [
-          Text(
-            AppLocalizations.of(context)!.complaintsOriginalRequestLabel,
-            style: context.caption.copyWith(color: context.accentGreen),
-          ),
-          const SizedBox(height: 4),
-          Text(message, style: context.smallDetails),
+          if (hasStatus || hasReference)
+            Row(
+              children: [
+                if (hasReference)
+                  Expanded(
+                    child: Text(
+                      l10n.complaintsReference(reference!),
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      style: context.smallDetailsMedium,
+                    ),
+                  )
+                else
+                  const Spacer(),
+                if (hasStatus) ComplaintStatusChip(status: status!),
+              ],
+            ),
+          if (message != null) ...[
+            if (hasStatus || hasReference) ...[
+              const SizedBox(height: Spacing.md),
+              Divider(height: 1, color: context.divider),
+              const SizedBox(height: Spacing.md),
+            ],
+            Text(
+              l10n.complaintsOriginalRequestLabel,
+              style: context.caption.copyWith(color: context.accentGreen),
+            ),
+            const SizedBox(height: Spacing.xs),
+            Text(message, style: context.smallDetails),
+          ],
         ],
       ),
     );
@@ -243,14 +278,14 @@ class _ComplaintDetailViewState extends State<ComplaintDetailView> {
             }
 
             final messages = _detail?.messages ?? const [];
-            final original = _originalMessageCard(context);
-            if (messages.isEmpty && original == null) {
-              return Center(
-                child: Text(
-                  AppLocalizations.of(context)!.complaintsNoMessages,
-                  style: context.smallDetails,
-                ),
+            final original = _summaryCard(context);
+            if (messages.isEmpty) {
+              final empty = Text(
+                AppLocalizations.of(context)!.complaintsNoMessages,
+                style: context.smallDetails,
               );
+              if (original == null) return Center(child: empty);
+              return Column(children: [original, empty]);
             }
 
             return Column(
@@ -309,7 +344,9 @@ class _ComplaintDetailViewState extends State<ComplaintDetailView> {
             builder: (context, sending, child) => FormInput(
               controller: _messageController,
               readOnly: sending,
-              placeholder: AppLocalizations.of(context)!.complaintsReplyPlaceholder,
+              placeholder: AppLocalizations.of(
+                context,
+              )!.complaintsReplyPlaceholder,
               // A single line, like every chat composer — it was reserving
               // room for up to 4 lines even when empty, towering over the
               // send button next to it.
@@ -326,7 +363,9 @@ class _ComplaintDetailViewState extends State<ComplaintDetailView> {
             builder: (context, sending, child) {
               final enabled = canSend && !sending;
               return IconButton.filled(
-                tooltip: AppLocalizations.of(context)!.complaintsSendMessageTooltip,
+                tooltip: AppLocalizations.of(
+                  context,
+                )!.complaintsSendMessageTooltip,
                 style: IconButton.styleFrom(
                   backgroundColor: enabled
                       ? AppColors.primary

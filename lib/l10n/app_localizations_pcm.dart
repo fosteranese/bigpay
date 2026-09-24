@@ -724,7 +724,7 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get kycEvenLighting => 'Light dey even, no hard shadow';
 
   @override
-  String get kycSlightBlur => 'We see small blur';
+  String get kycImageSharp => 'E clear well well';
 
   @override
   String get kycRetakeIfUnclear => 'Retake am if the picture no clear';
@@ -924,4 +924,27 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get connectivityRestoredMessage => 'Connection don restore well well.';
+
+  @override
+  String get commonCopy => 'Copy';
+
+  @override
+  String get commonCopied => 'E don copy';
+
+  @override
+  String get complaintsFilterAll => 'All';
+
+  @override
+  String get complaintsFilterOpen => 'Dey open';
+
+  @override
+  String get complaintsFilterResolved => 'Don settle';
+
+  @override
+  String complaintsReference(String reference) {
+    return 'Ref. $reference';
+  }
+
+  @override
+  String get feedbackSubmittedTitle => 'Complaint don enter';
 }

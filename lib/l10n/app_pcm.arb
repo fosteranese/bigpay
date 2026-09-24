@@ -257,7 +257,7 @@
   "kycNoObstructions": "No obstruction or glasses",
   "kycWellLit": "Light dey well",
   "kycEvenLighting": "Light dey even, no hard shadow",
-  "kycSlightBlur": "We see small blur",
+  "kycImageSharp": "E clear well well",
   "kycRetakeIfUnclear": "Retake am if the picture no clear",
   "kycCameraPermissionTitle": "We need your camera",
   "kycCameraPermissionMessage": "BigPay need to use your camera to check say na really you, with quick selfie.",
@@ -333,5 +333,12 @@
   "connectivityLostTitle": "No internet connection",
   "connectivityLostMessage": "Check your network settings and try again.",
   "connectivityRestoredTitle": "You dey back online",
-  "connectivityRestoredMessage": "Connection don restore well well."
+  "connectivityRestoredMessage": "Connection don restore well well.",
+  "commonCopy": "Copy",
+  "commonCopied": "E don copy",
+  "complaintsFilterAll": "All",
+  "complaintsFilterOpen": "Dey open",
+  "complaintsFilterResolved": "Don settle",
+  "complaintsReference": "Ref. {reference}",
+  "feedbackSubmittedTitle": "Complaint don enter"
 }

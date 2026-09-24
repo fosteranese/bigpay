@@ -1462,11 +1462,11 @@ abstract class AppLocalizations {
   /// **'Even lighting, no harsh shadows'**
   String get kycEvenLighting;
 
-  /// No description provided for @kycSlightBlur.
+  /// KYC photo review checklist item: the selfie must not be blurry
   ///
   /// In en, this message translates to:
-  /// **'Slight blur detected'**
-  String get kycSlightBlur;
+  /// **'Sharp and in focus'**
+  String get kycImageSharp;
 
   /// No description provided for @kycRetakeIfUnclear.
   ///
@@ -1833,6 +1833,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connection restored successfully.'**
   String get connectivityRestoredMessage;
+
+  /// Tooltip for a copy-to-clipboard button
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get commonCopy;
+
+  /// Snackbar shown after copying a value
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get commonCopied;
+
+  /// Complaints list filter chip: every complaint
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get complaintsFilterAll;
+
+  /// Complaints list filter chip: complaints still being handled
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get complaintsFilterOpen;
+
+  /// Complaints list filter chip: resolved or closed complaints
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get complaintsFilterResolved;
+
+  /// Complaint reference number shown on the complaint detail summary
+  ///
+  /// In en, this message translates to:
+  /// **'Ref. {reference}'**
+  String complaintsReference(String reference);
+
+  /// Title of the full-screen success page after submitting a complaint
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint Submitted'**
+  String get feedbackSubmittedTitle;
 }
 
 class _AppLocalizationsDelegate

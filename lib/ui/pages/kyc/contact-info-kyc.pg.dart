@@ -83,7 +83,7 @@ class _ContactInfoKycPageState extends State<ContactInfoKycPage> {
               message: snapshot.response?.message ?? '',
               onOk: () {
                 Future.delayed(Duration(seconds: 1), () {
-                  Kyc.onSuccess!.call();
+                  Kyc.onSuccess?.call();
                   Kyc.clear();
                 });
               },

@@ -241,7 +241,7 @@
   "kycNoObstructions": "لا توجد عوائق أو نظارات",
   "kycWellLit": "إضاءة جيدة",
   "kycEvenLighting": "إضاءة متساوية، بلا ظلال قاسية",
-  "kycSlightBlur": "تم اكتشاف ضبابية طفيفة",
+  "kycImageSharp": "واضحة وحادة",
   "kycRetakeIfUnclear": "أعد الالتقاط إذا بدت الصورة غير واضحة",
   "kycCameraPermissionTitle": "الوصول إلى الكاميرا مطلوب",
   "kycCameraPermissionMessage": "يحتاج BigPay إلى الوصول إلى كاميرتك للتحقق من هويتك بصورة سيلفي سريعة.",
@@ -331,5 +331,12 @@
   "connectivityLostTitle": "لا يوجد اتصال بالإنترنت",
   "connectivityLostMessage": "تحقق من إعدادات الشبكة وحاول مرة أخرى.",
   "connectivityRestoredTitle": "أنت متصل مرة أخرى",
-  "connectivityRestoredMessage": "تمت استعادة الاتصال بنجاح."
+  "connectivityRestoredMessage": "تمت استعادة الاتصال بنجاح.",
+  "commonCopy": "نسخ",
+  "commonCopied": "تم النسخ",
+  "complaintsFilterAll": "الكل",
+  "complaintsFilterOpen": "مفتوحة",
+  "complaintsFilterResolved": "تم حلها",
+  "complaintsReference": "مرجع {reference}",
+  "feedbackSubmittedTitle": "تم إرسال الشكوى"
 }

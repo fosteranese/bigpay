@@ -720,7 +720,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kycEvenLighting => 'Even lighting, no harsh shadows';
 
   @override
-  String get kycSlightBlur => 'Slight blur detected';
+  String get kycImageSharp => 'Sharp and in focus';
 
   @override
   String get kycRetakeIfUnclear => 'Retake if image feels unclear';
@@ -920,4 +920,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectivityRestoredMessage => 'Connection restored successfully.';
+
+  @override
+  String get commonCopy => 'Copy';
+
+  @override
+  String get commonCopied => 'Copied';
+
+  @override
+  String get complaintsFilterAll => 'All';
+
+  @override
+  String get complaintsFilterOpen => 'Open';
+
+  @override
+  String get complaintsFilterResolved => 'Resolved';
+
+  @override
+  String complaintsReference(String reference) {
+    return 'Ref. $reference';
+  }
+
+  @override
+  String get feedbackSubmittedTitle => 'Complaint Submitted';
 }

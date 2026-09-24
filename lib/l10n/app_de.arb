@@ -241,7 +241,7 @@
   "kycNoObstructions": "Keine Hindernisse oder Brille",
   "kycWellLit": "Gut beleuchtet",
   "kycEvenLighting": "Gleichmäßige Beleuchtung, keine harten Schatten",
-  "kycSlightBlur": "Leichte Unschärfe erkannt",
+  "kycImageSharp": "Scharf und fokussiert",
   "kycRetakeIfUnclear": "Erneut aufnehmen, wenn das Bild unscharf wirkt",
   "kycCameraPermissionTitle": "Kamerazugriff erforderlich",
   "kycCameraPermissionMessage": "BigPay benötigt Zugriff auf Ihre Kamera, um Ihre Identität mit einem kurzen Selfie zu bestätigen.",
@@ -331,5 +331,12 @@
   "connectivityLostTitle": "Keine Internetverbindung",
   "connectivityLostMessage": "Überprüfen Sie Ihre Netzwerkeinstellungen und versuchen Sie es erneut.",
   "connectivityRestoredTitle": "Sie sind wieder online",
-  "connectivityRestoredMessage": "Verbindung erfolgreich wiederhergestellt."
+  "connectivityRestoredMessage": "Verbindung erfolgreich wiederhergestellt.",
+  "commonCopy": "Kopieren",
+  "commonCopied": "Kopiert",
+  "complaintsFilterAll": "Alle",
+  "complaintsFilterOpen": "Offen",
+  "complaintsFilterResolved": "Gelöst",
+  "complaintsReference": "Ref. {reference}",
+  "feedbackSubmittedTitle": "Beschwerde eingereicht"
 }

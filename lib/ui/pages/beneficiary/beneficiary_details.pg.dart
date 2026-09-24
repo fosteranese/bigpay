@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/confirm_sheet.dart';
+import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -43,8 +45,7 @@ class BeneficiaryDetailsView extends StatefulWidget {
   final VoidCallback? onBack;
 
   @override
-  State<BeneficiaryDetailsView> createState() =>
-      _BeneficiaryDetailsViewState();
+  State<BeneficiaryDetailsView> createState() => _BeneficiaryDetailsViewState();
 }
 
 class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
@@ -70,7 +71,16 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
         .toList();
   }
 
-  void _delete() {
+  Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDestructiveConfirm(
+      context,
+      icon: Icons.person_remove_outlined,
+      title: l10n.beneficiariesRemoveTitle,
+      message: l10n.beneficiariesRemoveConfirm(_name(context)),
+      confirmText: l10n.commonRemove,
+    );
+    if (!confirmed || !mounted) return;
     _deleteEvent = context.dispatchProcess(
       DeletePayeeAction(
         payload: DeletePayeePayload(payeeId: widget.payee?.payeeId),
@@ -91,7 +101,9 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final rows = _rows;
+    final name = _name(context);
 
     return ProcessListener<bool>(
       event: () => _deleteEvent,
@@ -121,34 +133,51 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
         useScaffold: widget.onBack == null,
         onBack: widget.onBack,
         bottomSize: 72,
-        title: AppLocalizations.of(context)!.beneficiariesDetailsTitle,
-        bottomNav: FormButton(
-          backgroundColor: AppColors.danger,
+        title: l10n.beneficiariesDetailsTitle,
+        // Secondary, not a filled red slab: removing is the rare action on
+        // this page, and it confirms before doing anything.
+        bottomNav: FormOutlineButton(
           onPressed: _delete,
-          text: AppLocalizations.of(context)!.beneficiariesRemoveButton,
+          text: l10n.beneficiariesRemoveButton,
+          foregroundColor: AppColors.danger,
+          iconColor: AppColors.danger,
+          icon: Icons.person_remove_outlined,
+          buttonIconAlignment: .left,
+          iconSize: 20,
         ),
         child: Column(
           children: [
-            const SizedBox(height: 10),
             CircleAvatar(
-              radius: 34,
+              radius: 40,
               backgroundColor: context.avatarBg,
-              child: Text(_initials(_name(context)), style: context.header2),
+              child: Text(_initials(name), style: context.header1),
             ),
-            const SizedBox(height: Spacing.md),
-            Text(_name(context), style: context.header3, textAlign: .center),
-            if (widget.payee?.formName?.isNotEmpty ?? false)
-              Text(
-                widget.payee!.formName!,
-                style: context.smallDetails,
-                textAlign: .center,
+            const SizedBox(height: Spacing.lg),
+            Text(name, style: context.display2, textAlign: .center),
+            if (widget.payee?.formName?.isNotEmpty ?? false) ...[
+              const SizedBox(height: Spacing.sm),
+              Container(
+                padding: const .symmetric(
+                  horizontal: Spacing.md,
+                  vertical: Spacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: context.avatarBg,
+                  borderRadius: .circular(100),
+                ),
+                child: Text(
+                  widget.payee!.formName!,
+                  style: context.smallDetailsMedium,
+                ),
               ),
+            ],
             const SizedBox(height: Spacing.xxl),
             Container(
-              padding: .all(20),
+              padding: const .symmetric(horizontal: Spacing.lg),
               decoration: BoxDecoration(
                 color: context.cardBg,
-                borderRadius: .circular(12),
+                borderRadius: .circular(16),
+                border: .all(color: context.border),
               ),
               child: Column(
                 mainAxisSize: .min,
@@ -156,11 +185,11 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
                   for (final (index, entry) in rows.indexed) ...[
                     _detailRow(_label(entry.key), entry.value.toString()),
                     if (index != rows.length - 1)
-                      Divider(color: context.divider),
+                      Divider(height: 1, color: context.divider),
                   ],
                   if (rows.isEmpty)
                     _detailRow(
-                      AppLocalizations.of(context)!.beneficiariesRecipientLabel,
+                      l10n.beneficiariesRecipientLabel,
                       widget.payee?.value ?? '-',
                     ),
                 ],
@@ -172,22 +201,39 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
     );
   }
 
+  /// Label over value (reads better than a squeezed two-column row once
+  /// values get long, e.g. account numbers), with a copy action since these
+  /// are exactly the values people paste elsewhere.
   Widget _detailRow(String label, String value) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
-      padding: const .symmetric(vertical: 10),
+      padding: const .symmetric(vertical: Spacing.md),
       child: Row(
-        crossAxisAlignment: .start,
         children: [
           Expanded(
-            child: Text(label, style: context.smallDetails),
-          ),
-          const SizedBox(width: Spacing.md),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: .end,
-              style: context.smallDetailsBold,
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(label, style: context.smallDetails),
+                const SizedBox(height: 2),
+                Text(value, style: context.p1Medium),
+              ],
             ),
+          ),
+          IconButton(
+            tooltip: l10n.commonCopy,
+            icon: Icon(
+              Icons.copy_rounded,
+              size: 18,
+              color: context.textSecondary,
+            ),
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: value));
+              if (!mounted) return;
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(l10n.commonCopied)));
+            },
           ),
         ],
       ),

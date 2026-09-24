@@ -97,6 +97,7 @@ class FormOutlineButton extends StatelessWidget {
     return Text(
       text,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: context.buttons.copyWith(
         fontSize: labelSize ?? 16,
         fontWeight: fontWeight ?? .bold,
@@ -132,7 +133,7 @@ class FormOutlineButton extends StatelessWidget {
         children: [
           _icon(effectiveForeground),
           SizedBox(width: iconSpacerBeforeAfter ?? 10),
-          _text(context, effectiveForeground),
+          Flexible(child: _text(context, effectiveForeground)),
         ],
       );
     }
@@ -141,7 +142,7 @@ class FormOutlineButton extends StatelessWidget {
       mainAxisAlignment: .center,
       crossAxisAlignment: .center,
       children: [
-        _text(context, effectiveForeground),
+        Flexible(child: _text(context, effectiveForeground)),
         SizedBox(width: iconSpacerBeforeAfter ?? 10),
         _icon(effectiveForeground),
       ],

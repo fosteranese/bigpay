@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/am_doing.const.dart';
-import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
@@ -12,14 +11,11 @@ import 'package:bigpay/models/actions/services/get_service_categories_action.dar
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
-import 'package:bigpay/ui/pages/kyc/intro-kyc.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/utils/app_modal.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -133,11 +129,6 @@ class _ServicePageState extends State<ServicePage> {
             }
 
             if (snapshot.hasError) {
-              if (snapshot.error?.code == StatusCodeConstants.verifyIdentify) {
-                _verify();
-                return;
-              }
-
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,
@@ -181,6 +172,9 @@ class _ServicePageState extends State<ServicePage> {
                     );
                   };
                   Kyc.onSuccess!.call();
+                  // Ties the retry to this request: a 6000 from anything
+                  // else must not re-run it after verification.
+                  Kyc.retryEvent = mainEvent;
                 },
                 contentPadding: .symmetric(
                   horizontal: 15,
@@ -219,75 +213,6 @@ class _ServicePageState extends State<ServicePage> {
           },
         ),
       ),
-    );
-  }
-
-  void _verify() {
-    final l10n = AppLocalizations.of(context)!;
-    AppModal.showBottomModal(
-      context,
-      label: l10n.servicesVerifyIdentityTitle,
-      padding: .all(20),
-      children: [
-        SizedBox(height: 10),
-        Text(
-          l10n.servicesVerifyIdentityMessage,
-          style: context.smallDetails.copyWith(
-            color: context.textPrimary,
-          ),
-        ),
-        SizedBox(height: Spacing.xl),
-        Align(
-          alignment: .bottomRight,
-          child: Text(
-            l10n.servicesPercentComplete,
-            style: context.caption,
-          ),
-        ),
-        SizedBox(height: 5),
-        Container(
-          height: 8,
-          alignment: .centerLeft,
-          decoration: BoxDecoration(
-            borderRadius: .circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter, // 180deg points from top to bottom
-              end: Alignment.bottomCenter,
-              stops: [
-                0.0,
-                0.5052,
-                1.0,
-              ], // Exact CSS percentage stops
-              colors: [
-                context.textTertiary,
-                context.border,
-                context.divider,
-              ],
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraint) {
-              return Container(
-                width: 0.6 * constraint.maxWidth,
-                decoration: BoxDecoration(
-                  borderRadius: .circular(20),
-                  color: context.accentGreen,
-                ),
-              );
-            },
-          ),
-        ),
-        SizedBox(height: 30),
-        FormButton(
-          height: 45,
-          onPressed: () {
-            Kyc.route = ServicePage.route;
-            AppRouter.router.pop();
-            AppRouter.router.push(IntroKycPage.route.path);
-          },
-          text: l10n.servicesStartVerification,
-        ),
-      ],
     );
   }
 }

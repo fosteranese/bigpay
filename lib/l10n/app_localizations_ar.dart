@@ -714,7 +714,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get kycEvenLighting => 'إضاءة متساوية، بلا ظلال قاسية';
 
   @override
-  String get kycSlightBlur => 'تم اكتشاف ضبابية طفيفة';
+  String get kycImageSharp => 'واضحة وحادة';
 
   @override
   String get kycRetakeIfUnclear => 'أعد الالتقاط إذا بدت الصورة غير واضحة';
@@ -910,4 +910,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get connectivityRestoredMessage => 'تمت استعادة الاتصال بنجاح.';
+
+  @override
+  String get commonCopy => 'نسخ';
+
+  @override
+  String get commonCopied => 'تم النسخ';
+
+  @override
+  String get complaintsFilterAll => 'الكل';
+
+  @override
+  String get complaintsFilterOpen => 'مفتوحة';
+
+  @override
+  String get complaintsFilterResolved => 'تم حلها';
+
+  @override
+  String complaintsReference(String reference) {
+    return 'مرجع $reference';
+  }
+
+  @override
+  String get feedbackSubmittedTitle => 'تم إرسال الشكوى';
 }

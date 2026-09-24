@@ -5,6 +5,7 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/kyc/contact-info-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/kyc.dart';
+import 'package:bigpay/ui/pages/kyc/kyc_hero.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -29,7 +30,6 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
     final l10n = AppLocalizations.of(context)!;
     final picture = Kyc.passportPicture;
     return MainLayout(
-      titleStyle: context.display2,
       bottomSize: 0,
       bottomNav: Column(
         mainAxisSize: .min,
@@ -42,7 +42,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
             },
             text: l10n.kycVerifyPhoto,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: Spacing.md),
           FormOutlineButton(
             // Pops back to the still-live FaceCaptureKycPage — its own
             // "Retake" control (shown once it has a captured shot) hands
@@ -52,80 +52,56 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
           ),
         ],
       ),
-      child: Form(
-        child: Column(
-          mainAxisSize: .min,
-          mainAxisAlignment: .start,
-          crossAxisAlignment: .center,
-          children: [
-            ConstrainedBox(
-              constraints: .new(
-                maxWidth: 300,
+      child: Column(
+        mainAxisSize: .min,
+        mainAxisAlignment: .start,
+        crossAxisAlignment: .center,
+        children: [
+          KycHero(
+            title: l10n.kycReviewPhotoTitle,
+            subtitle: l10n.kycReviewPhotoSubtitle,
+            visual: Container(
+              padding: const .all(5),
+              decoration: BoxDecoration(
+                borderRadius: .circular(100),
+                border: .all(
+                  color: context.accentGreen,
+                  width: 1,
+                ),
               ),
-              child: Column(
-                mainAxisSize: .min,
-                mainAxisAlignment: .start,
-                crossAxisAlignment: .center,
-                children: [
-                  Container(
-                    padding: const .all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: .circular(100),
-                      border: .all(
-                        color: context.accentGreen,
-                        width: 1,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 70.5,
-                      backgroundColor: AppColors.tintShade1,
-                      backgroundImage: picture.isEmpty
-                          ? null
-                          : MemoryImage(base64Decode(picture)),
-                      child: picture.isEmpty
-                          ? const Icon(
-                              Icons.person,
-                              size: 100,
-                              color: AppColors.white,
-                            )
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    l10n.kycReviewPhotoTitle,
-                    textAlign: .center,
-                    style: context.display2,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    l10n.kycReviewPhotoSubtitle,
-                    textAlign: .center,
-                    style: context.p1.copyWith(
-                      color: context.textSecondary,
-                    ),
-                  ),
-                ],
+              child: CircleAvatar(
+                radius: 70.5,
+                backgroundColor: AppColors.tintShade1,
+                backgroundImage: picture.isEmpty
+                    ? null
+                    : MemoryImage(base64Decode(picture)),
+                child: picture.isEmpty
+                    ? const Icon(
+                        Icons.person,
+                        size: 100,
+                        color: AppColors.white,
+                      )
+                    : null,
               ),
             ),
-            const SizedBox(height: 30),
-            CheckListItem(
-              isChecked: !Kyc.faceHasObstructions,
-              title: l10n.kycFaceClearlyVisible,
-              subtitle: l10n.kycNoObstructions,
-            ),
-            CheckListItem(
-              isChecked: Kyc.faceIsWellLighted,
-              title: l10n.kycWellLit,
-              subtitle: l10n.kycEvenLighting,
-            ),
-            CheckListItem(
-              isChecked: !Kyc.faceIsBlur,
-              title: l10n.kycSlightBlur,
-              subtitle: l10n.kycRetakeIfUnclear,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: Spacing.xxxl),
+          CheckListItem(
+            isChecked: !Kyc.faceHasObstructions,
+            title: l10n.kycFaceClearlyVisible,
+            subtitle: l10n.kycNoObstructions,
+          ),
+          CheckListItem(
+            isChecked: Kyc.faceIsWellLighted,
+            title: l10n.kycWellLit,
+            subtitle: l10n.kycEvenLighting,
+          ),
+          CheckListItem(
+            isChecked: !Kyc.faceIsBlur,
+            title: l10n.kycImageSharp,
+            subtitle: l10n.kycRetakeIfUnclear,
+          ),
+        ],
       ),
     );
   }
@@ -171,7 +147,7 @@ class CheckListItem extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
-        style: context.caption,
+        style: context.smallDetails,
       ),
     );
   }
