@@ -206,7 +206,7 @@ class _AddCardPageState extends State<AddCardPage>
       ],
     ),
     image: DecorationImage(
-      image: AssetImage('assets/img/card-bg.png'),
+      image: AssetImage('assets/img/card-bg.webp'),
       fit: .contain,
       opacity: 0.05,
       alignment: .center,

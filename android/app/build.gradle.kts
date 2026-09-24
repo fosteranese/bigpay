@@ -25,6 +25,15 @@ android {
         versionName = flutter.versionName
     }
 
+    packaging {
+        jniLibs {
+            // TFLite's GPU delegate (~2.5 MB per ABI): KYC face capture runs
+            // its models on the CPU and never creates a GpuDelegate, and
+            // tflite_flutter only loads this library when one is created.
+            excludes += "**/libtensorflowlite_gpu_jni.so"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
