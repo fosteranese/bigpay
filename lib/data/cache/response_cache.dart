@@ -53,7 +53,34 @@ class ResponseCache {
     );
   }
 
-  Future<DataResponse?> latestForEndpoint(String endpoint) async {
+  /// The latest cached response for [endpoint], with its raw JSON `data` parsed
+  /// into [T] via [parse].
+  ///
+  /// The cache stores responses as raw JSON (parsing is deferred to emit time in
+  /// ProcessBloc), so callers pass the model's `fromMap`, e.g.
+  /// `latestForEndpoint<AuthData>(VerifyOtpLoginAction.path, AuthData.fromMap)`.
+  /// Returns null if nothing is cached; `data` is null if the cached payload
+  /// wasn't a JSON object.
+  Future<DataResponse<T>?> latestForEndpoint<T>(
+    String endpoint,
+    T Function(Map<String, dynamic> data) parse,
+  ) async {
+    final raw = await _latestRawForEndpoint(endpoint);
+    if (raw == null) return null;
+
+    final data = raw.data;
+    return DataResponse<T>(
+      code: raw.code,
+      status: raw.status,
+      message: raw.message,
+      data: data is Map<String, dynamic> ? parse(data) : null,
+      imageBaseUrl: raw.imageBaseUrl,
+      imageDirectory: raw.imageDirectory,
+      timeStamp: raw.timeStamp,
+    );
+  }
+
+  Future<DataResponse?> _latestRawForEndpoint(String endpoint) async {
     final inMemoryKey = _latestKeyByEndpoint[endpoint];
     if (inMemoryKey != null) {
       final cached = await read(inMemoryKey);
@@ -65,6 +92,28 @@ class ResponseCache {
     if (key == null) return null;
 
     return read(key);
+  }
+
+  /// The storage keys (endpoint pointer + the entry it points at) of the
+  /// latest cached response for each of [endpoints] — for keeping those
+  /// through a wipe.
+  Future<Set<String>> latestKeysFor(Iterable<String> endpoints) async {
+    final keys = <String>{};
+    for (final endpoint in endpoints) {
+      final pointerKey = _endpointPointerKey(endpoint);
+      keys.add(pointerKey);
+      final pointer = await _db.read(pointerKey);
+      final key = _latestKeyByEndpoint[endpoint] ?? pointer?['key'] as String?;
+      if (key != null) keys.add(key);
+    }
+    return keys;
+  }
+
+  /// Forgets the in-memory tier; storage is untouched. Used after a storage
+  /// wipe so stale responses aren't served from memory.
+  void clearMemory() {
+    _memory.clear();
+    _latestKeyByEndpoint.clear();
   }
 
   /// Drops [key] from both tiers — e.g. to invalidate a stale entry.

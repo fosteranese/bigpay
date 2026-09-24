@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 .DS_Store
+.env
 
 # Generated code (build_runner: freezed / json_serializable).
 # Regenerate with `dart run build_runner build` — never edit by hand.
@@ -51,3 +52,8 @@ app.*.map.json
 
 # Secrets
 figma_token.md
+# Widget Preview related
+.widget_preview/
+
+# Obfuscation symbols from release builds — keep them per release, not in git.
+/ios-debug-info/

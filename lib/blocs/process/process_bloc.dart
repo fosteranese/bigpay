@@ -1,3 +1,6 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:bigpay/constants/response.const.dart';
 import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/cache/process_store.dart';
@@ -6,8 +9,6 @@ import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/utils/remote.util.dart';
 import 'package:bigpay/utils/response.util.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'process_event.dart';
 part 'process_state.dart';
@@ -43,9 +44,13 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
   ) async {
     bool isSilent = false;
 
-    var action = event.action;
+    var action = event.action.copyWith(
+      endpoint: event.action.endpointFunc == null
+          ? event.action.endpoint
+          : event.action.endpointFunc!.call(),
+    );
     if (event.useSaveActionPayload) {
-      final saved = store.inputs.read(event.action.endpoint);
+      final saved = store.inputs.read(action.endpoint);
       if (saved == null) {
         emit(
           ExecuteProcessError(
@@ -97,17 +102,19 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
         store.inputs.write(event.action);
       }
 
-      final response = await RemoteUtil.makeCall(action);
+      final response = event.action.noRemoteFunc == null
+          ? await RemoteUtil.makeCall(action)
+          : event.action.noRemoteFunc?.call(event.action.payload);
 
       if (event.saveActionResponse &&
-          response.status == StatusConstants.success) {
+          response!.status == StatusConstants.success) {
         store.cache.write(cacheKey, response, endpoint: action.endpoint);
       }
 
       emit(
         ProcessExecuted(
           event: event,
-          result: _parsed(action, response),
+          result: _parsed(action, response!),
           isCachedData: false,
           isSilent: isSilent,
         ),

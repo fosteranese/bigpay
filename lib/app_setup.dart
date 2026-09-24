@@ -9,6 +9,8 @@ import 'package:bigpay/app.dart';
 import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/logger.dart';
 import 'package:bigpay/utils/app.util.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/connectivity.util.dart';
 
 void bootstrap() {
   runZonedGuarded(
@@ -17,19 +19,19 @@ void bootstrap() {
 
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
       ]);
 
       await Hive.initFlutter();
       await Database.init();
+      await AppState.loadTheme();
+      await AppState.loadLocale();
+      ConnectivityUtil.init();
 
-      // `init` populates CountryManager, which AppUtil.getInfo reads to resolve
-      // the country list. Without it the list is empty.
       await init();
 
-      // Device details ride on the `meta` of every backend request, so they
-      // have to be resolved before the app — and its startup call — exists. A
-      // failure here is logged rather than fatal: the app still starts and the
-      // backend rejects the request, which surfaces as the app error page.
       try {
         await AppUtil.getInfo();
       } catch (ex, stack) {
