@@ -54,3 +54,6 @@ app.*.map.json
 figma_token.md
 # Widget Preview related
 .widget_preview/
+
+# Obfuscation symbols from release builds — keep them per release, not in git.
+/ios-debug-info/
