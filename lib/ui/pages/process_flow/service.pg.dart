@@ -6,6 +6,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_form.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
@@ -77,9 +78,49 @@ class _ServicePageState extends State<ServicePage> {
     await context.awaitProcess(event);
   }
 
+  List<GeneralFlowForm> get _forms =>
+      (_category ?? widget.category).forms ?? const [];
+
+  /// A service with a single form has nothing to choose on this page — open
+  /// that form straight away, and (as a pushed page) swap this page out of
+  /// the stack so back from the form doesn't land on a one-item list. Inline
+  /// in a split pane there's no route of ours to replace, so it just pushes.
+  bool get _skipToForm => _forms.length == 1;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_skipToForm) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openForm(_forms.first);
+      });
+    }
+  }
+
+  void _openForm(GeneralFlowForm item) {
+    Kyc.onSuccess = () {
+      mainEvent = context.dispatchProcess(
+        saveActionResponse: true,
+        returnSavedResponse: true,
+        GetServiceFormDataAction(
+          payload: GetServiceFormDataActionPayload(
+            formId: item.formId,
+            insId: item.formId,
+          ),
+          endpointFunc: () =>
+              GetServiceFormDataAction.endpointFor(item.activityType),
+        ),
+      );
+    };
+    Kyc.onSuccess!.call();
+    // Ties the retry to this request: a 6000 from anything else must not
+    // re-run it after verification.
+    Kyc.retryEvent = mainEvent;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final forms = (_category ?? widget.category).forms ?? const [];
+    final forms = _forms;
     return MultiProcessListener(
       listeners: [
         ProcessListenerConfig<GeneralFlowCategory>(
@@ -116,15 +157,20 @@ class _ServicePageState extends State<ServicePage> {
                 return;
               }
 
-              AppRouter.router.push(
-                ServiceFormPage.route.path,
-                extra: {
-                  'activityDatum': widget.activityDatum,
-                  'category': widget.category,
-                  'formData': snapshot.data,
-                  'amDoing': widget.amDoing,
-                },
-              );
+              final extra = {
+                'activityDatum': widget.activityDatum,
+                'category': widget.category,
+                'formData': snapshot.data,
+                'amDoing': widget.amDoing,
+              };
+              if (_skipToForm && widget.useScaffold) {
+                AppRouter.router.pushReplacement(
+                  ServiceFormPage.route.path,
+                  extra: extra,
+                );
+              } else {
+                AppRouter.router.push(ServiceFormPage.route.path, extra: extra);
+              }
               return;
             }
 
@@ -154,28 +200,7 @@ class _ServicePageState extends State<ServicePage> {
                 vertical: 5,
               ),
               child: ListTile(
-                onTap: () {
-                  Kyc.onSuccess = () {
-                    mainEvent = context.dispatchProcess(
-                      saveActionResponse: true,
-                      returnSavedResponse: true,
-                      GetServiceFormDataAction(
-                        payload: GetServiceFormDataActionPayload(
-                          formId: item.formId,
-                          insId: item.formId,
-                        ),
-                        endpointFunc: () =>
-                            GetServiceFormDataAction.endpointFor(
-                              item.activityType,
-                            ),
-                      ),
-                    );
-                  };
-                  Kyc.onSuccess!.call();
-                  // Ties the retry to this request: a 6000 from anything
-                  // else must not re-run it after verification.
-                  Kyc.retryEvent = mainEvent;
-                },
+                onTap: () => _openForm(item),
                 contentPadding: .symmetric(
                   horizontal: 15,
                 ),

@@ -10,6 +10,7 @@ import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/notification_store.util.dart';
 
 /// The notifications inbox — reads from the local [NotificationStore] (like
@@ -143,7 +144,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget _buildEmptyState() {
     return EmptyState(
-      icon: Icons.notifications_off_outlined,
+      svgAsset: SvgImages.emptyWallet,
       title: AppLocalizations.of(context)!.notificationsEmptyTitle,
       subtitle: AppLocalizations.of(context)!.notificationsEmptySubtitle,
     );

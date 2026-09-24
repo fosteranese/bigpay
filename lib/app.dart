@@ -148,12 +148,16 @@ class BigPayApp extends StatelessWidget {
           ),
           ProcessListenerConfig<Null>(
             event: () => LogoutAction.event,
-            listener: (context, snapshot) {
+            listener: (context, snapshot) async {
               if (snapshot.isSuccessful) {
-                // The device is still known after logout — return to the
-                // existing-device unlock screen, not new-device sign-in.
+                // The device is still known after logout — return to its
+                // unlock screen (biometric if enabled, same as at launch),
+                // not new-device sign-in.
+                final biometric = await BiometricUtil.isLoginEnabled;
                 AppRouter.router.go(
-                  ExistingDeviceLoginPage.route.path,
+                  biometric
+                      ? BiometricLoginPage.route.path
+                      : ExistingDeviceLoginPage.route.path,
                 );
               }
             },

@@ -17,6 +17,7 @@ import 'package:bigpay/ui/pages/more/complaints/complaint_detail.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/date.util.dart';
@@ -216,11 +217,11 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
               hasScrollBody: false,
               child: (_query.isNotEmpty || _stage != null)
                   ? EmptyState(
-                      icon: Icons.search_off_outlined,
+                      svgAsset: SvgImages.emptyWallet,
                       title: l10n.commonNoMatches,
                     )
                   : EmptyState(
-                      icon: Icons.forum_outlined,
+                      svgAsset: SvgImages.emptyWallet,
                       title: l10n.complaintsEmptyTitle,
                       subtitle: l10n.complaintsEmptySubtitle,
                     ),

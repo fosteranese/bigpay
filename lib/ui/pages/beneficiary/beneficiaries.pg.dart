@@ -279,14 +279,11 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   }
 
   Widget _noMatches() {
-    return Center(
-      child: Padding(
-        padding: const .symmetric(vertical: 60),
-        child: Text(
-          AppLocalizations.of(context)!.beneficiariesNoMatchQuery(_query),
-          textAlign: .center,
-          style: context.smallDetails,
-        ),
+    return Padding(
+      padding: const .symmetric(vertical: 60),
+      child: EmptyState(
+        svgAsset: SvgImages.emptyWallet,
+        title: AppLocalizations.of(context)!.beneficiariesNoMatchQuery(_query),
       ),
     );
   }
