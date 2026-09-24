@@ -163,11 +163,14 @@ class VirtualWalletCard extends StatelessWidget {
                                   text: visible
                                       ? balance ?? '0.00'
                                       : '* *** **',
-                                  style: context.display1,
+                                  style: context.display1.copyWith(
+                                    color: AppColors.white,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
+                          const SizedBox(width: Spacing.md),
                           IconButton.filled(
                             tooltip: visible
                                 ? l10n.walletsHideBalanceTooltip

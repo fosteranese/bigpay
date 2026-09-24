@@ -187,7 +187,9 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                                 children: [
                                   Text(
                                     item.title ?? '',
-                                    style: context.display1,
+                                    style: context.display1.copyWith(
+                                      color: context.cardBg,
+                                    ),
                                   ),
                                   Text(
                                     item.description ?? '',

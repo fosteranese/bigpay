@@ -19,6 +19,9 @@ void bootstrap() {
 
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
       ]);
 
       await Hive.initFlutter();
