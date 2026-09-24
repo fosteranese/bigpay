@@ -114,9 +114,9 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
         }
 
         if (snapshot.hasData && !(snapshot.isSilent && !snapshot.isCached)) {
-          if (!snapshot.isSilent &&
-              !snapshot.isCached &&
-              (snapshot.data?.forms?.isEmpty ?? true)) {
+          // Checked on whichever result is shown first — cached or
+          // network — so an empty cached form can't slip through.
+          if (snapshot.data?.forms?.isEmpty ?? true) {
             final l10n = AppLocalizations.of(context)!;
             MessageUtil.displayErrorDialog(
               context,
@@ -172,7 +172,9 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
                   svgAsset: SvgImages.emptyWallet,
                   title: _query.isNotEmpty
                       ? AppLocalizations.of(context)!.commonNoMatches
-                      : AppLocalizations.of(context)!.beneficiariesEmptyServices,
+                      : AppLocalizations.of(
+                          context,
+                        )!.beneficiariesEmptyServices,
                 ),
               );
             }

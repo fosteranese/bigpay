@@ -121,9 +121,9 @@ class _DashboardPageState extends State<DashboardPage>
 
             if (snapshot.hasData &&
                 !(snapshot.isSilent && !snapshot.isCached)) {
-              if (!snapshot.isSilent &&
-                  !snapshot.isCached &&
-                  (snapshot.data?.forms?.isEmpty ?? true)) {
+              // Checked on whichever result is shown first — cached or
+              // network — so an empty cached form can't slip through.
+              if (snapshot.data?.forms?.isEmpty ?? true) {
                 MessageUtil.displayErrorDialog(
                   context,
                   title: AppLocalizations.of(
@@ -171,9 +171,9 @@ class _DashboardPageState extends State<DashboardPage>
 
             if (snapshot.hasData &&
                 !(snapshot.isSilent && !snapshot.isCached)) {
-              if (!snapshot.isSilent &&
-                  !snapshot.isCached &&
-                  (snapshot.data?.fieldsDatum?.isEmpty ?? true)) {
+              // Checked on whichever result is shown first — cached or
+              // network — so an empty cached form can't slip through.
+              if (snapshot.data?.fieldsDatum?.isEmpty ?? true) {
                 MessageUtil.displayErrorDialog(
                   context,
                   title: AppLocalizations.of(

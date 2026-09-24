@@ -151,9 +151,9 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
 
               if (snapshot.hasData &&
                   !(snapshot.isSilent && !snapshot.isCached)) {
-                if (!snapshot.isSilent &&
-                    !snapshot.isCached &&
-                    (snapshot.data?.forms?.isEmpty ?? true)) {
+                // Checked on whichever result is shown first — cached or
+                // network — so an empty cached form can't slip through.
+                if (snapshot.data?.forms?.isEmpty ?? true) {
                   final l10n = AppLocalizations.of(context)!;
                   MessageUtil.displayErrorDialog(
                     context,

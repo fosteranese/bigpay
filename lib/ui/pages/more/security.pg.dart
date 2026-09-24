@@ -121,9 +121,9 @@ class _SecurityPageState extends State<SecurityPage> {
 
     if (snapshot.hasData && !(snapshot.isSilent && !snapshot.isCached)) {
       final formData = snapshot.data as GeneralFlowFormData?;
-      if (!snapshot.isSilent &&
-          !snapshot.isCached &&
-          (formData?.fieldsDatum?.isEmpty ?? true)) {
+      // Checked on whichever result is shown first — cached or
+      // network — so an empty cached form can't slip through.
+      if (formData?.fieldsDatum?.isEmpty ?? true) {
         final l10n = AppLocalizations.of(context)!;
         MessageUtil.displayErrorDialog(
           context,
