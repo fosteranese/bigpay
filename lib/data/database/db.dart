@@ -70,6 +70,13 @@ class Database {
     Database.box.clear();
   }
 
+  /// Deletes every key except [keep].
+  Future<void> deleteAllExcept(Set<String> keep) async {
+    await checkBeforeOperation();
+    final doomed = Database.box.keys.where((k) => !keep.contains(k)).toList();
+    await Database.box.deleteAll(doomed);
+  }
+
   Future<void> delete(String key) async {
     await Database.box.delete(key);
   }

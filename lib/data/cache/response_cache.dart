@@ -94,6 +94,28 @@ class ResponseCache {
     return read(key);
   }
 
+  /// The storage keys (endpoint pointer + the entry it points at) of the
+  /// latest cached response for each of [endpoints] — for keeping those
+  /// through a wipe.
+  Future<Set<String>> latestKeysFor(Iterable<String> endpoints) async {
+    final keys = <String>{};
+    for (final endpoint in endpoints) {
+      final pointerKey = _endpointPointerKey(endpoint);
+      keys.add(pointerKey);
+      final pointer = await _db.read(pointerKey);
+      final key = _latestKeyByEndpoint[endpoint] ?? pointer?['key'] as String?;
+      if (key != null) keys.add(key);
+    }
+    return keys;
+  }
+
+  /// Forgets the in-memory tier; storage is untouched. Used after a storage
+  /// wipe so stale responses aren't served from memory.
+  void clearMemory() {
+    _memory.clear();
+    _latestKeyByEndpoint.clear();
+  }
+
   /// Drops [key] from both tiers — e.g. to invalidate a stale entry.
   Future<void> remove(String key) async {
     _memory.remove(key);

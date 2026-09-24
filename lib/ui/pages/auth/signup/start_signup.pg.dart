@@ -174,13 +174,17 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
     launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
-  void _continue() {
+  Future<void> _continue() async {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
 
     if (_phone.text.text.trim().isEmpty) return;
 
+    // Registering a new account on this device — wipe the previous user's
+    // data first (awaited, so it can't race the new session's responses).
+    await AppState.clearUserData();
+    if (!mounted) return;
     mainEvent = context.dispatchProcess(
       StartSignUpAction(
         payload: StartSignUpActionPayload(

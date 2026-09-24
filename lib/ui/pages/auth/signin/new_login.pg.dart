@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/status.const.dart';
@@ -21,7 +20,6 @@ import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/phone.util.dart';
 import 'package:bigpay/utils/biometric.util.dart';
@@ -229,32 +227,9 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
               ),
               Row(
                 mainAxisSize: .max,
-                mainAxisAlignment: .spaceBetween,
+                mainAxisAlignment: .end,
                 crossAxisAlignment: .start,
                 children: [
-                  TextButton(
-                    style: TextButton.styleFrom(padding: .zero),
-                    onPressed: () {
-                      AppRouter.router.push(
-                        BiometricLoginPage.route.path,
-                      );
-                    },
-                    child: Row(
-                      mainAxisSize: .min,
-                      mainAxisAlignment: .start,
-                      crossAxisAlignment: .center,
-                      children: [
-                        SvgPicture.asset(SvgImages.biometric),
-                        SizedBox(width: 5),
-                        Text(
-                          l10n.commonBiometricLogin,
-                          style: context.smallDetails.copyWith(
-                            color: context.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   TextButton(
                     style: TextButton.styleFrom(padding: .zero),
                     onPressed: () {
@@ -288,7 +263,7 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
     }
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
@@ -306,6 +281,11 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
       return;
     }
 
+    // A different user is signing in on this device — nothing of the
+    // previous user's may carry over. Awaited, so the wipe can't race the new
+    // session's own responses into the cache.
+    await AppState.clearUserData();
+    if (!mounted) return;
     newLoginEvent = context.dispatchProcess(
       NewLoginAction(
         payload: NewLoginActionPayload(

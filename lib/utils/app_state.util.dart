@@ -4,6 +4,7 @@ import 'package:bigpay/data/cache/process_store.dart';
 import 'package:bigpay/data/database/db.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
+import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/models/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
@@ -47,6 +48,25 @@ class AppState {
 
   static void notifyDataChanged() {
     dataChangedNotifier.value++;
+  }
+
+  /// Wipes everything stored about the previous user before a different one
+  /// signs in or registers on this device: cached responses (accounts,
+  /// history, profile, beneficiaries…), the saved login and phone number,
+  /// biometric settings and secrets, notifications and saved form inputs.
+  /// Keeps only device-level state: theme, language, and the cached startup
+  /// response (launch routing relies on it being cached — see app.dart).
+  static Future<void> clearUserData() async {
+    final keep = {
+      _themeKey,
+      _localeKey,
+      ...await store.cache.latestKeysFor([StartupAction.path]),
+    };
+    await db.deleteAllExcept(keep);
+    store.cache.clearMemory();
+    store.inputs.clear();
+    currentUser = null;
+    savedPhoneNumber = null;
   }
 
   static const _phoneKey = 'auth-phone-number';
