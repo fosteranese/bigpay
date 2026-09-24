@@ -18,7 +18,6 @@ import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_modal.dart';
-import 'package:bigpay/utils/message.util.dart';
 
 class VirtualWalletPage extends StatelessWidget {
   const VirtualWalletPage({super.key, this.account});
@@ -60,7 +59,20 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
       widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
       widget.account == null;
 
-  String get _sourceValue => widget.account?.sources?.firstOrNull?.value ?? '';
+  /// The account the mini statement is for — `value`, falling back to
+  /// `accountNumber` when a wallet only fills the latter.
+  String get _sourceValue {
+    final source = widget.account?.sources?.firstOrNull;
+    final value = source?.value ?? '';
+    return value.isNotEmpty ? value : (source?.accountNumber ?? '');
+  }
+
+  /// Wallets that don't offer a mini statement (or have no account to ask
+  /// about) aren't queried at all — the backend answers those with an
+  /// unparseable body, surfacing a generic error instead of "no
+  /// transactions".
+  bool get _canLoadTransactions =>
+      widget.account?.hasMiniStatement != false && _sourceValue.isNotEmpty;
 
   bool get _hasActiveFilter =>
       _dateFromController.text.isNotEmpty || _dateToController.text.isNotEmpty;
@@ -84,6 +96,8 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
   }
 
   void _loadTransactions({DateTime? startDate, DateTime? endDate}) {
+    // No event means the builder falls through to the empty state.
+    if (!_canLoadTransactions) return;
     String? start;
     String? end;
     if (startDate != null) {
@@ -210,48 +224,36 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
                                 ),
                               )
                             else if (snapshot.hasError)
+                              // Same shared component and placement as the
+                              // empty state below, so the two read as a pair.
                               SliverToBoxAdapter(
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.error_outline_rounded,
-                                          size: 40,
-                                          color: AppColors.danger,
-                                        ),
-                                        const SizedBox(height: Spacing.lg),
-                                        Text(
-                                          snapshot.message ??
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.commonRetry,
-                                          textAlign: TextAlign.center,
-                                          style: context.p1Medium,
-                                        ),
-                                        const SizedBox(height: Spacing.xl),
-                                        FormButton(
-                                          text: AppLocalizations.of(
-                                            context,
-                                          )!.commonRetry,
-                                          onPressed: () {
-                                            MessageUtil.close(context);
-                                            _loadTransactions();
-                                          },
-                                        ),
-                                      ],
-                                    ),
+                                child: Padding(
+                                  padding: const .symmetric(
+                                    vertical: Spacing.xxxl,
+                                  ),
+                                  child: EmptyState(
+                                    icon: Icons.cloud_off_rounded,
+                                    title: AppLocalizations.of(
+                                      context,
+                                    )!.walletsTransactionsErrorTitle,
+                                    // No button: pull-to-refresh retries.
+                                    subtitle: snapshot.error?.message,
                                   ),
                                 ),
                               )
                             else if ((snapshot.data?.transactions ?? [])
                                 .isEmpty)
-                              SliverFillRemaining(
-                                hasScrollBody: false,
+                              // A plain block right under the section header, not
+                              // SliverFillRemaining: the sheet's visible height
+                              // changes as it's dragged, which made a
+                              // fill-and-center layout drift. Same placement as
+                              // the error state above.
+                              SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: const .symmetric(horizontal: 30),
+                                  padding: const .only(
+                                    top: Spacing.xxxl,
+                                    bottom: Spacing.xxxl,
+                                  ),
                                   child: EmptyState(
                                     svgAsset: SvgImages.emptyWallet,
                                     title: AppLocalizations.of(

@@ -947,4 +947,7 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get feedbackSubmittedTitle => 'Complaint don enter';
+
+  @override
+  String get walletsTransactionsErrorTitle => 'We no fit load transactions';
 }

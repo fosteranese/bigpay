@@ -933,4 +933,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get feedbackSubmittedTitle => 'تم إرسال الشكوى';
+
+  @override
+  String get walletsTransactionsErrorTitle => 'تعذر تحميل المعاملات';
 }

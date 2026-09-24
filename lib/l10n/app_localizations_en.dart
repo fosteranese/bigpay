@@ -943,4 +943,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackSubmittedTitle => 'Complaint Submitted';
+
+  @override
+  String get walletsTransactionsErrorTitle => 'Couldn\'t load transactions';
 }

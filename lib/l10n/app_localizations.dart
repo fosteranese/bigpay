@@ -1875,6 +1875,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complaint Submitted'**
   String get feedbackSubmittedTitle;
+
+  /// Wallet details: title of the error state when recent transactions fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load transactions'**
+  String get walletsTransactionsErrorTitle;
 }
 
 class _AppLocalizationsDelegate

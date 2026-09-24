@@ -338,5 +338,6 @@
   "complaintsFilterOpen": "مفتوحة",
   "complaintsFilterResolved": "تم حلها",
   "complaintsReference": "مرجع {reference}",
-  "feedbackSubmittedTitle": "تم إرسال الشكوى"
+  "feedbackSubmittedTitle": "تم إرسال الشكوى",
+  "walletsTransactionsErrorTitle": "تعذر تحميل المعاملات"
 }

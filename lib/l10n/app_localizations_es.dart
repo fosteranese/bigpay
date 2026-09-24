@@ -950,4 +950,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get feedbackSubmittedTitle => 'Queja enviada';
+
+  @override
+  String get walletsTransactionsErrorTitle =>
+      'No se pudieron cargar las transacciones';
 }

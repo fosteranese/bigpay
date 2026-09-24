@@ -955,4 +955,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get feedbackSubmittedTitle => 'Beschwerde eingereicht';
+
+  @override
+  String get walletsTransactionsErrorTitle =>
+      'Transaktionen konnten nicht geladen werden';
 }

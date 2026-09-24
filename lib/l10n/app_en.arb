@@ -505,5 +505,7 @@
   "complaintsReference": "Ref. {reference}",
   "@complaintsReference": {"description": "Complaint reference number shown on the complaint detail summary", "placeholders": {"reference": {"type": "String"}}},
   "feedbackSubmittedTitle": "Complaint Submitted",
-  "@feedbackSubmittedTitle": {"description": "Title of the full-screen success page after submitting a complaint"}
+  "@feedbackSubmittedTitle": {"description": "Title of the full-screen success page after submitting a complaint"},
+  "walletsTransactionsErrorTitle": "Couldn't load transactions",
+  "@walletsTransactionsErrorTitle": {"description": "Wallet details: title of the error state when recent transactions fail to load"}
 }

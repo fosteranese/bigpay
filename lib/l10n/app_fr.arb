@@ -338,5 +338,6 @@
   "complaintsFilterOpen": "Ouvertes",
   "complaintsFilterResolved": "Résolues",
   "complaintsReference": "Réf. {reference}",
-  "feedbackSubmittedTitle": "Réclamation envoyée"
+  "feedbackSubmittedTitle": "Réclamation envoyée",
+  "walletsTransactionsErrorTitle": "Impossible de charger les transactions"
 }

@@ -340,5 +340,6 @@
   "complaintsFilterOpen": "Dey open",
   "complaintsFilterResolved": "Don settle",
   "complaintsReference": "Ref. {reference}",
-  "feedbackSubmittedTitle": "Complaint don enter"
+  "feedbackSubmittedTitle": "Complaint don enter",
+  "walletsTransactionsErrorTitle": "We no fit load transactions"
 }
