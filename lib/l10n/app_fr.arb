@@ -31,7 +31,7 @@
   "authPasswordRequirements": "Le mot de passe doit comporter au moins 6 caractères et inclure des lettres, des chiffres et des caractères spéciaux (par ex. !$@%).",
 
   "authSetSecurityPinTitle": "Définir le code PIN de sécurité",
-  "authSetPinSubtitle": "Définissez un code à 4 chiffres pour autoriser les paiements et protéger votre portefeuille.",
+  "authSetPinSubtitle": "Définissez un code à 6 chiffres pour autoriser les paiements et protéger votre portefeuille.",
   "authWelcomeAboardTitle": "Bienvenue à bord !",
   "authGetStarted": "Commencer",
   "authEnterPin": "Saisir le code PIN à 6 chiffres",

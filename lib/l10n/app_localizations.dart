@@ -295,7 +295,7 @@ abstract class AppLocalizations {
   /// Set-PIN page subtitle
   ///
   /// In en, this message translates to:
-  /// **'Set a 4-digit code to authorize payments and keep your wallet secure.'**
+  /// **'Set a 6-digit code to authorize payments and keep your wallet secure.'**
   String get authSetPinSubtitle;
 
   /// Success dialog title after completing sign-up

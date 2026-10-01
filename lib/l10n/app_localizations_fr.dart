@@ -104,7 +104,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authSetPinSubtitle =>
-      'Définissez un code à 4 chiffres pour autoriser les paiements et protéger votre portefeuille.';
+      'Définissez un code à 6 chiffres pour autoriser les paiements et protéger votre portefeuille.';
 
   @override
   String get authWelcomeAboardTitle => 'Bienvenue à bord !';

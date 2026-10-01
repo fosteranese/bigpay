@@ -105,7 +105,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get authSetPinSubtitle =>
-      'Legen Sie einen 4-stelligen Code fest, um Zahlungen zu autorisieren und Ihr Wallet zu schützen.';
+      'Legen Sie einen 6-stelligen Code fest, um Zahlungen zu autorisieren und Ihr Wallet zu schützen.';
 
   @override
   String get authWelcomeAboardTitle => 'Willkommen an Bord!';

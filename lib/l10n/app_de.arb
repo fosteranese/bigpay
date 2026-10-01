@@ -31,7 +31,7 @@
   "authPasswordRequirements": "Das Passwort muss mindestens 6 Zeichen lang sein und Buchstaben, Zahlen und Sonderzeichen enthalten (z. B. !$@%).",
 
   "authSetSecurityPinTitle": "Sicherheits-PIN festlegen",
-  "authSetPinSubtitle": "Legen Sie einen 4-stelligen Code fest, um Zahlungen zu autorisieren und Ihr Wallet zu schützen.",
+  "authSetPinSubtitle": "Legen Sie einen 6-stelligen Code fest, um Zahlungen zu autorisieren und Ihr Wallet zu schützen.",
   "authWelcomeAboardTitle": "Willkommen an Bord!",
   "authGetStarted": "Loslegen",
   "authEnterPin": "6-stelligen PIN eingeben",

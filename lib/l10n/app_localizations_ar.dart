@@ -104,7 +104,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get authSetPinSubtitle =>
-      'عيّن رمزًا مكونًا من 4 أرقام لتفويض المدفوعات والحفاظ على أمان محفظتك.';
+      'عيّن رمزًا مكونًا من 6 أرقام لتفويض المدفوعات والحفاظ على أمان محفظتك.';
 
   @override
   String get authWelcomeAboardTitle => 'مرحبًا بك!';

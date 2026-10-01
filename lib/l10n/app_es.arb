@@ -31,7 +31,7 @@
   "authPasswordRequirements": "La contraseña debe tener al menos 6 caracteres e incluir letras, números y caracteres especiales (p. ej., !$@%).",
 
   "authSetSecurityPinTitle": "Establecer PIN de seguridad",
-  "authSetPinSubtitle": "Establece un código de 4 dígitos para autorizar pagos y proteger tu billetera.",
+  "authSetPinSubtitle": "Establece un código de 6 dígitos para autorizar pagos y proteger tu billetera.",
   "authWelcomeAboardTitle": "¡Bienvenido a bordo!",
   "authGetStarted": "Comenzar",
   "authEnterPin": "Ingresa el PIN de 6 dígitos",

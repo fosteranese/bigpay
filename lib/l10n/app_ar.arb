@@ -31,7 +31,7 @@
   "authPasswordRequirements": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل وتشمل حروفًا وأرقامًا ورموزًا خاصة (مثل !$@%).",
 
   "authSetSecurityPinTitle": "تعيين رمز الأمان",
-  "authSetPinSubtitle": "عيّن رمزًا مكونًا من 4 أرقام لتفويض المدفوعات والحفاظ على أمان محفظتك.",
+  "authSetPinSubtitle": "عيّن رمزًا مكونًا من 6 أرقام لتفويض المدفوعات والحفاظ على أمان محفظتك.",
   "authWelcomeAboardTitle": "مرحبًا بك!",
   "authGetStarted": "ابدأ الآن",
   "authEnterPin": "أدخل رمز PIN المكوّن من 6 أرقام",

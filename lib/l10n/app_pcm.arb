@@ -37,7 +37,7 @@
   "passwordMismatch": "Passwords do not match",
 
   "authSetSecurityPinTitle": "Set Security PIN",
-  "authSetPinSubtitle": "Set 4-digit code make you fit approve payments and keep your wallet safe.",
+  "authSetPinSubtitle": "Set 6-digit code make you fit approve payments and keep your wallet safe.",
   "authWelcomeAboardTitle": "Welcome aboard!",
   "authGetStarted": "Get Started",
   "authEnterPin": "Enter 6-digit PIN",

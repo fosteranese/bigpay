@@ -105,7 +105,7 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get authSetPinSubtitle =>
-      'Set 4-digit code make you fit approve payments and keep your wallet safe.';
+      'Set 6-digit code make you fit approve payments and keep your wallet safe.';
 
   @override
   String get authWelcomeAboardTitle => 'Welcome aboard!';

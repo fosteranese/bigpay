@@ -68,7 +68,7 @@
 
   "authSetSecurityPinTitle": "Set Security PIN",
   "@authSetSecurityPinTitle": { "description": "Set-PIN page title" },
-  "authSetPinSubtitle": "Set a 4-digit code to authorize payments and keep your wallet secure.",
+  "authSetPinSubtitle": "Set a 6-digit code to authorize payments and keep your wallet secure.",
   "@authSetPinSubtitle": { "description": "Set-PIN page subtitle" },
   "authWelcomeAboardTitle": "Welcome aboard!",
   "@authWelcomeAboardTitle": { "description": "Success dialog title after completing sign-up" },

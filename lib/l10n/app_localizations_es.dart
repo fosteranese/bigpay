@@ -104,7 +104,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authSetPinSubtitle =>
-      'Establece un código de 4 dígitos para autorizar pagos y proteger tu billetera.';
+      'Establece un código de 6 dígitos para autorizar pagos y proteger tu billetera.';
 
   @override
   String get authWelcomeAboardTitle => '¡Bienvenido a bordo!';
