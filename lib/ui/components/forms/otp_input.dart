@@ -37,7 +37,8 @@ class FormOtpInput extends StatefulWidget {
   State<FormOtpInput> createState() => FormOtpInputState();
 }
 
-class FormOtpInputState extends State<FormOtpInput> {
+class FormOtpInputState extends State<FormOtpInput>
+    with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   late Timer _timer;
@@ -47,6 +48,7 @@ class FormOtpInputState extends State<FormOtpInput> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller.addListener(_onChanged);
     _focusNode.addListener(() {
       if (mounted) setState(() {});
@@ -58,6 +60,25 @@ class FormOtpInputState extends State<FormOtpInput> {
         _focusNode.requestFocus();
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Resuming from background tears down the IME connection but leaves the
+    // hidden field focused, so requestFocus() no-ops and the keyboard never
+    // returns. Reopen it directly. This is also the SMS-copy round-trip.
+    if (state == AppLifecycleState.resumed) _ensureKeyboard();
+  }
+
+  /// Shows the soft keyboard for the code field. When the node already holds
+  /// focus (the resume case), requestFocus does nothing, so poke the IME open.
+  void _ensureKeyboard() {
+    if (!mounted) return;
+    if (_focusNode.hasFocus) {
+      SystemChannels.textInput.invokeMethod('TextInput.show');
+    } else {
+      _focusNode.requestFocus();
+    }
   }
 
   // A single backing field for the whole code, with the boxes below purely
@@ -108,6 +129,7 @@ class FormOtpInputState extends State<FormOtpInput> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer.cancel();
     _controller
       ..removeListener(_onChanged)
@@ -151,7 +173,7 @@ class FormOtpInputState extends State<FormOtpInput> {
   Widget _otpFields() {
     final boxes = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => _focusNode.requestFocus(),
+      onTap: _ensureKeyboard,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(widget.count, _box),
