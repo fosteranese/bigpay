@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/models/auth_data/activity.dart';
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
+import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/confirm_sheet.dart';
+import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/message.util.dart';
@@ -50,6 +57,78 @@ class BeneficiaryDetailsView extends StatefulWidget {
 
 class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
   ExecuteProcessEvent? _deleteEvent;
+
+  /// The in-flight fetch of this beneficiary's form, correlated so a success
+  /// opens the service form pre-filled with the payee.
+  ExecuteProcessEvent? _sendEvent;
+
+  /// "Send Money": fetch the beneficiary's form definition, then open the
+  /// service form pre-filled with the saved payee (see the listener in build).
+  void _send() {
+    final payee = widget.payee;
+    if (payee?.formId == null) return;
+    setState(() {
+      _sendEvent = context.dispatchProcess(
+        saveActionResponse: true,
+        returnSavedResponse: true,
+        GetServiceFormDataAction(
+          payload: GetServiceFormDataActionPayload(
+            formId: payee!.formId,
+            insId: payee.formId,
+          ),
+          endpointFunc: () =>
+              GetServiceFormDataAction.endpointFor(payee.activityType),
+        ),
+      );
+    });
+  }
+
+  void _onFormFetched(BuildContext context, ProcessSnapshot snapshot) {
+    final l10n = AppLocalizations.of(context)!;
+    if (snapshot.isLoading && !snapshot.isSilent && !snapshot.isCached) {
+      MessageUtil.displayLoading(context);
+      return;
+    } else if (!snapshot.isSilent && !snapshot.isCached) {
+      MessageUtil.close(context);
+    }
+
+    if (snapshot.hasData && !(snapshot.isSilent && !snapshot.isCached)) {
+      final formData = snapshot.data as GeneralFlowFormData?;
+      if (!snapshot.isSilent &&
+          !snapshot.isCached &&
+          (formData?.fieldsDatum?.isEmpty ?? true)) {
+        MessageUtil.displayErrorDialog(
+          context,
+          title: l10n.commonServiceUnavailableTitle,
+          message: l10n.commonServiceUnavailableMessage,
+        );
+        return;
+      }
+      _sendEvent = null;
+      final payee = widget.payee;
+      AppRouter.router.push(
+        ServiceFormPage.route.path,
+        extra: {
+          'activityDatum': ActivityDatum(
+            activity: Activity(
+              activityId: payee?.activityId,
+              activityType: payee?.activityType,
+              activityName: payee?.activityName,
+              icon: payee?.icon,
+            ),
+          ),
+          'category': const GeneralFlowCategory(),
+          'formData': formData,
+          'payee': payee,
+        },
+      );
+      return;
+    }
+
+    if (snapshot.hasError) {
+      MessageUtil.displayErrorDialog(context, message: snapshot.error!.message);
+    }
+  }
 
   String _name(BuildContext context) =>
       widget.payee?.displayName ??
@@ -105,45 +184,68 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
     final rows = _rows;
     final name = _name(context);
 
-    return ProcessListener<bool>(
-      event: () => _deleteEvent,
-      listener: (context, snapshot) {
-        if (snapshot.isLoading) {
-          MessageUtil.displayLoading(context);
-          return;
-        }
-        MessageUtil.close(context);
+    return MultiProcessListener(
+      listeners: [
+        ProcessListenerConfig<bool>(
+          event: () => _deleteEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            }
+            MessageUtil.close(context);
 
-        if (snapshot.isSuccessful) {
-          _deleteEvent = null;
-          if (widget.onBack != null) {
-            widget.onBack!();
-          } else {
-            AppRouter.router.pop();
-          }
-        } else if (snapshot.hasError) {
-          _deleteEvent = null;
-          MessageUtil.displayErrorDialog(
-            context,
-            message: snapshot.error!.message,
-          );
-        }
-      },
+            if (snapshot.isSuccessful) {
+              _deleteEvent = null;
+              if (widget.onBack != null) {
+                widget.onBack!();
+              } else {
+                AppRouter.router.pop();
+              }
+            } else if (snapshot.hasError) {
+              _deleteEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+        ProcessListenerConfig<GeneralFlowFormData>(
+          event: () => _sendEvent,
+          listener: _onFormFetched,
+        ),
+      ],
       child: MainLayout(
         useScaffold: widget.onBack == null,
         onBack: widget.onBack,
         bottomSize: 72,
         title: l10n.beneficiariesDetailsTitle,
-        // Secondary, not a filled red slab: removing is the rare action on
-        // this page, and it confirms before doing anything.
-        bottomNav: FormOutlineButton(
-          onPressed: _delete,
-          text: l10n.beneficiariesRemoveButton,
-          foregroundColor: AppColors.danger,
-          iconColor: AppColors.danger,
-          icon: Icons.person_remove_outlined,
-          buttonIconAlignment: .left,
-          iconSize: 20,
+        bottomNav: Column(
+          mainAxisSize: .min,
+          children: [
+            if (widget.payee?.formId?.isNotEmpty ?? false) ...[
+              FormButton(
+                onPressed: _send,
+                text: l10n.beneficiariesSendMoney,
+                icon: Icons.north_east,
+                buttonIconAlignment: .left,
+                iconSize: 20,
+              ),
+              const SizedBox(height: Spacing.md),
+            ],
+            // Secondary, not a filled red slab: removing is the rare action on
+            // this page, and it confirms before doing anything.
+            FormOutlineButton(
+              onPressed: _delete,
+              text: l10n.beneficiariesRemoveButton,
+              foregroundColor: AppColors.danger,
+              iconColor: AppColors.danger,
+              icon: Icons.person_remove_outlined,
+              buttonIconAlignment: .left,
+              iconSize: 20,
+            ),
+          ],
         ),
         child: Column(
           children: [

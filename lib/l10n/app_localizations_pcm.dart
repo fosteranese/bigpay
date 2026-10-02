@@ -633,6 +633,9 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get beneficiariesRemoveButton => 'Remove Beneficiary';
 
   @override
+  String get beneficiariesSendMoney => 'Send Money';
+
+  @override
   String get beneficiariesRecipientLabel => 'Recipient';
 
   @override

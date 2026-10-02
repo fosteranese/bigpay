@@ -623,6 +623,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get beneficiariesRemoveButton => 'إزالة المستفيد';
 
   @override
+  String get beneficiariesSendMoney => 'إرسال الأموال';
+
+  @override
   String get beneficiariesRecipientLabel => 'المستلم';
 
   @override

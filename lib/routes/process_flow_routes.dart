@@ -1,5 +1,6 @@
 import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,6 +40,7 @@ GoRoute get processFlowRoute => GoRoute(
           category: payload['category'],
           formData: payload['formData'],
           amDoing: payload['amDoing'] as AmDoing? ?? AmDoing.transaction,
+          payee: payload['payee'] as Payee?,
         );
       },
       nested: true,

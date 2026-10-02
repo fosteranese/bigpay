@@ -634,6 +634,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get beneficiariesRemoveButton => 'Retirer le bénéficiaire';
 
   @override
+  String get beneficiariesSendMoney => 'Envoyer de l\'argent';
+
+  @override
   String get beneficiariesRecipientLabel => 'Destinataire';
 
   @override

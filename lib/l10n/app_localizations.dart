@@ -1282,6 +1282,12 @@ abstract class AppLocalizations {
   /// **'Remove Beneficiary'**
   String get beneficiariesRemoveButton;
 
+  /// Button to pay a saved beneficiary directly
+  ///
+  /// In en, this message translates to:
+  /// **'Send Money'**
+  String get beneficiariesSendMoney;
+
   /// No description provided for @beneficiariesRecipientLabel.
   ///
   /// In en, this message translates to:

@@ -226,6 +226,7 @@
   "beneficiariesFallbackName": "Beneficiary",
   "beneficiariesDetailsTitle": "Beneficiary Details",
   "beneficiariesRemoveButton": "Remove Beneficiary",
+  "beneficiariesSendMoney": "Send Money",
   "beneficiariesRecipientLabel": "Recipient",
 
   "kycIntroTitle": "Make we verify you",

@@ -5,12 +5,12 @@ import 'package:bigpay/data/models/auth_data/recent_activity.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/message.util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/models/wallet/get_wallets_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -82,10 +82,18 @@ class _WalletsPageState extends State<WalletsPage> {
   /// this identifies the same form here.
   static const _linkWalletFormId = '1AD40BE3-4D10-4CE1-AC51-A168348055DA';
 
+  /// Fallback activity shape for the Add Mobile Wallet entry, used only when
+  /// recentActivity has no link-wallet item (the dashboard gating we started
+  /// from was removed precisely because it blocked the navigation). The
+  /// link-wallet form runs over the online form flow — umb's own
+  /// LinkMoMoWalletCard hardcodes this type for its form.
+  static const _linkWalletActivityType = ActivityTypesConst.fblOnline;
+  static const _linkWalletActivityName = 'Link Mobile Wallet';
+
   /// The backend-curated "quick action" for linking a new wallet (e.g.
   /// "Link Mobile Wallet") — the same entry the Dashboard's most-used-
-  /// services carousel surfaces via [FrequentServiceItem]. There's no
-  /// dedicated add-wallet endpoint; this reuses that one.
+  /// services carousel surfaces via [FrequentServiceItem]. Read only to
+  /// enrich the synthesized activity with the real id/icon when present.
   RecentActivity? get _addWalletActivity {
     final recent = AppState.currentUser?.recentActivity ?? const [];
     for (final item in recent) {
@@ -96,30 +104,22 @@ class _WalletsPageState extends State<WalletsPage> {
     return null;
   }
 
-  /// Fetches the add-wallet form directly and hands the result to the
-  /// Dashboard's own listener (kept alive across tabs by
-  /// [StatefulNavigationShell]), which pushes the service form. Mirrors
-  /// [FrequentServiceItem]'s own dispatch — matching how umb's own
-  /// LinkMoMoWalletCard links a mobile wallet through the same generic,
-  /// backend-driven form rather than a bespoke screen.
+  /// Opens the Add Mobile Wallet form through the generic, backend-driven
+  /// service form. Mirrors VirtualWalletCard's Fund Wallet action (the "add
+  /// funds" reference): dispatch straight to the central listener with
+  /// static form/ins ids instead of depending on recentActivity, so the
+  /// "Add New" → Mobile Wallet entry always navigates to the form. When the
+  /// link activity does exist in recentActivity, its real id/type/icon are
+  /// carried into the synthesized activity so a later submit stays correct.
   void _addMobileWallet(BuildContext context) {
     final activity = _addWalletActivity;
-    if (activity == null) {
-      final l10n = AppLocalizations.of(context)!;
-      MessageUtil.displayErrorDialog(
-        context,
-        title: l10n.commonServiceUnavailableTitle,
-        message: l10n.commonServiceUnavailableMessage,
-      );
-      return;
-    }
 
     GetServiceFormDataAction.activityDatum = ActivityDatum(
       activity: Activity(
-        activityId: activity.activityId,
-        activityType: activity.activityType,
-        activityName: activity.activityName,
-        icon: activity.icon,
+        activityId: activity?.activityId ?? _linkWalletFormId,
+        activityType: activity?.activityType ?? _linkWalletActivityType,
+        activityName: activity?.activityName ?? _linkWalletActivityName,
+        icon: activity?.icon,
       ),
     );
     GetServiceFormDataAction.event = context.dispatchProcess(
@@ -127,11 +127,12 @@ class _WalletsPageState extends State<WalletsPage> {
       returnSavedResponse: true,
       GetServiceFormDataAction(
         payload: GetServiceFormDataActionPayload(
-          formId: activity.formId,
-          insId: activity.formId,
+          formId: _linkWalletFormId,
+          insId: _linkWalletFormId,
         ),
-        endpointFunc: () =>
-            GetServiceFormDataAction.endpointFor(activity.activityType),
+        endpointFunc: () => GetServiceFormDataAction.endpointFor(
+          activity?.activityType ?? _linkWalletActivityType,
+        ),
       ),
     );
   }

@@ -209,6 +209,7 @@
   "beneficiariesFallbackName": "مستفيد",
   "beneficiariesDetailsTitle": "تفاصيل المستفيد",
   "beneficiariesRemoveButton": "إزالة المستفيد",
+  "beneficiariesSendMoney": "إرسال الأموال",
   "beneficiariesRecipientLabel": "المستلم",
 
   "kycIntroTitle": "لنقم بالتحقق من حسابك",

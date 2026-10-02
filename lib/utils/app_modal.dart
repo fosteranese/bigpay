@@ -41,51 +41,57 @@ class AppModal {
           color: context.cardBg,
           borderRadius: .circular(16),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: .min,
-            children: [
-              Row(
-                mainAxisSize: .max,
-                mainAxisAlignment: .spaceBetween,
-                crossAxisAlignment: .center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: context.header1,
+        child: Material(
+          // Hosts the ink splashes for any ListTile the caller puts in the
+          // sheet below — otherwise the decorated Container in between would
+          // hide them (and Flutter asserts about it).
+          color: Colors.transparent,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: .min,
+              children: [
+                Row(
+                  mainAxisSize: .max,
+                  mainAxisAlignment: .spaceBetween,
+                  crossAxisAlignment: .center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: context.header1,
+                      ),
                     ),
-                  ),
-                  ...actions,
-                  const SizedBox(width: 5),
-                  IconButton.filled(
-                    style: IconButton.styleFrom(
-                      alignment: .center,
-                      tapTargetSize: .shrinkWrap,
-                      backgroundColor: context.divider,
-                      fixedSize: Size(35, 35),
-                      minimumSize: Size(35, 35),
-                      maximumSize: Size(35, 35),
+                    ...actions,
+                    const SizedBox(width: 5),
+                    IconButton.filled(
+                      style: IconButton.styleFrom(
+                        alignment: .center,
+                        tapTargetSize: .shrinkWrap,
+                        backgroundColor: context.divider,
+                        fixedSize: Size(35, 35),
+                        minimumSize: Size(35, 35),
+                        maximumSize: Size(35, 35),
+                      ),
+                      onPressed: () {
+                        // This sheet shows on the root navigator
+                        // (useRootNavigator: true above), but `context` here
+                        // can resolve its nearest Navigator to a shell branch's
+                        // own nested one instead — AppRouter.router.pop()
+                        // always targets the right one.
+                        AppRouter.router.pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        size: 17,
+                        color: context.textPrimary,
+                      ),
                     ),
-                    onPressed: () {
-                      // This sheet shows on the root navigator
-                      // (useRootNavigator: true above), but `context` here
-                      // can resolve its nearest Navigator to a shell branch's
-                      // own nested one instead — AppRouter.router.pop()
-                      // always targets the right one.
-                      AppRouter.router.pop();
-                    },
-                    icon: Icon(
-                      Icons.close,
-                      size: 17,
-                      color: context.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              // const SizedBox(height: 16),
-              ...children,
-            ],
+                  ],
+                ),
+                // const SizedBox(height: 16),
+                ...children,
+              ],
+            ),
           ),
         ),
       ),

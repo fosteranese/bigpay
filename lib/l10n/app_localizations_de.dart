@@ -636,6 +636,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get beneficiariesRemoveButton => 'Begünstigten entfernen';
 
   @override
+  String get beneficiariesSendMoney => 'Geld senden';
+
+  @override
   String get beneficiariesRecipientLabel => 'Empfänger';
 
   @override

@@ -378,6 +378,8 @@
   "beneficiariesFallbackName": "Beneficiary",
   "beneficiariesDetailsTitle": "Beneficiary Details",
   "beneficiariesRemoveButton": "Remove Beneficiary",
+  "beneficiariesSendMoney": "Send Money",
+  "@beneficiariesSendMoney": { "description": "Button to pay a saved beneficiary directly" },
   "beneficiariesRecipientLabel": "Recipient",
 
   "kycIntroTitle": "Let’s get you verified",

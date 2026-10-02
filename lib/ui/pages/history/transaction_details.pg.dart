@@ -1,14 +1,12 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/beneficiary/save_beneficiary_action.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
-import 'package:bigpay/ui/components/history/receipt_image.dart';
+import 'package:bigpay/ui/components/history/receipt_pdf.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
-import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
@@ -80,49 +78,16 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
 
   ExecuteProcessEvent? _saveBeneficiaryEvent;
 
-  /// Renders the branded receipt off-screen, captures it to a PNG and shares
-  /// that image. Falls back to a plain-text receipt if the capture fails.
+  /// Builds the branded transaction receipt as a PDF and shares that file.
+  /// Falls back to a plain-text receipt only if the PDF cannot be written.
   Future<void> _share() async {
-    final boundaryKey = GlobalKey();
-    final entry = OverlayEntry(
-      // Opacity 0 keeps it invisible while still laying out and painting, so
-      // the RepaintBoundary below it can be captured.
-      builder: (_) => Positioned(
-        left: 0,
-        top: 0,
-        child: Opacity(
-          opacity: 0,
-          child: Material(
-            color: Colors.transparent,
-            child: RepaintBoundary(
-              key: boundaryKey,
-              child: ReceiptImage(receipt: receipt),
-            ),
-          ),
-        ),
-      ),
-    );
-    Overlay.of(context).insert(entry);
-
     try {
-      // Let it lay out, paint, and the SVG logo rasterise.
-      await Future.delayed(const Duration(milliseconds: 350));
-      final boundary =
-          boundaryKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-      final image = await boundary?.toImage(pixelRatio: 3);
-      final bytes = await image?.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null) {
-        if (mounted) _shareText();
-        return;
-      }
-
       final dir = await getTemporaryDirectory();
       final file = File(
         '${dir.path}/receipt_'
-        '${receipt.receiptId ?? DateTime.now().millisecondsSinceEpoch}.png',
+        '${receipt.receiptId ?? DateTime.now().millisecondsSinceEpoch}.pdf',
       );
-      await file.writeAsBytes(bytes.buffer.asUint8List());
+      await file.writeAsBytes(await ReceiptPdf.build(receipt));
 
       await SharePlus.instance.share(
         ShareParams(
@@ -132,8 +97,6 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
       );
     } catch (_) {
       if (mounted) _shareText();
-    } finally {
-      entry.remove();
     }
   }
 

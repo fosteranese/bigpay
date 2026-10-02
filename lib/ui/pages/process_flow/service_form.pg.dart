@@ -36,6 +36,7 @@ class ServiceFormPage extends StatefulWidget {
     required this.category,
     required this.formData,
     this.amDoing = AmDoing.transaction,
+    this.payee,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/form',
@@ -44,6 +45,10 @@ class ServiceFormPage extends StatefulWidget {
   final GeneralFlowCategory category;
   final GeneralFlowFormData formData;
   final AmDoing amDoing;
+
+  /// When set (e.g. "Send Money" from a saved beneficiary), the form opens
+  /// pre-filled with this payee's saved values.
+  final Payee? payee;
 
   @override
   State<ServiceFormPage> createState() => _ServiceFormPageState();
@@ -78,6 +83,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
     super.initState();
     _form = widget.formData;
     _buildFormItems();
+    if (widget.payee != null) _prefillFromPayee(widget.payee!);
     _recomputeCanSubmit();
   }
 

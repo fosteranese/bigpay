@@ -107,9 +107,12 @@ extension ThemeColors on BuildContext {
 }
 
 class AppTheme {
+  // Cupertino transitions on Android too, so the left-edge swipe-to-go-back
+  // gesture works there as well — ZoomPageTransitionsBuilder has no such
+  // gesture, which is why back-swipe "didn't work" on Android.
   static const _pageTransitions = PageTransitionsTheme(
     builders: {
-      TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),

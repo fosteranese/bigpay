@@ -209,6 +209,7 @@
   "beneficiariesFallbackName": "Beneficiario",
   "beneficiariesDetailsTitle": "Detalles del beneficiario",
   "beneficiariesRemoveButton": "Eliminar beneficiario",
+  "beneficiariesSendMoney": "Enviar dinero",
   "beneficiariesRecipientLabel": "Destinatario",
 
   "kycIntroTitle": "Vamos a verificarte",
