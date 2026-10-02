@@ -180,6 +180,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validationPinRequired => 'Le code PIN est requis';
 
   @override
+  String get validationDebitCreditSame =>
+      'Le compte à débiter ne peut pas être le même que le compte à créditer.';
+
+  @override
   String get validationPinMismatch => 'Les codes PIN ne correspondent pas';
 
   @override
@@ -569,6 +573,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get historyTransactionFailed => 'Transaction échouée';
 
   @override
+  String get historyTransactionPending => 'Transaction en attente';
+
+  @override
+  String get historyTransactionProcessing => 'Transaction en cours';
+
+  @override
+  String get historyTransactionInProgressSubtitle =>
+      'Nous mettrons à jour le statut une fois confirmé.';
+
+  @override
   String get historyTransactionReceipt => 'Reçu de transaction';
 
   @override
@@ -779,6 +793,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get summaryTransactionConfirm =>
       'Veuillez confirmer les détails de la transaction avant de continuer';
+
+  @override
+  String get kycVerifiedName => 'Nom';
+
+  @override
+  String get kycVerifiedNationality => 'Nationalité';
+
+  @override
+  String get kycVerifiedGender => 'Sexe';
 
   @override
   String get summarySaveBeneficiary => 'Enregistrer le bénéficiaire';

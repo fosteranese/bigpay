@@ -1,3 +1,5 @@
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
@@ -332,10 +334,34 @@ class _FormSelectInputState extends State<FormSelectInput> {
         child: ListTile(
           onTap: () => _onSelect(option),
           selected: selected,
+          leading: _optionLeading(option),
           title: Text(option.label),
           contentPadding: .symmetric(horizontal: 10),
           trailing: FormRadioButton(selected: selected),
         ),
+      ),
+    );
+  }
+
+  /// The option's logo, when it has one. A full URL is used directly; a
+  /// relative path is resolved against the account's image base URL.
+  Widget? _optionLeading(FormSelectOption option) {
+    final icon = option.icon;
+    if (icon == null || icon.isEmpty) return null;
+
+    final url = icon.startsWith('http')
+        ? icon
+        : '${AppState.currentUser?.imageBaseUrl ?? ''}'
+              '${AppState.currentUser?.imageDirectory ?? ''}/$icon';
+
+    return ClipRRect(
+      borderRadius: .circular(6),
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 32,
+        height: 32,
+        fit: .contain,
+        errorWidget: (_, _, _) => const SizedBox(width: 32, height: 32),
       ),
     );
   }
@@ -368,11 +394,16 @@ class _FormSelectInputState extends State<FormSelectInput> {
 class FormSelectOption {
   final String id;
   final String label;
+
+  /// Optional leading icon — a full URL, or a relative path resolved against
+  /// the image base URL.
+  final String? icon;
   final dynamic data;
 
   FormSelectOption({
     required this.id,
     required this.label,
+    this.icon,
     this.data,
   });
 }

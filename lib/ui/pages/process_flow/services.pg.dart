@@ -215,6 +215,10 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
             placeholder: AppLocalizations.of(context)!.commonSearch,
             controller: _searchController,
             suffix: Icon(Icons.search),
+            textInputAction: .done,
+            next: (_) => FocusScope.of(context).unfocus(),
+            keyboardType: .text,
+            maxLines: 1,
           ),
         ),
       ),
@@ -280,7 +284,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
                     ),
                     leading: CachedNetworkImage(
                       imageUrl:
-                          '${AppState.currentUser?.imageBaseUrl}${item.imageDirectory}/${item.activity?.icon}',
+                          '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${item.activity?.icon}',
                       width: 24,
                       height: 24,
                       placeholder: (context, url) => Icon(

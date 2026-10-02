@@ -436,6 +436,12 @@ abstract class AppLocalizations {
   /// **'PIN is required'**
   String get validationPinRequired;
 
+  /// Shown when the source (debit) account equals the destination (credit) account
+  ///
+  /// In en, this message translates to:
+  /// **'The account to debit cannot be the same as the account to credit.'**
+  String get validationDebitCreditSame;
+
   /// Validation error when confirm PIN does not match
   ///
   /// In en, this message translates to:
@@ -1168,6 +1174,24 @@ abstract class AppLocalizations {
   /// **'Transaction Failed'**
   String get historyTransactionFailed;
 
+  /// Receipt title when a transaction is pending
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Pending'**
+  String get historyTransactionPending;
+
+  /// Receipt title when a transaction is processing
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Processing'**
+  String get historyTransactionProcessing;
+
+  /// Receipt subtitle for a pending/processing transaction
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll update the status once it\'s confirmed.'**
+  String get historyTransactionInProgressSubtitle;
+
   /// No description provided for @historyTransactionReceipt.
   ///
   /// In en, this message translates to:
@@ -1557,6 +1581,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kindly confirm the transaction details before you proceed'**
   String get summaryTransactionConfirm;
+
+  /// Verified-customer name label on the confirmation preview
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get kycVerifiedName;
+
+  /// Verified-customer nationality label on the confirmation preview
+  ///
+  /// In en, this message translates to:
+  /// **'Nationality'**
+  String get kycVerifiedNationality;
+
+  /// Verified-customer gender label on the confirmation preview
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get kycVerifiedGender;
 
   /// No description provided for @summarySaveBeneficiary.
   ///

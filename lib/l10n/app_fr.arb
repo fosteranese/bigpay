@@ -189,6 +189,9 @@
   "historyTransactionSuccessful": "Transaction réussie",
   "historyTransactionCompleteSubtitle": "Votre transaction est terminée",
   "historyTransactionFailed": "Transaction échouée",
+  "historyTransactionPending": "Transaction en attente",
+  "historyTransactionProcessing": "Transaction en cours",
+  "historyTransactionInProgressSubtitle": "Nous mettrons à jour le statut une fois confirmé.",
   "historyTransactionReceipt": "Reçu de transaction",
 
   "commonRemove": "Retirer",
@@ -260,6 +263,9 @@
   "summaryTransactionTitle": "Résumé de la transaction",
   "summaryBeneficiaryConfirm": "Confirmez les détails du bénéficiaire avant d'enregistrer",
   "summaryTransactionConfirm": "Veuillez confirmer les détails de la transaction avant de continuer",
+  "kycVerifiedName": "Nom",
+  "kycVerifiedNationality": "Nationalité",
+  "kycVerifiedGender": "Sexe",
   "summarySaveBeneficiary": "Enregistrer le bénéficiaire",
   "summaryBeneficiarySavedMessage": "Bénéficiaire enregistré.",
 
@@ -324,6 +330,7 @@
   "validationEmailInvalid": "Saisissez une adresse e-mail valide",
   "validationPasswordRequired": "Le mot de passe est requis",
   "validationPinRequired": "Le code PIN est requis",
+  "validationDebitCreditSame": "Le compte à débiter ne peut pas être le même que le compte à créditer.",
   "validationPinMismatch": "Les codes PIN ne correspondent pas",
   "validationAnswerRequired": "La réponse de sécurité est requise",
   "validationFieldRequired": "Ce champ est requis",

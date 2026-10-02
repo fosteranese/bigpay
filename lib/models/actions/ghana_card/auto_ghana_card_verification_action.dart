@@ -1,12 +1,14 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:bigpay/data/models/kyc/kyc_validation_result.dart';
 import 'package:bigpay/models/actions/action.dart';
 
 part 'auto_ghana_card_verification_action.freezed.dart';
 part 'auto_ghana_card_verification_action.g.dart';
 
 final class AutoGhanaCardVerificationAction
-    extends Action<AutoGhanaCardVerificationActionPayload, Null> {
+    extends
+        Action<AutoGhanaCardVerificationActionPayload, KycValidationResult> {
   static const path = '/MyAccount/enhanceValidation';
 
   const AutoGhanaCardVerificationAction({
@@ -16,8 +18,8 @@ final class AutoGhanaCardVerificationAction
          responseDataFunc: _responseDataFunc,
        );
 
-  static Null _responseDataFunc(_) {
-    return null;
+  static KycValidationResult _responseDataFunc(dynamic data) {
+    return KycValidationResult.fromResponse(data);
   }
 }
 

@@ -46,6 +46,18 @@ class VirtualWalletCard extends StatelessWidget {
 
   final _visible = ValueNotifier(false);
 
+  /// The balance with any leading currency prefix (GHS/GH/₵) removed, so the
+  /// card's own "GHS " prefix isn't doubled.
+  String _amount(String? value) {
+    final raw = (value ?? '0.00').trim();
+    return raw
+        .replaceFirst(
+          RegExp(r'^(GH[S₵]?|₵)\s*', caseSensitive: false),
+          '',
+        )
+        .trim();
+  }
+
   // Fund Wallet opens the "Top Up" form under the Transfers activity directly,
   // like a most-used service. Kept static since there's no runtime activity to
   // read it from.
@@ -160,9 +172,10 @@ class VirtualWalletCard extends StatelessWidget {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: visible
-                                      ? balance ?? '0.00'
-                                      : '* *** **',
+                                  // Some sources already carry a "GHS"/"GH"
+                                  // prefix; strip it so the "GHS " above isn't
+                                  // doubled (GHS GHS ...).
+                                  text: visible ? _amount(balance) : '* *** **',
                                   style: context.display1.copyWith(
                                     color: AppColors.white,
                                   ),

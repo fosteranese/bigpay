@@ -181,6 +181,10 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get validationPinRequired => 'PIN dey required';
 
   @override
+  String get validationDebitCreditSame =>
+      'The account to debit cannot be the same as the account to credit.';
+
+  @override
   String get validationPinMismatch => 'PIN no match';
 
   @override
@@ -568,6 +572,16 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get historyTransactionFailed => 'Transaction Fail';
 
   @override
+  String get historyTransactionPending => 'Transaction Dey Wait';
+
+  @override
+  String get historyTransactionProcessing => 'Transaction Dey Process';
+
+  @override
+  String get historyTransactionInProgressSubtitle =>
+      'We go update the status once dem confirm am.';
+
+  @override
   String get historyTransactionReceipt => 'Transaction Receipt';
 
   @override
@@ -776,6 +790,15 @@ class AppLocalizationsPcm extends AppLocalizations {
   @override
   String get summaryTransactionConfirm =>
       'Abeg confirm the transaction details before you continue';
+
+  @override
+  String get kycVerifiedName => 'Name';
+
+  @override
+  String get kycVerifiedNationality => 'Nationality';
+
+  @override
+  String get kycVerifiedGender => 'Gender';
 
   @override
   String get summarySaveBeneficiary => 'Save Beneficiary';

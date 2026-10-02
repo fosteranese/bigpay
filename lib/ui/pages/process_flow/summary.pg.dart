@@ -12,8 +12,11 @@ import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
 import 'package:bigpay/models/actions/services/process_request_action.dart';
+import 'package:bigpay/models/actions/services/resend_form_otp_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -24,6 +27,7 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/transaction_validation.util.dart';
 
 /// Confirmation screen shown after a form is verified: it renders the
 /// verification's `previewData` (amount, charges, total, entered fields) and —
@@ -180,18 +184,39 @@ class _SummaryPageState extends State<SummaryPage> {
     return {...verified, ...payload};
   }
 
+  /// Triggers the transaction OTP SMS — called when the OTP auth step opens
+  /// and on each resend tap.
+  void _sendFormOtp() {
+    final formId = widget.formData?.form?.formId;
+    if (formId == null) return;
+    context.dispatchProcess(ResendFormOtpAction(formId: formId));
+  }
+
   void _continue() {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
 
     final payload = _buildPayload();
+
+    if (TransactionValidation.debitEqualsCredit(
+      widget.formData?.fieldsDatum ?? const [],
+      payload,
+    )) {
+      MessageUtil.displayErrorDialog(
+        context,
+        message: AppLocalizations.of(context)!.validationDebitCreditSame,
+      );
+      return;
+    }
+
     final authModes = widget.verification?.authMode ?? const [];
 
     if (authModes.isNotEmpty) {
       AuthenticationUtil.start(
         authModes: authModes,
         payload: payload,
+        onResendShortCode: _sendFormOtp,
         complete: ({otp, required payload, pin, secretAnswer}) {
           // Each auth step (PIN/OTP/secret answer) dismisses its own
           // dialog before calling onSuccess, so there's nothing left to
@@ -314,6 +339,16 @@ class _SummaryPageState extends State<SummaryPage> {
 
             if (snapshot.hasError) {
               _processEvent = null;
+              final code = snapshot.error!.code;
+              // Pending/processing isn't a failure — the request was accepted
+              // but isn't final yet. Don't drop the user back on the summary;
+              // send them to History (refreshed) to track its status there.
+              if (code == StatusCodeConstants.pending ||
+                  code == StatusCodeConstants.processing) {
+                AppState.notifyDataChanged();
+                AppRouter.router.go(HistoryPage.route.path);
+                return;
+              }
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
 
 import 'package:bigpay/constants/field.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
@@ -17,9 +18,10 @@ import 'package:bigpay/utils/validator.util.dart';
 /// `fieldDataType` calls for — the bigpay adaptation of umb's
 /// `FormMultipleInputPlus`.
 ///
-/// bigpay has no dedicated payee, phone-book, amount, or source/destination
-/// account inputs, so those data types degrade to a plain text field rather
-/// than pull umb's payee/schedule subsystem across. A hidden field
+/// bigpay has no dedicated amount or source/destination account inputs, so
+/// those data types degrade to a plain text field rather than pull umb's
+/// schedule subsystem across. The phone-book type adds a contact-picker
+/// button; payees pick from saved recipients. A hidden field
 /// (`fieldVisible != 1`) renders nothing.
 class FormFieldInput extends StatelessWidget {
   const FormFieldInput({
@@ -40,6 +42,15 @@ class FormFieldInput extends StatelessWidget {
   final bool isLast;
   final void Function(Payee payee)? onPayeeSelected;
   final String? Function(String? value)? validator;
+
+  /// Opens the OS contact picker and drops the chosen number into [controller],
+  /// stripped of spaces/dashes/parens so it submits as clean digits.
+  Future<void> _pickFromPhoneBook() async {
+    final contact = await FlutterNativeContactPicker().selectPhoneNumber();
+    final number = contact?.selectedPhoneNumber;
+    if (number == null) return;
+    controller.text = number.replaceAll(RegExp(r'[\s()-]'), '');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +75,7 @@ class FormFieldInput extends StatelessWidget {
                 (l) => FormSelectOption(
                   id: l.lovValue ?? '',
                   label: l.lovTitle ?? '',
+                  icon: l.icon,
                 ),
               )
               .toList(),
@@ -220,7 +232,24 @@ class FormFieldInput extends StatelessWidget {
         return text(keyboardType: TextInputType.emailAddress);
 
       case FieldDataTypesConst.phoneBook:
-        return text(keyboardType: TextInputType.phone);
+        return FormInput(
+          label: label,
+          placeholder: placeholder,
+          controller: controller,
+          focusNode: focusNode,
+          readOnly: readOnly,
+          maxLength: maxLength,
+          keyboardType: TextInputType.phone,
+          textInputAction: isLast ? TextInputAction.done : TextInputAction.next,
+          next: next,
+          validator: validator,
+          // Pick a number straight from the device phonebook via the OS's own
+          // contact picker (out-of-process, so no contacts permission needed).
+          suffix: IconButton(
+            icon: const Icon(Icons.contacts_outlined),
+            onPressed: _pickFromPhoneBook,
+          ),
+        );
 
       case FieldDataTypesConst.link:
         return text(keyboardType: TextInputType.url);

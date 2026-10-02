@@ -182,6 +182,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get validationPinRequired => 'PIN ist erforderlich';
 
   @override
+  String get validationDebitCreditSame =>
+      'Das zu belastende Konto darf nicht mit dem gutzuschreibenden Konto übereinstimmen.';
+
+  @override
   String get validationPinMismatch => 'PINs stimmen nicht überein';
 
   @override
@@ -571,6 +575,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get historyTransactionFailed => 'Transaktion fehlgeschlagen';
 
   @override
+  String get historyTransactionPending => 'Transaktion ausstehend';
+
+  @override
+  String get historyTransactionProcessing => 'Transaktion in Bearbeitung';
+
+  @override
+  String get historyTransactionInProgressSubtitle =>
+      'Wir aktualisieren den Status, sobald er bestätigt ist.';
+
+  @override
   String get historyTransactionReceipt => 'Transaktionsbeleg';
 
   @override
@@ -783,6 +797,15 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get summaryTransactionConfirm =>
       'Bitte bestätigen Sie die Transaktionsdetails, bevor Sie fortfahren';
+
+  @override
+  String get kycVerifiedName => 'Name';
+
+  @override
+  String get kycVerifiedNationality => 'Staatsangehörigkeit';
+
+  @override
+  String get kycVerifiedGender => 'Geschlecht';
 
   @override
   String get summarySaveBeneficiary => 'Begünstigten speichern';

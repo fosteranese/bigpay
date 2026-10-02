@@ -1,9 +1,15 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/beneficiary/save_beneficiary_action.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/history/receipt_image.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/feedback.pg.dart';
@@ -74,15 +80,75 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
 
   ExecuteProcessEvent? _saveBeneficiaryEvent;
 
-  void _share(BuildContext context) {
+  /// Renders the branded receipt off-screen, captures it to a PNG and shares
+  /// that image. Falls back to a plain-text receipt if the capture fails.
+  Future<void> _share() async {
+    final boundaryKey = GlobalKey();
+    final entry = OverlayEntry(
+      // Opacity 0 keeps it invisible while still laying out and painting, so
+      // the RepaintBoundary below it can be captured.
+      builder: (_) => Positioned(
+        left: 0,
+        top: 0,
+        child: Opacity(
+          opacity: 0,
+          child: Material(
+            color: Colors.transparent,
+            child: RepaintBoundary(
+              key: boundaryKey,
+              child: ReceiptImage(receipt: receipt),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(entry);
+
+    try {
+      // Let it lay out, paint, and the SVG logo rasterise.
+      await Future.delayed(const Duration(milliseconds: 350));
+      final boundary =
+          boundaryKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      final image = await boundary?.toImage(pixelRatio: 3);
+      final bytes = await image?.toByteData(format: ui.ImageByteFormat.png);
+      if (bytes == null) {
+        if (mounted) _shareText();
+        return;
+      }
+
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        '${dir.path}/receipt_'
+        '${receipt.receiptId ?? DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await file.writeAsBytes(bytes.buffer.asUint8List());
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: receipt.formName,
+        ),
+      );
+    } catch (_) {
+      if (mounted) _shareText();
+    } finally {
+      entry.remove();
+    }
+  }
+
+  void _shareText() {
     final l10n = AppLocalizations.of(context)!;
     final lines = [
       receipt.formName,
       receipt.activityName,
-      if (receipt.amount != null) '${l10n.historyServiceLabel}: ${receipt.amount}',
+      if (receipt.amount != null)
+        '${l10n.historyServiceLabel}: ${receipt.amount}',
       ...receipt.previewData.map((item) => '${item.key}: ${item.value}'),
-      if (receipt.reference != null) '${l10n.historyTransactionIdLabel}: ${receipt.reference}',
-      if (receipt.receiptDateTime != null) '${l10n.commonDateLabel}: ${receipt.receiptDateTime}',
+      if (receipt.reference != null)
+        '${l10n.historyTransactionIdLabel}: ${receipt.reference}',
+      if (receipt.receiptDateTime != null)
+        '${l10n.commonDateLabel}: ${receipt.receiptDateTime}',
     ].whereType<String>().join('\n');
 
     SharePlus.instance.share(
@@ -120,7 +186,9 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
           _saveBeneficiaryEvent = null;
           MessageUtil.displaySuccessDialog(
             context,
-            message: AppLocalizations.of(context)!.summaryBeneficiarySavedMessage,
+            message: AppLocalizations.of(
+              context,
+            )!.summaryBeneficiarySavedMessage,
           );
           return;
         }
@@ -192,11 +260,15 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                       child: Column(
                         children: [
                           TransactionDetailsItem(
-                            title: AppLocalizations.of(context)!.historyServiceLabel,
+                            title: AppLocalizations.of(
+                              context,
+                            )!.historyServiceLabel,
                             value: receipt.formName ?? '',
                           ),
                           TransactionDetailsItem(
-                            title: AppLocalizations.of(context)!.historyTransactionIdLabel,
+                            title: AppLocalizations.of(
+                              context,
+                            )!.historyTransactionIdLabel,
                             value: receipt.activityName ?? '',
                           ),
                           Divider(
@@ -214,7 +286,9 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                             thickness: 4,
                           ),
                           TransactionDetailsItem(
-                            title: AppLocalizations.of(context)!.commonDateLabel,
+                            title: AppLocalizations.of(
+                              context,
+                            )!.commonDateLabel,
                             value: receipt.receiptDateTime ?? '',
                           ),
                         ],
@@ -241,7 +315,7 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                             child: FormButton(
                               backgroundColor: context.cardBg,
                               foregroundColor: context.textPrimary,
-                              onPressed: () => _share(context),
+                              onPressed: _share,
                               text: AppLocalizations.of(context)!.commonShare,
                               icon: Icons.share_outlined,
                               buttonIconAlignment: .left,
@@ -253,7 +327,8 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                           // bill payment doesn't) — no flag means no button,
                           // not a button that fails when tapped.
                           if (receipt.saveBeneficiary == 1 &&
-                              (receipt.beneficiaryEndpoint ?? '').isNotEmpty) ...[
+                              (receipt.beneficiaryEndpoint ?? '')
+                                  .isNotEmpty) ...[
                             const SizedBox(width: 10),
                             Expanded(
                               child: FormButton(
@@ -273,8 +348,11 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                       FormButton(
                         backgroundColor: context.cardBg,
                         foregroundColor: context.textPrimary,
-                        onPressed: () => AppRouter.router.push(FeedbackPage.route.path),
-                        text: AppLocalizations.of(context)!.historySubmitComplain,
+                        onPressed: () =>
+                            AppRouter.router.push(FeedbackPage.route.path),
+                        text: AppLocalizations.of(
+                          context,
+                        )!.historySubmitComplain,
                         svgIcon: 'assets/img/complaint.svg',
                         buttonIconAlignment: .left,
                         iconSize: 20,
@@ -301,52 +379,78 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
   }
 
   Widget _buildTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (receipt.status) {
       case 1:
-        return Column(
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              size: 45,
-              color: AppColors.success,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              AppLocalizations.of(context)!.historyTransactionSuccessful,
-              style: context.display2,
-            ),
-            Text(
-              AppLocalizations.of(context)!.historyTransactionCompleteSubtitle,
-              style: context.smallDetails.copyWith(
-                color: context.textPrimary,
-              ),
-            ),
-          ],
+        return _statusTitle(
+          context,
+          icon: Icons.check_circle_outline,
+          color: AppColors.success,
+          title: l10n.historyTransactionSuccessful,
+          subtitle: l10n.historyTransactionCompleteSubtitle,
+        );
+
+      case 3:
+        return _statusTitle(
+          context,
+          icon: Icons.schedule_outlined,
+          color: AppColors.pending,
+          title: l10n.historyTransactionPending,
+          titleColor: AppColors.pending,
+          subtitle: l10n.historyTransactionInProgressSubtitle,
+        );
+
+      case 5:
+        return _statusTitle(
+          context,
+          icon: Icons.sync_outlined,
+          color: AppColors.pending,
+          title: l10n.historyTransactionProcessing,
+          titleColor: AppColors.pending,
+          subtitle: l10n.historyTransactionInProgressSubtitle,
         );
 
       case 0:
-      case 3:
-        return Column(
-          children: [
-            Icon(
-              Icons.cancel_outlined,
-              size: 45,
-              color: AppColors.danger,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              AppLocalizations.of(context)!.historyTransactionFailed,
-              style: context.display2.copyWith(
-                color: AppColors.danger,
-              ),
-            ),
-          ],
+      case 2:
+        return _statusTitle(
+          context,
+          icon: Icons.cancel_outlined,
+          color: AppColors.danger,
+          title: l10n.historyTransactionFailed,
+          titleColor: AppColors.danger,
         );
     }
 
     return Text(
-      AppLocalizations.of(context)!.historyTransactionReceipt,
+      l10n.historyTransactionReceipt,
       style: context.display2,
+    );
+  }
+
+  Widget _statusTitle(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required String title,
+    Color? titleColor,
+    String? subtitle,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 45, color: color),
+        const SizedBox(height: 10),
+        Text(
+          title,
+          textAlign: .center,
+          style: context.display2.copyWith(color: titleColor),
+        ),
+        if (subtitle != null)
+          Text(
+            subtitle,
+            textAlign: .center,
+            style: context.smallDetails.copyWith(color: context.textPrimary),
+          ),
+      ],
     );
   }
 }

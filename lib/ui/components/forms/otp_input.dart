@@ -156,7 +156,8 @@ class FormOtpInputState extends State<FormOtpInput>
         border: Border(
           bottom: BorderSide(
             color: _borderColor(index),
-            width: _focusNode.hasFocus &&
+            width:
+                _focusNode.hasFocus &&
                     index == text.length.clamp(0, widget.count - 1)
                 ? 2
                 : 1,
@@ -171,9 +172,12 @@ class FormOtpInputState extends State<FormOtpInput>
   }
 
   Widget _otpFields() {
-    final boxes = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _ensureKeyboard,
+    // The real field fills the whole row and sits on top, with transparent
+    // text/cursor; the decorative boxes are painted behind it (IgnorePointer)
+    // from the controller. Tapping anywhere thus lands on the actual field, so
+    // the keyboard shows reliably and IME typing is normal — the old zero-size
+    // offstage field + faked requestFocus dropped taps and glitched input.
+    final boxes = IgnorePointer(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(widget.count, _box),
@@ -183,28 +187,38 @@ class FormOtpInputState extends State<FormOtpInput>
     return Stack(
       alignment: Alignment.center,
       children: [
-        Opacity(
-          opacity: 0,
-          child: SizedBox(
-            height: 0,
-            width: 0,
-            child: AutofillGroup(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                keyboardType: TextInputType.number,
-                autofillHints: widget.enableAutofill
-                    ? const [AutofillHints.oneTimeCode]
-                    : null,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(widget.count),
-                ],
+        boxes,
+        Positioned.fill(
+          child: AutofillGroup(
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              keyboardType: TextInputType.number,
+              obscureText: widget.obscureText,
+              showCursor: false,
+              enableInteractiveSelection: false,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.transparent),
+              cursorColor: Colors.transparent,
+              autofillHints: widget.enableAutofill
+                  ? const [AutofillHints.oneTimeCode]
+                  : null,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                fillColor: Colors.transparent,
+                filled: true,
+                counterText: '',
               ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(widget.count),
+              ],
             ),
           ),
         ),
-        boxes,
       ],
     );
   }

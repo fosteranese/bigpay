@@ -6,17 +6,23 @@ class Lov extends Equatable {
   final String? lovTitle;
   final String? lovValue;
 
-  const Lov({this.lovTitle, this.lovValue});
+  /// Optional icon/logo for the option (e.g. a bank or network logo). A full
+  /// URL is used as-is; a relative path is prefixed with the image base URL.
+  final String? icon;
+
+  const Lov({this.lovTitle, this.lovValue, this.icon});
 
   factory Lov.fromMap(Map<String, dynamic> data) => Lov(
-        lovTitle: data['lovTitle'] as String?,
-        lovValue: data['lovValue'] as String?,
-      );
+    lovTitle: data['lovTitle'] as String?,
+    lovValue: data['lovValue'] as String?,
+    icon: (data['lovIcon'] ?? data['icon'] ?? data['image']) as String?,
+  );
 
   Map<String, dynamic> toMap() => {
-        'lovTitle': lovTitle,
-        'lovValue': lovValue,
-      };
+    'lovTitle': lovTitle,
+    'lovValue': lovValue,
+    'icon': icon,
+  };
 
   /// `dart:convert`
   ///
@@ -33,10 +39,12 @@ class Lov extends Equatable {
   Lov copyWith({
     String? lovTitle,
     String? lovValue,
+    String? icon,
   }) {
     return Lov(
       lovTitle: lovTitle ?? this.lovTitle,
       lovValue: lovValue ?? this.lovValue,
+      icon: icon ?? this.icon,
     );
   }
 
@@ -44,5 +52,5 @@ class Lov extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object?> get props => [lovTitle, lovValue];
+  List<Object?> get props => [lovTitle, lovValue, icon];
 }

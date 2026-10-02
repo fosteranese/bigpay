@@ -65,6 +65,7 @@
   "validationEmailInvalid": "Put valid email address",
   "validationPasswordRequired": "Password dey required",
   "validationPinRequired": "PIN dey required",
+  "validationDebitCreditSame": "The account to debit cannot be the same as the account to credit.",
   "validationPinMismatch": "PIN no match",
   "validationAnswerRequired": "Security answer dey required",
   "validationFieldRequired": "This field dey required",
@@ -205,6 +206,9 @@
   "historyTransactionSuccessful": "Transaction Successful",
   "historyTransactionCompleteSubtitle": "Your transaction don complete",
   "historyTransactionFailed": "Transaction Fail",
+  "historyTransactionPending": "Transaction Dey Wait",
+  "historyTransactionProcessing": "Transaction Dey Process",
+  "historyTransactionInProgressSubtitle": "We go update the status once dem confirm am.",
   "historyTransactionReceipt": "Transaction Receipt",
 
   "commonRemove": "Remove",
@@ -276,6 +280,9 @@
   "summaryTransactionTitle": "Transaction Summary",
   "summaryBeneficiaryConfirm": "Confirm the beneficiary details before you save",
   "summaryTransactionConfirm": "Abeg confirm the transaction details before you continue",
+  "kycVerifiedName": "Name",
+  "kycVerifiedNationality": "Nationality",
+  "kycVerifiedGender": "Gender",
   "summarySaveBeneficiary": "Save Beneficiary",
   "summaryBeneficiarySavedMessage": "Beneficiary don save.",
 

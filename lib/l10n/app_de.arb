@@ -189,6 +189,9 @@
   "historyTransactionSuccessful": "Transaktion erfolgreich",
   "historyTransactionCompleteSubtitle": "Ihre Transaktion ist abgeschlossen",
   "historyTransactionFailed": "Transaktion fehlgeschlagen",
+  "historyTransactionPending": "Transaktion ausstehend",
+  "historyTransactionProcessing": "Transaktion in Bearbeitung",
+  "historyTransactionInProgressSubtitle": "Wir aktualisieren den Status, sobald er bestätigt ist.",
   "historyTransactionReceipt": "Transaktionsbeleg",
 
   "commonRemove": "Entfernen",
@@ -260,6 +263,9 @@
   "summaryTransactionTitle": "Transaktionsübersicht",
   "summaryBeneficiaryConfirm": "Bestätigen Sie die Begünstigtendaten, bevor Sie speichern",
   "summaryTransactionConfirm": "Bitte bestätigen Sie die Transaktionsdetails, bevor Sie fortfahren",
+  "kycVerifiedName": "Name",
+  "kycVerifiedNationality": "Staatsangehörigkeit",
+  "kycVerifiedGender": "Geschlecht",
   "summarySaveBeneficiary": "Begünstigten speichern",
   "summaryBeneficiarySavedMessage": "Begünstigter gespeichert.",
 
@@ -324,6 +330,7 @@
   "validationEmailInvalid": "Geben Sie eine gültige E-Mail-Adresse ein",
   "validationPasswordRequired": "Passwort ist erforderlich",
   "validationPinRequired": "PIN ist erforderlich",
+  "validationDebitCreditSame": "Das zu belastende Konto darf nicht mit dem gutzuschreibenden Konto übereinstimmen.",
   "validationPinMismatch": "PINs stimmen nicht überein",
   "validationAnswerRequired": "Sicherheitsantwort ist erforderlich",
   "validationFieldRequired": "Dieses Feld ist erforderlich",

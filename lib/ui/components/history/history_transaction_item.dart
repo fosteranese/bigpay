@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/constants/status.const.dart';
@@ -5,11 +7,12 @@ import 'package:bigpay/data/models/general_flow/request_response.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
-/// One transaction row in the history list. Renders a [RequestResponse] — the
-/// service name and date, with the amount and status coloured by outcome.
+/// One transaction row in the history list. Renders a [RequestResponse] — a
+/// round avatar (service initials) with a status-coloured direction badge, the
+/// service name and date, and the amount with its status on the right.
 ///
-/// Non-financial records (an enquiry, with no amount) show a status badge in
-/// place of the amount, mirroring umb's history item.
+/// Non-financial records (an enquiry, with no amount) show a receipt glyph and
+/// a status badge in place of the amount, mirroring umb's history item.
 class HistoryTransactionItem extends StatelessWidget {
   const HistoryTransactionItem({
     super.key,
@@ -37,15 +40,18 @@ class HistoryTransactionItem extends StatelessWidget {
     }
   }
 
-  IconData get _directionIcon {
-    switch (record.status) {
-      case 1:
-        return Icons.north_east_outlined;
-      case 0:
-        return Icons.south_west_outlined;
-      default:
-        return Icons.hourglass_bottom_outlined;
+  /// Up to two letters from the service name, for the avatar.
+  String get _initials {
+    final name = (record.formName ?? record.activityName ?? '').trim();
+    final words = name
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return '';
+    if (words.length == 1) {
+      return words.first.substring(0, min(2, words.first.length)).toUpperCase();
     }
+    return (words[0][0] + words[1][0]).toUpperCase();
   }
 
   @override
@@ -63,47 +69,86 @@ class HistoryTransactionItem extends StatelessWidget {
   }
 
   Widget _tile(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const .symmetric(horizontal: 20, vertical: 4),
-      leading: Container(
-        height: 44,
-        width: 44,
-        decoration: BoxDecoration(
-          color: context.avatarBg,
-          borderRadius: .circular(12),
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const .symmetric(horizontal: 20, vertical: 4),
+        leading: _avatar(context),
+        title: Text(
+          record.formName ?? record.activityName ?? '',
+          maxLines: 2,
+          overflow: .ellipsis,
+          style: context.formLabels,
         ),
-        child: Icon(
-          _hasAmount ? _directionIcon : Icons.receipt_long_outlined,
-          color: _hasAmount ? _statusColor(context) : context.textSecondary,
-          size: 18,
+        subtitle: Text(
+          record.receiptDateTime ?? record.receiptDate ?? '',
+          style: context.caption,
         ),
-      ),
-      title: Text(
-        record.formName ?? record.activityName ?? '',
-        maxLines: 2,
-        overflow: .ellipsis,
-        style: context.formLabels,
-      ),
-      subtitle: Text(
-        record.receiptDateTime ?? record.receiptDate ?? '',
-        style: context.caption,
-      ),
-      trailing: Column(
-        mainAxisSize: .min,
-        mainAxisAlignment: .center,
-        crossAxisAlignment: .end,
-        children: [
-          if (_hasAmount)
+        trailing: Column(
+          mainAxisSize: .min,
+          mainAxisAlignment: .center,
+          crossAxisAlignment: .end,
+          children: [
+            if (_hasAmount)
+              Text(
+                record.amount ?? '',
+                style: context.formLabels,
+              ),
+            const SizedBox(height: 6),
             Text(
-              record.amount ?? '',
-              style: context.captionSemibold,
+              record.statusLabel ?? '',
+              style: context.smallDetailsMedium.copyWith(
+                color: _statusColor(context),
+              ),
             ),
-          const SizedBox(height: 4),
-          Text(
-            record.statusLabel ?? '',
-            style: context.caption.copyWith(color: _statusColor(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _avatar(BuildContext context) {
+    return SizedBox(
+      width: 46,
+      height: 46,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          CircleAvatar(
+            radius: 23,
+            backgroundColor: context.avatarBg,
+            child: _hasAmount
+                ? Text(
+                    _initials,
+                    style: context.captionBold.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  )
+                : Icon(
+                    Icons.receipt_long_outlined,
+                    color: context.textSecondary,
+                    size: 20,
+                  ),
           ),
+          // Status-coloured direction badge, bottom-right.
+          if (_hasAmount)
+            Positioned(
+              right: -1,
+              bottom: -1,
+              child: Container(
+                padding: const .all(2),
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.north_east,
+                  size: 13,
+                  color: _statusColor(context),
+                ),
+              ),
+            ),
         ],
       ),
     );

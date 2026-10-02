@@ -114,6 +114,7 @@ final class GetServiceFormDataAction
             return Lov(
               lovTitle: el['lovTitle'],
               lovValue: el['lovValue'],
+              icon: el['lovIcon'] ?? el['icon'] ?? el['image'],
             );
           }).toList(),
         );

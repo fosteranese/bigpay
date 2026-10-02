@@ -43,59 +43,62 @@ class NotificationTile extends StatelessWidget {
   }
 
   Widget _tile(BuildContext context, bool unread) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const .symmetric(horizontal: 20, vertical: 4),
-      leading: Stack(
-        clipBehavior: .none,
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: context.avatarBg,
-            child: Icon(
-              unread ? Icons.notifications : Icons.notifications_none,
-              color: AppColors.primary,
-              size: 20,
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const .symmetric(horizontal: 20, vertical: 4),
+        leading: Stack(
+          clipBehavior: .none,
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: context.avatarBg,
+              child: Icon(
+                unread ? Icons.notifications : Icons.notifications_none,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
-          ),
-          if (unread)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: AppColors.danger,
-                  shape: .circle,
-                  border: Border.all(color: context.cardBg, width: 1.5),
+            if (unread)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: AppColors.danger,
+                    shape: .circle,
+                    border: Border.all(color: context.cardBg, width: 1.5),
+                  ),
                 ),
               ),
-            ),
-        ],
-      ),
-      title: Text(
-        notification.title ?? 'Notification',
-        maxLines: 1,
-        overflow: .ellipsis,
-        style: unread ? context.smallDetailsBold : context.smallDetailsMedium,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: .start,
-        children: [
-          if (notification.content?.isNotEmpty ?? false)
-            Padding(
-              padding: const .only(top: 2),
-              child: Text(
-                notification.content!,
-                maxLines: 2,
-                overflow: .ellipsis,
-                style: context.caption,
+          ],
+        ),
+        title: Text(
+          notification.title ?? 'Notification',
+          maxLines: 1,
+          overflow: .ellipsis,
+          style: unread ? context.smallDetailsBold : context.smallDetailsMedium,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: .start,
+          children: [
+            if (notification.content?.isNotEmpty ?? false)
+              Padding(
+                padding: const .only(top: 2),
+                child: Text(
+                  notification.content!,
+                  maxLines: 2,
+                  overflow: .ellipsis,
+                  style: context.caption,
+                ),
               ),
-            ),
-          const SizedBox(height: 4),
-          Text(_time, style: context.caption.copyWith(fontSize: 11)),
-        ],
+            const SizedBox(height: 4),
+            Text(_time, style: context.caption.copyWith(fontSize: 11)),
+          ],
+        ),
       ),
     );
   }

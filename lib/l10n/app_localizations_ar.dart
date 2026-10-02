@@ -180,6 +180,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationPinRequired => 'رمز PIN مطلوب';
 
   @override
+  String get validationDebitCreditSame =>
+      'لا يمكن أن يكون حساب الخصم هو نفسه حساب الإيداع.';
+
+  @override
   String get validationPinMismatch => 'رمزا PIN غير متطابقين';
 
   @override
@@ -560,6 +564,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get historyTransactionFailed => 'فشلت المعاملة';
 
   @override
+  String get historyTransactionPending => 'المعاملة قيد الانتظار';
+
+  @override
+  String get historyTransactionProcessing => 'جارٍ معالجة المعاملة';
+
+  @override
+  String get historyTransactionInProgressSubtitle =>
+      'سنحدّث الحالة بمجرد تأكيدها.';
+
+  @override
   String get historyTransactionReceipt => 'إيصال المعاملة';
 
   @override
@@ -765,6 +779,15 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get summaryTransactionConfirm =>
       'يرجى تأكيد تفاصيل المعاملة قبل المتابعة';
+
+  @override
+  String get kycVerifiedName => 'الاسم';
+
+  @override
+  String get kycVerifiedNationality => 'الجنسية';
+
+  @override
+  String get kycVerifiedGender => 'الجنس';
 
   @override
   String get summarySaveBeneficiary => 'حفظ المستفيد';

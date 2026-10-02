@@ -13,6 +13,7 @@ import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/models/actions/services/process_request_action.dart';
+import 'package:bigpay/models/actions/services/resend_form_otp_action.dart';
 import 'package:bigpay/models/actions/services/verify_service_form_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
@@ -26,6 +27,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/transaction_validation.util.dart';
 
 class ServiceFormPage extends StatefulWidget {
   const ServiceFormPage({
@@ -186,6 +188,17 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
           datum.field!.fieldName!: controller.text.trim(),
     });
 
+    if (TransactionValidation.debitEqualsCredit(
+      _form.fieldsDatum ?? const [],
+      _formData,
+    )) {
+      MessageUtil.displayErrorDialog(
+        context,
+        message: AppLocalizations.of(context)!.validationDebitCreditSame,
+      );
+      return;
+    }
+
     if (_form.form?.requireVerification != 1) {
       _submitDirect();
       return;
@@ -230,6 +243,12 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       AuthenticationUtil.start(
         authModes: authModes,
         payload: _formData,
+        onResendShortCode: () {
+          final formId = _form.form?.formId;
+          if (formId != null) {
+            context.dispatchProcess(ResendFormOtpAction(formId: formId));
+          }
+        },
         complete: ({otp, required payload, pin, secretAnswer}) {
           // Each auth step (PIN/OTP/secret answer) dismisses its own
           // dialog before calling onSuccess, so there's nothing left to
