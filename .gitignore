@@ -57,3 +57,6 @@ figma_token.md
 
 # Obfuscation symbols from release builds — keep them per release, not in git.
 /ios-debug-info/
+
+# OpenCode agent runtime state (goal tracking, session locks) — not source.
+.opencode/goals/

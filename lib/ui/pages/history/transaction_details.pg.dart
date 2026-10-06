@@ -228,12 +228,12 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                             )!.historyServiceLabel,
                             value: receipt.formName ?? '',
                           ),
-                          TransactionDetailsItem(
-                            title: AppLocalizations.of(
-                              context,
-                            )!.historyTransactionIdLabel,
-                            value: receipt.activityName ?? '',
-                          ),
+                          // TransactionDetailsItem(
+                          //   title: AppLocalizations.of(
+                          //     context,
+                          //   )!.historyTransactionIdLabel,
+                          //   value: receipt.activityName ?? '',
+                          // ),
                           Divider(
                             color: context.divider,
                             thickness: 4,
@@ -252,7 +252,10 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                             title: AppLocalizations.of(
                               context,
                             )!.commonDateLabel,
-                            value: receipt.receiptDateTime ?? '',
+                            value:
+                                receipt.receiptDate ??
+                                receipt.receiptDateTime ??
+                                '',
                           ),
                         ],
                       ),

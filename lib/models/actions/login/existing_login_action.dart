@@ -28,7 +28,7 @@ abstract class ExistingLoginActionPayload
     with _$ExistingLoginActionPayload
     implements ActionPayloadSerializable {
   const factory ExistingLoginActionPayload({
-    required String phoneNumber,
+    required bool isPassword,
     required String password,
   }) = _ExistingLoginActionPayload;
 

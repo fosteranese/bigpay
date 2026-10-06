@@ -69,6 +69,14 @@ class _PinSignUpPageState extends State<PinSignUpPage> {
               ),
             ),
           );
+
+          AuthAction.event = context.dispatchProcess(
+            AuthAction(
+              payload: AuthActionPayload(
+                dataResponse: snapshot.response!,
+              ),
+            ),
+          );
           MessageUtil.displaySuccessFullDialog(
             context,
             successIcon: CircleAvatar(

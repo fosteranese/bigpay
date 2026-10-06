@@ -1,3 +1,6 @@
+import 'package:bigpay/constants/status.const.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
+import 'package:bigpay/models/actions/save_auth_data_action.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
@@ -43,8 +46,23 @@ mixin DashboardDataRefresh<T extends StatefulWidget> on State<T> {
           if (snapshot.hasData) {
             setState(() {
               AppState.currentUser = snapshot.data;
+
+              SaveAuthDataAction.event = context.dispatchProcess(
+                SaveAuthDataAction(
+                  payload: SaveAuthDataActionPayload(
+                    dataResponse: DataResponse(
+                      code: StatusCodeConstants.success,
+                      status: StatusConstants.success,
+                      message: '',
+                      data: AppState.currentUser,
+                    ),
+                  ),
+                ),
+              );
+
               dashboardRefreshing = false;
             });
+
             return;
           }
           if (snapshot.hasError) {

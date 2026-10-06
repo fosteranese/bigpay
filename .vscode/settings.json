@@ -10,10 +10,14 @@
     "dart.completion.trailingCommas": true,
     "cSpell.words": [
         "bigpay",
+        "Deutsch",
+        "Español",
         "favourite's",
+        "Français",
         "momo",
         "NONCUSTOMER",
-        "Telecel"
+        "Telecel",
+        "العربية"
     ],
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {

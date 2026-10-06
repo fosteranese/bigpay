@@ -231,6 +231,15 @@ class FormFieldInput extends StatelessWidget {
       case FieldDataTypesConst.emailAddress:
         return text(keyboardType: TextInputType.emailAddress);
 
+      case FieldDataTypesConst.pin:
+      case FieldDataTypesConst.newPin:
+        return text(
+          keyboardType: TextInputType.number,
+          formatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+          ],
+        );
+
       case FieldDataTypesConst.phoneBook:
         return FormInput(
           label: label,
@@ -256,8 +265,6 @@ class FormFieldInput extends StatelessWidget {
 
       case FieldDataTypesConst.password:
       case FieldDataTypesConst.newPassword:
-      case FieldDataTypesConst.pin:
-      case FieldDataTypesConst.newPin:
         return password();
 
       case FieldDataTypesConst.payee:

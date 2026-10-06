@@ -1,7 +1,7 @@
 name: bigpay
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.6+1007
+version: 1.0.8+1008
 
 environment:
   sdk: ^3.12.2

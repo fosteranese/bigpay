@@ -28,7 +28,7 @@ import 'package:bigpay/utils/message.util.dart';
 /// The returning-user unlock screen for a device that already has a saved
 /// login. It greets the user by name (and avatar) and only asks for the
 /// password (or biometrics) — no phone number. If the backend says the device
-/// is no longer recognised (`newLogin`), it hands off to new-device sign-in.
+/// is no longer recognized (`newLogin`), it hands off to new-device sign-in.
 class ExistingDeviceLoginPage extends StatefulWidget {
   const ExistingDeviceLoginPage({super.key});
   static PageRouteDefinition route = PageRouteDefinition(
@@ -68,12 +68,6 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
   }
 
   String get _name => AppState.currentUser?.user?.name ?? '';
-
-  // Not user.shortName — that's a display name, not a phone number.
-  // SignIn.phoneNumber is seeded from AppState.savedPhoneNumber (the
-  // number actually used at login, persisted for this screen) by
-  // SignIn.clear() on startup.
-  String get _phone => SignIn.phoneNumber;
 
   String get _initials {
     final parts = _name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
@@ -127,7 +121,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
     _loginEvent = context.dispatchProcess(
       ExistingLoginAction(
         payload: ExistingLoginActionPayload(
-          phoneNumber: _phone,
+          isPassword: false,
           password: password,
         ),
       ),
@@ -147,7 +141,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
     _loginEvent = context.dispatchProcess(
       ExistingLoginAction(
         payload: ExistingLoginActionPayload(
-          phoneNumber: _phone,
+          isPassword: true,
           password: _passwordController.text,
         ),
       ),

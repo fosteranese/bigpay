@@ -4,8 +4,6 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/new_device_login_data.dart';
-import 'package:bigpay/models/actions/auth_action.dart';
-import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
@@ -22,7 +20,6 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/phone.util.dart';
-import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:bigpay/utils/validator.util.dart';
 
@@ -123,20 +120,6 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
               return;
             } else {
               MessageUtil.close(context);
-            }
-
-            if (snapshot.hasData) {
-              // The password verified — keep it for biometric sign-in if the
-              // user has that enabled.
-              _rememberPasswordForBiometric(_passwordController.text);
-              AuthAction.event = context.dispatchProcess(
-                AuthAction(
-                  payload: AuthActionPayload(
-                    dataResponse: snapshot.response!,
-                  ),
-                ),
-              );
-              return;
             }
 
             if (snapshot.hasError) {
@@ -254,15 +237,6 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
     );
   }
 
-  /// Stores the just-used password for biometric sign-in, but only when the
-  /// user has enabled it on the security screen.
-  Future<void> _rememberPasswordForBiometric(String password) async {
-    if (password.isEmpty) return;
-    if (await BiometricUtil.isLoginEnabled) {
-      await BiometricUtil.saveLoginPassword(password);
-    }
-  }
-
   Future<void> _onSave() async {
     FocusScope.of(context).unfocus();
 
@@ -271,8 +245,8 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
     if (_phone.text.text.trim() ==
         AppState.currentUser?.user?.shortName?.toLocalPhone) {
       existingLoginEvent = context.dispatchProcess(
-        ExistingLoginAction(
-          payload: ExistingLoginActionPayload(
+        NewLoginAction(
+          payload: NewLoginActionPayload(
             phoneNumber: _phone.international,
             password: _passwordController.text,
           ),

@@ -10,12 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/phone_input.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
-import 'package:bigpay/utils/validator.util.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class StartForgotSecurePhrasePage extends StatefulWidget {
@@ -35,8 +33,6 @@ class _StartForgotSecurePhrasePageState
   final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
   final _phone = PhoneNumberController(national: ForgotPwd.phoneNumber);
-  final _emailFocusNode = FocusNode();
-  final _emailController = TextEditingController();
 
   final _canSubmit = ValueNotifier(ForgotPwd.phoneNumber.isNotEmpty);
 
@@ -44,9 +40,6 @@ class _StartForgotSecurePhrasePageState
   void dispose() {
     _phoneNumberFocusNode.dispose();
     _phone.dispose();
-
-    _emailFocusNode.dispose();
-    _emailController.dispose();
 
     _canSubmit.dispose();
     super.dispose();
@@ -132,25 +125,12 @@ class _StartForgotSecurePhrasePageState
                   AppLocalizations.of(context)!.validationPhoneInvalid,
                 ),
                 next: (_) {
-                  _emailFocusNode.requestFocus();
-                },
-                onChanged: _onChanged,
-                textInputAction: .next,
-              ),
-              const SizedBox(height: Spacing.lg),
-              FormInput(
-                label: AppLocalizations.of(context)!.authEmailAddressLabel,
-                focusNode: _emailFocusNode,
-                controller: _emailController,
-                validator: Validator.emailValidator(
-                  AppLocalizations.of(context)!.validationEmailInvalid,
-                ),
-                next: (_) {
                   FocusScope.of(context).unfocus();
                 },
                 onChanged: _onChanged,
                 textInputAction: .done,
               ),
+              const SizedBox(height: Spacing.lg),
             ],
           ),
         ),
@@ -159,8 +139,7 @@ class _StartForgotSecurePhrasePageState
   }
 
   void _onChanged(_) {
-    _canSubmit.value =
-        _phone.text.text.isNotEmpty || _emailController.text.isNotEmpty;
+    _canSubmit.value = _phone.text.text.isNotEmpty;
   }
 
   void _onContinue() {
@@ -172,7 +151,7 @@ class _StartForgotSecurePhrasePageState
       ForgotSecurePhraseAction(
         payload: ForgotSecurePhraseActionPayload(
           phoneNumber: _phone.international,
-          email: _emailController.text.trim(),
+          email: '',
         ),
       ),
     );

@@ -72,10 +72,7 @@ class _BiometricLoginPageState extends State<BiometricLoginPage> {
       _loginEvent = context.dispatchProcess(
         ExistingLoginAction(
           payload: ExistingLoginActionPayload(
-            // Not user.shortName — that's a display name, not a phone
-            // number. SignIn.phoneNumber is seeded from
-            // AppState.savedPhoneNumber by SignIn.clear() on startup.
-            phoneNumber: SignIn.phoneNumber,
+            isPassword: false,
             password: password,
           ),
         ),

@@ -68,7 +68,7 @@ class ResponseCache {
     final raw = await _latestRawForEndpoint(endpoint);
     if (raw == null) return null;
 
-    final data = raw.data;
+    final data = (raw.data is String) ? json.decode(raw.data) : raw.data;
     return DataResponse<T>(
       code: raw.code,
       status: raw.status,

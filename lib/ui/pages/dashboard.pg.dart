@@ -1,10 +1,13 @@
 import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/models/actions/save_auth_data_action.dart';
 import 'package:bigpay/models/actions/services/get_service_categories_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/models/actions/services/resolve_collection_institution_action.dart';
@@ -271,6 +274,20 @@ class _DashboardPageState extends State<DashboardPage>
                                 .copyWith(
                                   profilePicture: snapshot.data ?? '',
                                 );
+
+                            SaveAuthDataAction.event = context.dispatchProcess(
+                              SaveAuthDataAction(
+                                payload: SaveAuthDataActionPayload(
+                                  dataResponse: DataResponse(
+                                    code: StatusCodeConstants.success,
+                                    status: StatusConstants.success,
+                                    message: '',
+                                    data: AppState.currentUser,
+                                  ),
+                                ),
+                              ),
+                            );
+
                             return CircleAvatar(
                               radius: 18,
                               backgroundColor: context.avatarBg,

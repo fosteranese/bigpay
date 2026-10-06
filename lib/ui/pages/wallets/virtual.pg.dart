@@ -403,6 +403,8 @@ class TransactionListItem extends StatelessWidget {
                 Text(
                   transaction.postDate ?? '',
                   style: context.caption,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -418,7 +420,7 @@ class TransactionListItem extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                transaction.narration ?? '',
+                transaction.debitCreditFlag ?? '',
                 style: context.caption,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
