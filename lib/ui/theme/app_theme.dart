@@ -121,7 +121,7 @@ class AppTheme {
   );
 
   static ThemeData get light {
-    final textTheme = ThemeData.light().textTheme.apply(fontFamily: 'SF Pro');
+    final textTheme = ThemeData.light().textTheme;
 
     return ThemeData(
       scaffoldBackgroundColor: AppColors.background,
@@ -172,7 +172,6 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontFamily: 'SF Pro',
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: AppColors.black,
@@ -185,12 +184,10 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 0,
         selectedLabelStyle: TextStyle(
-          fontFamily: 'SF Pro',
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: TextStyle(
-          fontFamily: 'SF Pro',
           fontSize: 13,
           fontWeight: FontWeight.w400,
         ),
@@ -200,7 +197,7 @@ class AppTheme {
   }
 
   static ThemeData get dark {
-    final textTheme = ThemeData.dark().textTheme.apply(fontFamily: 'SF Pro');
+    final textTheme = ThemeData.dark().textTheme;
 
     const surface = Color(0xFF1E1E2E);
     const background = Color(0xFF11111B);
@@ -258,7 +255,6 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontFamily: 'SF Pro',
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: textPrimary,
@@ -271,12 +267,10 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 0,
         selectedLabelStyle: TextStyle(
-          fontFamily: 'SF Pro',
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: TextStyle(
-          fontFamily: 'SF Pro',
           fontSize: 13,
           fontWeight: FontWeight.w400,
         ),

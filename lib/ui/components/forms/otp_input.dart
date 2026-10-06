@@ -45,6 +45,11 @@ class FormOtpInputState extends State<FormOtpInput>
   late int _remainingSeconds;
   bool _canResend = false;
 
+  /// Route transition whose completion triggers a keyboard re-poke (see
+  /// [_requestKeyboard]); tracked so [dispose] can detach the listener.
+  Animation<double>? _transition;
+  AnimationStatusListener? _transitionListener;
+
   @override
   void initState() {
     super.initState();
@@ -56,10 +61,38 @@ class FormOtpInputState extends State<FormOtpInput>
     _remainingSeconds = widget.resendDuration;
     _startTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && widget.autoFocus) {
-        _focusNode.requestFocus();
-      }
+      if (mounted && widget.autoFocus) _requestKeyboard();
     });
+  }
+
+  /// Focuses the code field and makes sure the soft keyboard actually opens.
+  ///
+  /// A bare requestFocus() is enough on a plain page, but in a dialog shown
+  /// right after a system sheet (the Face ID prompt) iOS silently drops the
+  /// keyboard presentation issued during the entrance transition — the field
+  /// ends up focused with no keyboard and no way to type. Re-poking once the
+  /// route's transition has completed lands after the system sheet is fully
+  /// gone, so the keyboard reliably appears.
+  void _requestKeyboard() {
+    _focusNode.requestFocus();
+    final animation = ModalRoute.of(context)?.animation;
+    if (animation == null || animation.status == AnimationStatus.completed) {
+      _ensureKeyboard();
+      return;
+    }
+    _transition?.removeStatusListener(_transitionListener ?? (_) {});
+    void listener(AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        _transition?.removeStatusListener(listener);
+        _transition = null;
+        _transitionListener = null;
+        if (mounted && widget.autoFocus) _ensureKeyboard();
+      }
+    }
+
+    _transition = animation;
+    _transitionListener = listener;
+    animation.addStatusListener(listener);
   }
 
   @override
@@ -75,6 +108,11 @@ class FormOtpInputState extends State<FormOtpInput>
   void _ensureKeyboard() {
     if (!mounted) return;
     if (_focusNode.hasFocus) {
+      // The node kept focus across a system sheet (Face ID), but the native
+      // text-input connection was torn down — TextInput.show alone is a no-op
+      // without a live client. Cycle the focus to force a fresh setClient.
+      _focusNode.unfocus();
+      _focusNode.requestFocus();
       SystemChannels.textInput.invokeMethod('TextInput.show');
     } else {
       _focusNode.requestFocus();
@@ -95,8 +133,25 @@ class FormOtpInputState extends State<FormOtpInput>
     widget.onChanged?.call(digits);
     if (digits.length == widget.count) {
       _focusNode.unfocus();
-      widget.onCompleted?.call(digits);
+      _completeAfterKeyboardHides(digits);
     }
+  }
+
+  /// Defers [onCompleted] until the soft keyboard has actually gone away.
+  /// The completion callback pops the route; tearing the field down while the
+  /// keyboard is still animating out wedges the iOS text-input connection —
+  /// the next dialog's field then never gets a keyboard (no auto-show, and
+  /// taps do nothing since the invisible overlay field already holds focus).
+  Future<void> _completeAfterKeyboardHides(String code) async {
+    final binding = WidgetsBinding.instance;
+    final view = binding.platformDispatcher.views.first;
+    final deadline = DateTime.now().add(const Duration(milliseconds: 500));
+    while (mounted &&
+        view.viewInsets.bottom > 0 &&
+        DateTime.now().isBefore(deadline)) {
+      await binding.endOfFrame;
+    }
+    if (mounted) widget.onCompleted?.call(code);
   }
 
   void _startTimer() {
@@ -130,6 +185,11 @@ class FormOtpInputState extends State<FormOtpInput>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (_transitionListener != null) {
+      _transition?.removeStatusListener(_transitionListener!);
+      _transition = null;
+      _transitionListener = null;
+    }
     _timer.cancel();
     _controller
       ..removeListener(_onChanged)

@@ -1,7 +1,7 @@
 name: bigpay
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.3+1003
+version: 1.0.6+1007
 
 environment:
   sdk: ^3.12.2
@@ -85,21 +85,9 @@ flutter:
     - assets/img/
     - assets/cert/main.pem
 
-  fonts:
-    - family: SF Pro
-      fonts:
-        - asset: assets/fonts/SFProDisplay-Regular.otf
-          weight: 400
-        - asset: assets/fonts/SFProDisplay-Medium.otf
-          weight: 500
-        # No standalone SemiBold weight ships in SF Pro Display — reusing
-        # Medium here (rather than leaving w600 requests to fall back to
-        # Flutter's nearest-weight matching against Bold) so every weight
-        # this app actually requests resolves to an exact registered font.
-        - asset: assets/fonts/SFProDisplay-Medium.otf
-          weight: 600
-        - asset: assets/fonts/SFProDisplay-Bold.otf
-          weight: 700
+  # The app uses the platform system font (Apple SF Pro on iOS, Roboto on
+  # Android). Embedded Apple-provided fonts are rejected by App Store Connect
+  # (error 91182), so no SF Pro copies ship in this bundle.
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

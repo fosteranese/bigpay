@@ -70,7 +70,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
                 ),
               ),
               child: CircleAvatar(
-                radius: 70.5,
+                radius: 58,
                 backgroundColor: AppColors.tintShade1,
                 backgroundImage: picture.isEmpty
                     ? null
@@ -85,7 +85,7 @@ class _PicturePreviewKycPageState extends State<PicturePreviewKycPage> {
               ),
             ),
           ),
-          const SizedBox(height: Spacing.xxxl),
+          const SizedBox(height: Spacing.lg),
           CheckListItem(
             isChecked: !Kyc.faceHasObstructions,
             title: l10n.kycFaceClearlyVisible,
@@ -144,7 +144,7 @@ class CheckListItem extends StatelessWidget {
             ),
           );
     return Padding(
-      padding: const .symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
+      padding: const .symmetric(horizontal: Spacing.lg, vertical: Spacing.xs),
       child: Row(
         children: [
           leading,

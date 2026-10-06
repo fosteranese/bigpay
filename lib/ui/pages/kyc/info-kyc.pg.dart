@@ -74,24 +74,20 @@ class _InfoKycPageState extends State<InfoKycPage> {
       ),
       child: Column(
         mainAxisSize: .min,
-        mainAxisAlignment: .start,
+        mainAxisAlignment: .center,
         crossAxisAlignment: .center,
         children: [
           KycHero(
-            // Explicit height (the asset's own): an SvgPicture reports no
-            // intrinsic height until it has loaded, which made the page's
-            // SliverFillRemaining size this column short and overflow.
-            visual: SvgPicture.asset(SvgImages.selfie, height: 115),
             title: l10n.kycTakeSelfieTitle,
             subtitle: l10n.kycSelfieMatchSubtitle,
           ),
-          const SizedBox(height: Spacing.xl),
+          const SizedBox(height: Spacing.sm),
           InfoItem(
             icon: SvgImages.identify,
             title: l10n.kycIdentityVerificationTitle,
             subtitle: l10n.kycScanCardSubtitle,
           ),
-          const SizedBox(height: Spacing.md),
+          const SizedBox(height: Spacing.sm),
           InfoItem(
             icon: SvgImages.encrypted,
             title: l10n.kycFullyEncryptedTitle,
@@ -120,7 +116,7 @@ class InfoItem extends StatelessWidget {
     // height for a wrapping subtitle, and this page's SliverFillRemaining
     // sizes the column from intrinsics — so it overflowed on small phones.
     return Container(
-      padding: const .symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
+      padding: const .symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
       decoration: BoxDecoration(
         borderRadius: .circular(12),
         border: .all(color: context.border),
