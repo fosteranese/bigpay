@@ -29,6 +29,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/payee.util.dart';
 import 'package:bigpay/utils/transaction_validation.util.dart';
 
 class ServiceFormPage extends StatefulWidget {
@@ -91,7 +92,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
     super.initState();
     _form = widget.formData;
     _buildFormItems();
-    if (widget.payee != null) _prefillFromPayee(widget.payee!);
+    prefillFromPayee(widget.payee, _formItems);
     _recomputeCanSubmit();
   }
 
@@ -160,24 +161,12 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
     });
   }
 
-  /// Prefills the other fields from a selected payee's saved values, matching
-  /// on field name (the backend stores the keys lower-camel).
-  void _prefillFromPayee(Payee payee) {
-    final saved = payee.formData;
-    if (saved == null) return;
-
-    for (final (datum, controller, _) in _formItems) {
-      final name = datum.field?.fieldName;
-      if (name == null) continue;
-      final value = saved[name] ?? saved[_lowerCamel(name)];
-      if (value != null) controller.text = value.toString();
-    }
-
+  /// Prefills the fields from a selected payee's saved values (see
+  /// [prefillFromPayee]).
+  void _onPayeeSelected(Payee payee) {
+    prefillFromPayee(payee, _formItems);
     _recomputeCanSubmit();
   }
-
-  String _lowerCamel(String value) =>
-      value.isEmpty ? value : '${value[0].toLowerCase()}${value.substring(1)}';
 
   /// [GeneralFlowForm.requireVerification] decides the route from here,
   /// matching umb's `ProcessFormController.submit`: a form that requires
@@ -387,10 +376,10 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                   'category': widget.category,
                   'formData': _form,
                   'amDoing': widget.amDoing,
-                  // "Edit & send" needs the saved payee's id again on the
-                  // confirmation screen so its upsert updates the same record.
-                  if (widget.payee?.payeeId != null)
-                    'payeeId': widget.payee?.payeeId,
+                  // "Edit & send" needs the saved payee again on the
+                  // confirmation screen so its remaining fields pre-fill and
+                  // the upsert updates the same record.
+                  if (widget.payee != null) 'payee': widget.payee,
                   'verification': snapshot.data,
                 },
               );
@@ -559,7 +548,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             focusNode: focusNode,
             isLast: isLast,
             validator: FormFieldInput.buildValidator(datum, l10n),
-            onPayeeSelected: _prefillFromPayee,
+            onPayeeSelected: _onPayeeSelected,
             next: (_) {
               if (isLast) {
                 FocusScope.of(context).unfocus();

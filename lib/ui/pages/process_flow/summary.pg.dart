@@ -27,6 +27,7 @@ import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/payee.util.dart';
 import 'package:bigpay/utils/transaction_validation.util.dart';
 
 /// Confirmation screen shown after a form is verified: it renders the
@@ -49,7 +50,7 @@ class SummaryPage extends StatefulWidget {
     this.activityDatum,
     this.category,
     this.amDoing = AmDoing.transaction,
-    this.payeeId,
+    this.payee,
   });
 
   static PageRouteDefinition route = PageRouteDefinition(
@@ -67,10 +68,10 @@ class SummaryPage extends StatefulWidget {
   /// beneficiary.
   final AmDoing amDoing;
 
-  /// The saved beneficiary being corrected by "edit and send" — threaded to
-  /// `Payee/addPayee` (as an upsert key) so the corrected details update the
-  /// saved record before the payment runs.
-  final String? payeeId;
+  /// The saved beneficiary behind "edit and send" — pre-fills the remaining
+  /// editable fields with the corrected details and keys the `Payee/addPayee`
+  /// upsert before the payment runs.
+  final Payee? payee;
 
   @override
   State<SummaryPage> createState() => _SummaryPageState();
@@ -124,10 +125,14 @@ class _SummaryPageState extends State<SummaryPage> {
     final verified = widget.verification?.formData ?? const {};
     _editableItems = editable.map((item) {
       final name = item.field?.fieldName;
+      // Freshly verified values win; a saved beneficiary fills the fields
+      // verification didn't touch (so "edit & send" opens with everything the
+      // user saved); the form's own default is the last resort.
       final existing = (name == null ? null : verified[name])?.toString();
       final text = (existing != null && existing.isNotEmpty)
           ? existing
-          : (item.field?.defaultValue ?? '');
+          : (payeeSavedFieldValue(widget.payee, name) ??
+                (item.field?.defaultValue ?? ''));
       final controller = TextEditingController(text: text)
         ..addListener(_recomputeCanContinue);
       return (item, controller, FocusNode());
@@ -155,24 +160,12 @@ class _SummaryPageState extends State<SummaryPage> {
     });
   }
 
-  /// Prefills the other editable fields from a selected payee's saved values,
-  /// matching on field name (the backend stores the keys lower-camel).
-  void _prefillFromPayee(Payee payee) {
-    final saved = payee.formData;
-    if (saved == null) return;
-
-    for (final (datum, controller, _) in _editableItems) {
-      final name = datum.field?.fieldName;
-      if (name == null) continue;
-      final value = saved[name] ?? saved[_lowerCamel(name)];
-      if (value != null) controller.text = value.toString();
-    }
-
+  /// Prefills the fields from a payee just selected here on the confirmation
+  /// screen (see [prefillFromPayee]).
+  void _onPayeeSelected(Payee payee) {
+    prefillFromPayee(payee, _editableItems);
     _recomputeCanContinue();
   }
-
-  String _lowerCamel(String value) =>
-      value.isEmpty ? value : '${value[0].toLowerCase()}${value.substring(1)}';
 
   /// The full form data for the process request: the verified data, with the
   /// pre-filled fields keyed by field name and the editable fields overlaid
@@ -282,7 +275,7 @@ class _SummaryPageState extends State<SummaryPage> {
       _sendPayload = actionPayload;
       _payeeEvent = context.dispatchProcess(
         AddPayeeAction(
-          payload: actionPayload.withPayeeId(widget.payeeId),
+          payload: actionPayload.withPayeeId(widget.payee?.payeeId),
         ),
       );
       return;
@@ -523,7 +516,7 @@ class _SummaryPageState extends State<SummaryPage> {
             focusNode: focusNode,
             isLast: isLast,
             validator: FormFieldInput.buildValidator(datum, l10n),
-            onPayeeSelected: _prefillFromPayee,
+            onPayeeSelected: _onPayeeSelected,
             next: (_) {
               if (isLast) {
                 FocusScope.of(context).unfocus();

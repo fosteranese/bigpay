@@ -60,7 +60,7 @@ GoRoute get processFlowRoute => GoRoute(
           activityDatum: payload?['activityDatum'],
           category: payload?['category'],
           amDoing: payload?['amDoing'] as AmDoing? ?? AmDoing.transaction,
-          payeeId: payload?['payeeId'] as String?,
+          payee: payload?['payee'] as Payee?,
         );
       },
       nested: true,
