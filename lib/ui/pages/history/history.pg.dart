@@ -212,7 +212,7 @@ class _HistoryPageState extends State<HistoryPage> {
           }
         },
         builder: (context, snapshot) {
-          if (snapshot.isLoading && !snapshot.isSilent) {
+          if (_source == null) {
             return ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: 10),

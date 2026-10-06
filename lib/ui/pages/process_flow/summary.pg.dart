@@ -82,13 +82,7 @@ class _SummaryPageState extends State<SummaryPage> {
   ExecuteProcessEvent? _processEvent;
   ExecuteProcessEvent? _payeeEvent;
 
-  /// The payload built by [_process] — kept so the "edit and send" chain can
-  /// reuse it for the payment step after the payee update succeeds.
-  ProcessRequestActionPayload? _sendPayload;
-
   bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
-
-  bool get _isEditBeneficiary => widget.amDoing == AmDoing.editBeneficiary;
 
   final _canContinue = ValueNotifier(true);
 
@@ -268,19 +262,8 @@ class _SummaryPageState extends State<SummaryPage> {
       return;
     }
 
-    // "Edit and send": first persist the corrected details to the saved
-    // beneficiary (Payee/addPayee as an upsert keyed on payeeId), then pay —
-    // the payee listener chains the payment once the update succeeds.
-    if (_isEditBeneficiary) {
-      _sendPayload = actionPayload;
-      _payeeEvent = context.dispatchProcess(
-        AddPayeeAction(
-          payload: actionPayload.withPayeeId(widget.payee?.payeeId),
-        ),
-      );
-      return;
-    }
-
+    // "Edit & send" is just a transaction with a pre-filled form — the edited
+    // fields apply to this payment only; the saved beneficiary is not re-saved.
     _processEvent = context.dispatchProcess(
       ProcessRequestAction(
         payload: actionPayload,
@@ -387,19 +370,6 @@ class _SummaryPageState extends State<SummaryPage> {
             }
 
             if (snapshot.isSuccessful) {
-              if (_isEditBeneficiary) {
-                // The corrected details are saved (the upsert above); now
-                // actually pay the beneficiary. The payment shares the process
-                // listener that already routes to the receipt.
-                _payeeEvent = null;
-                _processEvent = context.dispatchProcess(
-                  ProcessRequestAction(
-                    payload: _sendPayload!,
-                    endpointFunc: _processEndpoint,
-                  ),
-                );
-                return;
-              }
               _payeeEvent = null;
               AppState.notifyDataChanged();
               MessageUtil.displaySuccessDialog(

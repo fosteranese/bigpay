@@ -51,6 +51,11 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   /// instead.
   Payee? _selectedPayee;
 
+  /// True while a pushed details route is open, so [didPopNext] knows its
+  /// return is handled by [_openDetails] (optimistic delete) rather than a
+  /// plain re-fetch.
+  bool _returningFromDetails = false;
+
   /// "Send now" from a list row: the final submission — authorize with a PIN
   /// and pay the saved beneficiary directly (`Payee/payPayee`); no form opens.
   void _send(Payee payee) {
@@ -69,16 +74,24 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
     );
   }
 
-  void _openDetails(Payee payee) {
+  Future<void> _openDetails(Payee payee) async {
     if (context.usesSplitView) {
       setState(() => _selectedPayee = payee);
       return;
     }
 
-    AppRouter.router.push(
+    // The details page pops with the payee when it deletes it — handle the
+    // optimistic removal here (and skip didPopNext's re-fetch, which would
+    // otherwise flash the stale cached list back in).
+    _returningFromDetails = true;
+    final deleted = await AppRouter.router.push<Payee>(
       BeneficiaryDetailsPage.route.path,
       extra: payee,
     );
+    _returningFromDetails = false;
+    if (deleted != null && mounted) {
+      _delete(deleted);
+    }
   }
 
   void _closeDetails() {
@@ -105,8 +118,13 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   }
 
   // Returning from the details screen — a beneficiary may have been deleted.
+  // When it was, [_openDetails] already removed it optimistically; don't
+  // re-fetch (which would flash the stale cached list back in).
   @override
-  void didPopNext() => setState(_load);
+  void didPopNext() {
+    if (_returningFromDetails) return;
+    setState(_load);
+  }
 
   @override
   void dispose() {
@@ -175,6 +193,7 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
               key: ValueKey(_selectedPayee!.payeeId),
               payee: _selectedPayee,
               onBack: _closeDetails,
+              onDelete: () => _delete(_selectedPayee!),
             ),
       master: _master(context),
     );
@@ -268,9 +287,11 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
             }
           },
           builder: (context, snapshot) {
-            // Only the true first load shows a skeleton — a cache-then-refresh
-            // (isSilent) already has data on screen, so keep showing it.
-            if (snapshot.isLoading && !snapshot.isSilent) {
+            // Skeleton until data has actually loaded. Checking the field
+            // (not just snapshot.isLoading) also covers the brief cache-read
+            // window on a cold start, which would otherwise flash the empty
+            // state before the cached rows arrive.
+            if (_payees == null) {
               return Column(
                 mainAxisSize: .min,
                 children: List.generate(

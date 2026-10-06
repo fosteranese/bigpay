@@ -9,7 +9,6 @@ import 'package:bigpay/data/models/auth_data/preview_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
-import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
 import 'package:bigpay/models/actions/beneficiary/pay_payee_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
@@ -50,18 +49,27 @@ class BeneficiaryDetailsPage extends StatelessWidget {
 /// provided, clears the pane's selection instead of popping a route that was
 /// never pushed).
 class BeneficiaryDetailsView extends StatefulWidget {
-  const BeneficiaryDetailsView({super.key, this.payee, this.onBack});
+  const BeneficiaryDetailsView({
+    super.key,
+    this.payee,
+    this.onBack,
+    this.onDelete,
+  });
 
   final Payee? payee;
   final VoidCallback? onBack;
+
+  /// Called instead of [onBack]/pop when the beneficiary is removed — the
+  /// host (list) removes the row optimistically and dispatches the delete in
+  /// the background, so the details view can close instantly instead of
+  /// waiting on a spinner and the network.
+  final VoidCallback? onDelete;
 
   @override
   State<BeneficiaryDetailsView> createState() => _BeneficiaryDetailsViewState();
 }
 
 class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
-  ExecuteProcessEvent? _deleteEvent;
-
   /// In-flight "edit & send" form fetch, correlated so a success opens the
   /// service form pre-filled with the payee.
   ExecuteProcessEvent? _sendEvent;
@@ -150,7 +158,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
           'category': const GeneralFlowCategory(),
           'formData': formData,
           'payee': payee,
-          'amDoing': AmDoing.editBeneficiary,
+          'amDoing': AmDoing.transaction,
         },
       );
       return;
@@ -206,11 +214,15 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
       confirmText: l10n.commonRemove,
     );
     if (!confirmed || !mounted) return;
-    _deleteEvent = context.dispatchProcess(
-      DeletePayeeAction(
-        payload: DeletePayeePayload(payeeId: widget.payee?.payeeId),
-      ),
-    );
+
+    // Optimistic: hand off to the host (list) — it removes the row and runs
+    // the delete in the background — and close immediately. No spinner, no
+    // network wait.
+    if (widget.onDelete != null) {
+      widget.onDelete!();
+    } else {
+      AppRouter.router.pop(widget.payee);
+    }
   }
 
   String _label(String key) {
@@ -238,31 +250,6 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
 
     return MultiProcessListener(
       listeners: [
-        ProcessListenerConfig<bool>(
-          event: () => _deleteEvent,
-          listener: (context, snapshot) {
-            if (snapshot.isLoading) {
-              MessageUtil.displayLoading(context);
-              return;
-            }
-            MessageUtil.close(context);
-
-            if (snapshot.isSuccessful) {
-              _deleteEvent = null;
-              if (widget.onBack != null) {
-                widget.onBack!();
-              } else {
-                AppRouter.router.pop();
-              }
-            } else if (snapshot.hasError) {
-              _deleteEvent = null;
-              MessageUtil.displayErrorDialog(
-                context,
-                message: snapshot.error!.message,
-              );
-            }
-          },
-        ),
         ProcessListenerConfig<GeneralFlowFormData>(
           event: () => _sendEvent,
           listener: _onFormFetched,
