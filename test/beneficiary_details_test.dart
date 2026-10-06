@@ -56,7 +56,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Account Number'), findsOneWidget);
 
-      await tester.tap(find.text('Remove Beneficiary'));
+      await tester.tap(find.text('Remove'));
       await tester.pumpAndSettle();
       expect(
         find.text('Remove Ama Mensah Owusu from your beneficiaries?'),
@@ -121,7 +121,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Send now'), findsOneWidget);
       expect(find.text('Edit & send'), findsOneWidget);
-      expect(find.text('Remove Beneficiary'), findsOneWidget);
+      expect(find.text('Remove'), findsOneWidget);
     },
   );
 }

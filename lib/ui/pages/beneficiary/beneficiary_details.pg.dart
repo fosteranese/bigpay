@@ -268,6 +268,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
           mainAxisSize: .min,
           children: [
             if (widget.payee?.formId?.isNotEmpty ?? false) ...[
+              // Primary action alone on its own row.
               FormButton(
                 onPressed: _send,
                 text: l10n.beneficiariesSendNow,
@@ -276,26 +277,36 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
                 iconSize: 20,
               ),
               const SizedBox(height: Spacing.sm),
-              // Secondary action: correct the saved details, then pay.
-              FormOutlineButton(
-                onPressed: _editAndSend,
-                text: l10n.beneficiariesEditAndSend,
-                icon: Icons.edit_outlined,
-                buttonIconAlignment: .left,
-                iconSize: 20,
-              ),
-              const SizedBox(height: Spacing.sm),
             ],
-            // Tertiary, not a filled red slab: removing is the rare action on
-            // this page, and it confirms before doing anything.
-            FormOutlineButton(
-              onPressed: _delete,
-              text: l10n.beneficiariesRemoveButton,
-              foregroundColor: AppColors.danger,
-              iconColor: AppColors.danger,
-              icon: Icons.person_remove_outlined,
-              buttonIconAlignment: .left,
-              iconSize: 20,
+            // Secondary + tertiary side by side to halve the stacked height —
+            // three full-width buttons read as three fat rows; one primary row
+            // plus a compact pair keeps the hierarchy with half the footprint.
+            Row(
+              children: [
+                if (widget.payee?.formId?.isNotEmpty ?? false) ...[
+                  Expanded(
+                    child: FormOutlineButton(
+                      onPressed: _editAndSend,
+                      text: l10n.beneficiariesEditAndSend,
+                      icon: Icons.edit_outlined,
+                      buttonIconAlignment: .left,
+                      iconSize: 20,
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                ],
+                Expanded(
+                  child: FormOutlineButton(
+                    onPressed: _delete,
+                    text: l10n.commonRemove,
+                    foregroundColor: AppColors.danger,
+                    iconColor: AppColors.danger,
+                    icon: Icons.person_remove_outlined,
+                    buttonIconAlignment: .left,
+                    iconSize: 20,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
