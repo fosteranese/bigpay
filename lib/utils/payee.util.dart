@@ -30,10 +30,16 @@ bool _isPayeeField(GeneralFlowFieldsDatum datum) {
       dataType == FieldDataTypesConst.payee;
 }
 
+/// Whether [value] is a masked display value (e.g. `20******05`), which the
+/// backend only returns for list previews — never something to submit into a
+/// field.
+bool _isMasked(String value) => value.contains('*');
+
 /// Writes a saved payee's values into [items]' controllers so an opened form
 /// starts fully pre-filled with what was saved (the "edit" half of
 /// "edit & send"). The primary payee field falls back to [Payee.value] when
-/// the stored form data doesn't carry it.
+/// the stored form data doesn't carry it — but never for a masked preview
+/// value, which would otherwise be submitted as-is.
 void prefillFromPayee(
   Payee? payee,
   List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)> items,
@@ -43,7 +49,11 @@ void prefillFromPayee(
     final name = datum.field?.fieldName;
     final value =
         payeeSavedFieldValue(payee, name) ??
-        ((payee.value != null && _isPayeeField(datum)) ? payee.value : null);
+        ((payee.value != null &&
+                !_isMasked(payee.value!) &&
+                _isPayeeField(datum))
+            ? payee.value
+            : null);
     if (value != null) controller.text = value;
   }
 }

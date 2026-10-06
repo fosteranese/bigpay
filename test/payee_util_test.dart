@@ -91,6 +91,23 @@ void main() {
       },
     );
 
+    test('never fills a masked (preview-only) payee.value', () {
+      // The backend returns masked values like `20******05` for list
+      // previews; they must not end up in a field that gets submitted.
+      const masked = Payee(
+        payeeId: 'p3',
+        value: '20******05',
+        formData: {'Network': 'MTN'},
+      );
+      final items = [
+        item('AccountNumber', FieldDataTypesConst.payeeNumber),
+      ];
+
+      prefillFromPayee(masked, items);
+
+      expect(items[0].$2.text, isEmpty);
+    });
+
     test('null payee leaves the controllers untouched', () {
       final items = [item('AccountNumber', FieldDataTypesConst.payeeNumber)];
       prefillFromPayee(null, items);
