@@ -83,5 +83,41 @@ void main() {
 
       expect(controller.text, isEmpty);
     });
+
+    testWidgets('a pre-filled value resolves to its label', (tester) async {
+      // A saved beneficiary's select field arrives with the option id already
+      // in the controller — the display must show the matching label, not an
+      // empty box.
+      final controller = TextEditingController(text: 'ng');
+
+      await _pump(
+        tester,
+        controller: controller,
+        options: [
+          FormSelectOption(id: 'gh', label: 'Ghana'),
+          FormSelectOption(id: 'ng', label: 'Nigeria'),
+        ],
+      );
+      await tester.pump();
+
+      expect(controller.text, 'ng');
+      expect(find.text('Nigeria'), findsOneWidget);
+    });
+
+    testWidgets('a pre-filled value with no matching option stays blank', (
+      tester,
+    ) async {
+      final controller = TextEditingController(text: 'zz');
+
+      await _pump(
+        tester,
+        controller: controller,
+        options: [FormSelectOption(id: 'gh', label: 'Ghana')],
+      );
+      await tester.pump();
+
+      expect(controller.text, 'zz');
+      expect(find.text('Ghana'), findsNothing);
+    });
   });
 }

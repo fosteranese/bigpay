@@ -42,6 +42,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void initState() {
     super.initState();
     _filteredOptions = widget.options;
+    _syncDisplayFromController();
     _maybeAutoSelectOnlyOption();
   }
 
@@ -50,7 +51,23 @@ class _FormSelectInputState extends State<FormSelectInput> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options != widget.options) {
       _filteredOptions = widget.options;
+      _syncDisplayFromController();
       _maybeAutoSelectOnlyOption();
+    }
+  }
+
+  /// Resolves a pre-filled [widget.controller] value — an option `id` saved
+  /// with a beneficiary — back to its `label` so the field displays the chosen
+  /// option instead of an empty box. Mirrors umb's `selectedOption` lookup
+  /// (`lovValue == defaultValue` → `lovTitle`).
+  void _syncDisplayFromController() {
+    final value = widget.controller.text;
+    if (value.isEmpty) return;
+    for (final option in widget.options) {
+      if (option.id == value) {
+        _controller.text = option.label;
+        return;
+      }
     }
   }
 
