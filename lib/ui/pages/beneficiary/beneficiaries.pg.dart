@@ -364,12 +364,14 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: context.avatarBg,
                               borderRadius: .circular(100),
+                              border: .all(color: context.border),
                             ),
                             child: Text(
                               formName!,
-                              style: context.smallDetailsMedium,
+                              style: context.smallDetailsMedium.copyWith(
+                                color: context.textSecondary,
+                              ),
                             ),
                           ),
                         ],
@@ -386,8 +388,8 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
                       tooltip: l10n.beneficiariesSendNow,
                       onPressed: () => _send(payee),
                       style: IconButton.styleFrom(
-                        backgroundColor: context.avatarBg,
-                        foregroundColor: AppColors.primary,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.white,
                       ),
                       icon: const Icon(Icons.north_east, size: 18),
                     ),
