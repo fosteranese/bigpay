@@ -281,8 +281,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
               MessageUtil.displaySuccessDialog(
                 context,
                 title: l10n.beneficiariesSentTitle,
-                message:
-                    snapshot.message ?? l10n.beneficiariesSentMessage,
+                message: snapshot.message ?? l10n.beneficiariesSentMessage,
                 onOk: () {
                   if (widget.onBack != null) {
                     widget.onBack!();
@@ -304,7 +303,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
       child: MainLayout(
         useScaffold: widget.onBack == null,
         onBack: widget.onBack,
-        bottomSize: 130,
+        bottomSize: 60,
         title: l10n.beneficiariesDetailsTitle,
         bottomNav: Column(
           mainAxisSize: .min,
