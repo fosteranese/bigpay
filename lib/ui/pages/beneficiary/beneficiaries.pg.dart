@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/constants/am_doing.const.dart';
-import 'package:bigpay/data/models/auth_data/activity.dart';
-import 'package:bigpay/data/models/auth_data/activity_datum.dart';
-import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
-import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
 import 'package:bigpay/models/actions/beneficiary/get_payees_action.dart';
-import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/models/actions/beneficiary/pay_payee_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
@@ -19,13 +14,13 @@ import 'package:bigpay/ui/components/skeleton/variants.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/beneficiary/add_beneficiary.pg.dart';
 import 'package:bigpay/ui/pages/beneficiary/beneficiary_details.pg.dart';
-import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/ui/components/empty_state.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
+import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 class BeneficiariesPage extends StatefulWidget {
@@ -46,10 +41,9 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   List<Payee>? _payees;
   String _query = '';
 
-  /// In-flight "send now" form fetch from a row's quick action, plus the
-  /// beneficiary it belongs to (needed once the form definition lands).
-  ExecuteProcessEvent? _sendEvent;
-  Payee? _sendPayee;
+  /// In-flight "send now" payment (Payee/payPayee) from a row's quick action,
+  /// correlated so a success shows the confirmation.
+  ExecuteProcessEvent? _payEvent;
 
   /// The beneficiary shown in the detail pane in split view
   /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
@@ -57,79 +51,22 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   /// instead.
   Payee? _selectedPayee;
 
-  /// "Send now" from a list row: fetch the beneficiary's form definition and
-  /// open the service form pre-filled with it — straight to payment, skipping
-  /// the details page (the same flow the details page's "Send now" runs).
+  /// "Send now" from a list row: the final submission — authorize with a PIN
+  /// and pay the saved beneficiary directly (`Payee/payPayee`); no form opens.
   void _send(Payee payee) {
-    final formId = payee.formId;
-    if (formId == null) return;
-    setState(() {
-      _sendPayee = payee;
-      _sendEvent = context.dispatchProcess(
-        saveActionResponse: true,
-        returnSavedResponse: true,
-        GetServiceFormDataAction(
-          payload: GetServiceFormDataActionPayload(
-            formId: formId,
-            insId: formId,
+    if (payee.payeeId == null) return;
+    AuthenticationUtil.pin(
+      data: const {},
+      allowBiometric: true,
+      onSuccess: (pin) {
+        if (!mounted) return;
+        _payEvent = context.dispatchProcess(
+          PayPayeeAction(
+            payload: PayPayeeActionPayload(payeeId: payee.payeeId, pin: pin),
           ),
-          endpointFunc: () =>
-              GetServiceFormDataAction.endpointFor(payee.activityType),
-        ),
-      );
-    });
-  }
-
-  void _onFormFetched(BuildContext context, ProcessSnapshot snapshot) {
-    final l10n = AppLocalizations.of(context)!;
-    if (snapshot.isLoading && !snapshot.isSilent && !snapshot.isCached) {
-      MessageUtil.displayLoading(context);
-      return;
-    } else if (!snapshot.isSilent && !snapshot.isCached) {
-      MessageUtil.close(context);
-    }
-
-    if (snapshot.hasData && !(snapshot.isSilent && !snapshot.isCached)) {
-      final formData = snapshot.data as GeneralFlowFormData?;
-      if (!snapshot.isSilent &&
-          !snapshot.isCached &&
-          (formData?.fieldsDatum?.isEmpty ?? true)) {
-        MessageUtil.displayErrorDialog(
-          context,
-          title: l10n.commonServiceUnavailableTitle,
-          message: l10n.commonServiceUnavailableMessage,
         );
-        return;
-      }
-      _sendEvent = null;
-      final payee = _sendPayee;
-      if (payee == null) return;
-      AppRouter.router.push(
-        ServiceFormPage.route.path,
-        extra: {
-          'activityDatum': ActivityDatum(
-            activity: Activity(
-              activityId: payee.activityId,
-              activityType: payee.activityType,
-              activityName: payee.activityName,
-              icon: payee.icon,
-            ),
-          ),
-          'category': const GeneralFlowCategory(),
-          'formData': formData,
-          'payee': payee,
-          'amDoing': AmDoing.transaction,
-        },
-      );
-      return;
-    }
-
-    if (snapshot.hasError) {
-      MessageUtil.displayErrorDialog(
-        context,
-        message: snapshot.error!.message,
-      );
-    }
+      },
+    );
   }
 
   void _openDetails(Payee payee) {
@@ -262,9 +199,32 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
             }
           },
         ),
-        ProcessListenerConfig<GeneralFlowFormData>(
-          event: () => _sendEvent,
-          listener: _onFormFetched,
+        ProcessListenerConfig<bool>(
+          event: () => _payEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            }
+            MessageUtil.close(context);
+
+            if (snapshot.isSuccessful) {
+              _payEvent = null;
+              final l10n = AppLocalizations.of(context)!;
+              MessageUtil.displaySuccessDialog(
+                context,
+                title: l10n.beneficiariesSentTitle,
+                message: snapshot.message ?? l10n.beneficiariesSentMessage,
+                onOk: _load,
+              );
+            } else if (snapshot.hasError) {
+              _payEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
         ),
       ],
       child: MainLayout(

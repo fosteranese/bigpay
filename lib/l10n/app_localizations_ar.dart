@@ -641,6 +641,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get beneficiariesService => 'الخدمة';
 
   @override
+  String get beneficiariesSentTitle => 'تم بنجاح';
+
+  @override
+  String get beneficiariesSentMessage => 'تم إرسال الدفعة بنجاح';
+
+  @override
   String get kycIntroTitle => 'لنقم بالتحقق من حسابك';
 
   @override

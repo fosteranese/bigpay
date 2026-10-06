@@ -647,6 +647,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get beneficiariesService => 'Service';
 
   @override
+  String get beneficiariesSentTitle => 'Successful';
+
+  @override
+  String get beneficiariesSentMessage => 'Payment sent successfully';
+
+  @override
   String get kycIntroTitle => 'Let’s get you verified';
 
   @override

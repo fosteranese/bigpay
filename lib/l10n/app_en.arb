@@ -389,6 +389,10 @@
   "@beneficiariesTransactionType": { "description": "Meta row label showing the activity type of a saved beneficiary" },
   "beneficiariesService": "Service",
   "@beneficiariesService": { "description": "Meta row label showing the service of a saved beneficiary" },
+  "beneficiariesSentTitle": "Successful",
+  "@beneficiariesSentTitle": { "description": "Success dialog title after paying a saved beneficiary" },
+  "beneficiariesSentMessage": "Payment sent successfully",
+  "@beneficiariesSentMessage": { "description": "Success dialog message after paying a saved beneficiary" },
 
   "kycIntroTitle": "Let’s get you verified",
   "kycIntroSubtitle": "Confirm your Ghana Card details now for a safer, faster experience.",

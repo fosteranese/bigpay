@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/env/env.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -51,7 +52,10 @@ class _PinAuthenticatorState extends State<PinAuthenticator> {
   }
 
   int get _length {
-    return widget.data['fieldLength'];
+    // The process flow supplies the per-form fieldLength from the backend's
+    // auth modes; standalone flows (e.g. paying a saved beneficiary) have no
+    // auth mode and fall back to the env-configured PIN length.
+    return widget.data['fieldLength'] ?? Env.pingLength;
   }
 
   Future<void> _authenticateWithBiometric() async {

@@ -215,6 +215,8 @@
   "beneficiariesRecipientLabel": "Destinataire",
   "beneficiariesTransactionType": "Type de transaction",
   "beneficiariesService": "Service",
+  "beneficiariesSentTitle": "Réussi",
+  "beneficiariesSentMessage": "Paiement envoyé avec succès",
 
   "kycIntroTitle": "Faisons-vous vérifier",
   "kycIntroSubtitle": "Confirmez dès maintenant les détails de votre carte du Ghana pour une expérience plus sûre et plus rapide.",

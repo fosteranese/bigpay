@@ -10,6 +10,7 @@ import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
+import 'package:bigpay/models/actions/beneficiary/pay_payee_action.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
@@ -21,6 +22,7 @@ import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
 /// A pushed full page wrapping [BeneficiaryDetailsView] — used on every
@@ -60,28 +62,37 @@ class BeneficiaryDetailsView extends StatefulWidget {
 class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
   ExecuteProcessEvent? _deleteEvent;
 
-  /// The in-flight fetch of this beneficiary's form, correlated so a success
-  /// opens the service form pre-filled with the payee.
+  /// In-flight "edit & send" form fetch, correlated so a success opens the
+  /// service form pre-filled with the payee.
   ExecuteProcessEvent? _sendEvent;
 
-  /// Whether the in-flight fetch is for "edit & send" (true) or "send now"
-  /// (false) — decides the [AmDoing] the service form runs with.
-  bool _isEditingSend = false;
+  /// In-flight "send now" payment (Payee/payPayee), correlated so a success
+  /// shows the confirmation.
+  ExecuteProcessEvent? _payEvent;
 
-  /// "Send now": fetch the beneficiary's form definition, then open the
-  /// service form pre-filled with the saved payee (see the listener in build).
+  /// "Send now": the final submission — authorize with a PIN and pay the saved
+  /// beneficiary directly (`Payee/payPayee`); no form opens.
   void _send() {
-    _isEditingSend = false;
-    _fetchForm();
+    final payee = widget.payee;
+    if (payee?.payeeId == null) return;
+    AuthenticationUtil.pin(
+      data: const {},
+      allowBiometric: true,
+      onSuccess: (pin) {
+        if (!mounted) return;
+        _payEvent = context.dispatchProcess(
+          PayPayeeAction(
+            payload: PayPayeeActionPayload(payeeId: payee!.payeeId, pin: pin),
+          ),
+        );
+      },
+    );
   }
 
-  /// "Edit & send": the same pre-filled form, but in edit mode — the form can
-  /// correct the saved details, and submitting both updates the saved
-  /// beneficiary (Payee/addPayee as an upsert) and pays them.
-  void _editAndSend() {
-    _isEditingSend = true;
-    _fetchForm();
-  }
+  /// "Edit & send": open the pre-filled form so the saved details can be
+  /// corrected, then submit — updates the saved beneficiary (Payee/addPayee as
+  /// an upsert) and pays them.
+  void _editAndSend() => _fetchForm();
 
   void _fetchForm() {
     final payee = widget.payee;
@@ -139,9 +150,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
           'category': const GeneralFlowCategory(),
           'formData': formData,
           'payee': payee,
-          'amDoing': _isEditingSend
-              ? AmDoing.editBeneficiary
-              : AmDoing.transaction,
+          'amDoing': AmDoing.editBeneficiary,
         },
       );
       return;
@@ -257,6 +266,39 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
         ProcessListenerConfig<GeneralFlowFormData>(
           event: () => _sendEvent,
           listener: _onFormFetched,
+        ),
+        ProcessListenerConfig<bool>(
+          event: () => _payEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            }
+            MessageUtil.close(context);
+
+            if (snapshot.isSuccessful) {
+              _payEvent = null;
+              MessageUtil.displaySuccessDialog(
+                context,
+                title: l10n.beneficiariesSentTitle,
+                message:
+                    snapshot.message ?? l10n.beneficiariesSentMessage,
+                onOk: () {
+                  if (widget.onBack != null) {
+                    widget.onBack!();
+                  } else {
+                    AppRouter.router.pop();
+                  }
+                },
+              );
+            } else if (snapshot.hasError) {
+              _payEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
         ),
       ],
       child: MainLayout(

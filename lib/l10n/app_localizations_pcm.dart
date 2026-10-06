@@ -651,6 +651,12 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get beneficiariesService => 'Service';
 
   @override
+  String get beneficiariesSentTitle => 'Successful';
+
+  @override
+  String get beneficiariesSentMessage => 'Payment sent successfully';
+
+  @override
   String get kycIntroTitle => 'Make we verify you';
 
   @override

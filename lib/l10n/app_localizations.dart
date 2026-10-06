@@ -1318,6 +1318,18 @@ abstract class AppLocalizations {
   /// **'Service'**
   String get beneficiariesService;
 
+  /// Success dialog title after paying a saved beneficiary
+  ///
+  /// In en, this message translates to:
+  /// **'Successful'**
+  String get beneficiariesSentTitle;
+
+  /// Success dialog message after paying a saved beneficiary
+  ///
+  /// In en, this message translates to:
+  /// **'Payment sent successfully'**
+  String get beneficiariesSentMessage;
+
   /// No description provided for @kycIntroTitle.
   ///
   /// In en, this message translates to:

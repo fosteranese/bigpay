@@ -215,6 +215,8 @@
   "beneficiariesRecipientLabel": "المستلم",
   "beneficiariesTransactionType": "نوع المعاملة",
   "beneficiariesService": "الخدمة",
+  "beneficiariesSentTitle": "تم بنجاح",
+  "beneficiariesSentMessage": "تم إرسال الدفعة بنجاح",
 
   "kycIntroTitle": "لنقم بالتحقق من حسابك",
   "kycIntroSubtitle": "أكّد بيانات بطاقة غانا الخاصة بك الآن لتجربة أكثر أمانًا وسرعة.",
