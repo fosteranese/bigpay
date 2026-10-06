@@ -61,9 +61,9 @@
 
   "authEnterSecurePhraseTitle": "أدخل عبارة الأمان الخاصة بك",
 
-  "authUnlockWithBiometrics": "فتح القفل بالبصمة",
+  "authUnlockWithBiometrics": "افتح لتسجيل الدخول",
   "authLoginWithPassword": "تسجيل الدخول بكلمة المرور",
-  "authUnlockWithBiometricsTooltip": "فتح القفل بالبصمة",
+  "authUnlockWithBiometricsTooltip": "افتح لتسجيل الدخول",
 
   "authForgotPasswordTitle": "نسيت كلمة المرور",
   "authAnswerToSecurePhraseLabel": "الإجابة على عبارة الأمان",

@@ -211,13 +211,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Geben Sie Ihre Sicherheitsfrage ein';
 
   @override
-  String get authUnlockWithBiometrics => 'Mit Biometrie entsperren';
+  String get authUnlockWithBiometrics => 'Zum Anmelden entsperren';
 
   @override
   String get authLoginWithPassword => 'Mit Passwort anmelden';
 
   @override
-  String get authUnlockWithBiometricsTooltip => 'Mit Biometrie entsperren';
+  String get authUnlockWithBiometricsTooltip => 'Zum Anmelden entsperren';
 
   @override
   String get authForgotPasswordTitle => 'Passwort vergessen';

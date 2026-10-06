@@ -210,13 +210,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authEnterSecurePhraseTitle => 'Ingresa tu frase segura';
 
   @override
-  String get authUnlockWithBiometrics => 'Desbloquear con biometría';
+  String get authUnlockWithBiometrics => 'Desbloquear para iniciar sesión';
 
   @override
   String get authLoginWithPassword => 'Iniciar sesión con contraseña';
 
   @override
-  String get authUnlockWithBiometricsTooltip => 'Desbloquear con biometría';
+  String get authUnlockWithBiometricsTooltip =>
+      'Desbloquear para iniciar sesión';
 
   @override
   String get authForgotPasswordTitle => 'Olvidé mi contraseña';

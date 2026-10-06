@@ -61,9 +61,9 @@
 
   "authEnterSecurePhraseTitle": "Geben Sie Ihre Sicherheitsfrage ein",
 
-  "authUnlockWithBiometrics": "Mit Biometrie entsperren",
+  "authUnlockWithBiometrics": "Zum Anmelden entsperren",
   "authLoginWithPassword": "Mit Passwort anmelden",
-  "authUnlockWithBiometricsTooltip": "Mit Biometrie entsperren",
+  "authUnlockWithBiometricsTooltip": "Zum Anmelden entsperren",
 
   "authForgotPasswordTitle": "Passwort vergessen",
   "authAnswerToSecurePhraseLabel": "Antwort auf die Sicherheitsfrage",

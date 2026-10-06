@@ -61,9 +61,9 @@
 
   "authEnterSecurePhraseTitle": "Ingresa tu frase segura",
 
-  "authUnlockWithBiometrics": "Desbloquear con biometría",
+  "authUnlockWithBiometrics": "Desbloquear para iniciar sesión",
   "authLoginWithPassword": "Iniciar sesión con contraseña",
-  "authUnlockWithBiometricsTooltip": "Desbloquear con biometría",
+  "authUnlockWithBiometricsTooltip": "Desbloquear para iniciar sesión",
 
   "authForgotPasswordTitle": "Olvidé mi contraseña",
   "authAnswerToSecurePhraseLabel": "Respuesta a la frase segura",
