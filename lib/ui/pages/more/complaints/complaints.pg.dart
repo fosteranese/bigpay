@@ -184,7 +184,9 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
           placeholder: l10n.commonSearch,
           controller: _searchController,
           suffix: const Icon(Icons.search),
+          keyboardType: .text,
           textInputAction: .search,
+          maxLines: 1,
         ),
       ),
       builder: (scrollController) => ProcessConsumer<List<Complaint>>(

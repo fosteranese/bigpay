@@ -215,7 +215,7 @@ class _ServicesPageState extends State<ServicesPage> with DashboardDataRefresh {
             placeholder: AppLocalizations.of(context)!.commonSearch,
             controller: _searchController,
             suffix: Icon(Icons.search),
-            textInputAction: .done,
+            textInputAction: .search,
             next: (_) => FocusScope.of(context).unfocus(),
             keyboardType: .text,
             maxLines: 1,

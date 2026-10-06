@@ -255,7 +255,9 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
             placeholder: AppLocalizations.of(context)!.commonSearch,
             controller: _searchController,
             suffix: Icon(Icons.search),
+            keyboardType: .text,
             textInputAction: .search,
+            maxLines: 1,
           ),
         ),
         child: ProcessConsumer<List<Payee>>(
