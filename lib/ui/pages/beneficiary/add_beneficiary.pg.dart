@@ -197,7 +197,7 @@ class _AddBeneficiaryPageState extends State<AddBeneficiaryPage> {
                     ),
                     leading: CachedNetworkImage(
                       imageUrl:
-                          '${AppState.currentUser?.imageBaseUrl}${item.imageDirectory}/${item.activity?.icon}',
+                          '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${item.activity?.icon}',
                       width: 24,
                       height: 24,
                       placeholder: (context, url) => Icon(
