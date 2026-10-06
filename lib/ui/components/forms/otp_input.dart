@@ -268,6 +268,7 @@ class FormOtpInputState extends State<FormOtpInput>
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
+              autofocus: widget.autoFocus,
               keyboardType: TextInputType.number,
               obscureText: widget.obscureText,
               showCursor: false,
