@@ -297,10 +297,8 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   Widget _buildItem(Payee payee) {
     final l10n = AppLocalizations.of(context)!;
     final name = payee.displayName;
-    final subtitle = [
-      payee.formName,
-      payee.value,
-    ].where((e) => e?.isNotEmpty ?? false).join(' - ');
+    final value = payee.value;
+    final formName = payee.formName;
 
     return Dismissible(
       key: ValueKey(payee.payeeId ?? name),
@@ -308,44 +306,94 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
       confirmDismiss: (_) => _confirmDelete(payee),
       onDismissed: (_) => _delete(payee),
       background: Container(
-        margin: const .only(bottom: 6),
+        margin: const .only(bottom: 12),
         alignment: .centerRight,
         padding: const .symmetric(horizontal: 20),
         decoration: BoxDecoration(
           color: AppColors.danger,
-          borderRadius: .circular(10),
+          borderRadius: .circular(16),
         ),
         child: SvgPicture.asset(SvgImages.trash),
       ),
-      child: ListTile(
-        contentPadding: .zero,
-        onTap: () => _openDetails(payee),
-        leading: CircleAvatar(
-          radius: 21,
-          backgroundColor: context.avatarBg,
-          child: Text(_initials(name), style: context.caption),
+      child: Container(
+        margin: const .only(bottom: 12),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: .circular(16),
+          border: .all(color: context.border),
         ),
-        title: Text(name, style: context.p1Medium),
-        subtitle: subtitle.isEmpty
-            ? null
-            : Text(subtitle, style: context.smallDetails),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // "Send now": jump straight to the pre-filled payment form —
-            // umb-style quick action, without opening the details page.
-            if (payee.formId?.isNotEmpty ?? false)
-              IconButton(
-                tooltip: l10n.beneficiariesSendNow,
-                onPressed: () => _send(payee),
-                icon: Icon(
-                  Icons.north_east,
-                  size: 20,
-                  color: AppColors.primary,
-                ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: .circular(16),
+            onTap: () => _openDetails(payee),
+            child: Padding(
+              padding: const .all(16),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: context.avatarBg,
+                    child: Text(_initials(name), style: context.p1Medium),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: .start,
+                      children: [
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: .ellipsis,
+                          style: context.p1Medium,
+                        ),
+                        if (value?.isNotEmpty ?? false) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            value!,
+                            maxLines: 1,
+                            overflow: .ellipsis,
+                            style: context.smallDetails,
+                          ),
+                        ],
+                        if (formName?.isNotEmpty ?? false) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const .symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: context.avatarBg,
+                              borderRadius: .circular(100),
+                            ),
+                            child: Text(
+                              formName!,
+                              style: context.smallDetailsMedium,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // "Send now": pay the saved beneficiary directly (PIN +
+                  // Payee/payPayee) — a distinct action, no details page.
+                  if (payee.formId?.isNotEmpty ?? false)
+                    IconButton(
+                      tooltip: l10n.beneficiariesSendNow,
+                      onPressed: () => _send(payee),
+                      icon: Icon(
+                        Icons.north_east,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  Icon(Icons.chevron_right_outlined, color: context.textSecondary),
+                ],
               ),
-            Icon(Icons.chevron_right_outlined),
-          ],
+            ),
+          ),
         ),
       ),
     );
