@@ -49,6 +49,7 @@ class SummaryPage extends StatefulWidget {
     this.activityDatum,
     this.category,
     this.amDoing = AmDoing.transaction,
+    this.payeeId,
   });
 
   static PageRouteDefinition route = PageRouteDefinition(
@@ -66,6 +67,11 @@ class SummaryPage extends StatefulWidget {
   /// beneficiary.
   final AmDoing amDoing;
 
+  /// The saved beneficiary being corrected by "edit and send" — threaded to
+  /// `Payee/addPayee` (as an upsert key) so the corrected details update the
+  /// saved record before the payment runs.
+  final String? payeeId;
+
   @override
   State<SummaryPage> createState() => _SummaryPageState();
 }
@@ -75,7 +81,13 @@ class _SummaryPageState extends State<SummaryPage> {
   ExecuteProcessEvent? _processEvent;
   ExecuteProcessEvent? _payeeEvent;
 
+  /// The payload built by [_process] — kept so the "edit and send" chain can
+  /// reuse it for the payment step after the payee update succeeds.
+  ProcessRequestActionPayload? _sendPayload;
+
   bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
+
+  bool get _isEditBeneficiary => widget.amDoing == AmDoing.editBeneficiary;
 
   final _canContinue = ValueNotifier(true);
 
@@ -104,10 +116,10 @@ class _SummaryPageState extends State<SummaryPage> {
 
     // Keep the amount at the top when it happens to be an editable field, to
     // match the form screen's ordering.
-    final amountIndex = editable.indexWhere((f) => f.field?.isAmount == 1);
-    if (amountIndex > 0) {
-      editable.insert(0, editable.removeAt(amountIndex));
-    }
+    // final amountIndex = editable.indexWhere((f) => f.field?.isAmount == 1);
+    // if (amountIndex > 0) {
+    //   editable.insert(0, editable.removeAt(amountIndex));
+    // }
 
     final verified = widget.verification?.formData ?? const {};
     _editableItems = editable.map((item) {
@@ -263,6 +275,19 @@ class _SummaryPageState extends State<SummaryPage> {
       return;
     }
 
+    // "Edit and send": first persist the corrected details to the saved
+    // beneficiary (Payee/addPayee as an upsert keyed on payeeId), then pay —
+    // the payee listener chains the payment once the update succeeds.
+    if (_isEditBeneficiary) {
+      _sendPayload = actionPayload;
+      _payeeEvent = context.dispatchProcess(
+        AddPayeeAction(
+          payload: actionPayload.withPayeeId(widget.payeeId),
+        ),
+      );
+      return;
+    }
+
     _processEvent = context.dispatchProcess(
       ProcessRequestAction(
         payload: actionPayload,
@@ -369,6 +394,19 @@ class _SummaryPageState extends State<SummaryPage> {
             }
 
             if (snapshot.isSuccessful) {
+              if (_isEditBeneficiary) {
+                // The corrected details are saved (the upsert above); now
+                // actually pay the beneficiary. The payment shares the process
+                // listener that already routes to the receipt.
+                _payeeEvent = null;
+                _processEvent = context.dispatchProcess(
+                  ProcessRequestAction(
+                    payload: _sendPayload!,
+                    endpointFunc: _processEndpoint,
+                  ),
+                );
+                return;
+              }
               _payeeEvent = null;
               AppState.notifyDataChanged();
               MessageUtil.displaySuccessDialog(

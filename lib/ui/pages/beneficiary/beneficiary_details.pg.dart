@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
@@ -62,9 +63,26 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
   /// opens the service form pre-filled with the payee.
   ExecuteProcessEvent? _sendEvent;
 
-  /// "Send Money": fetch the beneficiary's form definition, then open the
+  /// Whether the in-flight fetch is for "edit & send" (true) or "send now"
+  /// (false) — decides the [AmDoing] the service form runs with.
+  bool _isEditingSend = false;
+
+  /// "Send now": fetch the beneficiary's form definition, then open the
   /// service form pre-filled with the saved payee (see the listener in build).
   void _send() {
+    _isEditingSend = false;
+    _fetchForm();
+  }
+
+  /// "Edit & send": the same pre-filled form, but in edit mode — the form can
+  /// correct the saved details, and submitting both updates the saved
+  /// beneficiary (Payee/addPayee as an upsert) and pays them.
+  void _editAndSend() {
+    _isEditingSend = true;
+    _fetchForm();
+  }
+
+  void _fetchForm() {
     final payee = widget.payee;
     if (payee?.formId == null) return;
     setState(() {
@@ -120,6 +138,9 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
           'category': const GeneralFlowCategory(),
           'formData': formData,
           'payee': payee,
+          'amDoing': _isEditingSend
+              ? AmDoing.editBeneficiary
+              : AmDoing.transaction,
         },
       );
       return;
@@ -219,7 +240,7 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
       child: MainLayout(
         useScaffold: widget.onBack == null,
         onBack: widget.onBack,
-        bottomSize: 72,
+        bottomSize: 130,
         title: l10n.beneficiariesDetailsTitle,
         bottomNav: Column(
           mainAxisSize: .min,
@@ -227,14 +248,23 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
             if (widget.payee?.formId?.isNotEmpty ?? false) ...[
               FormButton(
                 onPressed: _send,
-                text: l10n.beneficiariesSendMoney,
+                text: l10n.beneficiariesSendNow,
                 icon: Icons.north_east,
                 buttonIconAlignment: .left,
                 iconSize: 20,
               ),
-              const SizedBox(height: Spacing.md),
+              const SizedBox(height: Spacing.sm),
+              // Secondary action: correct the saved details, then pay.
+              FormOutlineButton(
+                onPressed: _editAndSend,
+                text: l10n.beneficiariesEditAndSend,
+                icon: Icons.edit_outlined,
+                buttonIconAlignment: .left,
+                iconSize: 20,
+              ),
+              const SizedBox(height: Spacing.sm),
             ],
-            // Secondary, not a filled red slab: removing is the rare action on
+            // Tertiary, not a filled red slab: removing is the rare action on
             // this page, and it confirms before doing anything.
             FormOutlineButton(
               onPressed: _delete,

@@ -130,6 +130,11 @@ class FormOtpInputState extends State<FormOtpInput>
   // through one field sidesteps that platform gap entirely.
   void _onChanged() {
     final digits = _controller.text;
+    // Repaint the decorative boxes immediately: the controller listener is
+    // the only signal that a key was entered or deleted, and the boxes read
+    // the controller text in build. Without this, characters would only show
+    // up on some unrelated rebuild, which reads as laggy input.
+    if (mounted) setState(() {});
     widget.onChanged?.call(digits);
     if (digits.length == widget.count) {
       _focusNode.unfocus();
@@ -151,7 +156,13 @@ class FormOtpInputState extends State<FormOtpInput>
         DateTime.now().isBefore(deadline)) {
       await binding.endOfFrame;
     }
-    if (mounted) widget.onCompleted?.call(code);
+    // The user may edit the code while the keyboard is going away — most
+    // commonly, deleting a digit right after the last one landed. Only
+    // complete when the field still holds exactly this code; otherwise the
+    // dialog would submit a code the user was already correcting.
+    if (mounted && _controller.text == code) {
+      widget.onCompleted?.call(code);
+    }
   }
 
   void _startTimer() {

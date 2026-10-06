@@ -1288,6 +1288,18 @@ abstract class AppLocalizations {
   /// **'Send Money'**
   String get beneficiariesSendMoney;
 
+  /// Quick action on a saved beneficiary that opens the pre-filled form to pay them
+  ///
+  /// In en, this message translates to:
+  /// **'Send now'**
+  String get beneficiariesSendNow;
+
+  /// Opens a saved beneficiary's pre-filled form to correct the details, then sends
+  ///
+  /// In en, this message translates to:
+  /// **'Edit & send'**
+  String get beneficiariesEditAndSend;
+
   /// No description provided for @beneficiariesRecipientLabel.
   ///
   /// In en, this message translates to:

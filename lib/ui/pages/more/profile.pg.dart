@@ -2,12 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/preview_datum.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/change_profile_picture_action.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
+import 'package:bigpay/models/actions/action.dart';
+import 'package:bigpay/models/actions/save_auth_data_action.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/utils/app_modal.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/avatar.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,6 +36,31 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   ExecuteProcessEvent? _changePictureEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPictureIfMissing();
+  }
+
+  /// Fetches the profile picture once when the saved login has none yet — the
+  /// dashboard only fetches it right after login, so a user who later opens
+  /// this page with an empty picture would otherwise see the placeholder
+  /// forever.
+  void _fetchPictureIfMissing() {
+    final picture = AppState.currentUser?.profilePicture ?? '';
+    if (picture.isNotEmpty) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.dispatchProcess(
+        GetProfilePictureAction(payload: NoPayload()),
+        returnSavedResponse: true,
+        saveActionResponse: true,
+      );
+    });
+  }
 
   /// Fields shown here come straight from the backend's own
   /// `user.previewData` rather than fixed fields on [User] — the same
@@ -85,7 +115,10 @@ class _ProfilePageState extends State<ProfilePage> {
           contentPadding: .zero,
           leading: CircleAvatar(
             backgroundColor: context.avatarBg,
-            child: Icon(Icons.photo_library_outlined, color: context.accentGreen),
+            child: Icon(
+              Icons.photo_library_outlined,
+              color: context.accentGreen,
+            ),
           ),
           title: Text(l10n.profileChooseFromGallery, style: context.formLabels),
           trailing: Icon(Icons.chevron_right_outlined),
@@ -110,11 +143,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
         if (snapshot.isSuccessful) {
           _changePictureEvent = null;
-          setState(() {
-            AppState.currentUser = AppState.currentUser!.copyWith(
-              profilePicture: snapshot.data ?? '',
-            );
-          });
+
+          AppState.currentUser = AppState.currentUser!.copyWith(
+            profilePicture: snapshot.data ?? '',
+          );
+
+          SaveAuthDataAction.event = context.dispatchProcess(
+            SaveAuthDataAction(
+              payload: SaveAuthDataActionPayload(
+                dataResponse: DataResponse(
+                  code: StatusCodeConstants.success,
+                  status: StatusConstants.success,
+                  message: '',
+                  data: AppState.currentUser,
+                ),
+              ),
+            ),
+          );
+
+          setState(() {});
           MessageUtil.displaySuccessDialog(
             context,
             message: l10n.profilePictureUpdatedMessage,
@@ -159,27 +206,24 @@ class _ProfilePageState extends State<ProfilePage> {
                   ProcessBuilder<String>(
                     event: () => GetProfilePictureAction.event,
                     builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        AppState.currentUser = AppState.currentUser!.copyWith(
-                          profilePicture: snapshot.data ?? '',
-                        );
-                        return CircleAvatar(
-                          radius: 18,
-                          backgroundColor: context.avatarBg,
-                          backgroundImage: MemoryImage(
-                            base64Decode(
-                              AppState.currentUser?.profilePicture ?? '',
-                            ),
-                          ),
-                        );
-                      }
-
+                      // Same fallback as the More page: the picture's bloc
+                      // state is always displaced by the time this page
+                      // mounts, so read the saved picture; the ProcessBuilder
+                      // just drives repaints when a fetch lands while open.
+                      final picture =
+                          (snapshot.hasData && (snapshot.data ?? '').isNotEmpty)
+                          ? snapshot.data
+                          : AppState.currentUser?.profilePicture;
                       return CircleAvatar(
                         radius: 36,
                         backgroundColor: context.cardBg,
                         child: CircleAvatar(
                           radius: 33,
                           backgroundColor: context.avatarBg,
+                          // avatarFromBase64 tolerates empty/invalid values —
+                          // a raw MemoryImage(base64Decode('')) crashes the
+                          // build when no picture was ever set.
+                          foregroundImage: avatarFromBase64(picture),
                         ),
                       );
                     },

@@ -1,3 +1,5 @@
+import 'package:bigpay/constants/form.const.dart';
+import 'package:bigpay/utils/biometric.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
@@ -64,9 +66,15 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   /// round trip.
   ExecuteProcessEvent? _processEvent;
   ExecuteProcessEvent? _payeeEvent;
+
+  /// The payload built by [_process] — kept so the "edit and send" chain can
+  /// reuse it for the payment step after the payee update succeeds.
+  ProcessRequestActionPayload? _sendPayload;
   final Map<String, dynamic> _formData = {};
 
   bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
+
+  bool get _isEditBeneficiary => widget.amDoing == AmDoing.editBeneficiary;
 
   /// The form definition currently on screen. Seeded from the one passed in,
   /// then replaced by a pull-to-refresh.
@@ -105,10 +113,10 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
               (!requireVerification || f.field?.requiredForVerification == 1),
         )
         .toList();
-    final amountIndex = visible.indexWhere((f) => f.field?.isAmount == 1);
-    if (amountIndex > 0) {
-      visible.insert(0, visible.removeAt(amountIndex));
-    }
+    // final amountIndex = visible.indexWhere((f) => f.field?.isAmount == 1);
+    // if (amountIndex > 0) {
+    //   visible.insert(0, visible.removeAt(amountIndex));
+    // }
 
     _formItems = visible.map((item) {
       final controller = TextEditingController(
@@ -299,6 +307,19 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       return;
     }
 
+    // "Edit and send": first persist the corrected details to the saved
+    // beneficiary (Payee/addPayee as an upsert keyed on payeeId), then pay —
+    // the payee listener chains the payment once the update succeeds.
+    if (_isEditBeneficiary) {
+      _sendPayload = actionPayload;
+      _payeeEvent = context.dispatchProcess(
+        AddPayeeAction(
+          payload: actionPayload.withPayeeId(widget.payee?.payeeId),
+        ),
+      );
+      return;
+    }
+
     _processEvent = context.dispatchProcess(
       ProcessRequestAction(
         payload: actionPayload,
@@ -366,6 +387,10 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                   'category': widget.category,
                   'formData': _form,
                   'amDoing': widget.amDoing,
+                  // "Edit & send" needs the saved payee's id again on the
+                  // confirmation screen so its upsert updates the same record.
+                  if (widget.payee?.payeeId != null)
+                    'payeeId': widget.payee?.payeeId,
                   'verification': snapshot.data,
                 },
               );
@@ -426,6 +451,35 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             }
 
             if (snapshot.isSuccessful) {
+              if (_isEditBeneficiary) {
+                // The corrected details are saved (the upsert above); now
+                // actually pay the beneficiary. The payment shares the process
+                // listener that already routes to the receipt.
+                _payeeEvent = null;
+                _processEvent = context.dispatchProcess(
+                  ProcessRequestAction(
+                    payload: _sendPayload!,
+                    endpointFunc: _processEndpoint,
+                  ),
+                );
+                return;
+              }
+              // Save the PIN/password to the device's secure storage if this was a
+              // change/reset flow, so the user can log in with biometrics next time.
+              if ([
+                FormConst.changePin,
+                FormConst.resetPin,
+              ].contains(widget.formData.form?.formId)) {
+                BiometricUtil.savePin(
+                  _formItems.last.$2.text.trim(),
+                );
+              } else if (widget.formData.form?.formId ==
+                  FormConst.changePassword) {
+                BiometricUtil.saveLoginPassword(
+                  _formItems.last.$2.text.trim(),
+                );
+              }
+
               _payeeEvent = null;
               AppState.notifyDataChanged();
               MessageUtil.displaySuccessDialog(

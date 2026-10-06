@@ -227,6 +227,8 @@
   "beneficiariesDetailsTitle": "Beneficiary Details",
   "beneficiariesRemoveButton": "Remove Beneficiary",
   "beneficiariesSendMoney": "Send Money",
+  "beneficiariesSendNow": "Send now",
+  "beneficiariesEditAndSend": "Edit and send",
   "beneficiariesRecipientLabel": "Recipient",
 
   "kycIntroTitle": "Make we verify you",

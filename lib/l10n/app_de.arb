@@ -210,6 +210,8 @@
   "beneficiariesDetailsTitle": "Begünstigtendetails",
   "beneficiariesRemoveButton": "Begünstigten entfernen",
   "beneficiariesSendMoney": "Geld senden",
+  "beneficiariesSendNow": "Jetzt senden",
+  "beneficiariesEditAndSend": "Bearbeiten & senden",
   "beneficiariesRecipientLabel": "Empfänger",
 
   "kycIntroTitle": "Lassen Sie uns Sie verifizieren",

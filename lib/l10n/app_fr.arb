@@ -210,6 +210,8 @@
   "beneficiariesDetailsTitle": "Détails du bénéficiaire",
   "beneficiariesRemoveButton": "Retirer le bénéficiaire",
   "beneficiariesSendMoney": "Envoyer de l'argent",
+  "beneficiariesSendNow": "Envoyer maintenant",
+  "beneficiariesEditAndSend": "Modifier et envoyer",
   "beneficiariesRecipientLabel": "Destinataire",
 
   "kycIntroTitle": "Faisons-vous vérifier",

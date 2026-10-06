@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -50,6 +51,30 @@ class _MorePageState extends State<MorePage> {
   final _otp = ValueNotifier('');
 
   @override
+  void initState() {
+    super.initState();
+    _fetchPictureIfMissing();
+  }
+
+  /// Fetches the profile picture once when the saved login has none yet — the
+  /// dashboard only fetches it right after login, so a user who later opens
+  /// More with an empty picture would otherwise see the placeholder forever.
+  void _fetchPictureIfMissing() {
+    final picture = AppState.currentUser?.profilePicture ?? '';
+    if (picture.isNotEmpty) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.dispatchProcess(
+        GetProfilePictureAction(payload: NoPayload()),
+        returnSavedResponse: true,
+        saveActionResponse: true,
+      );
+    });
+  }
+
+  @override
   void dispose() {
     _otp.dispose();
     super.dispose();
@@ -84,22 +109,23 @@ class _MorePageState extends State<MorePage> {
               leading: ProcessBuilder<String>(
                 event: () => GetProfilePictureAction.event,
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    AppState.currentUser = AppState.currentUser!.copyWith(
-                      profilePicture: snapshot.data ?? '',
-                    );
-                    return CircleAvatar(
-                      radius: 25,
-                      backgroundColor: context.cardBg,
-                      backgroundImage: avatarFromBase64(
-                        AppState.currentUser?.profilePicture,
-                      ),
-                    );
-                  }
-
+                  // The picture state is displaced in the shared ProcessBloc
+                  // (its success handler immediately dispatches
+                  // SaveAuthDataAction, and pull-to-refresh runs other
+                  // actions), so by the time this page mounts the bloc's
+                  // current state is never the picture's own — the builder
+                  // would forever render the placeholder. Fall back to the
+                  // picture saved on [AppState.currentUser]; the
+                  // ProcessBuilder still drives repaints when a fresh fetch
+                  // lands while this page is open.
+                  final picture =
+                      (snapshot.hasData && (snapshot.data ?? '').isNotEmpty)
+                      ? snapshot.data
+                      : AppState.currentUser?.profilePicture;
                   return CircleAvatar(
                     radius: 25,
                     backgroundColor: context.cardBg,
+                    backgroundImage: avatarFromBase64(picture),
                   );
                 },
               ),

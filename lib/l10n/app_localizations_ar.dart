@@ -626,6 +626,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get beneficiariesSendMoney => 'إرسال الأموال';
 
   @override
+  String get beneficiariesSendNow => 'أرسل الآن';
+
+  @override
+  String get beneficiariesEditAndSend => 'تعديل وإرسال';
+
+  @override
   String get beneficiariesRecipientLabel => 'المستلم';
 
   @override

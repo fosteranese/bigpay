@@ -380,6 +380,10 @@
   "beneficiariesRemoveButton": "Remove Beneficiary",
   "beneficiariesSendMoney": "Send Money",
   "@beneficiariesSendMoney": { "description": "Button to pay a saved beneficiary directly" },
+  "beneficiariesSendNow": "Send now",
+  "@beneficiariesSendNow": { "description": "Quick action on a saved beneficiary that opens the pre-filled form to pay them" },
+  "beneficiariesEditAndSend": "Edit & send",
+  "@beneficiariesEditAndSend": { "description": "Opens a saved beneficiary's pre-filled form to correct the details, then sends" },
   "beneficiariesRecipientLabel": "Recipient",
 
   "kycIntroTitle": "Let’s get you verified",

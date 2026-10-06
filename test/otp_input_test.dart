@@ -80,5 +80,63 @@ void main() {
 
       expect(completed, '1234');
     });
+
+    testWidgets('deleting a digit while completion is pending does not submit', (
+      tester,
+    ) async {
+      String? completed;
+
+      await _pump(
+        tester,
+        onCompleted: (value) => completed = value,
+      );
+
+      await tester.enterText(find.byType(TextField), '123456');
+      await tester.pump();
+
+      // The completion was deferred while the keyboard was going away. The
+      // user deletes a digit before it fires.
+      await tester.enterText(find.byType(TextField), '12345');
+      await tester.pump();
+
+      // Repopulating with a *different* full code completes with the new code.
+      await tester.enterText(find.byType(TextField), '654321');
+      await tester.pump();
+
+      expect(completed, '654321');
+    });
+
+    testWidgets('typed digits paint into the boxes immediately', (
+      tester,
+    ) async {
+      await _pump(tester, count: 4);
+
+      await tester.enterText(find.byType(TextField), '12');
+      await tester.pump();
+
+      // The decorative boxes render the controller text right away (no
+      // reliance on an unrelated rebuild).
+      final texts = tester
+          .widgetList<Text>(find.descendant(
+            of: find.byType(FormOtpInput),
+            matching: find.byType(Text),
+          ))
+          .map((t) => t.data)
+          .where((d) => d != null && d.isNotEmpty)
+          .toList();
+      expect(texts.join(), '12');
+
+      await tester.enterText(find.byType(TextField), '1');
+      await tester.pump();
+      final afterDelete = tester
+          .widgetList<Text>(find.descendant(
+            of: find.byType(FormOtpInput),
+            matching: find.byType(Text),
+          ))
+          .map((t) => t.data)
+          .where((d) => d != null && d.isNotEmpty)
+          .toList();
+      expect(afterDelete.join(), '1');
+    });
   });
 }

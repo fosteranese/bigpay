@@ -33,6 +33,7 @@ class ProcessRequestActionPayload implements ActionPayloadSerializable {
     this.otp,
     this.pin,
     this.secretAnswer,
+    this.payeeId,
   });
 
   final String? activityId;
@@ -43,16 +44,36 @@ class ProcessRequestActionPayload implements ActionPayloadSerializable {
   final String? pin;
   final String? secretAnswer;
 
+  /// The saved beneficiary to update instead of create — "edit and send"
+  /// reuses `Payee/addPayee` as an upsert keyed on this. Only set for that
+  /// flow, so a normal transaction's body stays identical.
+  final String? payeeId;
+
   @override
   Map<String, dynamic> toJson() => {
     'activityId': activityId,
     'formId': formId,
     'formData': formData,
     'paymentMode': paymentMode,
+    if (payeeId != null) 'payeeId': payeeId,
     'auth': {
       'otp': otp,
       'pin': pin,
       'secretAnswer': secretAnswer,
     },
   };
+
+  /// Copy with a [payeeId] attached — the "edit and send" flow reuses
+  /// `Payee/addPayee` as an upsert keyed on the saved payee.
+  ProcessRequestActionPayload withPayeeId(String? payeeId) =>
+      ProcessRequestActionPayload(
+        activityId: activityId,
+        formId: formId,
+        formData: formData,
+        paymentMode: paymentMode,
+        otp: otp,
+        pin: pin,
+        secretAnswer: secretAnswer,
+        payeeId: payeeId,
+      );
 }

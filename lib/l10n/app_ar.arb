@@ -210,6 +210,8 @@
   "beneficiariesDetailsTitle": "تفاصيل المستفيد",
   "beneficiariesRemoveButton": "إزالة المستفيد",
   "beneficiariesSendMoney": "إرسال الأموال",
+  "beneficiariesSendNow": "أرسل الآن",
+  "beneficiariesEditAndSend": "تعديل وإرسال",
   "beneficiariesRecipientLabel": "المستلم",
 
   "kycIntroTitle": "لنقم بالتحقق من حسابك",

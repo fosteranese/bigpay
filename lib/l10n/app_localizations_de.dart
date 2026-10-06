@@ -639,6 +639,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get beneficiariesSendMoney => 'Geld senden';
 
   @override
+  String get beneficiariesSendNow => 'Jetzt senden';
+
+  @override
+  String get beneficiariesEditAndSend => 'Bearbeiten & senden';
+
+  @override
   String get beneficiariesRecipientLabel => 'Empfänger';
 
   @override

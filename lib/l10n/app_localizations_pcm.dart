@@ -636,6 +636,12 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get beneficiariesSendMoney => 'Send Money';
 
   @override
+  String get beneficiariesSendNow => 'Send now';
+
+  @override
+  String get beneficiariesEditAndSend => 'Edit and send';
+
+  @override
   String get beneficiariesRecipientLabel => 'Recipient';
 
   @override

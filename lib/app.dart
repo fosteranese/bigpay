@@ -1,3 +1,6 @@
+import 'package:bigpay/constants/status.const.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
+import 'package:bigpay/models/actions/save_auth_data_action.dart';
 import 'package:flutter/cupertino.dart' show CupertinoLocalizations;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +13,6 @@ import 'package:bigpay/data/models/initialization_data/initialization_data.dart'
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/models/actions/auth_action.dart';
 import 'package:bigpay/models/actions/get_profile_picture_action.dart';
-import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/models/actions/logout_action.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
@@ -20,6 +22,7 @@ import 'package:bigpay/ui/pages/app_error.pg.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/pages/kyc/verify_identity_prompt.dart';
+import 'package:bigpay/ui/widgets/idle_timeout_gate.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
@@ -78,7 +81,7 @@ class BigPayApp extends StatelessWidget {
 
                 AppState.store.cache
                     .latestForEndpoint<AuthData>(
-                      VerifyOtpLoginAction.path,
+                      AuthAction.path,
                       AuthData.fromMap,
                     )
                     .then((result) async {
@@ -169,56 +172,71 @@ class BigPayApp extends StatelessWidget {
                 AppState.currentUser = AppState.currentUser!.copyWith(
                   profilePicture: snapshot.data ?? '',
                 );
+
+                SaveAuthDataAction.event = context.dispatchProcess(
+                  SaveAuthDataAction(
+                    payload: SaveAuthDataActionPayload(
+                      dataResponse: DataResponse(
+                        code: StatusCodeConstants.success,
+                        status: StatusConstants.success,
+                        message: '',
+                        data: AppState.currentUser,
+                      ),
+                    ),
+                  ),
+                );
               }
             },
           ),
         ],
         // App-wide: any request that comes back 6000 (identity verification
         // required) prompts KYC, wherever it was made.
-        child: VerifyIdentityGate(
-          navigatorKey: rootNavigatorKey,
-          child: ValueListenableBuilder<ThemeMode>(
-            valueListenable: AppState.themeNotifier,
-            builder: (context, themeMode, _) {
-              return ValueListenableBuilder<Locale?>(
-                valueListenable: AppState.localeNotifier,
-                builder: (context, locale, _) {
-                  return MaterialApp.router(
-                    title: 'BigPay',
-                    debugShowCheckedModeBanner: false,
-                    theme: AppTheme.light,
-                    darkTheme: AppTheme.dark,
-                    themeMode: themeMode,
-                    locale: locale,
-                    supportedLocales: AppState.supportedLocales,
-                    localizationsDelegates: [
-                      AppLocalizations.delegate,
-                      _PcmFallbackDelegate<MaterialLocalizations>(
-                        GlobalMaterialLocalizations.delegate,
-                      ),
-                      _PcmFallbackDelegate<CupertinoLocalizations>(
-                        GlobalCupertinoLocalizations.delegate,
-                      ),
-                      GlobalWidgetsLocalizations.delegate,
-                    ],
-                    routerConfig: AppRouter.router,
-                    builder: (context, child) {
-                      final scaler = MediaQuery.textScalerOf(context).clamp(
-                        maxScaleFactor: 1.3,
-                      );
-                      return MediaQuery(
-                        data: MediaQuery.of(
-                          context,
-                        ).copyWith(textScaler: scaler),
-                        child: ConnectivityBanner(
-                          child: child ?? SizedBox.shrink(),
+        child: IdleTimeoutGate(
+          child: VerifyIdentityGate(
+            navigatorKey: rootNavigatorKey,
+            child: ValueListenableBuilder<ThemeMode>(
+              valueListenable: AppState.themeNotifier,
+              builder: (context, themeMode, _) {
+                return ValueListenableBuilder<Locale?>(
+                  valueListenable: AppState.localeNotifier,
+                  builder: (context, locale, _) {
+                    return MaterialApp.router(
+                      title: 'BigPay',
+                      debugShowCheckedModeBanner: false,
+                      theme: AppTheme.light,
+                      darkTheme: AppTheme.dark,
+                      themeMode: themeMode,
+                      locale: locale,
+                      supportedLocales: AppState.supportedLocales,
+                      localizationsDelegates: [
+                        AppLocalizations.delegate,
+                        _PcmFallbackDelegate<MaterialLocalizations>(
+                          GlobalMaterialLocalizations.delegate,
                         ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
+                        _PcmFallbackDelegate<CupertinoLocalizations>(
+                          GlobalCupertinoLocalizations.delegate,
+                        ),
+                        GlobalWidgetsLocalizations.delegate,
+                      ],
+                      routerConfig: AppRouter.router,
+                      builder: (context, child) {
+                        final scaler = MediaQuery.textScalerOf(context).clamp(
+                          maxScaleFactor: 1.3,
+                        );
+                        return MediaQuery(
+                          data: MediaQuery.of(
+                            context,
+                          ).copyWith(textScaler: scaler),
+                          child: ConnectivityBanner(
+                            child: child ?? SizedBox.shrink(),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
