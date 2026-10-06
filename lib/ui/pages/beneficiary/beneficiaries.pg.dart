@@ -378,18 +378,19 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
                   ),
                   const SizedBox(width: 8),
                   // "Send now": pay the saved beneficiary directly (PIN +
-                  // Payee/payPayee) — a distinct action, no details page.
+                  // Payee/payPayee). A single soft circular action — no
+                  // chevron, so the trailing stays clean and the card tap
+                  // alone opens the details.
                   if (payee.formId?.isNotEmpty ?? false)
                     IconButton(
                       tooltip: l10n.beneficiariesSendNow,
                       onPressed: () => _send(payee),
-                      icon: Icon(
-                        Icons.north_east,
-                        size: 20,
-                        color: AppColors.primary,
+                      style: IconButton.styleFrom(
+                        backgroundColor: context.avatarBg,
+                        foregroundColor: AppColors.primary,
                       ),
+                      icon: const Icon(Icons.north_east, size: 18),
                     ),
-                  Icon(Icons.chevron_right_outlined, color: context.textSecondary),
                 ],
               ),
             ),
