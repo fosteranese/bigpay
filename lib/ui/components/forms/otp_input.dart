@@ -108,15 +108,19 @@ class FormOtpInputState extends State<FormOtpInput>
   void _ensureKeyboard() {
     if (!mounted) return;
     if (_focusNode.hasFocus) {
-      // The node kept focus across a system sheet (Face ID), but the native
-      // text-input connection was torn down — TextInput.show alone is a no-op
-      // without a live client. Cycle the focus to force a fresh setClient.
+      // The node kept focus across a system sheet (Face ID) or a dialog
+      // transition — cycle it to force a fresh text-input client.
       _focusNode.unfocus();
-      _focusNode.requestFocus();
-      SystemChannels.textInput.invokeMethod('TextInput.show');
-    } else {
-      _focusNode.requestFocus();
     }
+    _focusNode.requestFocus();
+    // Inside a dialog, focus can land without the OS actually raising the
+    // keyboard. Poke it open explicitly once the client is attached (on the
+    // next frame) so the PIN/OTP field is typeable without an extra tap.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _focusNode.hasFocus) {
+        SystemChannels.textInput.invokeMethod('TextInput.show');
+      }
+    });
   }
 
   // A single backing field for the whole code, with the boxes below purely
