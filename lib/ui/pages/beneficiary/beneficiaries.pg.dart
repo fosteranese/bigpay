@@ -268,7 +268,9 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
             }
           },
           builder: (context, snapshot) {
-            if (snapshot.isLoading) {
+            // Only the true first load shows a skeleton — a cache-then-refresh
+            // (isSilent) already has data on screen, so keep showing it.
+            if (snapshot.isLoading && !snapshot.isSilent) {
               return Column(
                 mainAxisSize: .min,
                 children: List.generate(

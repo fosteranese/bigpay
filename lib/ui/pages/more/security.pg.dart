@@ -301,7 +301,9 @@ class _SecurityPageState extends State<SecurityPage> {
           },
           builder: (context, snapshot) {
             final forms = _category?.forms ?? const [];
-            final loading = snapshot.isLoading;
+            // Skip the skeleton on the cache-then-refresh (isSilent) — the
+            // cached forms are already on screen.
+            final loading = snapshot.isLoading && !snapshot.isSilent;
 
             return Column(
               children: [

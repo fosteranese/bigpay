@@ -197,7 +197,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> with RouteAware {
           }
         },
         builder: (context, snapshot) {
-          if (snapshot.isLoading) {
+          if (snapshot.isLoading && !snapshot.isSilent) {
             return SliverFillRemaining(
               hasScrollBody: false,
               child: Column(
