@@ -230,6 +230,8 @@
   "beneficiariesSendNow": "Send now",
   "beneficiariesEditAndSend": "Edit and send",
   "beneficiariesRecipientLabel": "Recipient",
+  "beneficiariesTransactionType": "Transaction Type",
+  "beneficiariesService": "Service",
 
   "kycIntroTitle": "Make we verify you",
   "kycIntroSubtitle": "Confirm your Ghana Card details now make everything safe and quick pass.",

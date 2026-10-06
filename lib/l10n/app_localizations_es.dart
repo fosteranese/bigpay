@@ -645,6 +645,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get beneficiariesRecipientLabel => 'Destinatario';
 
   @override
+  String get beneficiariesTransactionType => 'Tipo de transacción';
+
+  @override
+  String get beneficiariesService => 'Servicio';
+
+  @override
   String get kycIntroTitle => 'Vamos a verificarte';
 
   @override

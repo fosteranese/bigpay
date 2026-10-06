@@ -648,6 +648,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get beneficiariesRecipientLabel => 'Empfänger';
 
   @override
+  String get beneficiariesTransactionType => 'Transaktionstyp';
+
+  @override
+  String get beneficiariesService => 'Dienst';
+
+  @override
   String get kycIntroTitle => 'Lassen Sie uns Sie verifizieren';
 
   @override

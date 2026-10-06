@@ -213,6 +213,8 @@
   "beneficiariesSendNow": "أرسل الآن",
   "beneficiariesEditAndSend": "تعديل وإرسال",
   "beneficiariesRecipientLabel": "المستلم",
+  "beneficiariesTransactionType": "نوع المعاملة",
+  "beneficiariesService": "الخدمة",
 
   "kycIntroTitle": "لنقم بالتحقق من حسابك",
   "kycIntroSubtitle": "أكّد بيانات بطاقة غانا الخاصة بك الآن لتجربة أكثر أمانًا وسرعة.",

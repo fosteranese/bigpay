@@ -5,6 +5,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/am_doing.const.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/auth_data/preview_datum.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
@@ -161,13 +162,28 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
     return parts.take(2).map((p) => p[0].toUpperCase()).join();
   }
 
-  /// The saved field values, minus the amount (a beneficiary is a recipient,
-  /// not a transaction).
-  List<MapEntry<String, dynamic>> get _rows {
+  /// Short label for the avatar — the backend's own [Payee.shortTitle] when
+  /// present (matches umb), otherwise computed initials.
+  String get _avatarLabel =>
+      widget.payee?.shortTitle ?? _initials(_name(context));
+
+  /// The saved field values to show, preferring the backend's display-ready
+  /// `previewData` (label + value) and falling back to the raw `formData`
+  /// keys (labelized, minus the amount — a beneficiary is a recipient, not a
+  /// transaction).
+  List<(String, String)> get _details {
+    final preview = widget.payee?.previewData ?? const <PreviewDatum>[];
+    if (preview.isNotEmpty) {
+      return preview
+          .where((e) => (e.value?.toString().isNotEmpty ?? false))
+          .map((e) => (e.key ?? '', e.value ?? ''))
+          .toList();
+    }
     final data = widget.payee?.formData ?? const {};
     return data.entries
         .where((e) => (e.value?.toString().isNotEmpty ?? false))
         .where((e) => e.key.toLowerCase() != 'amount')
+        .map((e) => (_label(e.key), e.value.toString()))
         .toList();
   }
 
@@ -202,8 +218,14 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final rows = _rows;
     final name = _name(context);
+    final meta = <(String, String)>[
+      if (widget.payee?.activityName?.isNotEmpty ?? false)
+        (l10n.beneficiariesTransactionType, widget.payee!.activityName!),
+      if (widget.payee?.formName?.isNotEmpty ?? false)
+        (l10n.beneficiariesService, widget.payee!.formName!),
+    ];
+    final details = _details;
 
     return MultiProcessListener(
       listeners: [
@@ -278,65 +300,81 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
           ],
         ),
         child: Column(
+          crossAxisAlignment: .stretch,
           children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: context.avatarBg,
-              child: Text(_initials(name), style: context.header1),
+            // Avatar in a white ring with a soft shadow — the umb "beneficiary
+            // details" hero look (an initial avatar floating on the page).
+            Center(
+              child: Container(
+                padding: const .all(4),
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withValues(alpha: 0.10),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 36,
+                  backgroundColor: context.avatarBg,
+                  child: Text(_avatarLabel, style: context.header1),
+                ),
+              ),
             ),
             const SizedBox(height: Spacing.lg),
             Text(name, style: context.display2, textAlign: .center),
-            if (widget.payee?.formName?.isNotEmpty ?? false) ...[
-              const SizedBox(height: Spacing.sm),
-              Container(
-                padding: const .symmetric(
-                  horizontal: Spacing.md,
-                  vertical: Spacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: context.avatarBg,
-                  borderRadius: .circular(100),
-                ),
-                child: Text(
-                  widget.payee!.formName!,
-                  style: context.smallDetailsMedium,
-                ),
-              ),
-            ],
-            const SizedBox(height: Spacing.xxl),
-            Container(
-              padding: const .symmetric(horizontal: Spacing.lg),
-              decoration: BoxDecoration(
-                color: context.cardBg,
-                borderRadius: .circular(16),
-                border: .all(color: context.border),
-              ),
-              child: Column(
-                mainAxisSize: .min,
-                children: [
-                  for (final (index, entry) in rows.indexed) ...[
-                    _detailRow(_label(entry.key), entry.value.toString()),
-                    if (index != rows.length - 1)
-                      Divider(height: 1, color: context.divider),
-                  ],
-                  if (rows.isEmpty)
-                    _detailRow(
-                      l10n.beneficiariesRecipientLabel,
-                      widget.payee?.value ?? '-',
-                    ),
+            const SizedBox(height: Spacing.lg),
+            if (meta.isNotEmpty) ...[
+              _sectionCard([
+                for (final (index, entry) in meta.indexed) ...[
+                  _detailRow(entry.$1, entry.$2, copyable: false),
+                  if (index != meta.length - 1)
+                    Divider(height: 1, color: context.divider),
                 ],
-              ),
-            ),
+              ]),
+              const SizedBox(height: Spacing.md),
+            ],
+            _sectionCard([
+              if (details.isEmpty)
+                _detailRow(
+                  l10n.beneficiariesRecipientLabel,
+                  widget.payee?.value ?? '-',
+                )
+              else
+                for (final (index, entry) in details.indexed) ...[
+                  _detailRow(entry.$1, entry.$2),
+                  if (index != details.length - 1)
+                    Divider(height: 1, color: context.divider),
+                ],
+            ]),
           ],
         ),
       ),
     );
   }
 
+  /// A card with rounded corners and a border, holding one or more rows with
+  /// dividers between them — the umb "details" card look.
+  Widget _sectionCard(List<Widget> children) {
+    return Container(
+      padding: const .symmetric(horizontal: Spacing.lg),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: .circular(16),
+        border: .all(color: context.border),
+      ),
+      child: Column(mainAxisSize: .min, children: children),
+    );
+  }
+
   /// Label over value (reads better than a squeezed two-column row once
-  /// values get long, e.g. account numbers), with a copy action since these
-  /// are exactly the values people paste elsewhere.
-  Widget _detailRow(String label, String value) {
+  /// values get long, e.g. account numbers), with an optional copy action
+  /// since these are exactly the values people paste elsewhere.
+  Widget _detailRow(String label, String value, {bool copyable = true}) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const .symmetric(vertical: Spacing.md),
@@ -352,21 +390,22 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
               ],
             ),
           ),
-          IconButton(
-            tooltip: l10n.commonCopy,
-            icon: Icon(
-              Icons.copy_rounded,
-              size: 18,
-              color: context.textSecondary,
+          if (copyable)
+            IconButton(
+              tooltip: l10n.commonCopy,
+              icon: Icon(
+                Icons.copy_rounded,
+                size: 18,
+                color: context.textSecondary,
+              ),
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: value));
+                if (!mounted) return;
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text(l10n.commonCopied)));
+              },
             ),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: value));
-              if (!mounted) return;
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(l10n.commonCopied)));
-            },
-          ),
         ],
       ),
     );

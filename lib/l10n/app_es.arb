@@ -213,6 +213,8 @@
   "beneficiariesSendNow": "Enviar ahora",
   "beneficiariesEditAndSend": "Editar y enviar",
   "beneficiariesRecipientLabel": "Destinatario",
+  "beneficiariesTransactionType": "Tipo de transacción",
+  "beneficiariesService": "Servicio",
 
   "kycIntroTitle": "Vamos a verificarte",
   "kycIntroSubtitle": "Confirma ahora los datos de tu Ghana Card para una experiencia más segura y rápida.",

@@ -385,6 +385,10 @@
   "beneficiariesEditAndSend": "Edit & send",
   "@beneficiariesEditAndSend": { "description": "Opens a saved beneficiary's pre-filled form to correct the details, then sends" },
   "beneficiariesRecipientLabel": "Recipient",
+  "beneficiariesTransactionType": "Transaction Type",
+  "@beneficiariesTransactionType": { "description": "Meta row label showing the activity type of a saved beneficiary" },
+  "beneficiariesService": "Service",
+  "@beneficiariesService": { "description": "Meta row label showing the service of a saved beneficiary" },
 
   "kycIntroTitle": "Let’s get you verified",
   "kycIntroSubtitle": "Confirm your Ghana Card details now for a safer, faster experience.",

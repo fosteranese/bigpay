@@ -1306,6 +1306,18 @@ abstract class AppLocalizations {
   /// **'Recipient'**
   String get beneficiariesRecipientLabel;
 
+  /// Meta row label showing the activity type of a saved beneficiary
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Type'**
+  String get beneficiariesTransactionType;
+
+  /// Meta row label showing the service of a saved beneficiary
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get beneficiariesService;
+
   /// No description provided for @kycIntroTitle.
   ///
   /// In en, this message translates to:
