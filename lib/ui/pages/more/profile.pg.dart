@@ -54,7 +54,11 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.dispatchProcess(
+      // Correlate the fetch with the shared event so the page's ProcessBuilder
+      // (and the app-level listener that persists the picture) actually see
+      // the result — a bare dispatchProcess here would run the request but
+      // leave its event unmatched, so the placeholder would never update.
+      GetProfilePictureAction.event = context.dispatchProcess(
         GetProfilePictureAction(payload: NoPayload()),
         returnSavedResponse: true,
         saveActionResponse: true,
