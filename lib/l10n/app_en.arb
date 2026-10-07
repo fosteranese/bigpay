@@ -141,11 +141,11 @@
   "authEnterSecurePhraseTitle": "Enter your secure phrase",
   "@authEnterSecurePhraseTitle": { "description": "Secure-phrase entry page title (during login)" },
 
-  "authUnlockWithBiometrics": "Unlock to Login",
+  "authUnlockWithBiometrics": "Unblock to Login",
   "@authUnlockWithBiometrics": { "description": "Button to trigger biometric unlock" },
   "authLoginWithPassword": "Login with Password",
   "@authLoginWithPassword": { "description": "Link to fall back to password sign-in" },
-  "authUnlockWithBiometricsTooltip": "Unlock to login",
+  "authUnlockWithBiometricsTooltip": "Unblock to login",
   "@authUnlockWithBiometricsTooltip": { "description": "Tooltip on the biometric icon button" },
 
   "authForgotPasswordTitle": "Forgot Password",

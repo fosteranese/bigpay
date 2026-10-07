@@ -209,14 +209,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authEnterSecurePhraseTitle => 'Saisissez votre phrase sécurisée';
 
   @override
-  String get authUnlockWithBiometrics => 'Déverrouiller pour se connecter';
+  String get authUnlockWithBiometrics => 'Débloquer pour se connecter';
 
   @override
   String get authLoginWithPassword => 'Se connecter avec un mot de passe';
 
   @override
-  String get authUnlockWithBiometricsTooltip =>
-      'Déverrouiller pour se connecter';
+  String get authUnlockWithBiometricsTooltip => 'Débloquer pour se connecter';
 
   @override
   String get authForgotPasswordTitle => 'Mot de passe oublié';

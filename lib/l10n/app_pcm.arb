@@ -77,9 +77,9 @@
 
   "authEnterSecurePhraseTitle": "Enter your secure phrase",
 
-  "authUnlockWithBiometrics": "Unlock to Login",
+  "authUnlockWithBiometrics": "Unblock to Login",
   "authLoginWithPassword": "Login with Password",
-  "authUnlockWithBiometricsTooltip": "Unlock to login",
+  "authUnlockWithBiometricsTooltip": "Unblock to login",
 
   "authForgotPasswordTitle": "Forgot Password",
   "authAnswerToSecurePhraseLabel": "Answer to Secure Phrase",

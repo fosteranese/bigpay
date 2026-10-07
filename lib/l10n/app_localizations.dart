@@ -493,7 +493,7 @@ abstract class AppLocalizations {
   /// Button to trigger biometric unlock
   ///
   /// In en, this message translates to:
-  /// **'Unlock to Login'**
+  /// **'Unblock to Login'**
   String get authUnlockWithBiometrics;
 
   /// Link to fall back to password sign-in
@@ -505,7 +505,7 @@ abstract class AppLocalizations {
   /// Tooltip on the biometric icon button
   ///
   /// In en, this message translates to:
-  /// **'Unlock to login'**
+  /// **'Unblock to login'**
   String get authUnlockWithBiometricsTooltip;
 
   /// Forgot-password page title
