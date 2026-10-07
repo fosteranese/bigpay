@@ -290,8 +290,8 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
       child: MainLayout(
         useScaffold: widget.onBack == null,
         onBack: widget.onBack,
-        bottomSize: 60,
-        title: l10n.beneficiariesDetailsTitle,
+        bottomSize: 30,
+        miniTitle: l10n.beneficiariesDetailsTitle,
         bottomNav: Column(
           mainAxisSize: .min,
           children: [
