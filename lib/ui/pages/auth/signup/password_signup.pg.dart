@@ -82,7 +82,10 @@ class _CreatePasswordSignUpPageState extends State<CreatePasswordSignUpPage> {
               controller: _confirmPasswordController,
               onChanged: _onChanged,
               next: (value) {
-                _continue();
+                // Only advance on the keyboard's "done" action when the two
+                // passwords actually match — otherwise stay put and show the
+                // mismatch message.
+                if (_canSubmit.value) _continue();
               },
             ),
             ValueListenableBuilder(
