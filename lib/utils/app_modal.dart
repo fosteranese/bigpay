@@ -1,7 +1,8 @@
+import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class AppModal {
   AppModal._();
@@ -13,6 +14,12 @@ class AppModal {
     EdgeInsetsGeometry padding = const .all(10),
     List<Widget> actions = const [],
   }) {
+    // Capped the same way page content is via BoundedContent, so the sheet
+    // doesn't stretch edge-to-edge on a tablet/desktop window — using
+    // showModalBottomSheet's own `constraints` param (its supported,
+    // documented way to do this) rather than fighting its layout with a
+    // custom wrapper.
+    final cap = contentCapWidth(context);
     showModalBottomSheet(
       isScrollControlled: true,
       requestFocus: true,
@@ -20,9 +27,9 @@ class AppModal {
       useSafeArea: true,
       useRootNavigator: true,
       isDismissible: true,
-      constraints: BoxConstraints(
-        minWidth: double.maxFinite,
-      ),
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),
       ),
@@ -31,49 +38,60 @@ class AppModal {
         margin: const .all(20),
         padding: padding,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardBg,
           borderRadius: .circular(16),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: .min,
-            children: [
-              Row(
-                mainAxisSize: .max,
-                mainAxisAlignment: .spaceBetween,
-                crossAxisAlignment: .center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: AppTypography.header1,
+        child: Material(
+          // Hosts the ink splashes for any ListTile the caller puts in the
+          // sheet below — otherwise the decorated Container in between would
+          // hide them (and Flutter asserts about it).
+          color: Colors.transparent,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: .min,
+              children: [
+                Row(
+                  mainAxisSize: .max,
+                  mainAxisAlignment: .spaceBetween,
+                  crossAxisAlignment: .center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: context.header1,
+                      ),
                     ),
-                  ),
-                  ...actions,
-                  const SizedBox(width: 5),
-                  IconButton.filled(
-                    style: IconButton.styleFrom(
-                      alignment: .center,
-                      tapTargetSize: .shrinkWrap,
-                      backgroundColor: AppColors.offWhite,
-                      fixedSize: Size(35, 35),
-                      minimumSize: Size(35, 35),
-                      maximumSize: Size(35, 35),
+                    ...actions,
+                    const SizedBox(width: 5),
+                    IconButton.filled(
+                      style: IconButton.styleFrom(
+                        alignment: .center,
+                        tapTargetSize: .shrinkWrap,
+                        backgroundColor: context.divider,
+                        fixedSize: Size(35, 35),
+                        minimumSize: Size(35, 35),
+                        maximumSize: Size(35, 35),
+                      ),
+                      onPressed: () {
+                        // This sheet shows on the root navigator
+                        // (useRootNavigator: true above), but `context` here
+                        // can resolve its nearest Navigator to a shell branch's
+                        // own nested one instead — AppRouter.router.pop()
+                        // always targets the right one.
+                        AppRouter.router.pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        size: 17,
+                        color: context.textPrimary,
+                      ),
                     ),
-                    onPressed: () {
-                      context.pop();
-                    },
-                    icon: Icon(
-                      Icons.close,
-                      size: 17,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ],
-              ),
-              // const SizedBox(height: 16),
-              ...children,
-            ],
+                  ],
+                ),
+                // const SizedBox(height: 16),
+                ...children,
+              ],
+            ),
           ),
         ),
       ),

@@ -1,7 +1,12 @@
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,6 +42,8 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void initState() {
     super.initState();
     _filteredOptions = widget.options;
+    _syncDisplayFromController();
+    _maybeAutoSelectOnlyOption();
   }
 
   @override
@@ -44,24 +51,70 @@ class _FormSelectInputState extends State<FormSelectInput> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options != widget.options) {
       _filteredOptions = widget.options;
+      _syncDisplayFromController();
+      _maybeAutoSelectOnlyOption();
     }
+  }
+
+  /// Resolves a pre-filled [widget.controller] value — an option `id` saved
+  /// with a beneficiary — back to its `label` so the field displays the chosen
+  /// option instead of an empty box. Mirrors umb's `selectedOption` lookup
+  /// (`lovValue == defaultValue` → `lovTitle`).
+  void _syncDisplayFromController() {
+    final value = widget.controller.text;
+    if (value.isEmpty) return;
+    for (final option in widget.options) {
+      if (option.id == value) {
+        _controller.text = option.label;
+        return;
+      }
+    }
+  }
+
+  /// A single-option field has nothing to actually choose, so it selects
+  /// itself rather than making the user open a picker just to tap the one
+  /// row in it. Skipped once something's already selected — including
+  /// whatever this same auto-select just set on a prior call — so it never
+  /// clobbers a real (or already-applied) choice.
+  void _maybeAutoSelectOnlyOption() {
+    if (widget.options.length != 1) return;
+    if (widget.controller.text.isNotEmpty) return;
+
+    final option = widget.options.first;
+    _controller.text = option.label;
+    widget.controller.text = option.id;
+
+    // Deferred: this can run from initState, before this widget's own
+    // first build — calling widget.onChanged synchronously there risks
+    // triggering setState on an ancestor still in the middle of building.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onChanged?.call(option.label);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: _onTap,
-      highlightColor: Colors.transparent,
-      child: AbsorbPointer(
-        child: FormInput(
-          readOnly: true,
-          label: widget.label,
-          placeholder: widget.placeholder,
-          controller: _controller,
-          focusNode: widget.focusNode,
-          next: widget.next,
-          onChanged: widget.onChanged,
-          suffix: const Icon(Icons.expand_more_outlined),
+    return Tooltip(
+      message: _controller.text,
+      child: InkWell(
+        onTap: _onTap,
+        highlightColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        child: AbsorbPointer(
+          child: FormInput(
+            readOnly: true,
+            label: widget.label,
+            placeholder: widget.placeholder,
+            controller: _controller,
+            focusNode: widget.focusNode,
+            next: widget.next,
+            onChanged: widget.onChanged,
+            suffix: const Icon(Icons.expand_more_outlined),
+            maxLines: 1,
+          ),
         ),
       ),
     );
@@ -70,7 +123,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void _onTap() {
     FocusScope.of(context).unfocus();
     widget.focusNode?.requestFocus();
-    if (widget.options.length <= 5) {
+    if (widget.options.length <= 3) {
       _onShortList();
     } else {
       _onLongList();
@@ -78,23 +131,25 @@ class _FormSelectInputState extends State<FormSelectInput> {
   }
 
   void _onShortList() {
+    final cap = contentCapWidth(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
       useRootNavigator: true,
       isDismissible: true,
-      constraints: BoxConstraints(
-        minWidth: double.maxFinite,
-      ),
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: RoundedRectangleBorder(
         borderRadius: .circular(20),
       ),
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      builder: (ctx) => Container(
         margin: const .all(20),
         padding: const .all(10),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: ctx.cardBg,
           borderRadius: .circular(16),
         ),
         child: SingleChildScrollView(
@@ -107,32 +162,30 @@ class _FormSelectInputState extends State<FormSelectInput> {
                 crossAxisAlignment: .start,
                 children: [
                   Text(
-                    widget.label ?? 'Select',
-                    style: AppTypography.header1,
+                    widget.label ?? l10n.commonSelect,
+                    style: ctx.header1,
                   ),
                   IconButton.filled(
+                    tooltip: l10n.commonClose,
                     style: IconButton.styleFrom(
                       alignment: .center,
-                      tapTargetSize: .shrinkWrap,
-                      backgroundColor: AppColors.offWhite,
-                      fixedSize: Size(35, 35),
-                      minimumSize: Size(35, 35),
-                      maximumSize: Size(35, 35),
+                      backgroundColor: ctx.divider,
+                      fixedSize: Size(44, 44),
                     ),
                     onPressed: () {
-                      context.pop();
+                      ctx.pop();
                     },
                     icon: Icon(
                       Icons.close,
                       size: 17,
-                      color: AppColors.black,
+                      color: ctx.textPrimary,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               if (widget.options.isEmpty)
-                _emptyState(message: 'No options available')
+                _emptyState(message: l10n.commonNoOptionsAvailable)
               else
                 ...widget.options.map(_buildOption),
             ],
@@ -145,17 +198,25 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void _onLongList() {
     _searchController.clear();
     _filteredOptions = widget.options;
+    final cap = contentCapWidth(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
+      useRootNavigator: true,
+      constraints: cap == double.infinity
+          ? null
+          : BoxConstraints(maxWidth: cap),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: .vertical(
+          top: .circular(20),
+        ),
       ),
-      builder: (_) => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
+      builder: (ctx) => Container(
+        margin: const .symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: ctx.cardBg,
+          borderRadius: .circular(20),
         ),
         child: DraggableScrollableSheet(
           initialChildSize: 0.6,
@@ -163,41 +224,71 @@ class _FormSelectInputState extends State<FormSelectInput> {
           maxChildSize: 0.9,
           expand: false,
           builder: (_, scrollController) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const .symmetric(vertical: 24),
             child: Column(
               children: [
-                Text(
-                  widget.label ?? 'Select',
-                  style: AppTypography.formLabels,
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      hintStyle: AppTypography.caption,
-                      prefixIcon: const Icon(Icons.search),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: AppColors.tertiary,
-                          style: BorderStyle.solid,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          style: BorderStyle.solid,
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.offWhite,
+                Row(
+                  mainAxisSize: .max,
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    Text(
+                      widget.label ?? l10n.commonSelect,
+                      style: ctx.header1,
                     ),
-                    onChanged: _onSearch,
+                    IconButton.filled(
+                      tooltip: l10n.commonClose,
+                      style: IconButton.styleFrom(
+                        alignment: .center,
+                        backgroundColor: ctx.divider,
+                        fixedSize: Size(44, 44),
+                      ),
+                      onPressed: () {
+                        ctx.pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        size: 17,
+                        color: ctx.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const .only(
+                    top: 5,
+                    bottom: 10,
+                  ),
+                  child: SizedBox(
+                    height: 48,
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: l10n.feedbackCategorySearchPlaceholder,
+                        hintStyle: ctx.caption,
+                        prefixIcon: const Icon(Icons.search),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: .circular(10),
+                          borderSide: BorderSide(
+                            color: ctx.border,
+                            style: .solid,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: .circular(10),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            style: .solid,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: ctx.divider,
+                      ),
+                      keyboardType: .text,
+                      textInputAction: .search,
+                      maxLines: 1,
+                      onChanged: _onSearch,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -205,8 +296,8 @@ class _FormSelectInputState extends State<FormSelectInput> {
                   child: _filteredOptions.isEmpty
                       ? _emptyState(
                           message: _searchController.text.isEmpty
-                              ? 'No options available'
-                              : 'No results found',
+                              ? l10n.commonNoOptionsAvailable
+                              : l10n.commonNoResultsFound,
                           icon: _searchController.text.isEmpty
                               ? Icons.inbox_outlined
                               : Icons.search_off_outlined,
@@ -235,11 +326,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: AppColors.flora),
+          Icon(icon, size: 48, color: context.textTertiary),
           const SizedBox(height: 12),
           Text(
             message,
-            style: AppTypography.smallDetails,
+            style: context.smallDetails,
             textAlign: TextAlign.center,
           ),
         ],
@@ -250,18 +341,47 @@ class _FormSelectInputState extends State<FormSelectInput> {
   Widget _buildOption(FormSelectOption option) {
     final selected = widget.controller.text == option.id;
     return Container(
+      margin: const .only(bottom: 10),
       decoration: BoxDecoration(
         borderRadius: .circular(10),
         border: .all(
-          color: AppColors.tertiary,
+          color: context.border,
           width: 1,
         ),
       ),
-      child: ListTile(
-        onTap: () => _onSelect(option),
-        title: Text(option.label),
-        contentPadding: .symmetric(horizontal: 10),
-        trailing: FormRadioButton(selected: selected),
+      child: Material(
+        borderRadius: .circular(10),
+        child: ListTile(
+          onTap: () => _onSelect(option),
+          selected: selected,
+          leading: _optionLeading(option),
+          title: Text(option.label),
+          contentPadding: .symmetric(horizontal: 10),
+          trailing: FormRadioButton(selected: selected),
+        ),
+      ),
+    );
+  }
+
+  /// The option's logo, when it has one. A full URL is used directly; a
+  /// relative path is resolved against the account's image base URL.
+  Widget? _optionLeading(FormSelectOption option) {
+    final icon = option.icon;
+    if (icon == null || icon.isEmpty) return null;
+
+    final url = icon.startsWith('http')
+        ? icon
+        : '${AppState.currentUser?.imageBaseUrl ?? ''}'
+              '${AppState.currentUser?.imageDirectory ?? ''}/$icon';
+
+    return ClipRRect(
+      borderRadius: .circular(6),
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 32,
+        height: 32,
+        fit: .contain,
+        errorWidget: (_, _, _) => const SizedBox(width: 32, height: 32),
       ),
     );
   }
@@ -286,6 +406,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
   @override
   void dispose() {
     _searchController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 }
@@ -293,11 +414,16 @@ class _FormSelectInputState extends State<FormSelectInput> {
 class FormSelectOption {
   final String id;
   final String label;
+
+  /// Optional leading icon — a full URL, or a relative path resolved against
+  /// the image base URL.
+  final String? icon;
   final dynamic data;
 
   FormSelectOption({
     required this.id,
     required this.label,
+    this.icon,
     this.data,
   });
 }

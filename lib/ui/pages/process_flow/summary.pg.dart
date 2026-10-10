@@ -1,92 +1,503 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/constants/am_doing.const.dart';
+import 'package:bigpay/data/models/auth_data/activity_datum.dart';
+import 'package:bigpay/data/models/general_flow/form_verification_response.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
+import 'package:bigpay/data/models/general_flow/general_flow_form_data.dart';
+import 'package:bigpay/data/models/general_flow/request_response.dart';
+import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/models/actions/beneficiary/add_payee_action.dart';
+import 'package:bigpay/models/actions/services/process_request_action.dart';
+import 'package:bigpay/models/actions/services/resend_form_otp_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/pages/history/history.pg.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
+import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
 import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/authentication.util.dart';
+import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/payee.util.dart';
+import 'package:bigpay/utils/transaction_validation.util.dart';
 
+/// Confirmation screen shown after a form is verified: it renders the
+/// verification's `previewData` (amount, charges, total, entered fields) and —
+/// mirroring umb's `ConfirmationFormPage` — any remaining editable fields the
+/// user still has to complete here.
+///
+/// The form screen only collects the fields needed to verify
+/// (`requiredForVerification == 1`); the rest of the visible, editable fields
+/// are gathered on this screen, then merged with the verified data into the
+/// process request.
+///
+/// Continue processes the request — collecting an OTP/PIN first when the
+/// verification says an auth factor is required.
 class SummaryPage extends StatefulWidget {
-  const SummaryPage({super.key});
+  const SummaryPage({
+    super.key,
+    this.verification,
+    this.formData,
+    this.activityDatum,
+    this.category,
+    this.amDoing = AmDoing.transaction,
+    this.payee,
+  });
+
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/services/summary',
   );
+
+  /// The `verifyForm` result. Nullable so a direct hit on the route degrades
+  /// gracefully.
+  final FormVerificationResponse? verification;
+  final GeneralFlowFormData? formData;
+  final ActivityDatum? activityDatum;
+  final GeneralFlowCategory? category;
+
+  /// Whether Continue processes a transaction or saves the form as a
+  /// beneficiary.
+  final AmDoing amDoing;
+
+  /// The saved beneficiary behind "edit and send" — pre-fills the remaining
+  /// editable fields with the corrected details and keys the `Payee/addPayee`
+  /// upsert before the payment runs.
+  final Payee? payee;
 
   @override
   State<SummaryPage> createState() => _SummaryPageState();
 }
 
 class _SummaryPageState extends State<SummaryPage> {
+  final _formKey = GlobalKey<FormState>();
+  ExecuteProcessEvent? _processEvent;
+  ExecuteProcessEvent? _payeeEvent;
+
+  bool get _isAddBeneficiary => widget.amDoing == AmDoing.addBeneficiary;
+
+  final _canContinue = ValueNotifier(true);
+
+  /// Visible, editable fields that weren't needed for verification — collected
+  /// on this screen. Matches umb's `ConfirmationFormPage._setupFormData`.
+  late final List<(GeneralFlowFieldsDatum, TextEditingController, FocusNode)>
+  _editableItems;
+
+  /// Every other field (hidden, read-only, or already used for verification).
+  /// Their values come from the verified data, not user input.
+  late final List<GeneralFlowFieldsDatum> _preFields;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final fields = widget.formData?.fieldsDatum ?? const [];
+
+    bool isEditable(GeneralFlowFieldsDatum f) =>
+        f.field?.fieldVisible == 1 &&
+        f.field?.readOnly != 1 &&
+        f.field?.requiredForVerification != 1;
+
+    final editable = fields.where(isEditable).toList();
+    _preFields = fields.where((f) => !isEditable(f)).toList();
+
+    // Keep the amount at the top when it happens to be an editable field, to
+    // match the form screen's ordering.
+    // final amountIndex = editable.indexWhere((f) => f.field?.isAmount == 1);
+    // if (amountIndex > 0) {
+    //   editable.insert(0, editable.removeAt(amountIndex));
+    // }
+
+    final verified = widget.verification?.formData ?? const {};
+    _editableItems = editable.map((item) {
+      final name = item.field?.fieldName;
+      // Freshly verified values win; a saved beneficiary fills the fields
+      // verification didn't touch (so "edit & send" opens with everything the
+      // user saved); the form's own default is the last resort.
+      final existing = (name == null ? null : verified[name])?.toString();
+      final text = (existing != null && existing.isNotEmpty)
+          ? existing
+          : (payeeSavedFieldValue(widget.payee, name) ??
+                (item.field?.defaultValue ?? ''));
+      final controller = TextEditingController(text: text)
+        ..addListener(_recomputeCanContinue);
+      return (item, controller, FocusNode());
+    }).toList();
+
+    _recomputeCanContinue();
+  }
+
+  @override
+  void dispose() {
+    for (final (_, controller, focusNode) in _editableItems) {
+      controller.removeListener(_recomputeCanContinue);
+      controller.dispose();
+      focusNode.dispose();
+    }
+    _canContinue.dispose();
+    super.dispose();
+  }
+
+  /// Continue stays enabled while every mandatory editable field has a value.
+  void _recomputeCanContinue() {
+    _canContinue.value = _editableItems.every((item) {
+      final mandatory = item.$1.field?.fieldMandatory == 1;
+      return !mandatory || item.$2.text.trim().isNotEmpty;
+    });
+  }
+
+  /// Prefills the fields from a payee just selected here on the confirmation
+  /// screen (see [prefillFromPayee]).
+  void _onPayeeSelected(Payee payee) {
+    prefillFromPayee(payee, _editableItems);
+    _recomputeCanContinue();
+  }
+
+  /// The full form data for the process request: the verified data, with the
+  /// pre-filled fields keyed by field name and the editable fields overlaid
+  /// with what the user entered here. Mirrors umb's `getFormData`.
+  Map<String, dynamic> _buildPayload() {
+    final verified = widget.verification?.formData ?? const {};
+    final payload = <String, dynamic>{};
+
+    for (final datum in _preFields) {
+      final name = datum.field?.fieldName;
+      if (name == null) continue;
+      payload[name] = verified[name] ?? datum.field?.defaultValue;
+    }
+
+    for (final (datum, controller, _) in _editableItems) {
+      final name = datum.field?.fieldName;
+      if (name == null) continue;
+      payload[name] = controller.text.trim();
+    }
+
+    return {...verified, ...payload};
+  }
+
+  /// Triggers the transaction OTP SMS — called when the OTP auth step opens
+  /// and on each resend tap.
+  void _sendFormOtp() {
+    final formId = widget.formData?.form?.formId;
+    if (formId == null) return;
+    context.dispatchProcess(ResendFormOtpAction(formId: formId));
+  }
+
+  void _continue() {
+    FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
+
+    final payload = _buildPayload();
+
+    if (TransactionValidation.debitEqualsCredit(
+      widget.formData?.fieldsDatum ?? const [],
+      payload,
+    )) {
+      MessageUtil.displayErrorDialog(
+        context,
+        message: AppLocalizations.of(context)!.validationDebitCreditSame,
+      );
+      return;
+    }
+
+    final authModes = widget.verification?.authMode ?? const [];
+
+    if (authModes.isNotEmpty) {
+      AuthenticationUtil.start(
+        authModes: authModes,
+        payload: payload,
+        onResendShortCode: _sendFormOtp,
+        complete: ({otp, required payload, pin, secretAnswer}) {
+          // Each auth step (PIN/OTP/secret answer) dismisses its own
+          // dialog before calling onSuccess, so there's nothing left to
+          // pop here.
+          _process(
+            otp: otp,
+            payload: payload,
+            pin: pin,
+            secretAnswer: secretAnswer,
+          );
+        },
+      );
+      return;
+    }
+
+    _process(payload: payload);
+  }
+
+  void _process({
+    String? otp,
+    required Map<String, dynamic> payload,
+    String? pin,
+    String? secretAnswer,
+  }) {
+    final paymentMode =
+        (payload['SourceAccount'] ?? payload['sourceAccount'] ?? '').toString();
+
+    final actionPayload = ProcessRequestActionPayload(
+      activityId: widget.activityDatum?.activity?.activityId,
+      formId: widget.formData?.form?.formId,
+      formData: payload,
+      paymentMode: paymentMode,
+      otp: otp,
+      pin: pin,
+      secretAnswer: secretAnswer,
+    );
+
+    // Same payload either way — a beneficiary is just a saved, unprocessed
+    // request.
+    if (_isAddBeneficiary) {
+      _payeeEvent = context.dispatchProcess(
+        AddPayeeAction(payload: actionPayload),
+      );
+      return;
+    }
+
+    // "Edit & send" is just a transaction with a pre-filled form — the edited
+    // fields apply to this payment only; the saved beneficiary is not re-saved.
+    _processEvent = context.dispatchProcess(
+      ProcessRequestAction(
+        payload: actionPayload,
+        endpointFunc: _processEndpoint,
+      ),
+    );
+  }
+
+  String _processEndpoint() {
+    switch (widget.formData?.form?.activityType) {
+      case ActivityTypesConst.fblCollect:
+      case ActivityTypesConst.fblCollectCategory:
+        return '/FBLCollect/initiatePayment';
+      case ActivityTypesConst.quickFlow:
+      case ActivityTypesConst.quickFlowAlt:
+        return '/QuickFlow/processRequest';
+      case ActivityTypesConst.fblOnline:
+      case ActivityTypesConst.enquiry:
+      default:
+        return '/FBLOnline/processRequest';
+    }
+  }
+
+  /// (title, value) rows: the service name followed by the server's preview
+  /// rows. Rows without a value are dropped.
+  List<(String, String)> _rows(BuildContext context) {
+    final rows = <(String, String)>[];
+
+    final service =
+        widget.formData?.form?.formName ??
+        widget.activityDatum?.activity?.activityName ??
+        '';
+    if (service.isNotEmpty) {
+      rows.add((AppLocalizations.of(context)!.historyServiceLabel, service));
+    }
+
+    for (final item in widget.verification?.previewData ?? const []) {
+      final key = item.key;
+      final value = item.value;
+      if (key == null || value == null || value.isEmpty) continue;
+      rows.add((key, value));
+    }
+
+    return rows;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      subtitleWidget: Column(
-        children: [
-          Text(
-            'Transaction Summary',
-            textAlign: .center,
-            style: AppTypography.display2,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Kindly confirm the transaction details before you proceed',
-            textAlign: .center,
-            style: AppTypography.smallDetails,
-          ),
-        ],
-      ),
-      bottomNav: FormButton(
-        onPressed: () {},
-        text: 'Continue',
-      ),
-      child: Container(
-        // alignment: .center,
-        padding: .all(20),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: .circular(12),
+    final rows = _rows(context);
+
+    return MultiProcessListener(
+      listeners: [
+        ProcessListenerConfig<RequestResponse>(
+          event: () => _processEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _processEvent = null;
+              // Dashboard/Wallets/History live in other shell branches and
+              // won't otherwise know this happened — see the notifier's doc.
+              AppState.notifyDataChanged();
+              AppRouter.router.push(
+                TransactionDetailsPage.route.path,
+                extra: snapshot.data,
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _processEvent = null;
+              final code = snapshot.error!.code;
+              // Pending/processing isn't a failure — the request was accepted
+              // but isn't final yet. Don't drop the user back on the summary;
+              // send them to History (refreshed) to track its status there.
+              if (code == StatusCodeConstants.pending ||
+                  code == StatusCodeConstants.processing) {
+                AppState.notifyDataChanged();
+                AppRouter.router.go(HistoryPage.route.path);
+                return;
+              }
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
         ),
-        child: Column(
-          mainAxisSize: .min,
-          mainAxisAlignment: .start,
-          crossAxisAlignment: .center,
+        // Add-beneficiary saves the same payload via Payee/addPayee; on success
+        // return to the beneficiaries list.
+        ProcessListenerConfig<bool>(
+          event: () => _payeeEvent,
+          listener: (context, snapshot) {
+            if (snapshot.isLoading) {
+              MessageUtil.displayLoading(context);
+              return;
+            } else {
+              MessageUtil.close(context);
+            }
+
+            if (snapshot.isSuccessful) {
+              _payeeEvent = null;
+              AppState.notifyDataChanged();
+              MessageUtil.displaySuccessDialog(
+                context,
+                message:
+                    snapshot.message ??
+                    AppLocalizations.of(
+                      context,
+                    )!.summaryBeneficiarySavedMessage,
+                // See the matching comment in service_form.pg.dart —
+                // pops back rather than go() so BeneficiariesPage's own
+                // didPopNext refresh actually fires.
+                onOk: () => AppRouter.router.popUntilNamed(
+                  BeneficiariesPage.route.name,
+                ),
+              );
+              return;
+            }
+
+            if (snapshot.hasError) {
+              _payeeEvent = null;
+              MessageUtil.displayErrorDialog(
+                context,
+                message: snapshot.error!.message,
+              );
+            }
+          },
+        ),
+      ],
+      child: MainLayout(
+        // Default (100) is too tight once the confirm description wraps to
+        // 2 lines — overflowing by a couple pixels on some devices/font
+        // sizes. Headroom added.
+        bottomSize: 130,
+        subtitleWidget: Column(
           children: [
-            TransactionDetailsItem(
-              title: 'Service',
-              value: 'MoMo to Bank Account',
+            Text(
+              _isAddBeneficiary
+                  ? AppLocalizations.of(context)!.summaryBeneficiaryTitle
+                  : AppLocalizations.of(context)!.summaryTransactionTitle,
+              textAlign: .center,
+              style: context.display2,
             ),
-            Divider(
-              color: AppColors.offWhite,
-            ),
-            TransactionDetailsItem(
-              title: 'Amount',
-              value: 'GHS 10.00',
-            ),
-            Divider(
-              color: AppColors.offWhite,
-            ),
-            TransactionDetailsItem(
-              title: 'Payment Method',
-              value: 'MTN Mobile Money (0245***219)',
-            ),
-            Divider(
-              color: AppColors.offWhite,
-            ),
-            TransactionDetailsItem(
-              title: 'Charges',
-              value: 'GHS 5.00',
-            ),
-            Divider(
-              color: AppColors.offWhite,
-            ),
-            TransactionDetailsItem(
-              title: 'Total Amount',
-              value: 'GHS 2,505.00',
+            const SizedBox(height: 10),
+            Text(
+              _isAddBeneficiary
+                  ? AppLocalizations.of(context)!.summaryBeneficiaryConfirm
+                  : AppLocalizations.of(context)!.summaryTransactionConfirm,
+              textAlign: .center,
+              style: context.smallDetails,
             ),
           ],
         ),
+        bottomNav: ValueListenableBuilder(
+          valueListenable: _canContinue,
+          builder: (context, canContinue, child) {
+            return FormButton(
+              enabled: canContinue,
+              onPressed: _continue,
+              text: _isAddBeneficiary
+                  ? AppLocalizations.of(context)!.summarySaveBeneficiary
+                  : AppLocalizations.of(context)!.commonContinue,
+            );
+          },
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: .min,
+            crossAxisAlignment: .stretch,
+            children: [
+              Container(
+                padding: .all(20),
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  borderRadius: .circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .start,
+                  crossAxisAlignment: .center,
+                  children: [
+                    for (final (index, (title, value)) in rows.indexed) ...[
+                      TransactionDetailsItem(title: title, value: value),
+                      if (index != rows.length - 1)
+                        Divider(color: context.divider),
+                    ],
+                  ],
+                ),
+              ),
+              if (_editableItems.isNotEmpty) ...[
+                const SizedBox(height: Spacing.xl),
+                ..._buildEditableFields,
+              ],
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  List<Widget> get _buildEditableFields {
+    final l10n = AppLocalizations.of(context)!;
+    final items = <Widget>[];
+    for (final (index, (datum, controller, focusNode))
+        in _editableItems.indexed) {
+      final isLast = index == _editableItems.length - 1;
+      items.add(
+        Padding(
+          padding: const .only(bottom: Spacing.lg),
+          child: FormFieldInput(
+            datum: datum,
+            controller: controller,
+            focusNode: focusNode,
+            isLast: isLast,
+            validator: FormFieldInput.buildValidator(datum, l10n),
+            onPayeeSelected: _onPayeeSelected,
+            next: (_) {
+              if (isLast) {
+                FocusScope.of(context).unfocus();
+              } else {
+                _editableItems[index + 1].$3.requestFocus();
+              }
+            },
+          ),
+        ),
+      );
+    }
+    return items;
   }
 }

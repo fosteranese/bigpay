@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:string_validator/string_validator.dart';
 
+import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/utils/validator.util.dart';
-import 'input.dart';
-
-// import '../../../utils/validator.util.dart';
 
 class GhanaCardInput extends StatefulWidget {
   const GhanaCardInput({

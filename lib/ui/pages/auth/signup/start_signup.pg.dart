@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
+import 'package:bigpay/data/models/verify_user_data/verify_user_data.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/signup/start_signup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/forms/phone_input.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
 import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StartSignUpPage extends StatefulWidget {
   const StartSignUpPage({super.key});
@@ -26,69 +28,75 @@ class StartSignUpPage extends StatefulWidget {
 }
 
 class _StartSignUpPageState extends State<StartSignUpPage> {
+  final _formKey = GlobalKey<FormState>();
   final _phoneNumberFocusNode = FocusNode();
-  final _phoneNumberController = TextEditingController();
+  final _phone = PhoneNumberController();
   ExecuteProcessEvent? mainEvent;
-
-  late final _id = Uuid().v4();
 
   @override
   dispose() {
     _phoneNumberFocusNode.dispose();
-    _phoneNumberController.dispose();
+    _phone.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
-      title: 'Sign Up',
-      titleStyle: AppTypography.display1,
-      subtitleWidget: Row(
+      maxWidth: 480,
+      title: l10n.authSignUpTitle,
+      titleStyle: context.display1,
+      subtitleWidget: Column(
+        mainAxisSize: .min,
         children: [
-          Text(
-            'Already have an account?',
-            style: AppTypography.smallDetails,
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              tapTargetSize: .shrinkWrap,
-            ),
-            onPressed: () {
-              AppRouter.router.push(
-                NewLoginPage.route.path,
-              );
-            },
-            child: Text(
-              'Sign in',
-              style: AppTypography.buttons.copyWith(
-                color: AppColors.secondary,
+          Row(
+            children: [
+              Text(
+                l10n.authAlreadyHaveAccount,
+                style: context.smallDetails,
               ),
-            ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  tapTargetSize: .shrinkWrap,
+                ),
+                onPressed: () {
+                  AppRouter.router.push(
+                    NewLoginPage.route.path,
+                  );
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.authSignInLink,
+                  style: context.buttons.copyWith(
+                    color: context.accentGreen,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      bottomNav: BlocListener<ProcessBloc, ProcessState>(
-        listenWhen: (previous, current) => current.event == mainEvent,
-        listener: (context, state) {
-          if (state is ExecutingProcess) {
+      bottomNav: ProcessListener<VerifyUserData>(
+        event: () => mainEvent,
+        listener: (context, snapshot) {
+          if (snapshot.isLoading) {
             MessageUtil.displayLoading(context);
             return;
           } else {
             MessageUtil.close(context);
           }
 
-          if (state is ProcessExecuted) {
+          if (snapshot.hasData) {
             AppRouter.router.push(
               OtpSignUpPage.route.path,
-              extra: state.result.data as StartSignUpData,
+              extra: snapshot.data,
             );
           }
 
-          if (state is ExecuteProcessError) {
+          if (snapshot.hasError) {
             MessageUtil.displayErrorDialog(
               context,
-              message: state.error.message,
+              message: snapshot.error!.message,
             );
             return;
           }
@@ -104,27 +112,27 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
               runAlignment: .start,
               children: [
                 Text(
-                  'By clicking on continue, you accept our ',
-                  style: AppTypography.smallDetails,
+                  l10n.authTermsPrefix,
+                  style: context.smallDetails,
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => _openLink(AppState.data?.help?.termsUrl),
                   child: Text(
-                    'Terms of Use',
-                    style: AppTypography.smallDetailsMedium.copyWith(
+                    l10n.authTermsOfUse,
+                    style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),
                 ),
                 Text(
-                  ' and ',
-                  style: AppTypography.smallDetails,
+                  l10n.authAnd,
+                  style: context.smallDetails,
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => _openLink(AppState.data?.help?.privacyUrl),
                   child: Text(
-                    'Privacy Policy',
-                    style: AppTypography.smallDetailsMedium.copyWith(
+                    l10n.authPrivacyPolicy,
+                    style: context.smallDetailsMedium.copyWith(
                       decoration: .underline,
                     ),
                   ),
@@ -134,19 +142,22 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
             const SizedBox(height: 10),
             FormButton(
               onPressed: _continue,
-              text: 'Continue',
+              text: l10n.commonContinue,
             ),
           ],
         ),
       ),
       child: Form(
+        key: _formKey,
         child: Column(
           children: [
-            FormInput(
-              label: 'Phone Number',
-              keyboardType: .phone,
+            PhoneNumberInput(
+              label: l10n.commonPhoneNumberLabel,
               focusNode: _phoneNumberFocusNode,
-              controller: _phoneNumberController,
+              controller: _phone,
+              validator: _phone.validator(
+                l10n.validationPhoneInvalid,
+              ),
               next: (_) {
                 _continue();
               },
@@ -158,21 +169,28 @@ class _StartSignUpPageState extends State<StartSignUpPage> {
     );
   }
 
-  void _continue() {
+  void _openLink(String? url) {
+    if (url == null || url.isEmpty) return;
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _continue() async {
     FocusScope.of(context).unfocus();
 
-    final phone = _phoneNumberController.text.trim();
-    if (phone.isEmpty) return;
+    if (!_formKey.currentState!.validate()) return;
 
-    mainEvent = ExecuteProcessEvent(
-      id: _id,
-      action: StartSignUpAction(
+    if (_phone.text.text.trim().isEmpty) return;
+
+    // Registering a new account on this device — wipe the previous user's
+    // data first (awaited, so it can't race the new session's responses).
+    await AppState.clearUserData();
+    if (!mounted) return;
+    mainEvent = context.dispatchProcess(
+      StartSignUpAction(
         payload: StartSignUpActionPayload(
-          phoneNumber: phone,
+          phoneNumber: _phone.international,
         ),
       ),
     );
-
-    context.read<ProcessBloc>().add(mainEvent!);
   }
 }
