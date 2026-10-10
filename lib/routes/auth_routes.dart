@@ -26,11 +26,6 @@ GoRoute get authRoute => GoRoute(
       () => const OtpLoginPage(),
       nested: true,
     ),
-
-    BiometricLoginPage.route.toGoRoute(
-      () => const BiometricLoginPage(),
-      nested: true,
-    ),
     StartSignUpPage.route.toGoRoute(
       () => const StartSignUpPage(),
       nested: true,

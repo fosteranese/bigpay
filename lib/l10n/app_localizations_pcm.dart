@@ -209,13 +209,13 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get authEnterSecurePhraseTitle => 'Enter your secure phrase';
 
   @override
-  String get authUnlockWithBiometrics => 'Unblock to Login';
+  String get authUnlockWithBiometrics => 'Login with Biometrics';
 
   @override
   String get authLoginWithPassword => 'Login with Password';
 
   @override
-  String get authUnlockWithBiometricsTooltip => 'Unblock to login';
+  String get authUnlockWithBiometricsTooltip => 'Login with biometrics';
 
   @override
   String get authForgotPasswordTitle => 'Forgot Password';
@@ -554,6 +554,9 @@ class AppLocalizationsPcm extends AppLocalizations {
 
   @override
   String get historyServiceLabel => 'Service';
+
+  @override
+  String get historyStatusLabel => 'Status';
 
   @override
   String get historyTransactionIdLabel => 'Transaction ID';

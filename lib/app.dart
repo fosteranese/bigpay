@@ -26,7 +26,6 @@ import 'package:bigpay/ui/widgets/idle_timeout_gate.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/biometric.util.dart';
 
 /// Flutter's built-in Material/Cupertino chrome translations (back-button
 /// tooltip, etc.) don't cover Nigerian Pidgin ('pcm') —
@@ -101,10 +100,10 @@ class BigPayApp extends StatelessWidget {
                       // stayed on the splash.
                       var target = WalkthroughPage.route.path;
                       if (savedUser != null && snapshot.isCached) {
-                        final enabled = await BiometricUtil.isLoginEnabled;
-                        target = enabled
-                            ? BiometricLoginPage.route.path
-                            : ExistingDeviceLoginPage.route.path;
+                        // Always land on the existing-device login screen —
+                        // it already offers a biometric unlock button when
+                        // enabled, so there's no separate biometric page.
+                        target = ExistingDeviceLoginPage.route.path;
                       }
 
                       AppRouter.router.go(target, extra: snapshot.data);
@@ -153,14 +152,11 @@ class BigPayApp extends StatelessWidget {
             event: () => LogoutAction.event,
             listener: (context, snapshot) async {
               if (snapshot.isSuccessful) {
-                // The device is still known after logout — return to its
-                // unlock screen (biometric if enabled, same as at launch),
-                // not new-device sign-in.
-                final biometric = await BiometricUtil.isLoginEnabled;
+                // The device is still known after logout — return to the
+                // existing-device login screen (which offers biometric unlock
+                // when enabled), not new-device sign-in.
                 AppRouter.router.go(
-                  biometric
-                      ? BiometricLoginPage.route.path
-                      : ExistingDeviceLoginPage.route.path,
+                  ExistingDeviceLoginPage.route.path,
                 );
               }
             },

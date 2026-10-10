@@ -61,9 +61,9 @@
 
   "authEnterSecurePhraseTitle": "Ingresa tu frase segura",
 
-  "authUnlockWithBiometrics": "Desbloquear para iniciar sesión",
+  "authUnlockWithBiometrics": "Iniciar sesión con biometría",
   "authLoginWithPassword": "Iniciar sesión con contraseña",
-  "authUnlockWithBiometricsTooltip": "Desbloquear para iniciar sesión",
+  "authUnlockWithBiometricsTooltip": "Iniciar sesión con biometría",
 
   "authForgotPasswordTitle": "Olvidé mi contraseña",
   "authAnswerToSecurePhraseLabel": "Respuesta a la frase segura",
@@ -184,6 +184,7 @@
   "historyClearFilter": "Borrar filtro",
   "historyNoServicesToFilter": "Aún no hay servicios para filtrar.",
   "historyServiceLabel": "Servicio",
+  "historyStatusLabel": "Estado",
   "historyTransactionIdLabel": "ID de transacción",
   "historySubmitComplain": "Enviar un reclamo",
   "historyTransactionSuccessful": "Transacción exitosa",

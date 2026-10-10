@@ -61,9 +61,9 @@
 
   "authEnterSecurePhraseTitle": "أدخل عبارة الأمان الخاصة بك",
 
-  "authUnlockWithBiometrics": "أزل الحظر لتسجيل الدخول",
+  "authUnlockWithBiometrics": "تسجيل الدخول بالبصمة",
   "authLoginWithPassword": "تسجيل الدخول بكلمة المرور",
-  "authUnlockWithBiometricsTooltip": "أزل الحظر لتسجيل الدخول",
+  "authUnlockWithBiometricsTooltip": "تسجيل الدخول بالبصمة",
 
   "authForgotPasswordTitle": "نسيت كلمة المرور",
   "authAnswerToSecurePhraseLabel": "الإجابة على عبارة الأمان",
@@ -184,6 +184,7 @@
   "historyClearFilter": "مسح التصفية",
   "historyNoServicesToFilter": "لا توجد خدمات للتصفية بعد.",
   "historyServiceLabel": "الخدمة",
+  "historyStatusLabel": "الحالة",
   "historyTransactionIdLabel": "رقم المعاملة",
   "historySubmitComplain": "تقديم شكوى",
   "historyTransactionSuccessful": "تمت المعاملة بنجاح",

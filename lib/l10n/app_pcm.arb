@@ -77,9 +77,9 @@
 
   "authEnterSecurePhraseTitle": "Enter your secure phrase",
 
-  "authUnlockWithBiometrics": "Unblock to Login",
+  "authUnlockWithBiometrics": "Login with Biometrics",
   "authLoginWithPassword": "Login with Password",
-  "authUnlockWithBiometricsTooltip": "Unblock to login",
+  "authUnlockWithBiometricsTooltip": "Login with biometrics",
 
   "authForgotPasswordTitle": "Forgot Password",
   "authAnswerToSecurePhraseLabel": "Answer to Secure Phrase",
@@ -201,6 +201,7 @@
   "historyClearFilter": "Clear Filter",
   "historyNoServicesToFilter": "No service dey to filter by yet.",
   "historyServiceLabel": "Service",
+  "historyStatusLabel": "Status",
   "historyTransactionIdLabel": "Transaction ID",
   "historySubmitComplain": "Submit a Complain",
   "historyTransactionSuccessful": "Transaction Successful",

@@ -141,11 +141,11 @@
   "authEnterSecurePhraseTitle": "Enter your secure phrase",
   "@authEnterSecurePhraseTitle": { "description": "Secure-phrase entry page title (during login)" },
 
-  "authUnlockWithBiometrics": "Unblock to Login",
+  "authUnlockWithBiometrics": "Login with Biometrics",
   "@authUnlockWithBiometrics": { "description": "Button to trigger biometric unlock" },
   "authLoginWithPassword": "Login with Password",
   "@authLoginWithPassword": { "description": "Link to fall back to password sign-in" },
-  "authUnlockWithBiometricsTooltip": "Unblock to login",
+  "authUnlockWithBiometricsTooltip": "Login with biometrics",
   "@authUnlockWithBiometricsTooltip": { "description": "Tooltip on the biometric icon button" },
 
   "authForgotPasswordTitle": "Forgot Password",
@@ -342,6 +342,7 @@
   "historyClearFilter": "Clear Filter",
   "historyNoServicesToFilter": "No services to filter by yet.",
   "historyServiceLabel": "Service",
+  "historyStatusLabel": "Status",
   "historyTransactionIdLabel": "Transaction ID",
   "historySubmitComplain": "Submit a Complain",
   "historyTransactionSuccessful": "Transaction Successful",

@@ -208,13 +208,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authEnterSecurePhraseTitle => 'أدخل عبارة الأمان الخاصة بك';
 
   @override
-  String get authUnlockWithBiometrics => 'أزل الحظر لتسجيل الدخول';
+  String get authUnlockWithBiometrics => 'تسجيل الدخول بالبصمة';
 
   @override
   String get authLoginWithPassword => 'تسجيل الدخول بكلمة المرور';
 
   @override
-  String get authUnlockWithBiometricsTooltip => 'أزل الحظر لتسجيل الدخول';
+  String get authUnlockWithBiometricsTooltip => 'تسجيل الدخول بالبصمة';
 
   @override
   String get authForgotPasswordTitle => 'نسيت كلمة المرور';
@@ -547,6 +547,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get historyServiceLabel => 'الخدمة';
+
+  @override
+  String get historyStatusLabel => 'الحالة';
 
   @override
   String get historyTransactionIdLabel => 'رقم المعاملة';

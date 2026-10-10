@@ -228,6 +228,12 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                             )!.historyServiceLabel,
                             value: receipt.formName ?? '',
                           ),
+                          TransactionDetailsItem(
+                            title: AppLocalizations.of(
+                              context,
+                            )!.historyStatusLabel,
+                            value: _statusLabel(context),
+                          ),
                           // TransactionDetailsItem(
                           //   title: AppLocalizations.of(
                           //     context,
@@ -342,6 +348,27 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
         ],
       ),
     );
+  }
+
+  /// The receipt's status as a short label — the backend's own [RequestResponse.statusLabel]
+  /// when present, otherwise derived from the numeric status code.
+  String _statusLabel(BuildContext context) {
+    final backend = receipt.statusLabel;
+    if (backend != null && backend.isNotEmpty) return backend;
+    final l10n = AppLocalizations.of(context)!;
+    switch (receipt.status) {
+      case 1:
+        return l10n.historyTransactionSuccessful;
+      case 3:
+        return l10n.historyTransactionPending;
+      case 5:
+        return l10n.historyTransactionProcessing;
+      case 0:
+      case 2:
+        return l10n.historyTransactionFailed;
+      default:
+        return '';
+    }
   }
 
   Widget _buildTitle(BuildContext context) {

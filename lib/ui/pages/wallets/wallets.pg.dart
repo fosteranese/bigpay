@@ -371,7 +371,7 @@ class WalletListItem extends StatelessWidget {
               ),
           leading: CachedNetworkImage(
             imageUrl:
-                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.icon}',
+                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.sources?.first.picture ?? data.icon}',
             placeholder: (context, url) => Icon(
               Icons.circle_outlined,
               color: Theme.of(context).primaryColor,
