@@ -62,7 +62,9 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
         );
         return;
       }
-      action = event.action.copyWith(payload: saved.payload);
+      // Rebuild from the *resolved* action so the endpointFunc resolution
+      // isn't discarded.
+      action = action.copyWith(payload: saved.payload);
     }
 
     final cacheKey = ResponseCache.keyFor(action);
@@ -99,12 +101,14 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
       }
 
       if (event.saveActionPayload) {
-        store.inputs.write(event.action);
+        // Store the *resolved* action so a later useSaveActionPayload lookup
+        // under the same resolved endpoint finds it.
+        store.inputs.write(action);
       }
 
-      final response = event.action.noRemoteFunc == null
+      final response = action.noRemoteFunc == null
           ? await RemoteUtil.makeCall(action)
-          : event.action.noRemoteFunc?.call(event.action.payload);
+          : action.noRemoteFunc?.call(action.payload);
 
       if (event.saveActionResponse &&
           response!.status == StatusConstants.success) {

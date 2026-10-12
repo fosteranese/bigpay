@@ -137,7 +137,9 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       GetServiceFormDataAction(
         payload: GetServiceFormDataActionPayload(
           formId: _form.form?.formId,
-          insId: _form.form?.formId,
+          // FBLCollect's formsDataByInsId is keyed on the institution id; the
+          // other activity types use the form id.
+          insId: _form.institution?.insId ?? _form.form?.formId,
         ),
         endpointFunc: () =>
             GetServiceFormDataAction.endpointFor(_form.form?.activityType),
@@ -335,6 +337,9 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
               setState(() {
                 _form = snapshot.data!;
                 _buildFormItems();
+                // Re-apply the payee pre-fill — initState does it once, but a
+                // refresh rebuilds every controller from defaults.
+                prefillFromPayee(widget.payee, _formItems);
               });
               _recomputeCanSubmit();
             }

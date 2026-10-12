@@ -144,9 +144,9 @@ final class GetServiceFormDataAction
           ),
         );
       }
-      final authMode = (formData['authMode'] as List<dynamic>).map((item) {
-        return item as Map<String, dynamic>;
-      }).toList();
+      final authMode = (formData['authMode'] as List<dynamic>?)
+          ?.map((item) => item as Map<String, dynamic>)
+          .toList();
 
       return GeneralFlowFormData(
         institution: Institution(

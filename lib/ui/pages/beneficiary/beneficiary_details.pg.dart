@@ -132,9 +132,9 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
 
     if (snapshot.hasData && !(snapshot.isSilent && !snapshot.isCached)) {
       final formData = snapshot.data as GeneralFlowFormData?;
-      if (!snapshot.isSilent &&
-          !snapshot.isCached &&
-          (formData?.fieldsDatum?.isEmpty ?? true)) {
+      // Checked on whichever result is shown first — cached or network — so an
+      // empty cached form can't slip through.
+      if (formData?.fieldsDatum?.isEmpty ?? true) {
         MessageUtil.displayErrorDialog(
           context,
           title: l10n.commonServiceUnavailableTitle,
