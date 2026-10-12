@@ -60,7 +60,9 @@ class FormFieldInput extends StatelessWidget {
     final label = field?.fieldCaption ?? '';
     final placeholder = field?.toolTip;
     final readOnly = field?.readOnly == 1;
-    final maxLength = field?.fieldLength;
+    // A backend `fieldLength: 0` (or negative) means "no limit", not "zero
+    // characters" — otherwise TextFormField would hard-block all input.
+    final maxLength = (field?.fieldLength ?? 0) > 0 ? field?.fieldLength : null;
 
     switch (field?.fieldType) {
       case FieldTypesConst.listOfValues:
@@ -115,7 +117,8 @@ class FormFieldInput extends StatelessWidget {
 
     final mandatory = field.fieldMandatory == 1;
     final dataType = field.fieldDataType;
-    final maxLength = field.fieldLength;
+    // See build() — a `fieldLength` of 0 means "no limit", not "zero chars".
+    final maxLength = (field.fieldLength ?? 0) > 0 ? field.fieldLength : null;
 
     if (!mandatory && maxLength == null && dataType == null) return null;
 

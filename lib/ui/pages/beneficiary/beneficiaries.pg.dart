@@ -39,7 +39,10 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   final _searchController = TextEditingController();
 
   ExecuteProcessEvent? _event;
-  ExecuteProcessEvent? _deleteEvent;
+
+  /// In-flight delete requests, correlated individually so a rapid second
+  /// delete doesn't lose the first one's success/error result.
+  final Set<ExecuteProcessEvent> _deleteEvents = {};
   List<Payee>? _payees;
   String _query = '';
 
@@ -176,9 +179,10 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
       _payees = List.of(_payees ?? const [])..remove(payee);
       if (_selectedPayee?.payeeId == payee.payeeId) _selectedPayee = null;
     });
-    _deleteEvent = context.dispatchProcess(
+    final event = context.dispatchProcess(
       DeletePayeeAction(payload: DeletePayeePayload(payeeId: payee.payeeId)),
     );
+    setState(() => _deleteEvents.add(event));
   }
 
   String _initials(String name) {
@@ -208,27 +212,29 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
   Widget _master(BuildContext context) {
     return MultiProcessListener(
       listeners: [
-        ProcessListenerConfig<bool>(
-          event: () => _deleteEvent,
-          listener: (context, snapshot) {
-            if (snapshot.hasError) {
-              _deleteEvent = null;
-              MessageUtil.displayErrorDialog(
-                context,
-                message: snapshot.error!.message,
-              );
-              // Restore the optimistic removal.
-              _load();
-            } else if (snapshot.isSuccessful) {
-              _deleteEvent = null;
-              // Invalidate the cached beneficiaries list so a later load
-              // doesn't briefly resurrect the deleted row before the network
-              // refresh removes it.
-              AppState.store.cache.remove(
-                ResponseCache.keyFor(const GetPayeesAction()),
-              );
-            }
-          },
+        ..._deleteEvents.map(
+          (event) => ProcessListenerConfig<bool>(
+            event: () => event,
+            listener: (context, snapshot) {
+              if (snapshot.hasError) {
+                setState(() => _deleteEvents.remove(event));
+                MessageUtil.displayErrorDialog(
+                  context,
+                  message: snapshot.error!.message,
+                );
+                // Restore the optimistic removal.
+                _load();
+              } else if (snapshot.isSuccessful) {
+                setState(() => _deleteEvents.remove(event));
+                // Invalidate the cached beneficiaries list so a later load
+                // doesn't briefly resurrect the deleted row before the
+                // network refresh removes it.
+                AppState.store.cache.remove(
+                  ResponseCache.keyFor(const GetPayeesAction()),
+                );
+              }
+            },
+          ),
         ),
         ProcessListenerConfig<bool>(
           event: () => _payEvent,
