@@ -118,7 +118,6 @@ class AuthenticationUtil {
 
   static Future secretAnswer({
     required void Function(String pin) onSuccess,
-    bool allowBiometric = false,
   }) {
     return AppNav.dialog(
       barrierDismissible: true,
@@ -135,7 +134,6 @@ class AuthenticationUtil {
 
   static Future otp({
     required void Function(String pin) onSuccess,
-    bool allowBiometric = false,
     required Map<String, dynamic> authMode,
     void Function()? onResendShortCode,
   }) {

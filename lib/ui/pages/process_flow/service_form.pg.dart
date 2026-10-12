@@ -177,6 +177,10 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
     if (!_formKey.currentState!.validate()) return;
 
+    // Rebuild from scratch — a refresh can drop a field, and a stale key from
+    // a previous submit must not be sent to the backend.
+    _formData.clear();
+
     _form.fieldsDatum?.forEach((item) {
       _formData[item.field?.fieldName ?? ''] = item.field?.defaultValue ?? '';
     });

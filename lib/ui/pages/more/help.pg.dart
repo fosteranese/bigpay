@@ -27,20 +27,18 @@ class _HelpPageState extends State<HelpPage> {
         children: [
           ProfileItem(
             onPressed: () {
-              final url = Uri.parse(
-                'tel:${AppState.data?.help?.phoneNumber}',
-              );
-              launchUrl(url);
+              final phone = AppState.data?.help?.phoneNumber ?? '';
+              if (phone.isEmpty) return;
+              launchUrl(Uri.parse('tel:$phone'));
             },
             title: l10n.helpCallUs,
             icon: Icons.phone_outlined,
           ),
           ProfileItem(
             onPressed: () {
-              final url = Uri.parse(
-                'mailto:${AppState.data?.help?.email}',
-              );
-              launchUrl(url);
+              final email = AppState.data?.help?.email ?? '';
+              if (email.isEmpty) return;
+              launchUrl(Uri.parse('mailto:$email'));
             },
             title: l10n.helpEmailUs,
             icon: Icons.email_outlined,
