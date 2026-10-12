@@ -4,6 +4,8 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/new_device_login_data.dart';
+import 'package:bigpay/models/actions/auth_action.dart';
+import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
 import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
@@ -19,7 +21,6 @@ import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/phone.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 import 'package:bigpay/utils/validator.util.dart';
 
@@ -120,6 +121,20 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
               return;
             } else {
               MessageUtil.close(context);
+            }
+
+            if (snapshot.hasData) {
+              // Existing-device login succeeded — hand the response to the
+              // app-level AuthAction listener (sets AppState.currentUser and
+              // navigates to the dashboard).
+              AuthAction.event = context.dispatchProcess(
+                AuthAction(
+                  payload: AuthActionPayload(
+                    dataResponse: snapshot.response!,
+                  ),
+                ),
+              );
+              return;
             }
 
             if (snapshot.hasError) {
@@ -242,12 +257,11 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
 
     if (!_formKey.currentState!.validate()) return;
 
-    if (_phone.text.text.trim() ==
-        AppState.currentUser?.user?.shortName?.toLocalPhone) {
+    if (_phone.text.text.trim() == AppState.savedPhoneNumber) {
       existingLoginEvent = context.dispatchProcess(
-        NewLoginAction(
-          payload: NewLoginActionPayload(
-            phoneNumber: _phone.international,
+        ExistingLoginAction(
+          payload: ExistingLoginActionPayload(
+            isPassword: true,
             password: _passwordController.text,
           ),
         ),
