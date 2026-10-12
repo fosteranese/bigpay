@@ -342,6 +342,7 @@
   "validationPinMismatch": "PINs stimmen nicht überein",
   "validationAnswerRequired": "Sicherheitsantwort ist erforderlich",
   "validationFieldRequired": "Dieses Feld ist erforderlich",
+  "validationFieldTooLong": "Dieses Feld darf höchstens {max} Zeichen haben",
   "securityUnlockBigPay": "BigPay entsperren",
   "connectivityLostTitle": "Keine Internetverbindung",
   "connectivityLostMessage": "Überprüfen Sie Ihre Netzwerkeinstellungen und versuchen Sie es erneut.",

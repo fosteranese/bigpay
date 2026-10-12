@@ -69,6 +69,7 @@
   "validationPinMismatch": "PIN no match",
   "validationAnswerRequired": "Security answer dey required",
   "validationFieldRequired": "This field dey required",
+  "validationFieldTooLong": "This field must be at most {max} characters",
 
   "authUseDifferentAccount": "Na no be you? Use another account",
   "authWelcomeBack": "Welcome back",

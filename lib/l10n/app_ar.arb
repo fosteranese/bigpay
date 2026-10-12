@@ -342,6 +342,7 @@
   "validationPinMismatch": "رمزا PIN غير متطابقين",
   "validationAnswerRequired": "إجابة الأمان مطلوبة",
   "validationFieldRequired": "هذا الحقل مطلوب",
+  "validationFieldTooLong": "يجب ألا يتجاوز هذا الحقل {max} حرفًا",
   "securityUnlockBigPay": "فتح BigPay",
   "connectivityLostTitle": "لا يوجد اتصال بالإنترنت",
   "connectivityLostMessage": "تحقق من إعدادات الشبكة وحاول مرة أخرى.",

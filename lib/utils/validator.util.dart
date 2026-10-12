@@ -20,6 +20,14 @@ class Validator {
     return regex.firstMatch(value) != null;
   }
 
+  /// Lenient phone check — strips separators and accepts a Ghana mobile
+  /// number in national (10 digits, leading 0) or international (12 digits,
+  /// 233) form.
+  static bool phone(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    return digits.length == 10 || digits.length == 12;
+  }
+
   static String? Function(String?) requiredField(String message) {
     return (String? value) {
       if (value == null || value.trim().isEmpty) return message;

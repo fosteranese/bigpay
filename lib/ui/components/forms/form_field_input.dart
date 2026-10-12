@@ -131,8 +131,15 @@ class FormFieldInput extends StatelessWidget {
         }
       }
 
+      if (dataType == FieldDataTypesConst.phoneBook ||
+          dataType == FieldDataTypesConst.payeeNumber) {
+        if (!Validator.phone(value.trim())) {
+          return l10n.validationPhoneInvalid;
+        }
+      }
+
       if (maxLength != null && value.trim().length > maxLength) {
-        return l10n.validationFieldRequired;
+        return l10n.validationFieldTooLong(maxLength);
       }
 
       return null;

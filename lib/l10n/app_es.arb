@@ -342,6 +342,7 @@
   "validationPinMismatch": "Los PIN no coinciden",
   "validationAnswerRequired": "La respuesta de seguridad es obligatoria",
   "validationFieldRequired": "Este campo es obligatorio",
+  "validationFieldTooLong": "Este campo debe tener como máximo {max} caracteres",
   "securityUnlockBigPay": "Desbloquear BigPay",
   "connectivityLostTitle": "Sin conexión a internet",
   "connectivityLostMessage": "Revisa la configuración de tu red e inténtalo de nuevo.",

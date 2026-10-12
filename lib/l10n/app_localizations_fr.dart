@@ -193,6 +193,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get validationFieldRequired => 'Ce champ est requis';
 
   @override
+  String validationFieldTooLong(int max) {
+    return 'Ce champ doit comporter au maximum $max caractères';
+  }
+
+  @override
   String get authUseDifferentAccount =>
       'Ce n\'est pas vous ? Utilisez un autre compte';
 

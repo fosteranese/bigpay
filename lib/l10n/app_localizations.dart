@@ -460,6 +460,12 @@ abstract class AppLocalizations {
   /// **'This field is required'**
   String get validationFieldRequired;
 
+  /// Validation error when a field exceeds its maximum length
+  ///
+  /// In en, this message translates to:
+  /// **'This field must be at most {max} characters'**
+  String validationFieldTooLong(int max);
+
   /// Link to sign out and start a new-device sign-in as someone else
   ///
   /// In en, this message translates to:

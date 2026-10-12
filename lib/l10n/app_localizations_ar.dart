@@ -193,6 +193,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationFieldRequired => 'هذا الحقل مطلوب';
 
   @override
+  String validationFieldTooLong(int max) {
+    return 'يجب ألا يتجاوز هذا الحقل $max حرفًا';
+  }
+
+  @override
   String get authUseDifferentAccount => 'لست أنت؟ استخدم حسابًا آخر';
 
   @override

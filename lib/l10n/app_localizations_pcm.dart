@@ -194,6 +194,11 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get validationFieldRequired => 'This field dey required';
 
   @override
+  String validationFieldTooLong(int max) {
+    return 'This field must be at most $max characters';
+  }
+
+  @override
   String get authUseDifferentAccount => 'Na no be you? Use another account';
 
   @override

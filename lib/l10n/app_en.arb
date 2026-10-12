@@ -128,6 +128,13 @@
   "@validationAnswerRequired": { "description": "Validation error when security answer field is empty" },
   "validationFieldRequired": "This field is required",
   "@validationFieldRequired": { "description": "Generic validation error for required fields" },
+  "validationFieldTooLong": "This field must be at most {max} characters",
+  "@validationFieldTooLong": {
+    "description": "Validation error when a field exceeds its maximum length",
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
 
   "authUseDifferentAccount": "Not you? Use a different account",
   "@authUseDifferentAccount": { "description": "Link to sign out and start a new-device sign-in as someone else" },
