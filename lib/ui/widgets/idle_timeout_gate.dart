@@ -66,11 +66,18 @@ class _IdleTimeoutGateState extends State<IdleTimeoutGate>
     // background time never counts towards the timeout.
     if (state == AppLifecycleState.resumed) {
       _remaining = _timeoutSeconds;
+      // Re-arm after a previous auto-logout so a later sign-in can time out
+      // again (currentUser survives logout for the existing-device greeting,
+      // so the false→true transition in [_onTick] never re-fires).
+      _loggedOut = false;
     }
   }
 
   void _reset() {
     _remaining = _timeoutSeconds;
+    // Any interaction is a fresh-session signal — re-arm so the next idle
+    // window can log out again.
+    _loggedOut = false;
   }
 
   void _onTick() {

@@ -68,9 +68,8 @@ class SummaryPage extends StatefulWidget {
   /// beneficiary.
   final AmDoing amDoing;
 
-  /// The saved beneficiary behind "edit and send" — pre-fills the remaining
-  /// editable fields with the corrected details and keys the `Payee/addPayee`
-  /// upsert before the payment runs.
+  /// The saved beneficiary behind "edit & send" — pre-fills the remaining
+  /// editable fields with the saved details before the payment runs.
   final Payee? payee;
 
   @override
@@ -125,7 +124,7 @@ class _SummaryPageState extends State<SummaryPage> {
       final existing = (name == null ? null : verified[name])?.toString();
       final text = (existing != null && existing.isNotEmpty)
           ? existing
-          : (payeeSavedFieldValue(widget.payee, name) ??
+          : (payeePrefillValue(widget.payee, item) ??
                 (item.field?.defaultValue ?? ''));
       final controller = TextEditingController(text: text)
         ..addListener(_recomputeCanContinue);

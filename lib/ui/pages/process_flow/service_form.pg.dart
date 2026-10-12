@@ -360,8 +360,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                   'formData': _form,
                   'amDoing': widget.amDoing,
                   // "Edit & send" needs the saved payee again on the
-                  // confirmation screen so its remaining fields pre-fill and
-                  // the upsert updates the same record.
+                  // confirmation screen so its remaining fields pre-fill.
                   if (widget.payee != null) 'payee': widget.payee,
                   'verification': snapshot.data,
                 },

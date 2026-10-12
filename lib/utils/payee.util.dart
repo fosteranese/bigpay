@@ -46,14 +46,22 @@ void prefillFromPayee(
 ) {
   if (payee == null) return;
   for (final (datum, controller, _) in items) {
-    final name = datum.field?.fieldName;
-    final value =
-        payeeSavedFieldValue(payee, name) ??
-        ((payee.value != null &&
-                !_isMasked(payee.value!) &&
-                _isPayeeField(datum))
-            ? payee.value
-            : null);
+    final value = payeePrefillValue(payee, datum);
     if (value != null) controller.text = value;
   }
+}
+
+/// The value to pre-fill for [datum] from a saved payee — its formData value
+/// (matched case-insensitively), falling back to [Payee.value] for the primary
+/// recipient field (masked preview values are never used).
+String? payeePrefillValue(Payee? payee, GeneralFlowFieldsDatum datum) {
+  final name = datum.field?.fieldName;
+  final value =
+      payeeSavedFieldValue(payee, name) ??
+      ((payee?.value != null &&
+              !_isMasked(payee!.value!) &&
+              _isPayeeField(datum))
+          ? payee.value
+          : null);
+  return value;
 }

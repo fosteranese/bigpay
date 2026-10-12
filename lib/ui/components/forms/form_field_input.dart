@@ -131,8 +131,7 @@ class FormFieldInput extends StatelessWidget {
         }
       }
 
-      if (dataType == FieldDataTypesConst.phoneBook ||
-          dataType == FieldDataTypesConst.payeeNumber) {
+      if (dataType == FieldDataTypesConst.phoneBook) {
         if (!Validator.phone(value.trim())) {
           return l10n.validationPhoneInvalid;
         }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/cache/response_cache.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
 import 'package:bigpay/models/actions/beneficiary/delete_payee_action.dart';
 import 'package:bigpay/models/actions/beneficiary/get_payees_action.dart';
@@ -20,6 +21,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/authentication.util.dart';
 import 'package:bigpay/utils/message.util.dart';
 
@@ -84,11 +86,15 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
     // optimistic removal here (and skip didPopNext's re-fetch, which would
     // otherwise flash the stale cached list back in).
     _returningFromDetails = true;
-    final deleted = await AppRouter.router.push<Payee>(
-      BeneficiaryDetailsPage.route.path,
-      extra: payee,
-    );
-    _returningFromDetails = false;
+    Payee? deleted;
+    try {
+      deleted = await AppRouter.router.push<Payee>(
+        BeneficiaryDetailsPage.route.path,
+        extra: payee,
+      );
+    } finally {
+      _returningFromDetails = false;
+    }
     if (deleted != null && mounted) {
       _delete(deleted);
     }
@@ -215,6 +221,12 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
               _load();
             } else if (snapshot.isSuccessful) {
               _deleteEvent = null;
+              // Invalidate the cached beneficiaries list so a later load
+              // doesn't briefly resurrect the deleted row before the network
+              // refresh removes it.
+              AppState.store.cache.remove(
+                ResponseCache.keyFor(const GetPayeesAction()),
+              );
             }
           },
         ),

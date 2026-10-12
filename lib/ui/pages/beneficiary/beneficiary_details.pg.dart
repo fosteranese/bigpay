@@ -97,9 +97,9 @@ class _BeneficiaryDetailsViewState extends State<BeneficiaryDetailsView> {
     );
   }
 
-  /// "Edit & send": open the pre-filled form so the saved details can be
-  /// corrected, then submit — updates the saved beneficiary (Payee/addPayee as
-  /// an upsert) and pays them.
+  /// "Edit & send": open the pre-filled form so the details can be corrected
+  /// before submitting the transaction (the saved beneficiary itself is left
+  /// untouched).
   void _editAndSend() => _fetchForm();
 
   void _fetchForm() {
