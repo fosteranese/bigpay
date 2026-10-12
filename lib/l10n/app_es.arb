@@ -155,6 +155,7 @@
   "walletsAddWalletMobileOption": "Billetera móvil",
   "walletsAddWalletCardOption": "Tarjeta",
   "walletsAddCardTitle": "Agregar tarjeta",
+  "walletsCardAddedMessage": "Tarjeta agregada correctamente.",
   "walletsDebitLabel": "DÉBITO",
   "walletsCardHolderNameLabel": "Nombre del titular de la tarjeta",
   "walletsCardNumberLabel": "Número de tarjeta",

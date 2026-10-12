@@ -155,6 +155,7 @@
   "walletsAddWalletMobileOption": "محفظة الهاتف المحمول",
   "walletsAddWalletCardOption": "بطاقة",
   "walletsAddCardTitle": "إضافة بطاقة",
+  "walletsCardAddedMessage": "تمت إضافة البطاقة بنجاح.",
   "walletsDebitLabel": "خصم",
   "walletsCardHolderNameLabel": "اسم حامل البطاقة",
   "walletsCardNumberLabel": "رقم البطاقة",

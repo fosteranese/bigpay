@@ -173,6 +173,7 @@
   "walletsAddWalletMobileOption": "Mobile Wallet",
   "walletsAddWalletCardOption": "Card",
   "walletsAddCardTitle": "Add Card",
+  "walletsCardAddedMessage": "Card added successfully.",
   "walletsDebitLabel": "DEBIT",
   "walletsCardHolderNameLabel": "Card Holder Name",
   "walletsCardNumberLabel": "Card Number",

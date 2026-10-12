@@ -465,6 +465,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get walletsAddCardTitle => 'إضافة بطاقة';
 
   @override
+  String get walletsCardAddedMessage => 'تمت إضافة البطاقة بنجاح.';
+
+  @override
   String get walletsDebitLabel => 'خصم';
 
   @override

@@ -988,6 +988,12 @@ abstract class AppLocalizations {
   /// **'Add Card'**
   String get walletsAddCardTitle;
 
+  /// No description provided for @walletsCardAddedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Card added successfully.'**
+  String get walletsCardAddedMessage;
+
   /// No description provided for @walletsDebitLabel.
   ///
   /// In en, this message translates to:

@@ -471,6 +471,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get walletsAddCardTitle => 'Ajouter une carte';
 
   @override
+  String get walletsCardAddedMessage => 'Carte ajoutée avec succès.';
+
+  @override
   String get walletsDebitLabel => 'DÉBIT';
 
   @override

@@ -1,6 +1,11 @@
+import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/models/wallet/add_card_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/message.util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -31,6 +36,10 @@ class _AddCardPageState extends State<AddCardPage>
   final _numberFocus = FocusNode();
   final _cvvFocus = FocusNode();
   final _expiryFocus = FocusNode();
+
+  /// The in-flight add-card request — correlates the submit with its result
+  /// (see [_onSaved]).
+  ExecuteProcessEvent? _saveEvent;
 
   /// Drives the front/back flip — forward while the CVV field has focus
   /// (real cards print the CVV on the back, next to the signature strip),
@@ -93,100 +102,155 @@ class _AddCardPageState extends State<AddCardPage>
         month <= 12;
   }
 
+  void _save() {
+    FocusScope.of(context).unfocus();
+    if (!_canSave) return;
+
+    // MM/YY → split into the two fields the (assumed) backend expects.
+    final expiry = _expiryController.text.replaceAll('/', '');
+    final expiryMonth = expiry.substring(0, 2);
+    final expiryYear = expiry.substring(2);
+
+    _saveEvent = context.dispatchProcess(
+      AddCardAction(
+        payload: AddCardActionPayload(
+          cardNumber: _rawNumber,
+          cardHolderName: _nameController.text.trim(),
+          cvv: _cvvController.text,
+          expiryMonth: expiryMonth,
+          expiryYear: expiryYear,
+        ),
+      ),
+    );
+  }
+
+  void _onSaved(BuildContext context, ProcessSnapshot<bool> snapshot) {
+    if (snapshot.isLoading) {
+      MessageUtil.displayLoading(context);
+      return;
+    }
+    MessageUtil.close(context);
+
+    if (snapshot.isSuccessful) {
+      _saveEvent = null;
+      AppState.notifyDataChanged();
+      MessageUtil.displaySuccessDialog(
+        context,
+        title: AppLocalizations.of(context)!.commonSuccess,
+        message:
+            snapshot.message ??
+            AppLocalizations.of(context)!.walletsCardAddedMessage,
+        onOk: () => AppRouter.router.pop(),
+      );
+    } else if (snapshot.hasError) {
+      _saveEvent = null;
+      MessageUtil.displayErrorDialog(
+        context,
+        message: snapshot.error!.message,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return MainLayout(
-      miniTitle: l10n.walletsAddCardTitle,
-      bottomSize: 98 + 61 + 56,
-      subtitleWidget: SizedBox(
-        height: 189,
-        width: double.maxFinite,
-        child: AnimatedBuilder(
-          animation: _flipController,
-          builder: (context, child) {
-            // 0 -> pi over the animation; past the halfway point we're
-            // looking at the back of the card, so swap content and
-            // subtract pi from the remaining rotation — otherwise the back
-            // would keep turning through to pi and render mirror-flipped
-            // instead of settling face-on.
-            final angle = _flipController.value * 3.14159265;
-            final isBack = angle > 3.14159265 / 2;
-            return Transform(
-              alignment: .center,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..rotateY(isBack ? angle - 3.14159265 : angle),
-              child: isBack ? _buildCardBack(context) : _buildCardFront(context),
-            );
-          },
+    return ProcessListener<bool>(
+      event: () => _saveEvent,
+      listener: _onSaved,
+      child: MainLayout(
+        miniTitle: l10n.walletsAddCardTitle,
+        bottomSize: 98 + 61 + 56,
+        subtitleWidget: SizedBox(
+          height: 189,
+          width: double.maxFinite,
+          child: AnimatedBuilder(
+            animation: _flipController,
+            builder: (context, child) {
+              // 0 -> pi over the animation; past the halfway point we're
+              // looking at the back of the card, so swap content and
+              // subtract pi from the remaining rotation — otherwise the back
+              // would keep turning through to pi and render mirror-flipped
+              // instead of settling face-on.
+              final angle = _flipController.value * 3.14159265;
+              final isBack = angle > 3.14159265 / 2;
+              return Transform(
+                alignment: .center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(isBack ? angle - 3.14159265 : angle),
+                child: isBack
+                    ? _buildCardBack(context)
+                    : _buildCardFront(context),
+              );
+            },
+          ),
         ),
-      ),
 
-      bottomNav: FormButton(
-        onPressed: () {},
-        enabled: _canSave,
-        text: l10n.commonSave,
-      ),
-      child: Column(
-        children: [
-          FormInput(
-            controller: _nameController,
-            label: l10n.walletsCardHolderNameLabel,
-            textInputAction: .next,
-            onChanged: (_) => setState(() {}),
-            next: (_) => _numberFocus.requestFocus(),
-          ),
-          const SizedBox(height: 10),
-          FormInput(
-            controller: _numberController,
-            label: l10n.walletsCardNumberLabel,
-            focusNode: _numberFocus,
-            keyboardType: .number,
-            inputFormatters: [_CardNumberFormatter()],
-            onChanged: (_) => setState(() {}),
-            next: (_) => _cvvFocus.requestFocus(),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: FormInput(
-                  controller: _cvvController,
-                  label: l10n.walletsCvvLabel,
-                  focusNode: _cvvFocus,
-                  keyboardType: .number,
-                  isPassword: true,
-                  // FormInput passes this straight through as
-                  // TextFormField's maxLines — left at its null default
-                  // that combines with obscureText: true to trip
-                  // TextFormField's own "obscured fields must be single
-                  // line" assertion.
-                  maxLines: 1,
-                  maxLength: 4,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  onChanged: (_) => setState(() {}),
-                  next: (_) => _expiryFocus.requestFocus(),
+        bottomNav: FormButton(
+          onPressed: _save,
+          enabled: _canSave,
+          text: l10n.commonSave,
+        ),
+        child: Column(
+          children: [
+            FormInput(
+              controller: _nameController,
+              label: l10n.walletsCardHolderNameLabel,
+              textInputAction: .next,
+              onChanged: (_) => setState(() {}),
+              next: (_) => _numberFocus.requestFocus(),
+            ),
+            const SizedBox(height: 10),
+            FormInput(
+              controller: _numberController,
+              label: l10n.walletsCardNumberLabel,
+              focusNode: _numberFocus,
+              keyboardType: .number,
+              inputFormatters: [_CardNumberFormatter()],
+              onChanged: (_) => setState(() {}),
+              next: (_) => _cvvFocus.requestFocus(),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: FormInput(
+                    controller: _cvvController,
+                    label: l10n.walletsCvvLabel,
+                    focusNode: _cvvFocus,
+                    keyboardType: .number,
+                    isPassword: true,
+                    // FormInput passes this straight through as
+                    // TextFormField's maxLines — left at its null default
+                    // that combines with obscureText: true to trip
+                    // TextFormField's own "obscured fields must be single
+                    // line" assertion.
+                    maxLines: 1,
+                    maxLength: 4,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    onChanged: (_) => setState(() {}),
+                    next: (_) => _expiryFocus.requestFocus(),
+                  ),
                 ),
-              ),
-              const SizedBox(width: Spacing.lg),
-              Expanded(
-                child: FormInput(
-                  controller: _expiryController,
-                  label: l10n.walletsExpiryDateLabel,
-                  focusNode: _expiryFocus,
-                  keyboardType: .number,
-                  placeholder: 'MM/YY',
-                  inputFormatters: [_ExpiryDateFormatter()],
-                  onChanged: (_) => setState(() {}),
-                  next: (_) => _expiryFocus.unfocus(),
+                const SizedBox(width: Spacing.lg),
+                Expanded(
+                  child: FormInput(
+                    controller: _expiryController,
+                    label: l10n.walletsExpiryDateLabel,
+                    focusNode: _expiryFocus,
+                    keyboardType: .number,
+                    placeholder: 'MM/YY',
+                    inputFormatters: [_ExpiryDateFormatter()],
+                    onChanged: (_) => setState(() {}),
+                    next: (_) => _expiryFocus.unfocus(),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -155,6 +155,7 @@
   "walletsAddWalletMobileOption": "Mobile Wallet",
   "walletsAddWalletCardOption": "Karte",
   "walletsAddCardTitle": "Karte hinzufügen",
+  "walletsCardAddedMessage": "Karte erfolgreich hinzugefügt.",
   "walletsDebitLabel": "DEBIT",
   "walletsCardHolderNameLabel": "Karteninhabername",
   "walletsCardNumberLabel": "Kartennummer",

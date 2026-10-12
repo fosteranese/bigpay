@@ -307,6 +307,7 @@
   "walletsAddWalletCardOption": "Card",
   "@walletsAddWalletCardOption": { "description": "Option to add a debit/credit card, on the add-wallet choice sheet" },
   "walletsAddCardTitle": "Add Card",
+  "walletsCardAddedMessage": "Card added successfully.",
   "walletsDebitLabel": "DEBIT",
   "walletsCardHolderNameLabel": "Card Holder Name",
   "walletsCardNumberLabel": "Card Number",

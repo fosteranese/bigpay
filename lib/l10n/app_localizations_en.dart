@@ -469,6 +469,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get walletsAddCardTitle => 'Add Card';
 
   @override
+  String get walletsCardAddedMessage => 'Card added successfully.';
+
+  @override
   String get walletsDebitLabel => 'DEBIT';
 
   @override
