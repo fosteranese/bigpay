@@ -57,10 +57,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     setState(() => _items = items);
   }
 
-  Future<void> _delete(PushNotification n) async {
-    final items = await NotificationStore.delete(n.id);
-    if (!mounted) return;
-    setState(() => _items = items);
+  void _delete(PushNotification n) {
+    // Optimistically remove the row — Dismissible requires the item to be out
+    // of the tree synchronously — then persist the deletion in the background.
+    setState(() {
+      _items = List.of(_items ?? const [])
+        ..removeWhere((e) => e.id == n.id);
+    });
+    NotificationStore.delete(n.id);
   }
 
   @override

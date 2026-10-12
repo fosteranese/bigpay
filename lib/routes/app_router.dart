@@ -34,7 +34,7 @@ class AppRouter {
 
 extension AppRouterNavigation on GoRouter {
   void popUntilNamed(String name) {
-    while (name != AppRouter.router.state.path && AppRouter.router.canPop()) {
+    while (name != AppRouter.router.state.name && AppRouter.router.canPop()) {
       AppRouter.router.pop();
     }
   }

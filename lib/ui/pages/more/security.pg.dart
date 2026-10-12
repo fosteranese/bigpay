@@ -241,20 +241,17 @@ class _SecurityPageState extends State<SecurityPage> {
   }) async {
     if (isLogin) {
       await BiometricUtil.setLoginEnabled(enable);
+      // Login biometric replays the sign-in password (captured at login), not
+      // the PIN — so only toggle the flag, and clear the stored password when
+      // turning it off.
+      if (!enable) await BiometricUtil.saveLoginPassword('');
     } else {
       await BiometricUtil.setTransactionEnabled(enable);
-    }
-
-    // Post-toggle state — the `_loginEnabled`/`_transactionEnabled` fields
-    // aren't updated until the setState below, so compute the new values here.
-    final loginEnabled = isLogin ? enable : _loginEnabled;
-    final transactionEnabled = isLogin ? _transactionEnabled : enable;
-
-    if (enable && pin != null) {
-      await BiometricUtil.savePin(pin);
-    } else if (!loginEnabled && !transactionEnabled) {
-      // Both settings are now off — drop the stored PIN.
-      await BiometricUtil.savePin('');
+      if (enable && pin != null) {
+        await BiometricUtil.savePin(pin);
+      } else if (!enable) {
+        await BiometricUtil.savePin('');
+      }
     }
 
     if (!mounted) return;

@@ -26,6 +26,8 @@ import 'package:bigpay/ui/widgets/idle_timeout_gate.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/biometric.util.dart';
+import 'package:bigpay/utils/notification_store.util.dart';
 
 /// Flutter's built-in Material/Cupertino chrome translations (back-button
 /// tooltip, etc.) don't cover Nigerian Pidgin ('pcm') —
@@ -152,9 +154,12 @@ class BigPayApp extends StatelessWidget {
             event: () => LogoutAction.event,
             listener: (context, snapshot) async {
               if (snapshot.isSuccessful) {
-                // The device is still known after logout — return to the
-                // existing-device login screen (which offers biometric unlock
-                // when enabled), not new-device sign-in.
+                // Signing out — drop the previous user's saved biometric
+                // secrets and their notifications (same cleanup as "Use a
+                // different account"), then return to the existing-device
+                // login screen (which offers biometric unlock when re-enabled).
+                BiometricUtil.clear();
+                NotificationStore.clear();
                 AppRouter.router.go(
                   ExistingDeviceLoginPage.route.path,
                 );
@@ -164,24 +169,25 @@ class BigPayApp extends StatelessWidget {
           ProcessListenerConfig<String>(
             event: () => GetProfilePictureAction.event,
             listener: (context, snapshot) {
-              if (snapshot.hasData) {
-                AppState.currentUser = AppState.currentUser!.copyWith(
-                  profilePicture: snapshot.data ?? '',
-                );
+              if (!snapshot.hasData) return;
+              final current = AppState.currentUser;
+              if (current == null) return;
+              AppState.currentUser = current.copyWith(
+                profilePicture: snapshot.data ?? '',
+              );
 
-                SaveAuthDataAction.event = context.dispatchProcess(
-                  SaveAuthDataAction(
-                    payload: SaveAuthDataActionPayload(
-                      dataResponse: DataResponse(
-                        code: StatusCodeConstants.success,
-                        status: StatusConstants.success,
-                        message: '',
-                        data: AppState.currentUser,
-                      ),
+              SaveAuthDataAction.event = context.dispatchProcess(
+                SaveAuthDataAction(
+                  payload: SaveAuthDataActionPayload(
+                    dataResponse: DataResponse(
+                      code: StatusCodeConstants.success,
+                      status: StatusConstants.success,
+                      message: '',
+                      data: AppState.currentUser,
                     ),
                   ),
-                );
-              }
+                ),
+              );
             },
           ),
         ],

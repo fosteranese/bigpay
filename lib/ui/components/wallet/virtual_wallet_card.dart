@@ -18,8 +18,8 @@ import 'package:bigpay/ui/theme/assets/app_images.dart';
 /// For the virtual wallet it shows the (toggleable) balance and a Fund Wallet
 /// action; for any other wallet it shows the wallet's [title] in place of the
 /// balance. [showViewDetails] adds the dashboard-only "View Details" button.
-class VirtualWalletCard extends StatelessWidget {
-  VirtualWalletCard({
+class VirtualWalletCard extends StatefulWidget {
+  const VirtualWalletCard({
     super.key,
     this.label,
     this.balance,
@@ -44,7 +44,20 @@ class VirtualWalletCard extends StatelessWidget {
   final bool showViewDetails;
   final VoidCallback? onViewDetails;
 
+  @override
+  State<VirtualWalletCard> createState() => _VirtualWalletCardState();
+}
+
+class _VirtualWalletCardState extends State<VirtualWalletCard> {
+  /// The balance eye toggle — a State field (not a StatelessWidget field) so
+  /// it survives rebuilds (e.g. a dashboard refresh) and is disposed properly.
   final _visible = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _visible.dispose();
+    super.dispose();
+  }
 
   /// The balance with any leading currency prefix (GHS/GH/₵) removed, so the
   /// card's own "GHS " prefix isn't doubled.
@@ -102,7 +115,7 @@ class VirtualWalletCard extends StatelessWidget {
   }
 
   double get _height {
-    return isVirtual ? 177 : 177 - 46;
+    return widget.isVirtual ? 177 : 177 - 46;
   }
 
   @override
@@ -145,15 +158,15 @@ class VirtualWalletCard extends StatelessWidget {
               crossAxisAlignment: .start,
               children: [
                 Text(
-                  isVirtual
-                      ? (label ?? l10n.walletsVirtualBalanceLabel)
-                      : (title ?? l10n.walletsGenericFallback),
+                  widget.isVirtual
+                      ? (widget.label ?? l10n.walletsVirtualBalanceLabel)
+                      : (widget.title ?? l10n.walletsGenericFallback),
                   style: context.smallDetails.copyWith(
                     color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 10),
-                if (isVirtual)
+                if (widget.isVirtual)
                   ValueListenableBuilder(
                     valueListenable: _visible,
                     builder: (context, visible, child) {
@@ -175,7 +188,9 @@ class VirtualWalletCard extends StatelessWidget {
                                   // Some sources already carry a "GHS"/"GH"
                                   // prefix; strip it so the "GHS " above isn't
                                   // doubled (GHS GHS ...).
-                                  text: visible ? _amount(balance) : '* *** **',
+                                  text: visible
+                                      ? _amount(widget.balance)
+                                      : '* *** **',
                                   style: context.display1.copyWith(
                                     color: AppColors.white,
                                   ),
@@ -206,13 +221,15 @@ class VirtualWalletCard extends StatelessWidget {
                   )
                 else
                   Text(
-                    wallet?.sources?.first.tile ?? title ?? '',
+                    widget.wallet?.sources?.firstOrNull?.tile ??
+                        widget.title ??
+                        '',
                     style: context.display1.copyWith(
                       color: AppColors.white,
                     ),
                   ),
                 const Spacer(),
-                if (isVirtual)
+                if (widget.isVirtual)
                   Row(
                     children: [
                       Expanded(
@@ -227,13 +244,13 @@ class VirtualWalletCard extends StatelessWidget {
                           buttonIconAlignment: .left,
                         ),
                       ),
-                      if (showViewDetails) ...[
+                      if (widget.showViewDetails) ...[
                         const SizedBox(width: 10),
                         Expanded(
                           child: FormButton(
                             backgroundColor: AppColors.white11,
                             height: 46,
-                            onPressed: onViewDetails ?? () {},
+                            onPressed: widget.onViewDetails ?? () {},
                             text: l10n.walletsViewDetails,
                             labelSize: 13,
                             svgIcon: 'assets/img/trending-up.svg',

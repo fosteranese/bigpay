@@ -371,7 +371,7 @@ class WalletListItem extends StatelessWidget {
               ),
           leading: CachedNetworkImage(
             imageUrl:
-                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.sources?.first.picture ?? data.icon}',
+                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.sources?.firstOrNull?.picture ?? data.icon}',
             placeholder: (context, url) => Icon(
               Icons.circle_outlined,
               color: Theme.of(context).primaryColor,
@@ -382,13 +382,13 @@ class WalletListItem extends StatelessWidget {
             ),
           ),
           title: Text(
-            data.sources?.first.tile ?? '',
+            data.sources?.firstOrNull?.tile ?? '',
             style: context.caption.copyWith(
               color: context.textPrimary,
             ),
           ),
           subtitle: Text(
-            data.sources?.first.balance ?? '0.00',
+            data.sources?.firstOrNull?.balance ?? '0.00',
             style: context.caption,
           ),
           trailing: FormRadioButton(selected: false),
