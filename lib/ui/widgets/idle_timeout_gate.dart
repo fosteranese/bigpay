@@ -103,8 +103,10 @@ class _IdleTimeoutGateState extends State<IdleTimeoutGate>
   void _logout() {
     if (!mounted) return;
     // Same path as More -> Sign Out; the app-wide LogoutAction listener
-    // navigates back to the unlock screen.
-    context.dispatchProcess(
+    // navigates back to the unlock screen. Correlate on the static event so
+    // that listener actually fires (a bare dispatch would run the action but
+    // never trigger the navigation).
+    LogoutAction.event = context.dispatchProcess(
       LogoutAction(payload: NoPayload()),
     );
   }
