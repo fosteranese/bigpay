@@ -83,11 +83,11 @@ final class GetServiceFormDataAction
       final formData = forms.first as Map<String, dynamic>;
       final form = formData['form'] as Map<String, dynamic>;
 
-      final fieldData = (formData['fields'] as List<dynamic>).map((
+      final fieldData = (formData['fields'] as List<dynamic>?)?.map((
         item,
       ) {
         final field = item['field'] as Map<String, dynamic>;
-        final lov = item['lov'] as List<dynamic>;
+        final lov = (item['lov'] as List<dynamic>?) ?? const [];
         return GeneralFlowFieldsDatum(
           field: GeneralFlowField(
             fieldId: field['fieldId'],
@@ -118,7 +118,8 @@ final class GetServiceFormDataAction
             );
           }).toList(),
         );
-      }).toList();
+      }).toList() ??
+          <GeneralFlowFieldsDatum>[];
       if (fieldData.isNotEmpty) {
         fieldData.add(
           GeneralFlowFieldsDatum(
@@ -138,7 +139,7 @@ final class GetServiceFormDataAction
               requiredForVerification: 1,
               isAmount: 0,
               showOnReceipt: 1,
-              rank: fieldData.first.field!.fieldLength,
+              rank: fieldData.length,
               toolTip: 'Select your preferred payment option',
             ),
           ),

@@ -17,7 +17,14 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
   ProcessBloc({
     required this.store,
   }) : super(const InitialProcess(event: ZeroProcessEvent())) {
-    on<ExecuteProcessEvent>(_onExecuteProcess);
+    // Serialize requests so a rapid second dispatch of the same action sees the
+    // first one's cache write (otherwise the concurrent default could make both
+    // miss the cache and double-fetch). bloc 9.x no longer ships `sequential()`
+    // inline, so this is the equivalent.
+    on<ExecuteProcessEvent>(
+      _onExecuteProcess,
+      transformer: (events, mapper) => events.asyncExpand(mapper),
+    );
   }
 
   final ProcessStore store;
