@@ -1,3 +1,4 @@
+import 'package:bigpay/ui/components/animated/pressable_scale.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -50,25 +51,28 @@ class FormOutlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveForeground = foregroundColor ?? context.textPrimary;
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: height),
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: loading || !enabled ? context.cardBg : null,
-          padding: padding,
-          shape: RoundedRectangleBorder(
-            borderRadius: borderRadius ?? .circular(height),
-            side: BorderSide(
-              color: enabled ? context.border : AppColors.flora,
-              width: 1,
+    return PressableScale(
+      enabled: !loading && enabled,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: loading || !enabled ? context.cardBg : null,
+            padding: padding,
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius ?? .circular(height),
+              side: BorderSide(
+                color: enabled ? context.border : AppColors.flora,
+                width: 1,
+              ),
             ),
+            minimumSize: Size(double.maxFinite, height),
           ),
-          minimumSize: Size(double.maxFinite, height),
+          // null (rather than the raw callback) so Material — and screen
+          // readers — actually treat the button as disabled while loading.
+          onPressed: (loading || !enabled) ? null : onPressed,
+          child: _content(context, effectiveForeground),
         ),
-        // null (rather than the raw callback) so Material — and screen
-        // readers — actually treat the button as disabled while loading.
-        onPressed: (loading || !enabled) ? null : onPressed,
-        child: _content(context, effectiveForeground),
       ),
     );
   }

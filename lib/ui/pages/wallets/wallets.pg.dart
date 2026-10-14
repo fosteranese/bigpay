@@ -13,6 +13,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/models/wallet/get_wallets_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/animated/fade_in.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
@@ -293,10 +294,16 @@ class _WalletsPageState extends State<WalletsPage> {
 
           return Column(
             children: [
-              ...?_accounts?.map((item) {
-                return WalletListItem(
-                  data: item,
-                  onTap: () => _openWallet(item),
+              // Subtle staggered entrance — each wallet settles in 40ms after
+              // the last, capped so a long list doesn't drag on.
+              ...?_accounts?.asMap().entries.map((entry) {
+                final index = entry.key > 8 ? 8 : entry.key;
+                return FadeInView(
+                  delay: Duration(milliseconds: index * 40),
+                  child: WalletListItem(
+                    data: entry.value,
+                    onTap: () => _openWallet(entry.value),
+                  ),
                 );
               }),
               // Clear the floating bottom nav so the last item isn't hidden.

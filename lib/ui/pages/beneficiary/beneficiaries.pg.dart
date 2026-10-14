@@ -9,6 +9,7 @@ import 'package:bigpay/models/actions/beneficiary/get_payees_action.dart';
 import 'package:bigpay/models/actions/beneficiary/pay_payee_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/animated/fade_in.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/skeleton/variants.dart';
@@ -328,7 +329,13 @@ class _BeneficiariesPageState extends State<BeneficiariesPage> with RouteAware {
 
             return Column(
               children: [
-                for (final payee in beneficiaries) _buildItem(payee),
+                // Subtle staggered entrance, capped so a long list doesn't
+                // drag on.
+                for (var i = 0; i < beneficiaries.length; i++)
+                  FadeInView(
+                    delay: Duration(milliseconds: (i > 8 ? 8 : i) * 40),
+                    child: _buildItem(beneficiaries[i]),
+                  ),
               ],
             );
           },

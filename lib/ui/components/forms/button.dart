@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:bigpay/ui/components/animated/pressable_scale.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 
@@ -51,23 +52,26 @@ class FormButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: height),
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          backgroundColor: loading || !enabled
-              ? context.avatarBg
-              : backgroundColor,
-          padding: padding,
-          shape: RoundedRectangleBorder(
-            borderRadius: borderRadius ?? .circular(height),
+    return PressableScale(
+      enabled: !loading && enabled,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: loading || !enabled
+                ? context.avatarBg
+                : backgroundColor,
+            padding: padding,
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius ?? .circular(height),
+            ),
+            minimumSize: Size(double.maxFinite, height),
           ),
-          minimumSize: Size(double.maxFinite, height),
+          // null (rather than a no-op callback) so Material — and screen
+          // readers — actually treat the button as disabled while loading.
+          onPressed: (loading || !enabled) ? null : onPressed,
+          child: _content(context),
         ),
-        // null (rather than a no-op callback) so Material — and screen
-        // readers — actually treat the button as disabled while loading.
-        onPressed: (loading || !enabled) ? null : onPressed,
-        child: _content(context),
       ),
     );
   }
@@ -87,7 +91,9 @@ class FormButton extends StatelessWidget {
       );
     }
 
-    return icon == null && svgIcon == null ? _text(context) : _textAndIcon(context);
+    return icon == null && svgIcon == null
+        ? _text(context)
+        : _textAndIcon(context);
   }
 
   Widget _text(BuildContext context) {
