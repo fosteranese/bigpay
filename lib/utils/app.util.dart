@@ -92,7 +92,7 @@ class AppUtil {
       if (AppState.appPackage != null) {
         AppState.appPackage = pip.PackageInfo(
           appName: AppState.appPackage!.appName,
-          buildNumber: Env.buildNumber,
+          buildNumber: AppState.appPackage?.buildNumber ?? Env.buildNumber,
           packageName: AppState.appPackage!.packageName,
           version: AppState.appPackage!.version,
           buildSignature: AppState.appPackage!.buildSignature,

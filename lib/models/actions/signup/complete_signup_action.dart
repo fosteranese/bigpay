@@ -1,13 +1,13 @@
+import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'package:bigpay/data/models/start_sign_up_data/start_sign_up_data.dart';
 import 'package:bigpay/models/actions/action.dart';
 
 part 'complete_signup_action.freezed.dart';
 part 'complete_signup_action.g.dart';
 
 final class CompleteSignUpAction
-    extends Action<CompleteSignUpActionPayload, StartSignUpData> {
+    extends Action<CompleteSignUpActionPayload, AuthData> {
   static const path = '/UserAccess/CompleteCustomerSignUp';
 
   const CompleteSignUpAction({
@@ -15,10 +15,11 @@ final class CompleteSignUpAction
   }) : super(
          endpoint: path,
          responseDataFunc: _responseDataFunc,
+         isAuthenticated: false,
        );
 
-  static StartSignUpData _responseDataFunc(dynamic response) {
-    return StartSignUpData.fromMap(response as Map<String, dynamic>);
+  static AuthData _responseDataFunc(dynamic data) {
+    return AuthData.fromMap(data as Map<String, dynamic>);
   }
 }
 
