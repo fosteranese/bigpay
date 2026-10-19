@@ -10,7 +10,7 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/login/verify_secure_phrase_login_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
-import 'package:bigpay/ui/components/forms/input.dart';
+import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/pages/auth/signin/signin.dart';
@@ -100,7 +100,7 @@ class _SecurePhraseLoginPageState extends State<SecurePhraseLoginPage> {
             mainAxisAlignment: .start,
             crossAxisAlignment: .center,
             children: [
-              FormInput(
+              FormPasswordInput(
                 label: AppLocalizations.of(context)!.authAnswerToQuestionLabel,
                 focusNode: _answerFocusNode,
                 controller: _answerController,
