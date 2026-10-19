@@ -80,6 +80,12 @@ class _InfoKycPageState extends State<InfoKycPage> {
           KycHero(
             title: l10n.kycTakeSelfieTitle,
             subtitle: l10n.kycSelfieMatchSubtitle,
+            visual: Padding(
+              padding: const .only(bottom: Spacing.xl),
+              child: SvgPicture.asset(
+                SvgImages.selfie,
+              ),
+            ),
           ),
           const SizedBox(height: Spacing.sm),
           InfoItem(
