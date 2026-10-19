@@ -12,6 +12,7 @@ import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
+import 'package:bigpay/ui/components/forms/outline_button.dart';
 import 'package:bigpay/ui/components/forms/password_input.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
@@ -221,7 +222,27 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
         bottomNav: Column(
           mainAxisSize: .min,
           children: [
-            FormButton(onPressed: _signIn, text: l10n.authSignIn),
+            // A returning user with biometrics enabled gets "Login with
+            // Biometrics" as the primary action (the fastest way in), with
+            // password sign-in demoted to a secondary outline.
+            if (_biometricEnabled) ...[
+              FormButton(
+                onPressed: _biometricUnlock,
+                text: l10n.authUnlockWithBiometrics,
+                svgIcon: SvgImages.biometric,
+                buttonIconAlignment: .left,
+                iconSize: 20,
+              ),
+              const SizedBox(height: 10),
+              FormOutlineButton(
+                onPressed: _signIn,
+                text: l10n.authSignIn,
+              ),
+            ] else
+              FormButton(
+                onPressed: _signIn,
+                text: l10n.authSignIn,
+              ),
             const SizedBox(height: 6),
             TextButton(
               onPressed: _useDifferentAccount,
@@ -258,48 +279,23 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
               controller: _passwordController,
               focusNode: _passwordFocusNode,
             ),
-            Row(
-              mainAxisAlignment: .spaceBetween,
-              crossAxisAlignment: .center,
-              children: [
-                if (_biometricEnabled)
-                  TextButton(
-                    style: TextButton.styleFrom(padding: .zero),
-                    onPressed: _biometricUnlock,
-                    child: Row(
-                      mainAxisSize: .min,
-                      mainAxisAlignment: .start,
-                      crossAxisAlignment: .center,
-                      children: [
-                        SvgPicture.asset(SvgImages.biometric),
-                        SizedBox(width: 5),
-                        Text(
-                          l10n.authUnlockWithBiometrics,
-                          style: context.smallDetails.copyWith(
-                            color: context.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  const SizedBox.shrink(),
-                TextButton(
-                  style: TextButton.styleFrom(padding: .zero),
-                  onPressed: () {
-                    ForgotPwd.phoneNumber = SignIn.phoneNumber;
-                    AppRouter.router.push(
-                      StartForgotPasswordPage.route.path,
-                    );
-                  },
-                  child: Text(
-                    l10n.commonForgotPassword,
-                    style: context.smallDetails.copyWith(
-                      color: context.textPrimary,
-                    ),
+            Align(
+              alignment: .centerRight,
+              child: TextButton(
+                style: TextButton.styleFrom(padding: .zero),
+                onPressed: () {
+                  ForgotPwd.phoneNumber = SignIn.phoneNumber;
+                  AppRouter.router.push(
+                    StartForgotPasswordPage.route.path,
+                  );
+                },
+                child: Text(
+                  l10n.commonForgotPassword,
+                  style: context.smallDetails.copyWith(
+                    color: context.textPrimary,
                   ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
