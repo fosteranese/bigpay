@@ -26,7 +26,6 @@ import 'package:bigpay/ui/widgets/idle_timeout_gate.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
-import 'package:bigpay/utils/biometric.util.dart';
 import 'package:bigpay/utils/notification_store.util.dart';
 
 /// Flutter's built-in Material/Cupertino chrome translations (back-button
@@ -154,11 +153,11 @@ class BigPayApp extends StatelessWidget {
             event: () => LogoutAction.event,
             listener: (context, snapshot) async {
               if (snapshot.isSuccessful) {
-                // Signing out — drop the previous user's saved biometric
-                // secrets and their notifications (same cleanup as "Use a
-                // different account"), then return to the existing-device
-                // login screen (which offers biometric unlock when re-enabled).
-                BiometricUtil.clear();
+                // Signing out — clear per-session notifications, but KEEP the
+                // saved biometric login settings and secrets so the returning
+                // user can still sign in with biometrics. ("Use a different
+                // account" is what clears biometrics, since they belong to the
+                // previous user.)
                 NotificationStore.clear();
                 AppRouter.router.go(
                   ExistingDeviceLoginPage.route.path,
