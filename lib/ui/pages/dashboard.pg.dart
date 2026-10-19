@@ -297,7 +297,7 @@ class _DashboardPageState extends State<DashboardPage>
                           ),
                         ),
                         Text(
-                          AppState.currentUser?.user?.name ?? '',
+                          AppState.currentUser?.user?.displayFirstName ?? '',
                           style: context.p1Medium.copyWith(
                             color: AppColors.white,
                           ),

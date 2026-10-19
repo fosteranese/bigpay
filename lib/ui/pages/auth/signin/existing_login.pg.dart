@@ -67,7 +67,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
     setState(() => _biometricEnabled = enabled);
   }
 
-  String get _name => AppState.currentUser?.user?.name ?? '';
+  String get _name => AppState.currentUser?.user?.displayFirstName ?? '';
 
   String get _initials {
     final parts = _name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);

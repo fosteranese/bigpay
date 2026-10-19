@@ -84,6 +84,15 @@ class User extends Equatable {
     return User.fromMap(json.decode(data) as Map<String, dynamic>);
   }
 
+  /// The first word of [name] — the displayable given name. The backend's own
+  /// [firstName] field isn't reliably populated for this account, so it's
+  /// derived from [name] instead.
+  String? get displayFirstName {
+    final trimmed = name?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed.split(RegExp(r'\s+')).first;
+  }
+
   /// `dart:convert`
   ///
   /// Converts [User] to a JSON string.
