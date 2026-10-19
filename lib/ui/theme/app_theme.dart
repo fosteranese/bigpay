@@ -90,7 +90,7 @@ extension ThemeColors on BuildContext {
   Color get textTertiary => _isDark ? const Color(0xFF6E6E7A) : AppColors.flora;
   Color get divider => _isDark ? const Color(0xFF3A3A4C) : AppColors.offWhite;
   Color get border => _isDark ? const Color(0xFF3A3A4C) : AppColors.tertiary;
-  Color get inputBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.white;
+  Color get inputBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.tertiary;
   Color get avatarBg => _isDark ? const Color(0xFF2A2A3C) : AppColors.tintShade3;
   // The header's flexibleSpace (main.lo.dart) replaces this color's alpha
   // wholesale with a scroll-driven blur value rather than multiplying it —

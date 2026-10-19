@@ -47,6 +47,8 @@ class FormInput extends StatefulWidget {
 }
 
 class _FormInputState extends State<FormInput> {
+  bool _hasFocus = false;
+
   @override
   void initState() {
     super.initState();
@@ -69,72 +71,80 @@ class _FormInputState extends State<FormInput> {
               FormLabel(
                 label: widget.label!,
               ),
-            TextFormField(
-              readOnly: widget.readOnly,
-              focusNode: widget.focusNode,
-              obscureText: widget.isPassword,
-              controller: widget.controller,
-              keyboardType: widget.keyboardType,
-              textInputAction: _textInputAction,
-              maxLength: widget.maxLength,
-              maxLines: widget.maxLines,
-              inputFormatters: widget.inputFormatters,
-              validator: widget.validator,
-              onFieldSubmitted: (value) {
-                widget.next?.call(value);
+            Focus(
+              onFocusChange: (hasFocus) {
+                if (hasFocus != _hasFocus) {
+                  setState(() => _hasFocus = hasFocus);
+                }
               },
-              onChanged: (value) {
-                widget.onChanged?.call(value);
-              },
-              decoration: InputDecoration(
-                constraints: (widget.maxLines ?? 1) == 1
-                    ? const BoxConstraints(minHeight: 48)
-                    : null,
-                contentPadding: widget.padding,
-                hintText: widget.placeholder,
-                hintStyle: context.caption,
-                counterText: '',
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: .circular(10),
-                  borderSide: BorderSide(
-                    color: context.border,
-                    style: .solid,
+              child: TextFormField(
+                readOnly: widget.readOnly,
+                focusNode: widget.focusNode,
+                obscureText: widget.isPassword,
+                controller: widget.controller,
+                keyboardType: widget.keyboardType,
+                textInputAction: _textInputAction,
+                maxLength: widget.maxLength,
+                maxLines: widget.maxLines,
+                inputFormatters: widget.inputFormatters,
+                validator: widget.validator,
+                onFieldSubmitted: (value) {
+                  widget.next?.call(value);
+                },
+                onChanged: (value) {
+                  widget.onChanged?.call(value);
+                },
+                decoration: InputDecoration(
+                  constraints: (widget.maxLines ?? 1) == 1
+                      ? const BoxConstraints(minHeight: 48)
+                      : null,
+                  contentPadding: widget.padding,
+                  hintText: widget.placeholder,
+                  hintStyle: context.caption,
+                  counterText: '',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: .circular(10),
+                    borderSide: BorderSide(
+                      color: context.border,
+                      style: .solid,
+                    ),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: .circular(10),
-                  borderSide: BorderSide(
-                    color: AppColors.primary,
-                    style: .solid,
-                    width: 2,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: .circular(10),
+                    borderSide: BorderSide(
+                      color: AppColors.primary,
+                      style: .solid,
+                      width: 2,
+                    ),
                   ),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: .circular(10),
-                  borderSide: BorderSide(
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: .circular(10),
+                    borderSide: BorderSide(
+                      color: AppColors.danger,
+                      style: .solid,
+                    ),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: .circular(10),
+                    borderSide: BorderSide(
+                      color: AppColors.danger,
+                      style: .solid,
+                      width: 2,
+                    ),
+                  ),
+                  errorMaxLines: 2,
+                  errorStyle: context.caption.copyWith(
                     color: AppColors.danger,
-                    style: .solid,
                   ),
+                  filled: true,
+                  // Filled by default, transparent while focused.
+                  fillColor: _hasFocus ? Colors.transparent : context.inputBg,
+                  suffixIcon: widget.suffix,
+                  prefixIcon: widget.prefix,
+                  prefixIconConstraints: widget.prefix == null
+                      ? null
+                      : const BoxConstraints(minWidth: 0, minHeight: 0),
                 ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: .circular(10),
-                  borderSide: BorderSide(
-                    color: AppColors.danger,
-                    style: .solid,
-                    width: 2,
-                  ),
-                ),
-                errorMaxLines: 2,
-                errorStyle: context.caption.copyWith(
-                  color: AppColors.danger,
-                ),
-                filled: true,
-                fillColor: context.inputBg,
-                suffixIcon: widget.suffix,
-                prefixIcon: widget.prefix,
-                prefixIconConstraints: widget.prefix == null
-                    ? null
-                    : const BoxConstraints(minWidth: 0, minHeight: 0),
               ),
             ),
           ],
