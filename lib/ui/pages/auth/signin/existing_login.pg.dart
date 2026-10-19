@@ -240,7 +240,8 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
         child: Column(
           crossAxisAlignment: .stretch,
           children: [
-            const SizedBox(height: 120),
+            // const SizedBox(height: 120),
+            const Spacer(),
             Center(child: _buildAvatar()),
             const SizedBox(height: Spacing.lg),
             Text(

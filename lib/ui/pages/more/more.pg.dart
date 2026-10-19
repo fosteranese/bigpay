@@ -91,7 +91,7 @@ class _MorePageState extends State<MorePage> {
       // Was 150 — too tight for the account card's actual height (avatar +
       // name + padding) at larger text-scale factors, overflowing by a few
       // pixels on some devices/font sizes. Headroom added.
-      bottomSize: 190,
+      bottomSize: 155,
       title: l10n.moreAccountTitle,
       subtitleWidget: InkWell(
         borderRadius: .circular(12),
@@ -99,7 +99,7 @@ class _MorePageState extends State<MorePage> {
           AppRouter.router.push(ProfilePage.route.path);
         },
         child: Container(
-          margin: .only(top: 20),
+          margin: .only(top: 10),
           padding: .symmetric(horizontal: 16, vertical: 18),
           decoration: BoxDecoration(
             color: AppColors.primary,
