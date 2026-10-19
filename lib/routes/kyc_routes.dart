@@ -5,13 +5,25 @@ import 'package:bigpay/ui/pages/kyc/info-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/intro-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/preview-picture-kyc.pg.dart';
 import 'package:bigpay/ui/pages/kyc/start-kyc.pg.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoPage;
 import 'package:go_router/go_router.dart';
 
 GoRoute get kycRoute => GoRoute(
   name: IntroKycPage.route.name,
   path: IntroKycPage.route.path,
   redirect: (context, state) => null,
-  builder: (context, state) => IntroKycPage(),
+  // CupertinoPage (see app_router.dart) so the KYC intro also gets the iOS
+  // back-swipe gesture.
+  pageBuilder: (context, state) => CupertinoPage(
+    key: state.pageKey,
+    name: state.name ?? state.path,
+    arguments: <String, String>{
+      ...state.pathParameters,
+      ...state.uri.queryParameters,
+    },
+    restorationId: state.pageKey.value,
+    child: const IntroKycPage(),
+  ),
   routes: [
     StartKycPage.route.toGoRoute(
       () => const StartKycPage(),
