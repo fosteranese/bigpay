@@ -274,7 +274,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
                         SvgPicture.asset(SvgImages.biometric),
                         SizedBox(width: 5),
                         Text(
-                          l10n.commonBiometricLogin,
+                          l10n.authUnlockWithBiometrics,
                           style: context.smallDetails.copyWith(
                             color: context.textPrimary,
                           ),

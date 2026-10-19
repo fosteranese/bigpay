@@ -47,9 +47,11 @@ class ReceiptPdf {
     final dividerBlock = 17.0; // 6 gap + 1 divider + 10 gap
     final cardInnerHeight =
         rows.length * rowHeight + (amountIndex > 0 ? dividerBlock : 0.0);
-    final footerHeight = 48.0 + _wrappedLineCount(_footer, 13.0, _width - 56) * 20.0 + 36.0;
+    final footerHeight =
+        48.0 + _wrappedLineCount(_footer, 13.0, _width - 56) * 20.0 + 36.0;
 
-    final pageHeight = headerHeight +
+    final pageHeight =
+        headerHeight +
         dateHeight +
         (20.0 + 20.0 + cardInnerHeight + 20.0) +
         footerHeight +
@@ -181,8 +183,7 @@ class ReceiptPdf {
   }
 
   static pw.Widget _row(String label, String value, {required bool bold}) {
-    final weight =
-        bold ? pw.FontWeight.bold : pw.FontWeight.normal;
+    final weight = bold ? pw.FontWeight.bold : pw.FontWeight.normal;
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 8),
       child: pw.Row(
@@ -215,11 +216,14 @@ class ReceiptPdf {
     );
   }
 
-  /// (label, value, bold) rows: the service, then the server's preview rows.
+  /// (label, value, bold) rows: the service, its status, then the server's
+  /// preview rows — mirroring the on-screen receipt's order.
   static List<(String, String, bool)> _rows(RequestResponse receipt) {
     final rows = <(String, String, bool)>[];
     final service = receipt.formName ?? receipt.activityName ?? '';
     if (service.isNotEmpty) rows.add(('Service', service, true));
+    final status = _statusLabel(receipt);
+    if (status.isNotEmpty) rows.add(('Status', status, false));
     for (final item in receipt.previewData) {
       final key = item.key;
       final value = item.value;
@@ -227,6 +231,29 @@ class ReceiptPdf {
       rows.add((key, value, key.toLowerCase().contains('total')));
     }
     return rows;
+  }
+
+  /// The receipt status as a short label — the backend's own
+  /// [RequestResponse.statusLabel] when present, otherwise derived from the
+  /// numeric status code. Uses fixed English because the PDF chrome is
+  /// English-only (no l10n context), matching the on-screen receipt's
+  /// derivation for the same status codes.
+  static String _statusLabel(RequestResponse receipt) {
+    final backend = receipt.statusLabel;
+    if (backend != null && backend.isNotEmpty) return backend;
+    switch (receipt.status) {
+      case 1:
+        return 'Transaction Successful';
+      case 3:
+        return 'Transaction Pending';
+      case 5:
+        return 'Transaction Processing';
+      case 0:
+      case 2:
+        return 'Transaction Failed';
+      default:
+        return '';
+    }
   }
 
   /// Crude wrapped-line estimate used to size the footer block without
