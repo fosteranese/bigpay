@@ -48,7 +48,6 @@ class NeumorphicBottomNav extends StatelessWidget {
               fontSize: 10.5,
               height: 1.1,
               fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
             ),
           ),
         ],

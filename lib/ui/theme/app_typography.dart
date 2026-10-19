@@ -9,7 +9,6 @@ class AppTypography {
     fontSize: 28,
     fontWeight: FontWeight.w700,
     height: 1.2,
-    letterSpacing: -0.5,
     color: AppColors.white,
     decoration: TextDecoration.none,
   );
@@ -28,7 +27,6 @@ class AppTypography {
     fontSize: 20,
     fontWeight: FontWeight.w700,
     height: 1.2,
-    letterSpacing: 0.2,
     color: AppColors.black,
     decoration: TextDecoration.none,
   );

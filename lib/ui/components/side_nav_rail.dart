@@ -65,7 +65,6 @@ class SideNavRail extends StatelessWidget {
                       fontSize: 11,
                       height: 1.1,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
                     ),
                   ),
                 ],
