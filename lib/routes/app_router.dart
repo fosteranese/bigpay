@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart' show CupertinoPage;
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -73,20 +72,7 @@ extension GoRouteX on PageRouteDefinition {
       path: nested ? subPath : path,
       // Pushed onto the root navigator, so it covers the bottom-nav shell.
       parentNavigatorKey: rootNavigator ? rootNavigatorKey : null,
-      // CupertinoPage (not the default MaterialPage) so the route gets the
-      // iOS back-swipe gesture. go_router 18.x builds its MaterialPage from
-      // the `material_ui` package, whose PageTransitionsTheme handling broke
-      // the CupertinoPageTransitionsBuilder gesture wiring.
-      pageBuilder: (context, state) => CupertinoPage(
-        key: state.pageKey,
-        name: state.name ?? state.path,
-        arguments: <String, String>{
-          ...state.pathParameters,
-          ...state.uri.queryParameters,
-        },
-        restorationId: state.pageKey.value,
-        child: page(),
-      ),
+      builder: (context, state) => page(),
       onExit: onExit,
     );
   }
@@ -102,17 +88,7 @@ extension GoRouteX on PageRouteDefinition {
       name: name,
       path: nested ? subPath : path,
       parentNavigatorKey: rootNavigator ? rootNavigatorKey : null,
-      // See [toGoRoute] — CupertinoPage restores the iOS back-swipe.
-      pageBuilder: (context, state) => CupertinoPage(
-        key: state.pageKey,
-        name: state.name ?? state.path,
-        arguments: <String, String>{
-          ...state.pathParameters,
-          ...state.uri.queryParameters,
-        },
-        restorationId: state.pageKey.value,
-        child: page(state),
-      ),
+      builder: (context, state) => page(state),
       onExit: onExit,
     );
   }
