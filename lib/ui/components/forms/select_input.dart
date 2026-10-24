@@ -36,12 +36,12 @@ class FormSelectInput extends StatefulWidget {
 class _FormSelectInputState extends State<FormSelectInput> {
   final _searchController = TextEditingController();
   final _controller = TextEditingController();
-  List<FormSelectOption> _filteredOptions = [];
+  final _sheetController = DraggableScrollableController();
+  static const _sheetMaxSize = 0.9;
 
   @override
   void initState() {
     super.initState();
-    _filteredOptions = widget.options;
     _syncDisplayFromController();
     _maybeAutoSelectOnlyOption();
   }
@@ -50,7 +50,6 @@ class _FormSelectInputState extends State<FormSelectInput> {
   void didUpdateWidget(FormSelectInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options != widget.options) {
-      _filteredOptions = widget.options;
       _syncDisplayFromController();
       _maybeAutoSelectOnlyOption();
     }
@@ -197,7 +196,6 @@ class _FormSelectInputState extends State<FormSelectInput> {
 
   void _onLongList() {
     _searchController.clear();
-    _filteredOptions = widget.options;
     final cap = contentCapWidth(context);
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
@@ -219,9 +217,10 @@ class _FormSelectInputState extends State<FormSelectInput> {
           borderRadius: .circular(20),
         ),
         child: DraggableScrollableSheet(
+          controller: _sheetController,
           initialChildSize: 0.6,
           minChildSize: 0.4,
-          maxChildSize: 0.9,
+          maxChildSize: _sheetMaxSize,
           expand: false,
           builder: (_, scrollController) => Padding(
             padding: const .symmetric(vertical: 24),
@@ -286,28 +285,61 @@ class _FormSelectInputState extends State<FormSelectInput> {
                       ),
                       keyboardType: .text,
                       textInputAction: .search,
+                      // Option labels are names/codes — corrections and
+                      // predictions only mangle the query.
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      smartDashesType: .disabled,
+                      smartQuotesType: .disabled,
                       maxLines: 1,
-                      onChanged: _onSearch,
+                      // The keyboard eats half the screen — give the list
+                      // all the room the sheet has.
+                      onTap: () {
+                        if (_sheetController.isAttached) {
+                          _sheetController.animateTo(
+                            _sheetMaxSize,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                          );
+                        }
+                      },
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: _filteredOptions.isEmpty
-                      ? _emptyState(
-                          message: _searchController.text.isEmpty
+                  // Listens to the search text directly: the sheet is its
+                  // own route, so setState on this field never rebuilt it.
+                  child: ValueListenableBuilder(
+                    valueListenable: _searchController,
+                    builder: (context, search, _) {
+                      final q = search.text.trim().toLowerCase();
+                      final filtered = q.isEmpty
+                          ? widget.options
+                          : widget.options
+                                .where((o) => o.label.toLowerCase().contains(q))
+                                .toList();
+                      if (filtered.isEmpty) {
+                        return _emptyState(
+                          message: q.isEmpty
                               ? l10n.commonNoOptionsAvailable
                               : l10n.commonNoResultsFound,
-                          icon: _searchController.text.isEmpty
+                          icon: q.isEmpty
                               ? Icons.inbox_outlined
                               : Icons.search_off_outlined,
-                        )
-                      : ListView.builder(
-                          controller: scrollController,
-                          itemCount: _filteredOptions.length,
-                          itemBuilder: (_, i) =>
-                              _buildOption(_filteredOptions[i]),
+                        );
+                      }
+                      return ListView.builder(
+                        controller: scrollController,
+                        // Last options stay reachable above the keyboard.
+                        padding: .only(
+                          bottom: MediaQuery.viewInsetsOf(context).bottom,
                         ),
+                        itemCount: filtered.length,
+                        itemBuilder: (_, i) => _buildOption(filtered[i]),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -394,19 +426,11 @@ class _FormSelectInputState extends State<FormSelectInput> {
     Navigator.pop(context);
   }
 
-  void _onSearch(String query) {
-    final q = query.toLowerCase();
-    setState(() {
-      _filteredOptions = widget.options
-          .where((o) => o.label.toLowerCase().contains(q))
-          .toList();
-    });
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
     _controller.dispose();
+    _sheetController.dispose();
     super.dispose();
   }
 }
