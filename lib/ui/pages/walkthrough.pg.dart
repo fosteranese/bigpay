@@ -119,10 +119,12 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
       fit: .cover,
     );
 
-    final url = '$baseUrl/$imageDirectory/${item.picture}';
-    if (item.picture == null) {
+    final picture = item.picture;
+    if (picture == null || picture.isEmpty || baseUrl.isEmpty) {
       return fallback;
     }
+    // imageBaseUrl already ends with '/', same join as the dashboard icons.
+    final url = '$baseUrl$imageDirectory/$picture';
 
     return CachedNetworkImage(
       imageUrl: url,
@@ -137,8 +139,15 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     return ProcessBuilder<InitializationData>(
       event: () => startUpEvent,
       builder: (context, snapshot) {
-        baseUrl = snapshot.data?.imageBaseUrl ?? '';
-        imageDirectory = snapshot.data?.imageDirectory ?? '';
+        // The server sends these on the envelope, not inside `data`.
+        baseUrl =
+            snapshot.response?.imageBaseUrl ??
+            snapshot.data?.imageBaseUrl ??
+            '';
+        imageDirectory =
+            snapshot.response?.imageDirectory ??
+            snapshot.data?.imageDirectory ??
+            '';
         _walkThrough = snapshot.data?.walkThrough ?? [];
 
         return _buildContent();
