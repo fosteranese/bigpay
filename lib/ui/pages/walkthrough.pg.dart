@@ -15,6 +15,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/walkthrough_images.util.dart';
 
 class WalkthroughPage extends StatefulWidget {
@@ -124,7 +125,11 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     return ProcessBuilder<InitializationData>(
       event: () => startUpEvent,
       builder: (context, snapshot) {
-        _walkThrough = snapshot.data?.walkThrough ?? [];
+        // The background refresh after the cached startup emission passes
+        // through a loading state with no data — keep the last known slides
+        // (AppState.data) instead of rendering an empty, blank PageView.
+        _walkThrough =
+            (snapshot.data ?? AppState.data)?.walkThrough ?? _walkThrough;
 
         return _buildContent();
       },
