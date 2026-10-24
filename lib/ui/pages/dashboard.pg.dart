@@ -18,6 +18,7 @@ import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
 import 'package:bigpay/ui/pages/wallets/virtual.pg.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:bigpay/utils/notification_store.util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,6 +51,14 @@ class _DashboardPageState extends State<DashboardPage>
   /// scrolling repaints only the header overlay, not the whole dashboard.
   final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
 
+  /// Picks the bell icon: the "new" one only while something is unread.
+  final ValueNotifier<bool> _hasUnread = ValueNotifier(false);
+
+  Future<void> _loadUnread() async {
+    final count = await NotificationStore.unreadCount();
+    if (mounted) _hasUnread.value = count > 0;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,15 +69,20 @@ class _DashboardPageState extends State<DashboardPage>
     // shell branch, so no same-navigator pop to catch) — see the
     // notifier's own doc for why this can't just be RouteAware.
     AppState.dataChangedNotifier.addListener(_onDataChanged);
+    _loadUnread();
   }
 
-  void _onDataChanged() => refreshDashboardData();
+  void _onDataChanged() {
+    refreshDashboardData();
+    _loadUnread();
+  }
 
   @override
   void dispose() {
     AppState.dataChangedNotifier.removeListener(_onDataChanged);
     _scrollController.dispose();
     _blurOpacity.dispose();
+    _hasUnread.dispose();
     super.dispose();
   }
 
@@ -312,10 +326,17 @@ class _DashboardPageState extends State<DashboardPage>
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.white20,
                         ),
-                        onPressed: () =>
-                            AppRouter.router.push(NotificationsPage.route.path),
-                        icon: SvgPicture.asset(
-                          'assets/img/new-notification.svg',
+                        // Reading/clearing on that page changes the badge.
+                        onPressed: () => AppRouter.router
+                            .push(NotificationsPage.route.path)
+                            .then((_) => _loadUnread()),
+                        icon: ValueListenableBuilder<bool>(
+                          valueListenable: _hasUnread,
+                          builder: (context, hasUnread, _) => SvgPicture.asset(
+                            hasUnread
+                                ? 'assets/img/new-notification.svg'
+                                : 'assets/img/no-notice.svg',
+                          ),
                         ),
                       ),
                     ],
