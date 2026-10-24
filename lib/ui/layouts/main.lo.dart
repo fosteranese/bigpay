@@ -195,11 +195,13 @@ class _MainLayoutState extends State<MainLayout> {
     // centered card rather than a phone layout stretched onto a big canvas.
     final dockBottomNav = context.isCompact;
 
+    // Never top: a bottom bar has no status bar to clear. Inside Scaffold's
+    // bottomNavigationBar the top inset is stripped anyway, but the
+    // useScaffold: false path (e.g. complaint detail) kept it, adding the
+    // whole status-bar height above the docked composer.
     final bottomNavContent = widget.bottomNav == null
         ? null
-        : (dockBottomNav
-              ? SafeArea(child: widget.bottomNav!)
-              : SafeArea(top: false, child: widget.bottomNav!));
+        : SafeArea(top: false, child: widget.bottomNav!);
 
     final pageContent = (dockBottomNav || bottomNavContent == null)
         ? widget.child
