@@ -85,8 +85,11 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
   String get _balance =>
       widget.account?.sources?.firstOrNull?.balance ?? '0.00';
 
+  /// Space the wallet card takes under the app bar: VirtualWalletCard's
+  /// height (177, or 131 without the fund button) plus its 15 top margin
+  /// and a 10 gap before the sheet.
   double get _height {
-    return _isVirtual ? 160 : 160 - 55;
+    return 15 + (_isVirtual ? 177 : 131) + 10;
   }
 
   @override
@@ -140,9 +143,11 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
     final totalAppBarHeight = statusBarHeight + appBarHeight;
 
     final max = (screenHeight - statusBarHeight) / screenHeight;
-    final min =
-        (screenHeight - (statusBarHeight + totalAppBarHeight + _height)) /
-        screenHeight;
+    // Sheet rests just below the card. (The status bar used to be counted
+    // twice here, which only happened to clear the card in portrait — in
+    // landscape the inset is 0 and the sheet covered it.)
+    final min = ((screenHeight - (totalAppBarHeight + _height)) / screenHeight)
+        .clamp(0.1, max);
     return Stack(
       children: [
         DashboardLayout(
