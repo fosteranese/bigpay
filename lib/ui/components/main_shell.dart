@@ -8,7 +8,6 @@ import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/side_nav_rail.dart';
 import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/routes/app_router.dart';
-import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
@@ -49,22 +48,27 @@ class MainShell extends StatelessWidget {
           showSignOutDialog(context);
         }
       },
-      // iOS has no system back on a root page, so a horizontal swipe on
-      // Home's root stands in for Android's back → sign-out prompt. Inner
-      // horizontal scrollers (carousels) still win the gesture arena.
+      // A horizontal swipe on a tab's root page acts as back: other tabs
+      // return to Home (all platforms); Home's root offers sign-out on iOS,
+      // which has no system back there (Android's back gesture already
+      // reaches the PopScope above). Inner horizontal scrollers (carousels)
+      // still win the gesture arena.
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onHorizontalDragEnd: Theme.of(context).platform == TargetPlatform.iOS
-            ? (details) {
-                if ((details.primaryVelocity ?? 0).abs() < 300) return;
-                if (navigationShell.currentIndex != 0) return;
-                if (AppRouter.router.state.uri.path !=
-                    DashboardPage.route.path) {
-                  return;
-                }
-                showSignOutDialog(context);
-              }
-            : null,
+        onHorizontalDragEnd: (details) {
+          if ((details.primaryVelocity ?? 0).abs() < 300) return;
+          // An open split-view detail has its own back (the page's PopScope).
+          if (AppState.splitDetailOpenNotifier.value) return;
+          final index = navigationShell.currentIndex;
+          final rootPath =
+              navigationShell.route.branches[index].defaultRoute?.path;
+          if (AppRouter.router.state.uri.path != rootPath) return;
+          if (index != 0) {
+            _goBranch(0);
+          } else if (Theme.of(context).platform == TargetPlatform.iOS) {
+            showSignOutDialog(context);
+          }
+        },
         child: _buildChrome(context),
       ),
     );
