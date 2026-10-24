@@ -117,7 +117,10 @@ class _HistoryPageState extends State<HistoryPage> {
 
     AppRouter.router.push(
       TransactionDetailsPage.route.path,
-      extra: record,
+      extra: {
+        'receipt': record,
+        'canGoBack': true,
+      },
     );
   }
 

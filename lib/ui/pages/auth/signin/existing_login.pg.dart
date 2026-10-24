@@ -182,7 +182,7 @@ class _ExistingDeviceLoginPageState extends State<ExistingDeviceLoginPage> {
         }
 
         if (snapshot.hasError) {
-          // The device is no longer recognised — restart on the new-device
+          // The device is no longer recognized — restart on the new-device
           // sign-in.
           if (snapshot.error?.code == StatusCodeConstants.newLogin) {
             AppState.store.cache.remove(VerifyOtpLoginAction.path);

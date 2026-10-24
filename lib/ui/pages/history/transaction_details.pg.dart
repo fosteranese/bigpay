@@ -29,19 +29,45 @@ class TransactionDetailsPage extends StatelessWidget {
   const TransactionDetailsPage({
     super.key,
     required this.receipt,
+    required this.canGoBack,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/history/details',
   );
 
   final RequestResponse receipt;
+  final bool canGoBack;
+
+  /// Shows the outcome of a just-processed request: the receipt, or — when
+  /// the backend says there's nothing to receipt (`showReceipt == 0`, e.g. a
+  /// settings change) — the same full-screen success view sign-up uses.
+  static void showResult(BuildContext context, RequestResponse receipt) {
+    if (receipt.showReceipt == 0) {
+      MessageUtil.displaySuccessFullDialog(
+        context,
+        title: receipt.statusLabel ?? receipt.formName,
+        message: receipt.comment ?? '',
+        btnText: AppLocalizations.of(context)!.commonBackToHome,
+        onOk: () => AppRouter.router.popUntilNamedRoutes([
+          DashboardPage.route.path,
+          ServicePage.route.path,
+          HistoryPage.route.path,
+        ]),
+      );
+      return;
+    }
+    AppRouter.router.push(
+      route.path,
+      extra: {'receipt': receipt, 'canGoBack': false},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: TransactionDetailsView(
         receipt: receipt,
-        onBack: () => context.pop(),
+        onBack: canGoBack ? () => context.pop() : null,
       ),
     );
   }
@@ -202,6 +228,16 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                   ),
                 ),
               ),
+            )
+          else
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const .fromLTRB(20, 12, 20, 0),
+                child: SizedBox.square(
+                  dimension: 44,
+                ),
+              ),
             ),
           Expanded(
             child: SingleChildScrollView(
@@ -250,10 +286,11 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                               value: item.value ?? '',
                             );
                           }),
-                          Divider(
-                            color: context.divider,
-                            thickness: 4,
-                          ),
+                          if (receipt.previewData.isNotEmpty)
+                            Divider(
+                              color: context.divider,
+                              thickness: 4,
+                            ),
                           TransactionDetailsItem(
                             title: AppLocalizations.of(
                               context,

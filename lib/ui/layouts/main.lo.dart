@@ -405,7 +405,14 @@ class _MainLayoutState extends State<MainLayout> {
                   top: 15,
                   bottom: 10,
                 ),
-                child: bottomNavContent,
+                // The keyboard already covers the home indicator, so drop
+                // SafeArea's bottom inset while it's up — otherwise it
+                // leaves a dead gap between the button and the keyboard.
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeBottom: MediaQuery.viewInsetsOf(context).bottom > 0,
+                  child: bottomNavContent,
+                ),
               ),
             ),
           );

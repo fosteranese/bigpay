@@ -7,6 +7,8 @@ import 'package:bigpay/ui/components/app_sidebar.dart';
 import 'package:bigpay/ui/components/bottom_nav_bar.dart';
 import 'package:bigpay/ui/components/side_nav_rail.dart';
 import 'package:bigpay/ui/components/confirm_sheet.dart';
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/pages/dashboard.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
@@ -47,7 +49,24 @@ class MainShell extends StatelessWidget {
           showSignOutDialog(context);
         }
       },
-      child: _buildChrome(context),
+      // iOS has no system back on a root page, so a horizontal swipe on
+      // Home's root stands in for Android's back → sign-out prompt. Inner
+      // horizontal scrollers (carousels) still win the gesture arena.
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: Theme.of(context).platform == TargetPlatform.iOS
+            ? (details) {
+                if ((details.primaryVelocity ?? 0).abs() < 300) return;
+                if (navigationShell.currentIndex != 0) return;
+                if (AppRouter.router.state.uri.path !=
+                    DashboardPage.route.path) {
+                  return;
+                }
+                showSignOutDialog(context);
+              }
+            : null,
+        child: _buildChrome(context),
+      ),
     );
   }
 

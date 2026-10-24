@@ -12,9 +12,13 @@ GoRoute get historyRoute => GoRoute(
   builder: (context, state) => HistoryPage(),
   routes: [
     TransactionDetailsPage.route.toGoRouteWithState(
-      (state) => TransactionDetailsPage(
-        receipt: state.extra as RequestResponse,
-      ),
+      (state) {
+        final payload = state.extra as Map<String, dynamic>;
+        return TransactionDetailsPage(
+          receipt: payload['receipt'] as RequestResponse,
+          canGoBack: payload['canGoBack'] as bool,
+        );
+      },
       nested: true,
       rootNavigator: true,
     ),

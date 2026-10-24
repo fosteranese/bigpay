@@ -330,10 +330,7 @@ class _SummaryPageState extends State<SummaryPage> {
               // Dashboard/Wallets/History live in other shell branches and
               // won't otherwise know this happened — see the notifier's doc.
               AppState.notifyDataChanged();
-              AppRouter.router.push(
-                TransactionDetailsPage.route.path,
-                extra: snapshot.data,
-              );
+              TransactionDetailsPage.showResult(context, snapshot.data!);
               return;
             }
 
