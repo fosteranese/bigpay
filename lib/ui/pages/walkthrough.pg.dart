@@ -188,13 +188,13 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                                   Text(
                                     item.title ?? '',
                                     style: context.display1.copyWith(
-                                      color: context.cardBg,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                   Text(
                                     item.description ?? '',
                                     style: context.smallDetails.copyWith(
-                                      color: context.cardBg,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                 ],
