@@ -29,9 +29,9 @@ class ReceiptPdf {
 
   // Static brand contact line shown at the foot of every receipt.
   static const _footer =
-      "We're here to help! Call us at 0302 666 331, use our Toll-Free line at "
-      '0800-100880 (Telecel only), or dial 0302633988. You can also email '
-      'info@mybigpaybank.com or visit www.bigpay.com.gh.';
+      "We're here to help! Call us at +233591824050, +233591823963 or "
+      '+233591823791. You can also email '
+      'support@mybigpay.net or visit mybigpay.net.';
 
   /// Generates the receipt PDF bytes for [receipt].
   static Future<Uint8List> build(RequestResponse receipt) async {
