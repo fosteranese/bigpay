@@ -200,6 +200,8 @@
   "commonCancel": "Abbrechen",
   "commonNoMatches": "Keine Treffer",
 
+  "walletsRemoveTitle": "Wallet entfernen",
+  "walletsRemoveConfirm": "{name} aus Ihren Wallets entfernen?",
   "beneficiariesRemoveTitle": "Begünstigten entfernen",
   "beneficiariesRemoveConfirm": "{name} aus Ihren Begünstigten entfernen?",
   "beneficiariesNoMatchQuery": "Keine Begünstigten stimmen mit \"{query}\" überein",

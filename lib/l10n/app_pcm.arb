@@ -218,6 +218,8 @@
   "commonCancel": "Cancel",
   "commonNoMatches": "No match",
 
+  "walletsRemoveTitle": "Remove wallet",
+  "walletsRemoveConfirm": "You wan remove {name} from your wallets?",
   "beneficiariesRemoveTitle": "Remove beneficiary",
   "beneficiariesRemoveConfirm": "You wan remove {name} from your beneficiaries?",
   "beneficiariesNoMatchQuery": "No beneficiary match \"{query}\"",

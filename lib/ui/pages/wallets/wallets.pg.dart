@@ -13,6 +13,7 @@ import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/models/wallet/get_wallets_action.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/ui/components/animated/fade_in.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/forms/radio_button.dart';
@@ -339,9 +340,25 @@ class WalletListItem extends StatelessWidget {
       ),
       child: Dismissible(
         key: ValueKey(data.formId ?? data.activityId ?? Uuid().v4()),
-        direction: DismissDirection.endToStart,
-        dismissThresholds: const {
-          DismissDirection.endToStart: 1,
+        // The in-app virtual wallet can't be removed.
+        direction: data.mode?.toUpperCase() == 'VIRTUAL_WALLET'
+            ? DismissDirection.none
+            : DismissDirection.endToStart,
+        confirmDismiss: (_) async {
+          final l10n = AppLocalizations.of(context)!;
+          await showConfirmSheet(
+            context,
+            icon: Icons.account_balance_wallet_outlined,
+            title: l10n.walletsRemoveTitle,
+            message: l10n.walletsRemoveConfirm(
+              data.sources?.firstOrNull?.tile ?? data.title ?? '',
+            ),
+            confirmText: l10n.commonRemove,
+          );
+          // shortcut: no remove-wallet endpoint yet, so the item always
+          // snaps back; once there is one, dispatch it on confirm and
+          // return true (like beneficiaries.pg.dart's _delete).
+          return false;
         },
         background: Container(
           padding: .all(20),

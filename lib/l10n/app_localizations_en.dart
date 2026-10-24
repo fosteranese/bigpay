@@ -602,6 +602,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNoMatches => 'No matches';
 
   @override
+  String get walletsRemoveTitle => 'Remove wallet';
+
+  @override
+  String walletsRemoveConfirm(String name) {
+    return 'Remove $name from your wallets?';
+  }
+
+  @override
   String get beneficiariesRemoveTitle => 'Remove beneficiary';
 
   @override

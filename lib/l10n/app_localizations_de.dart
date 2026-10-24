@@ -608,6 +608,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get commonNoMatches => 'Keine Treffer';
 
   @override
+  String get walletsRemoveTitle => 'Wallet entfernen';
+
+  @override
+  String walletsRemoveConfirm(String name) {
+    return '$name aus Ihren Wallets entfernen?';
+  }
+
+  @override
   String get beneficiariesRemoveTitle => 'Begünstigten entfernen';
 
   @override

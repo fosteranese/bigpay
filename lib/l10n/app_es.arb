@@ -200,6 +200,8 @@
   "commonCancel": "Cancelar",
   "commonNoMatches": "Sin coincidencias",
 
+  "walletsRemoveTitle": "Eliminar billetera",
+  "walletsRemoveConfirm": "¿Eliminar {name} de tus billeteras?",
   "beneficiariesRemoveTitle": "Eliminar beneficiario",
   "beneficiariesRemoveConfirm": "¿Eliminar a {name} de tus beneficiarios?",
   "beneficiariesNoMatchQuery": "Ningún beneficiario coincide con \"{query}\"",

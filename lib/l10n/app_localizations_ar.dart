@@ -597,6 +597,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonNoMatches => 'لا توجد نتائج مطابقة';
 
   @override
+  String get walletsRemoveTitle => 'إزالة المحفظة';
+
+  @override
+  String walletsRemoveConfirm(String name) {
+    return 'هل تريد إزالة $name من محافظك؟';
+  }
+
+  @override
   String get beneficiariesRemoveTitle => 'إزالة المستفيد';
 
   @override

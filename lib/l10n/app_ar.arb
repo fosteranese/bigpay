@@ -200,6 +200,8 @@
   "commonCancel": "إلغاء",
   "commonNoMatches": "لا توجد نتائج مطابقة",
 
+  "walletsRemoveTitle": "إزالة المحفظة",
+  "walletsRemoveConfirm": "هل تريد إزالة {name} من محافظك؟",
   "beneficiariesRemoveTitle": "إزالة المستفيد",
   "beneficiariesRemoveConfirm": "هل تريد إزالة {name} من قائمة المستفيدين؟",
   "beneficiariesNoMatchQuery": "لا يوجد مستفيدون مطابقون لـ \"{query}\"",

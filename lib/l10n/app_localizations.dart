@@ -1234,6 +1234,18 @@ abstract class AppLocalizations {
   /// **'No matches'**
   String get commonNoMatches;
 
+  /// No description provided for @walletsRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove wallet'**
+  String get walletsRemoveTitle;
+
+  /// Confirmation message before removing a linked wallet
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from your wallets?'**
+  String walletsRemoveConfirm(String name);
+
   /// No description provided for @beneficiariesRemoveTitle.
   ///
   /// In en, this message translates to:

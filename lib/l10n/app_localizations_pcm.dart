@@ -605,6 +605,14 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get commonNoMatches => 'No match';
 
   @override
+  String get walletsRemoveTitle => 'Remove wallet';
+
+  @override
+  String walletsRemoveConfirm(String name) {
+    return 'You wan remove $name from your wallets?';
+  }
+
+  @override
   String get beneficiariesRemoveTitle => 'Remove beneficiary';
 
   @override

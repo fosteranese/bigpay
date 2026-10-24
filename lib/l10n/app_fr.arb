@@ -200,6 +200,8 @@
   "commonCancel": "Annuler",
   "commonNoMatches": "Aucun résultat",
 
+  "walletsRemoveTitle": "Retirer le portefeuille",
+  "walletsRemoveConfirm": "Retirer {name} de vos portefeuilles ?",
   "beneficiariesRemoveTitle": "Retirer le bénéficiaire",
   "beneficiariesRemoveConfirm": "Retirer {name} de vos bénéficiaires ?",
   "beneficiariesNoMatchQuery": "Aucun bénéficiaire ne correspond à « {query} »",

@@ -606,6 +606,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonNoMatches => 'Aucun résultat';
 
   @override
+  String get walletsRemoveTitle => 'Retirer le portefeuille';
+
+  @override
+  String walletsRemoveConfirm(String name) {
+    return 'Retirer $name de vos portefeuilles ?';
+  }
+
+  @override
   String get beneficiariesRemoveTitle => 'Retirer le bénéficiaire';
 
   @override

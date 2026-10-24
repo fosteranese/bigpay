@@ -368,6 +368,12 @@
   "commonCancel": "Cancel",
   "commonNoMatches": "No matches",
 
+  "walletsRemoveTitle": "Remove wallet",
+  "walletsRemoveConfirm": "Remove {name} from your wallets?",
+  "@walletsRemoveConfirm": {
+    "description": "Confirmation message before removing a linked wallet",
+    "placeholders": { "name": { "type": "String" } }
+  },
   "beneficiariesRemoveTitle": "Remove beneficiary",
   "beneficiariesRemoveConfirm": "Remove {name} from your beneficiaries?",
   "@beneficiariesRemoveConfirm": {
