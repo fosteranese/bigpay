@@ -36,6 +36,39 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   String baseUrl = '';
   String imageDirectory = '';
 
+  /// The slide URLs last handed to [_precacheImages], and whether they've all
+  /// finished downloading — slides show the bundled image until then, then
+  /// switch together instead of popping in one by one.
+  String? _precachedKey;
+  bool _imagesReady = false;
+
+  String? _urlFor(WalkThrough item) {
+    final picture = item.picture;
+    if (picture == null || picture.isEmpty || baseUrl.isEmpty) return null;
+    // imageBaseUrl already ends with '/', same join as the dashboard icons.
+    return '$baseUrl$imageDirectory/$picture';
+  }
+
+  void _precacheImages() {
+    final urls = _walkThrough.map(_urlFor).nonNulls.toList();
+    final key = urls.join('|');
+    if (key == _precachedKey) return;
+    _precachedKey = key;
+    _imagesReady = false;
+    // A failed download just leaves that slide on the fallback (errorWidget).
+    Future.wait(
+      urls.map(
+        (url) => precacheImage(
+          CachedNetworkImageProvider(url),
+          context,
+          onError: (_, _) {},
+        ),
+      ),
+    ).then((_) {
+      if (mounted && _precachedKey == key) setState(() => _imagesReady = true);
+    });
+  }
+
   Widget _buildPageIndicator() {
     List<Widget> list = [];
     for (int i = 0; i < _walkThrough.length; i++) {
@@ -119,16 +152,16 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
       fit: .cover,
     );
 
-    final picture = item.picture;
-    if (picture == null || picture.isEmpty || baseUrl.isEmpty) {
+    final url = _urlFor(item);
+    if (url == null || !_imagesReady) {
       return fallback;
     }
-    // imageBaseUrl already ends with '/', same join as the dashboard icons.
-    final url = '$baseUrl$imageDirectory/$picture';
 
     return CachedNetworkImage(
       imageUrl: url,
       fit: .cover,
+      // Already in memory after precaching — no per-slide fade-in.
+      fadeInDuration: Duration.zero,
       placeholder: (context, url) => fallback,
       errorWidget: (context, url, error) => fallback,
     );
@@ -149,6 +182,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
             snapshot.data?.imageDirectory ??
             '';
         _walkThrough = snapshot.data?.walkThrough ?? [];
+        _precacheImages();
 
         return _buildContent();
       },
