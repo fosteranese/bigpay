@@ -27,6 +27,7 @@ import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/notification_store.util.dart';
+import 'package:bigpay/utils/walkthrough_images.util.dart';
 
 /// Flutter's built-in Material/Cupertino chrome translations (back-button
 /// tooltip, etc.) don't cover Nigerian Pidgin ('pcm') —
@@ -105,6 +106,32 @@ class BigPayApp extends StatelessWidget {
                         // it already offers a biometric unlock button when
                         // enabled, so there's no separate biometric page.
                         target = ExistingDeviceLoginPage.route.path;
+                      }
+
+                      if (target == WalkthroughPage.route.path) {
+                        // Stay on the splash until the slide images are on
+                        // the device (see WalkthroughImages.prepare).
+                        final items = snapshot.data!.walkThrough ?? const [];
+                        await WalkthroughImages.prepare(
+                          items,
+                          baseUrl:
+                              snapshot.response?.imageBaseUrl ??
+                              snapshot.data!.imageBaseUrl ??
+                              '',
+                          imageDirectory:
+                              snapshot.response?.imageDirectory ??
+                              snapshot.data!.imageDirectory ??
+                              '',
+                        );
+                        // Decode up front so the first slide doesn't flash.
+                        if (context.mounted) {
+                          await Future.wait([
+                            for (final item in items)
+                              if (WalkthroughImages.fileFor(item)
+                                  case final file?)
+                                precacheImage(FileImage(file), context),
+                          ]);
+                        }
                       }
 
                       AppRouter.router.go(target, extra: snapshot.data);

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
@@ -16,6 +15,7 @@ import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/walkthrough_images.util.dart';
 
 class WalkthroughPage extends StatefulWidget {
   const WalkthroughPage({super.key});
@@ -33,41 +33,6 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   List<WalkThrough> _walkThrough = const [];
   Timer? _timer;
   // final bool _pause = false;
-  String baseUrl = '';
-  String imageDirectory = '';
-
-  /// The slide URLs last handed to [_precacheImages], and whether they've all
-  /// finished downloading — slides show the bundled image until then, then
-  /// switch together instead of popping in one by one.
-  String? _precachedKey;
-  bool _imagesReady = false;
-
-  String? _urlFor(WalkThrough item) {
-    final picture = item.picture;
-    if (picture == null || picture.isEmpty || baseUrl.isEmpty) return null;
-    // imageBaseUrl already ends with '/', same join as the dashboard icons.
-    return '$baseUrl$imageDirectory/$picture';
-  }
-
-  void _precacheImages() {
-    final urls = _walkThrough.map(_urlFor).nonNulls.toList();
-    final key = urls.join('|');
-    if (key == _precachedKey) return;
-    _precachedKey = key;
-    _imagesReady = false;
-    // A failed download just leaves that slide on the fallback (errorWidget).
-    Future.wait(
-      urls.map(
-        (url) => precacheImage(
-          CachedNetworkImageProvider(url),
-          context,
-          onError: (_, _) {},
-        ),
-      ),
-    ).then((_) {
-      if (mounted && _precachedKey == key) setState(() => _imagesReady = true);
-    });
-  }
 
   Widget _buildPageIndicator() {
     List<Widget> list = [];
@@ -146,25 +111,12 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   }
 
   Widget _slideImage(WalkThrough item) {
-    final fallback = Image.asset(
-      JpgImages.walkthrough1,
-      alignment: .center,
-      fit: .cover,
-    );
-
-    final url = _urlFor(item);
-    if (url == null || !_imagesReady) {
-      return fallback;
-    }
-
-    return CachedNetworkImage(
-      imageUrl: url,
-      fit: .cover,
-      // Already in memory after precaching — no per-slide fade-in.
-      fadeInDuration: Duration.zero,
-      placeholder: (context, url) => fallback,
-      errorWidget: (context, url, error) => fallback,
-    );
+    // Saved on the device during the splash (WalkthroughImages.prepare);
+    // anything not downloaded yet uses the bundled image.
+    final file = WalkthroughImages.fileFor(item);
+    return file != null
+        ? Image.file(file, alignment: .center, fit: .cover)
+        : Image.asset(JpgImages.walkthrough1, alignment: .center, fit: .cover);
   }
 
   @override
@@ -172,17 +124,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
     return ProcessBuilder<InitializationData>(
       event: () => startUpEvent,
       builder: (context, snapshot) {
-        // The server sends these on the envelope, not inside `data`.
-        baseUrl =
-            snapshot.response?.imageBaseUrl ??
-            snapshot.data?.imageBaseUrl ??
-            '';
-        imageDirectory =
-            snapshot.response?.imageDirectory ??
-            snapshot.data?.imageDirectory ??
-            '';
         _walkThrough = snapshot.data?.walkThrough ?? [];
-        _precacheImages();
 
         return _buildContent();
       },
