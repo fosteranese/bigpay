@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
+import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/app_refresh_indicator.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
 
 class ListLayout extends StatefulWidget {
   const ListLayout({
@@ -21,6 +25,7 @@ class ListLayout extends StatefulWidget {
     this.bodyColor = Colors.transparent,
     this.bottom,
     this.appBarBottomColor = 0,
+    this.onRefresh,
   });
   final String? title;
   final String? subtitle;
@@ -38,28 +43,33 @@ class ListLayout extends StatefulWidget {
   final PreferredSizeWidget? bottom;
   final double appBarBottomColor;
 
+  /// Pull-to-refresh handler. When set, the list gets a [RefreshIndicator];
+  /// the future should complete when the reload lands.
+  final Future<void> Function()? onRefresh;
+
   @override
   State<ListLayout> createState() => _ListLayoutState();
 }
 
 class _ListLayoutState extends State<ListLayout> {
   final ScrollController _scrollController = ScrollController();
-  double _blurOpacity = 0.0;
+
+  /// Drives the app-bar blur as the page scrolls. A notifier (not setState) so
+  /// scrolling repaints only the header overlay, not the whole list body.
+  final ValueNotifier<double> _blurOpacity = ValueNotifier(0.0);
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      final opacity = (_scrollController.offset / 80).clamp(0.0, 1.0);
-      if (opacity != _blurOpacity) {
-        setState(() => _blurOpacity = opacity);
-      }
+      _blurOpacity.value = (_scrollController.offset / 80).clamp(0.0, 1.0);
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _blurOpacity.dispose();
     super.dispose();
   }
 
@@ -67,14 +77,14 @@ class _ListLayoutState extends State<ListLayout> {
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: .topCenter,
           end: .bottomCenter,
           stops: [0.0, 0.3077],
           colors: [
-            AppColors.background,
-            AppColors.white,
+            context.scaffoldBg,
+            context.cardBg,
           ],
         ),
       ),
@@ -104,58 +114,73 @@ class _ListLayoutState extends State<ListLayout> {
         title: (widget.miniTitle?.isNotEmpty ?? false)
             ? Text(
                 widget.miniTitle!,
-                style: AppTypography.p1,
+                style: context.p1,
               )
             : null,
-        leading: widget.showBackBtn
+        leading: AppRouter.router.canPop() && widget.showBackBtn
             ? IconButton.filled(
+                tooltip: AppLocalizations.of(context)!.commonBack,
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.white,
-                  fixedSize: Size(28, 28),
+                  backgroundColor: context.cardBg,
+                  foregroundColor: context.textPrimary,
+                  fixedSize: Size(44, 44),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  AppRouter.router.pop();
+                },
                 icon: Icon(
                   Icons.chevron_left_outlined,
                 ),
               )
             : null,
         bottom: widget.bottom,
-        flexibleSpace: ClipRect(
-          child: BackdropFilter(
-            filter: .blur(
-              sigmaX: 12 * _blurOpacity,
-              sigmaY: 12 * _blurOpacity,
-            ),
-            child: Container(
-              margin: .only(
-                bottom: widget.appBarBottomColor,
+        flexibleSpace: ValueListenableBuilder<double>(
+          valueListenable: _blurOpacity,
+          builder: (context, blur, _) => ClipRect(
+            child: BackdropFilter(
+              filter: .blur(
+                sigmaX: 12 * blur,
+                sigmaY: 12 * blur,
               ),
-              color:
-                  widget.appBarColor ??
-                  AppColors.white.withValues(
-                    alpha: 0.15 * _blurOpacity,
-                  ),
+              child: Container(
+                margin: .only(
+                  bottom: widget.appBarBottomColor,
+                ),
+                color:
+                    widget.appBarColor ??
+                    context.appBarOverlay.withValues(
+                      alpha: blur,
+                    ),
+              ),
             ),
           ),
         ),
       ),
 
-      body: Container(
-        color: widget.bodyColor,
-        // padding: const .all(20),
-        child: widget.child(_scrollController),
+      body: BoundedContent(
+        child: Container(
+          color: widget.bodyColor,
+          child: widget.onRefresh != null
+              ? AppRefreshIndicator(
+                  onRefresh: widget.onRefresh!,
+                  child: widget.child(_scrollController),
+                )
+              : widget.child(_scrollController),
+        ),
       ),
 
       bottomNavigationBar: widget.bottomNav != null
-          ? Container(
-              padding: .only(
-                right: 20,
-                left: 20,
-                top: 15,
-                bottom: 10,
-              ),
-              child: SafeArea(
-                child: widget.bottomNav!,
+          ? BoundedContent(
+              child: Container(
+                padding: .only(
+                  right: context.gutter,
+                  left: context.gutter,
+                  top: 15,
+                  bottom: 10,
+                ),
+                child: SafeArea(
+                  child: widget.bottomNav!,
+                ),
               ),
             )
           : null,

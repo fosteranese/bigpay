@@ -1,14 +1,14 @@
-import 'package:bigpay/constants/response.const.dart';
-import 'package:bigpay/data/models/response/response.md.dart';
-import 'package:bigpay/ui/pages/app_error.pg.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bigpay/constants/response.const.dart';
+import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/ui/pages/app_error.pg.dart';
+import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
+import 'package:bigpay/ui/pages/beneficiary/add_beneficiary.pg.dart';
 import 'package:bigpay/ui/pages/beneficiary/beneficiaries.pg.dart';
-import 'package:bigpay/ui/pages/dashboard.pg.dart';
-import 'package:bigpay/ui/pages/history/history.pg.dart';
-import 'package:bigpay/ui/pages/history/transaction_details.pg.dart';
-import 'package:bigpay/ui/pages/pin_auth.pg.dart';
+import 'package:bigpay/ui/pages/beneficiary/beneficiary_details.pg.dart';
 import 'package:bigpay/ui/pages/splash_screen.pg.dart';
 import 'package:bigpay/ui/pages/walkthrough.pg.dart';
 
@@ -24,9 +24,10 @@ List<GoRoute> get rootRoutes => [
     ),
   ),
   WalkthroughPage.route.toGoRoute(() => const WalkthroughPage()),
-  DashboardPage.route.toGoRoute(() => const DashboardPage()),
-  HistoryPage.route.toGoRoute(() => const HistoryPage()),
-  TransactionDetailsPage.route.toGoRoute(() => const TransactionDetailsPage()),
-  PinAuthPage.route.toGoRoute(() => const PinAuthPage()),
+  NotificationsPage.route.toGoRoute(() => const NotificationsPage()),
   BeneficiariesPage.route.toGoRoute(() => const BeneficiariesPage()),
+  AddBeneficiaryPage.route.toGoRoute(() => const AddBeneficiaryPage()),
+  BeneficiaryDetailsPage.route.toGoRouteWithState(
+    (state) => BeneficiaryDetailsPage(payee: state.extra as Payee?),
+  ),
 ];

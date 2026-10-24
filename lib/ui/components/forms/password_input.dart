@@ -1,5 +1,6 @@
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:flutter/material.dart';
+import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -12,6 +13,7 @@ class FormPasswordInput extends StatefulWidget {
     this.focusNode,
     this.next,
     this.onChanged,
+    this.validator,
   });
   final TextEditingController controller;
   final String? label;
@@ -19,6 +21,7 @@ class FormPasswordInput extends StatefulWidget {
   final FocusNode? focusNode;
   final void Function(String value)? next;
   final void Function(String value)? onChanged;
+  final String? Function(String? value)? validator;
 
   @override
   State<FormPasswordInput> createState() => _FormPasswordInputState();
@@ -26,6 +29,12 @@ class FormPasswordInput extends StatefulWidget {
 
 class _FormPasswordInputState extends State<FormPasswordInput> {
   final _isPassword = ValueNotifier(true);
+
+  @override
+  void dispose() {
+    _isPassword.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +50,19 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
           keyboardType: value ? null : .visiblePassword,
           next: widget.next,
           onChanged: widget.onChanged,
+          validator: widget.validator,
           maxLines: 1,
           suffix: IconButton(
+            tooltip: value ? 'Show password' : 'Hide password',
             onPressed: () {
               _isPassword.value = !_isPassword.value;
             },
             icon: SvgPicture.asset(
               value ? SvgImages.visible : SvgImages.invisible,
+              // The SVGs themselves are hardcoded to near-black
+              // (#010101), so without this they're nearly invisible
+              // against a dark-theme input field.
+              colorFilter: ColorFilter.mode(context.textPrimary, BlendMode.srcIn),
             ),
           ),
         );
