@@ -20,6 +20,8 @@ GoRoute get walletRoute => GoRoute(
     VirtualWalletPage.route.toGoRouteWithState(
       (state) => VirtualWalletPage(account: state.extra as Account?),
       nested: true,
+      // Full-screen, above the tab bar — like AddCardPage and receipts.
+      rootNavigator: true,
     ),
   ],
 );
