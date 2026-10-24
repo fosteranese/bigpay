@@ -161,6 +161,25 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                     fit: .expand,
                     children: [
                       _slideImage(item),
+                      // Darkens the top (title) and bottom (buttons) so the
+                      // white text stays readable over a light image.
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+                            colors: [
+                              Color(0xD9000000),
+                              Color(0x99000000),
+                              Color(0x00000000),
+                              Color(0x00000000),
+                              Color(0xA6000000),
+                              Color(0xE6000000),
+                            ],
+                          ),
+                        ),
+                      ),
                       Align(
                         alignment: .topCenter,
                         child: SafeArea(
