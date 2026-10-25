@@ -460,6 +460,16 @@ class WalletListItem extends StatelessWidget {
     return Icons.account_balance_wallet_outlined;
   }
 
+  /// The subtitle — the balance when there is one (virtual wallet), else the
+  /// account number (mobile wallet etc. carry no balance), else null.
+  String? get _subtitle {
+    final balance = source.balance?.trim();
+    if (balance != null && balance.isNotEmpty) return balance;
+    final number = source.accountNumber?.trim();
+    if (number != null && number.isNotEmpty) return number;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -536,10 +546,12 @@ class WalletListItem extends StatelessWidget {
               color: context.textPrimary,
             ),
           ),
-          subtitle: Text(
-            source.balance ?? '0.00',
-            style: context.caption,
-          ),
+          subtitle: _subtitle == null
+              ? null
+              : Text(
+                  _subtitle!,
+                  style: context.caption,
+                ),
           trailing: FormRadioButton(selected: false),
         ),
       ),
