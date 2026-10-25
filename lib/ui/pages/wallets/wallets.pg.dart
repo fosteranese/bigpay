@@ -1,5 +1,6 @@
 import 'package:bigpay/data/cache/response_cache.dart';
 import 'package:bigpay/data/models/account/account.dart';
+import 'package:bigpay/data/models/account/source.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/auth_data/recent_activity.dart';
@@ -59,9 +60,12 @@ class _WalletsPageState extends State<WalletsPage> {
   /// device, where opening a wallet pushes [VirtualWalletPage] instead.
   Account? _selectedAccount;
 
+  /// The specific source of [_selectedAccount] shown in the split detail pane.
+  Source? _selectedSource;
+
   ExecuteProcessEvent? _delinkEvent;
 
-  void _openWallet(Account account) {
+  void _openWallet(Account account, Source source) {
     if (context.usesSplitView) {
       // Synchronous, before setState — see the matching comment in
       // services.pg.dart's _openService. Marks MainShell dirty in the same
@@ -69,19 +73,25 @@ class _WalletsPageState extends State<WalletsPage> {
       // sidebar collapsing and the split appearing happen in one frame
       // instead of visibly jumping in two steps.
       AppState.splitDetailOpenNotifier.value = true;
-      setState(() => _selectedAccount = account);
+      setState(() {
+        _selectedAccount = account;
+        _selectedSource = source;
+      });
       return;
     }
 
     AppRouter.router.push(
       VirtualWalletPage.route.path,
-      extra: account,
+      extra: (account, source),
     );
   }
 
   void _closeDetails() {
     AppState.splitDetailOpenNotifier.value = false;
-    setState(() => _selectedAccount = null);
+    setState(() {
+      _selectedAccount = null;
+      _selectedSource = null;
+    });
   }
 
   /// The formId umb's own reference client (full_app_mode.dart) hardcodes
@@ -229,17 +239,31 @@ class _WalletsPageState extends State<WalletsPage> {
     );
   }
 
-  /// Removes [account] from the list right away (the Dismissible is already
+  /// Removes [source] from the list right away (the Dismissible is already
   /// gone) and delinks it; a failure shows the error and reloads the list.
-  void _delink(Account account) {
-    if (_selectedAccount == account) _closeDetails();
+  /// When the account has other sources, only this one is dropped.
+  void _delink(Account account, Source source) {
+    if (_selectedAccount == account && _selectedSource == source) {
+      _closeDetails();
+    }
     setState(() {
-      _accounts = List.of(_accounts ?? const <Account>[])..remove(account);
+      final remaining = <Account>[];
+      for (final a in _accounts ?? const <Account>[]) {
+        if (a == account) {
+          final sources = (a.sources ?? const <Source>[])
+              .where((s) => s.value != source.value)
+              .toList();
+          if (sources.isNotEmpty) {
+            remaining.add(a.copyWith(sources: sources));
+          }
+        } else {
+          remaining.add(a);
+        }
+      }
+      _accounts = remaining;
       _delinkEvent = context.dispatchProcess(
         DelinkWalletAction(
-          payload: DelinkWalletPayload(
-            sourceValue: account.sources?.firstOrNull?.value,
-          ),
+          payload: DelinkWalletPayload(sourceValue: source.value),
         ),
       );
     });
@@ -295,8 +319,9 @@ class _WalletsPageState extends State<WalletsPage> {
                   // Without a key, switching the selection reuses the same
                   // State instead of creating a fresh one for the new account
                   // (Account extends Equatable, so this compares by value).
-                  key: ValueKey(_selectedAccount),
+                  key: ValueKey(_selectedSource),
                   account: _selectedAccount,
+                  source: _selectedSource,
                   onBack: _closeDetails,
                 ),
           master: _master(context),
@@ -341,20 +366,31 @@ class _WalletsPageState extends State<WalletsPage> {
             );
           }
 
+          // Flatten each account into its sources — the payload lists one
+          // wallet per source (e.g. two MTN numbers under a single
+          // "Mobile Wallet" account).
+          final wallets = <(Account, Source)>[
+            for (final account in _accounts ?? const <Account>[])
+              for (final source in account.sources ?? const <Source>[])
+                (account, source),
+          ];
+
           return Column(
             children: [
               // Subtle staggered entrance — each wallet settles in 40ms after
               // the last, capped so a long list doesn't drag on.
-              ...?_accounts?.asMap().entries.map((entry) {
+              ...wallets.asMap().entries.map((entry) {
+                final (account, source) = entry.value;
                 final index = entry.key > 8 ? 8 : entry.key;
                 return FadeInView(
                   delay: Duration(milliseconds: index * 40),
                   child: WalletListItem(
-                    data: entry.value,
-                    onTap: () => _openWallet(entry.value),
-                    onRemove: entry.value.sources?.firstOrNull?.value == null
+                    account: account,
+                    source: source,
+                    onTap: () => _openWallet(account, source),
+                    onRemove: source.value == null
                         ? null
-                        : () => _delink(entry.value),
+                        : () => _delink(account, source),
                   ),
                 );
               }),
@@ -371,11 +407,13 @@ class _WalletsPageState extends State<WalletsPage> {
 class WalletListItem extends StatelessWidget {
   const WalletListItem({
     super.key,
-    required this.data,
+    required this.account,
+    required this.source,
     this.onTap,
     this.onRemove,
   });
-  final Account data;
+  final Account account;
+  final Source source;
   final VoidCallback? onTap;
 
   /// Called once the user confirms removal; null makes the row unswipeable.
@@ -389,7 +427,7 @@ class WalletListItem extends StatelessWidget {
       backgroundColor: context.avatarBg,
       child: Icon(_typeIcon, color: context.accentGreen),
     );
-    final images = [data.sources?.firstOrNull?.picture, data.icon]
+    final images = [source.picture, account.icon]
         .whereType<String>()
         .where((name) => name.trim().isNotEmpty)
         .map(
@@ -410,8 +448,7 @@ class WalletListItem extends StatelessWidget {
   }
 
   IconData get _typeIcon {
-    final mode = '${data.mode} ${data.sources?.firstOrNull?.mode}'
-        .toUpperCase();
+    final mode = '${account.mode} ${source.mode}'.toUpperCase();
     if (mode.contains('VIRTUAL')) return Icons.account_balance_wallet_outlined;
     if (mode.contains('CARD')) return Icons.credit_card_outlined;
     if (mode.contains('MOMO') || mode.contains('MOBILE')) {
@@ -439,11 +476,11 @@ class WalletListItem extends StatelessWidget {
         // The source value, not formId — wallets of the same type share a
         // formId, and a duplicate key breaks Dismissible once one is removed.
         key: ValueKey(
-          data.sources?.firstOrNull?.value ?? data.formId ?? Uuid().v4(),
+          source.value ?? account.formId ?? Uuid().v4(),
         ),
         // The in-app virtual wallet can't be removed.
         direction:
-            onRemove == null || data.mode?.toUpperCase() == 'VIRTUAL_WALLET'
+            onRemove == null || account.mode?.toUpperCase() == 'VIRTUAL_WALLET'
             ? DismissDirection.none
             : DismissDirection.endToStart,
         confirmDismiss: (_) {
@@ -453,7 +490,7 @@ class WalletListItem extends StatelessWidget {
             icon: Icons.account_balance_wallet_outlined,
             title: l10n.walletsRemoveTitle,
             message: l10n.walletsRemoveConfirm(
-              data.sources?.firstOrNull?.tile ?? data.title ?? '',
+              source.tile ?? account.title ?? '',
             ),
             confirmText: l10n.commonRemove,
           );
@@ -490,17 +527,17 @@ class WalletListItem extends StatelessWidget {
               onTap ??
               () => AppRouter.router.push(
                 VirtualWalletPage.route.path,
-                extra: data,
+                extra: (account, source),
               ),
           leading: SizedBox.square(dimension: 40, child: _leading(context)),
           title: Text(
-            data.sources?.firstOrNull?.tile ?? '',
+            source.tile ?? '',
             style: context.caption.copyWith(
               color: context.textPrimary,
             ),
           ),
           subtitle: Text(
-            data.sources?.firstOrNull?.balance ?? '0.00',
+            source.balance ?? '0.00',
             style: context.caption,
           ),
           trailing: FormRadioButton(selected: false),

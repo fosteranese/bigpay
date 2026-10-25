@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/data/models/account/mini_statement.dart';
+import 'package:bigpay/data/models/account/source.dart';
 import 'package:bigpay/data/models/account/transaction.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
@@ -20,17 +21,19 @@ import 'package:bigpay/ui/theme/responsive.dart';
 import 'package:bigpay/utils/app_modal.dart';
 
 class VirtualWalletPage extends StatelessWidget {
-  const VirtualWalletPage({super.key, this.account});
+  const VirtualWalletPage({super.key, this.account, this.source});
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/wallets/virtual',
   );
 
   final Account? account;
+  final Source? source;
 
   @override
   Widget build(BuildContext context) {
     return VirtualWalletView(
       account: account,
+      source: source,
       onBack: () => AppRouter.router.pop(),
     );
   }
@@ -40,10 +43,12 @@ class VirtualWalletView extends StatefulWidget {
   const VirtualWalletView({
     super.key,
     this.account,
+    this.source,
     required this.onBack,
   });
 
   final Account? account;
+  final Source? source;
   final VoidCallback onBack;
 
   @override
@@ -59,10 +64,14 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
       widget.account?.mode?.toUpperCase() == 'VIRTUAL_WALLET' ||
       widget.account == null;
 
+  /// The specific source this view shows — the one tapped in the list, else
+  /// the wallet's first source (legacy single-source callers).
+  Source? get _source => widget.source ?? widget.account?.sources?.firstOrNull;
+
   /// The account the mini statement is for — `value`, falling back to
   /// `accountNumber` when a wallet only fills the latter.
   String get _sourceValue {
-    final source = widget.account?.sources?.firstOrNull;
+    final source = _source;
     final value = source?.value ?? '';
     return value.isNotEmpty ? value : (source?.accountNumber ?? '');
   }
@@ -79,11 +88,10 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
 
   String _title(BuildContext context) =>
       widget.account?.title ??
-      widget.account?.sources?.firstOrNull?.tile ??
+      _source?.tile ??
       AppLocalizations.of(context)!.walletsVirtualWalletFallback;
 
-  String get _balance =>
-      widget.account?.sources?.firstOrNull?.balance ?? '0.00';
+  String get _balance => _source?.balance ?? '0.00';
 
   /// Space the wallet card takes under the app bar: VirtualWalletCard's
   /// height (177, or 131 without the fund button) plus its 15 top margin
