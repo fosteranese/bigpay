@@ -117,6 +117,20 @@ final class MessageUtil {
                     },
                     text: resolvedOkButtonText,
                   ),
+                  // Errors whose message references Help (e.g. "…click Help
+                  // if the issue continues") get an extra Help button.
+                  if (message != null &&
+                      message.toLowerCase().contains('help')) ...[
+                    const SizedBox(height: 10),
+                    FormOutlineButton(
+                      height: 50,
+                      onPressed: () {
+                        Navigator.pop(context);
+                        AppRouter.router.push('/more/help');
+                      },
+                      text: AppLocalizations.of(context)!.helpTitle,
+                    ),
+                  ],
                   ?customButton,
                 ],
               ),
