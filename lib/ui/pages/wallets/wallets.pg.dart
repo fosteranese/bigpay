@@ -381,6 +381,48 @@ class WalletListItem extends StatelessWidget {
   /// Called once the user confirms removal; null makes the row unswipeable.
   final VoidCallback? onRemove;
 
+  /// The source's picture, else the wallet's icon, else a built-in icon
+  /// for the wallet type — each step taken when the previous one is
+  /// missing or fails to load.
+  Widget _leading(BuildContext context) {
+    final fallback = CircleAvatar(
+      backgroundColor: context.avatarBg,
+      child: Icon(_typeIcon, color: context.accentGreen),
+    );
+    final images = [data.sources?.firstOrNull?.picture, data.icon]
+        .whereType<String>()
+        .where((name) => name.trim().isNotEmpty)
+        .map(
+          (name) =>
+              '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/$name',
+        )
+        .toList();
+
+    Widget image(int i) => i >= images.length
+        ? fallback
+        : CachedNetworkImage(
+            imageUrl: images[i],
+            fit: .contain,
+            placeholder: (_, _) => fallback,
+            errorWidget: (_, _, _) => image(i + 1),
+          );
+    return image(0);
+  }
+
+  IconData get _typeIcon {
+    final mode = '${data.mode} ${data.sources?.firstOrNull?.mode}'
+        .toUpperCase();
+    if (mode.contains('VIRTUAL')) return Icons.account_balance_wallet_outlined;
+    if (mode.contains('CARD')) return Icons.credit_card_outlined;
+    if (mode.contains('MOMO') || mode.contains('MOBILE')) {
+      return Icons.phone_android_outlined;
+    }
+    if (mode.contains('BANK') || mode.contains('ACCOUNT')) {
+      return Icons.account_balance_outlined;
+    }
+    return Icons.account_balance_wallet_outlined;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -450,18 +492,7 @@ class WalletListItem extends StatelessWidget {
                 VirtualWalletPage.route.path,
                 extra: data,
               ),
-          leading: CachedNetworkImage(
-            imageUrl:
-                '${AppState.currentUser?.imageBaseUrl}${AppState.currentUser?.imageDirectory}/${data.sources?.firstOrNull?.picture ?? data.icon}',
-            placeholder: (context, url) => Icon(
-              Icons.circle_outlined,
-              color: Theme.of(context).primaryColor,
-            ),
-            errorWidget: (context, url, error) => Icon(
-              Icons.circle_outlined,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
+          leading: SizedBox.square(dimension: 40, child: _leading(context)),
           title: Text(
             data.sources?.firstOrNull?.tile ?? '',
             style: context.caption.copyWith(
