@@ -418,6 +418,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonShowResults => 'Afficher les résultats';
 
   @override
+  String get commonShowPasswordTooltip => 'Afficher le mot de passe';
+
+  @override
+  String get commonHidePasswordTooltip => 'Masquer le mot de passe';
+
+  @override
+  String get commonShowPinTooltip => 'Afficher le code PIN';
+
+  @override
+  String get commonHidePinTooltip => 'Masquer le code PIN';
+
+  @override
   String get commonSuccess => 'Réussi';
 
   @override

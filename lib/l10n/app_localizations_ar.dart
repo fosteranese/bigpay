@@ -412,6 +412,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonShowResults => 'عرض النتائج';
 
   @override
+  String get commonShowPasswordTooltip => 'إظهار كلمة المرور';
+
+  @override
+  String get commonHidePasswordTooltip => 'إخفاء كلمة المرور';
+
+  @override
+  String get commonShowPinTooltip => 'إظهار رمز PIN';
+
+  @override
+  String get commonHidePinTooltip => 'إخفاء رمز PIN';
+
+  @override
   String get commonSuccess => 'نجاح';
 
   @override

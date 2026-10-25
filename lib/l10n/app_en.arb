@@ -286,6 +286,10 @@
   "commonArchive": "Archive",
   "commonAddNew": "Add New",
   "commonShowResults": "Show Results",
+  "commonShowPasswordTooltip": "Show password",
+  "commonHidePasswordTooltip": "Hide password",
+  "commonShowPinTooltip": "Show PIN",
+  "commonHidePinTooltip": "Hide PIN",
   "commonSuccess": "Success",
   "commonDateFormatPlaceholder": "DD/MM/YY",
 

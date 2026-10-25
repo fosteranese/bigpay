@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
@@ -61,7 +62,11 @@ class _FormPinUnifiedInputState extends State<FormPinUnifiedInput> {
           validator: widget.validator,
           maxLines: 1,
           suffix: IconButton(
-            tooltip: value ? 'Hide PIN' : 'Show PIN',
+            // Correct the previously-inverted labels: obscured → "Show PIN",
+            // visible → "Hide PIN" (matching FormPasswordInput).
+            tooltip: value
+                ? AppLocalizations.of(context)!.commonShowPinTooltip
+                : AppLocalizations.of(context)!.commonHidePinTooltip,
             onPressed: () {
               _isPassword.value = !_isPassword.value;
             },

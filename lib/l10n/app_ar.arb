@@ -137,6 +137,10 @@
   "commonArchive": "أرشفة",
   "commonAddNew": "إضافة جديد",
   "commonShowResults": "عرض النتائج",
+  "commonShowPasswordTooltip": "إظهار كلمة المرور",
+  "commonHidePasswordTooltip": "إخفاء كلمة المرور",
+  "commonShowPinTooltip": "إظهار رمز PIN",
+  "commonHidePinTooltip": "إخفاء رمز PIN",
   "commonSuccess": "نجاح",
   "commonDateFormatPlaceholder": "يوم/شهر/سنة",
 

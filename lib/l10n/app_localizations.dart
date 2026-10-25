@@ -886,6 +886,30 @@ abstract class AppLocalizations {
   /// **'Show Results'**
   String get commonShowResults;
 
+  /// No description provided for @commonShowPasswordTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get commonShowPasswordTooltip;
+
+  /// No description provided for @commonHidePasswordTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get commonHidePasswordTooltip;
+
+  /// No description provided for @commonShowPinTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Show PIN'**
+  String get commonShowPinTooltip;
+
+  /// No description provided for @commonHidePinTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide PIN'**
+  String get commonHidePinTooltip;
+
   /// No description provided for @commonSuccess.
   ///
   /// In en, this message translates to:

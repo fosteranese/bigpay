@@ -1,3 +1,4 @@
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:flutter/material.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
@@ -53,7 +54,9 @@ class _FormPasswordInputState extends State<FormPasswordInput> {
           validator: widget.validator,
           maxLines: 1,
           suffix: IconButton(
-            tooltip: value ? 'Show password' : 'Hide password',
+            tooltip: value
+                ? AppLocalizations.of(context)!.commonShowPasswordTooltip
+                : AppLocalizations.of(context)!.commonHidePasswordTooltip,
             onPressed: () {
               _isPassword.value = !_isPassword.value;
             },

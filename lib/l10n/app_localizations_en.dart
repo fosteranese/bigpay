@@ -416,6 +416,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonShowResults => 'Show Results';
 
   @override
+  String get commonShowPasswordTooltip => 'Show password';
+
+  @override
+  String get commonHidePasswordTooltip => 'Hide password';
+
+  @override
+  String get commonShowPinTooltip => 'Show PIN';
+
+  @override
+  String get commonHidePinTooltip => 'Hide PIN';
+
+  @override
   String get commonSuccess => 'Success';
 
   @override

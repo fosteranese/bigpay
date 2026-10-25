@@ -420,6 +420,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get commonShowResults => 'Ergebnisse anzeigen';
 
   @override
+  String get commonShowPasswordTooltip => 'Passwort anzeigen';
+
+  @override
+  String get commonHidePasswordTooltip => 'Passwort ausblenden';
+
+  @override
+  String get commonShowPinTooltip => 'PIN anzeigen';
+
+  @override
+  String get commonHidePinTooltip => 'PIN ausblenden';
+
+  @override
   String get commonSuccess => 'Erfolgreich';
 
   @override

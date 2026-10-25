@@ -137,6 +137,10 @@
   "commonArchive": "Archiver",
   "commonAddNew": "Ajouter",
   "commonShowResults": "Afficher les résultats",
+  "commonShowPasswordTooltip": "Afficher le mot de passe",
+  "commonHidePasswordTooltip": "Masquer le mot de passe",
+  "commonShowPinTooltip": "Afficher le code PIN",
+  "commonHidePinTooltip": "Masquer le code PIN",
   "commonSuccess": "Réussi",
   "commonDateFormatPlaceholder": "JJ/MM/AA",
 
