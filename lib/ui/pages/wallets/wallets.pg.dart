@@ -1,3 +1,4 @@
+import 'package:bigpay/data/cache/response_cache.dart';
 import 'package:bigpay/data/models/account/account.dart';
 import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
+import 'package:bigpay/models/wallet/delink_wallet_action.dart';
 import 'package:bigpay/models/wallet/get_wallets_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/confirm_sheet.dart';
@@ -27,6 +29,7 @@ import 'package:bigpay/ui/theme/assets/app_images.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/foldable.dart';
 import 'package:bigpay/utils/app_modal.dart';
+import 'package:bigpay/utils/message.util.dart';
 import 'package:uuid/uuid.dart';
 
 class WalletsPage extends StatefulWidget {
@@ -55,6 +58,8 @@ class _WalletsPageState extends State<WalletsPage> {
   /// ([MasterDetailLayout]) — unused (and the pane not shown) on any other
   /// device, where opening a wallet pushes [VirtualWalletPage] instead.
   Account? _selectedAccount;
+
+  ExecuteProcessEvent? _delinkEvent;
 
   void _openWallet(Account account) {
     if (context.usesSplitView) {
@@ -224,6 +229,22 @@ class _WalletsPageState extends State<WalletsPage> {
     );
   }
 
+  /// Removes [account] from the list right away (the Dismissible is already
+  /// gone) and delinks it; a failure shows the error and reloads the list.
+  void _delink(Account account) {
+    if (_selectedAccount == account) _closeDetails();
+    setState(() {
+      _accounts = List.of(_accounts ?? const <Account>[])..remove(account);
+      _delinkEvent = context.dispatchProcess(
+        DelinkWalletAction(
+          payload: DelinkWalletPayload(
+            sourceValue: account.sources?.firstOrNull?.value,
+          ),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Back closes an open split-view detail before it can reach
@@ -233,13 +254,40 @@ class _WalletsPageState extends State<WalletsPage> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _closeDetails();
       },
-      child: ProcessListener<List<Account>>(
-        event: () => mainEvent,
-        listener: (context, snapshot) {
-          if (snapshot.hasData) {
-            setState(() => _accounts = snapshot.data);
-          }
-        },
+      child: MultiProcessListener(
+        listeners: [
+          ProcessListenerConfig<List<Account>>(
+            event: () => mainEvent,
+            listener: (context, snapshot) {
+              if (snapshot.hasData) {
+                setState(() => _accounts = snapshot.data);
+              }
+            },
+          ),
+          ProcessListenerConfig<bool>(
+            event: () => _delinkEvent,
+            listener: (context, snapshot) {
+              if (snapshot.hasError) {
+                _delinkEvent = null;
+                MessageUtil.displayErrorDialog(
+                  context,
+                  message: snapshot.error!.message,
+                );
+                // Restore the optimistic removal.
+                setState(_load);
+              } else if (snapshot.isSuccessful) {
+                _delinkEvent = null;
+                // Drop the cached list so the reload below doesn't briefly
+                // bring the removed wallet back before the network answers.
+                AppState.store.cache.remove(
+                  ResponseCache.keyFor(const GetWalletsAction()),
+                );
+                // Dashboard and payment-source pickers refresh too.
+                AppState.notifyDataChanged();
+              }
+            },
+          ),
+        ],
         child: MasterDetailLayout(
           detail: _selectedAccount == null
               ? null
@@ -304,6 +352,9 @@ class _WalletsPageState extends State<WalletsPage> {
                   child: WalletListItem(
                     data: entry.value,
                     onTap: () => _openWallet(entry.value),
+                    onRemove: entry.value.sources?.firstOrNull?.value == null
+                        ? null
+                        : () => _delink(entry.value),
                   ),
                 );
               }),
@@ -322,9 +373,13 @@ class WalletListItem extends StatelessWidget {
     super.key,
     required this.data,
     this.onTap,
+    this.onRemove,
   });
   final Account data;
   final VoidCallback? onTap;
+
+  /// Called once the user confirms removal; null makes the row unswipeable.
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -339,14 +394,19 @@ class WalletListItem extends StatelessWidget {
         ),
       ),
       child: Dismissible(
-        key: ValueKey(data.formId ?? data.activityId ?? Uuid().v4()),
+        // The source value, not formId — wallets of the same type share a
+        // formId, and a duplicate key breaks Dismissible once one is removed.
+        key: ValueKey(
+          data.sources?.firstOrNull?.value ?? data.formId ?? Uuid().v4(),
+        ),
         // The in-app virtual wallet can't be removed.
-        direction: data.mode?.toUpperCase() == 'VIRTUAL_WALLET'
+        direction:
+            onRemove == null || data.mode?.toUpperCase() == 'VIRTUAL_WALLET'
             ? DismissDirection.none
             : DismissDirection.endToStart,
-        confirmDismiss: (_) async {
+        confirmDismiss: (_) {
           final l10n = AppLocalizations.of(context)!;
-          await showConfirmSheet(
+          return showConfirmSheet(
             context,
             icon: Icons.account_balance_wallet_outlined,
             title: l10n.walletsRemoveTitle,
@@ -355,11 +415,8 @@ class WalletListItem extends StatelessWidget {
             ),
             confirmText: l10n.commonRemove,
           );
-          // shortcut: no remove-wallet endpoint yet, so the item always
-          // snaps back; once there is one, dispatch it on confirm and
-          // return true (like beneficiaries.pg.dart's _delete).
-          return false;
         },
+        onDismissed: (_) => onRemove?.call(),
         background: Container(
           padding: .all(20),
           alignment: .centerLeft,
