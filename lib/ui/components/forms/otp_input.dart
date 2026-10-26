@@ -77,7 +77,7 @@ class FormOtpInputState extends State<FormOtpInput>
     _focusNode.requestFocus();
     final animation = ModalRoute.of(context)?.animation;
     if (animation == null || animation.status == AnimationStatus.completed) {
-      _ensureKeyboard();
+      _showKeyboard();
       return;
     }
     _transition?.removeStatusListener(_transitionListener ?? (_) {});
@@ -86,7 +86,7 @@ class FormOtpInputState extends State<FormOtpInput>
         _transition?.removeStatusListener(listener);
         _transition = null;
         _transitionListener = null;
-        if (mounted && widget.autoFocus) _ensureKeyboard();
+        if (mounted && widget.autoFocus) _showKeyboard();
       }
     }
 
@@ -103,23 +103,28 @@ class FormOtpInputState extends State<FormOtpInput>
     if (state == AppLifecycleState.resumed) _ensureKeyboard();
   }
 
-  /// Shows the soft keyboard for the code field. When the node already holds
-  /// focus (the resume case), requestFocus does nothing, so poke the IME open.
+  /// Resume path: the field kept focus across a system sheet (Face ID) or a
+  /// lifecycle pause, so cycle the focus to force a fresh text-input client
+  /// before re-opening the keyboard.
   void _ensureKeyboard() {
     if (!mounted) return;
     if (_focusNode.hasFocus) {
-      // The node kept focus across a system sheet (Face ID) or a dialog
-      // transition — cycle it to force a fresh text-input client.
       _focusNode.unfocus();
     }
     _focusNode.requestFocus();
+    _showKeyboard();
+  }
+
+  /// Pokes the soft keyboard open for the (already-focused) field, retrying
+  /// once a beat later so a preceding dialog's teardown (e.g. OTP → PIN)
+  /// doesn't swallow the first show.
+  void _showKeyboard() {
+    if (!mounted) return;
     // Inside a dialog, focus can land without the OS actually raising the
     // keyboard. Poke it open explicitly once the client is attached (on the
     // next frame) so the PIN/OTP field is typeable without an extra tap.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pokeKeyboard();
-      // Retry once more a beat later — a preceding dialog's keyboard teardown
-      // (e.g. OTP → PIN) can swallow the first show.
       Future.delayed(const Duration(milliseconds: 150), () {
         _pokeKeyboard();
       });
