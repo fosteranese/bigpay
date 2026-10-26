@@ -38,8 +38,16 @@ class AuthenticationUtil {
 
     // authentication sequence
     int index = 0;
+    bool first = true;
     authenticate() async {
-      await Future.delayed(const Duration(seconds: 0));
+      // The first step opens immediately; each later step waits a beat so the
+      // previous dialog's exit transition (and its keyboard teardown) fully
+      // completes first. Without this, the next field's keyboard can open
+      // without the field actually taking focus (e.g. OTP → PIN).
+      await Future.delayed(
+        first ? Duration.zero : const Duration(milliseconds: 300),
+      );
+      first = false;
       var authMode = authModes[index];
       switch (authMode['type']) {
         case 'PIN':
