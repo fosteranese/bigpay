@@ -117,10 +117,18 @@ class FormOtpInputState extends State<FormOtpInput>
     // keyboard. Poke it open explicitly once the client is attached (on the
     // next frame) so the PIN/OTP field is typeable without an extra tap.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _focusNode.hasFocus) {
-        SystemChannels.textInput.invokeMethod('TextInput.show');
-      }
+      _pokeKeyboard();
+      // Retry once more a beat later — a preceding dialog's keyboard teardown
+      // (e.g. OTP → PIN) can swallow the first show.
+      Future.delayed(const Duration(milliseconds: 150), () {
+        _pokeKeyboard();
+      });
     });
+  }
+
+  void _pokeKeyboard() {
+    if (!mounted || !_focusNode.hasFocus) return;
+    SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 
   // A single backing field for the whole code, with the boxes below purely
