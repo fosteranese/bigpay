@@ -105,7 +105,6 @@ class _WalletsPageState extends State<WalletsPage> {
   /// link-wallet form runs over the online form flow — umb's own
   /// LinkMoMoWalletCard hardcodes this type for its form.
   static const _linkWalletActivityType = ActivityTypesConst.fblOnline;
-  static const _linkWalletActivityName = 'Link Mobile Wallet';
 
   /// The backend-curated "quick action" for linking a new wallet (e.g.
   /// "Link Mobile Wallet") — the same entry the Dashboard's most-used-
@@ -135,7 +134,9 @@ class _WalletsPageState extends State<WalletsPage> {
       activity: Activity(
         activityId: activity?.activityId ?? _linkWalletFormId,
         activityType: activity?.activityType ?? _linkWalletActivityType,
-        activityName: activity?.activityName ?? _linkWalletActivityName,
+        activityName:
+            activity?.activityName ??
+            AppLocalizations.of(context)!.walletsLinkMobileWalletName,
         icon: activity?.icon,
       ),
     );

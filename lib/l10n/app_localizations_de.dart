@@ -518,6 +518,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get walletsAddMomoTitle => 'Mobile-Money-Wallet hinzufügen';
 
   @override
+  String get walletsLinkMobileWalletName => 'Mobile Wallet verknüpfen';
+
+  @override
   String get walletsAddMomoSubtitle =>
       'Verbinden Sie Ihre Mobile-Money-Wallet sicher für sofortige Aufladungen und nahtlose Zahlungen.';
 

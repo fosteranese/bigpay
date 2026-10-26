@@ -510,6 +510,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get walletsAddMomoTitle => 'إضافة محفظة الأموال عبر الهاتف المحمول';
 
   @override
+  String get walletsLinkMobileWalletName => 'ربط المحفظة المحمولة';
+
+  @override
   String get walletsAddMomoSubtitle =>
       'اربط محفظة الأموال عبر الهاتف المحمول بأمان لإعادة الشحن الفوري والمدفوعات السلسة.';
 

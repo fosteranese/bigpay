@@ -170,6 +170,7 @@
   "walletsBalanceDemo": "الرصيد - 20,000.00 GHS",
   "walletsAddMomoMiniTitle": "إضافة محفظة موبايل موني",
   "walletsAddMomoTitle": "إضافة محفظة الأموال عبر الهاتف المحمول",
+  "walletsLinkMobileWalletName": "ربط المحفظة المحمولة",
   "walletsAddMomoSubtitle": "اربط محفظة الأموال عبر الهاتف المحمول بأمان لإعادة الشحن الفوري والمدفوعات السلسة.",
   "walletsChooseNetworkLabel": "اختر الشبكة",
   "walletsMomoOtpSubtitle": "أدخل الرمز المكوّن من 6 أرقام المُرسل إلى +233********219",

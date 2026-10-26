@@ -516,6 +516,9 @@ class AppLocalizationsPcm extends AppLocalizations {
   String get walletsAddMomoTitle => 'Add Mobile Money Wallet';
 
   @override
+  String get walletsLinkMobileWalletName => 'Link Mobile Wallet';
+
+  @override
   String get walletsAddMomoSubtitle =>
       'Connect your mobile money wallet well well make you fit top up quick quick and pay smooth.';
 

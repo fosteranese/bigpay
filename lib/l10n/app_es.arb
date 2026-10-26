@@ -170,6 +170,7 @@
   "walletsBalanceDemo": "Saldo - GHS 20,000.00",
   "walletsAddMomoMiniTitle": "Agregar billetera MoMo",
   "walletsAddMomoTitle": "Agregar billetera de dinero móvil",
+  "walletsLinkMobileWalletName": "Vincular billetera móvil",
   "walletsAddMomoSubtitle": "Conecta de forma segura tu billetera de dinero móvil para recargas instantáneas y pagos sin problemas.",
   "walletsChooseNetworkLabel": "Elegir red",
   "walletsMomoOtpSubtitle": "Ingresa el código de 6 dígitos enviado a +233********219",

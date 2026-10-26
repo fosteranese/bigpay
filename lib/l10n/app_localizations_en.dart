@@ -514,6 +514,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get walletsAddMomoTitle => 'Add Mobile Money Wallet';
 
   @override
+  String get walletsLinkMobileWalletName => 'Link Mobile Wallet';
+
+  @override
   String get walletsAddMomoSubtitle =>
       'Securely connect your mobile money wallet for instant wallet top-ups and seamless payments.';
 

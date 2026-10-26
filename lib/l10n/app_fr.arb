@@ -170,6 +170,7 @@
   "walletsBalanceDemo": "Solde - GHS 20 000,00",
   "walletsAddMomoMiniTitle": "Ajouter un portefeuille MoMo",
   "walletsAddMomoTitle": "Ajouter un portefeuille d'argent mobile",
+  "walletsLinkMobileWalletName": "Lier un portefeuille mobile",
   "walletsAddMomoSubtitle": "Connectez en toute sécurité votre portefeuille d'argent mobile pour des recharges instantanées et des paiements fluides.",
   "walletsChooseNetworkLabel": "Choisir un réseau",
   "walletsMomoOtpSubtitle": "Saisissez le code à 6 chiffres envoyé au +233********219",

@@ -516,6 +516,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get walletsAddMomoTitle => 'Agregar billetera de dinero móvil';
 
   @override
+  String get walletsLinkMobileWalletName => 'Vincular billetera móvil';
+
+  @override
   String get walletsAddMomoSubtitle =>
       'Conecta de forma segura tu billetera de dinero móvil para recargas instantáneas y pagos sin problemas.';
 

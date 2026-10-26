@@ -516,6 +516,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get walletsAddMomoTitle => 'Ajouter un portefeuille d\'argent mobile';
 
   @override
+  String get walletsLinkMobileWalletName => 'Lier un portefeuille mobile';
+
+  @override
   String get walletsAddMomoSubtitle =>
       'Connectez en toute sécurité votre portefeuille d\'argent mobile pour des recharges instantanées et des paiements fluides.';
 

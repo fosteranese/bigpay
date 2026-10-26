@@ -1078,6 +1078,12 @@ abstract class AppLocalizations {
   /// **'Add Mobile Money Wallet'**
   String get walletsAddMomoTitle;
 
+  /// No description provided for @walletsLinkMobileWalletName.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Mobile Wallet'**
+  String get walletsLinkMobileWalletName;
+
   /// No description provided for @walletsAddMomoSubtitle.
   ///
   /// In en, this message translates to:

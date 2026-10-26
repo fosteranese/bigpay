@@ -323,6 +323,7 @@
   "walletsBalanceDemo": "Balance - GHS 20,000.00",
   "walletsAddMomoMiniTitle": "Add MoMo Wallet",
   "walletsAddMomoTitle": "Add Mobile Money Wallet",
+  "walletsLinkMobileWalletName": "Link Mobile Wallet",
   "walletsAddMomoSubtitle": "Securely connect your mobile money wallet for instant wallet top-ups and seamless payments.",
   "walletsChooseNetworkLabel": "Choose Network",
   "walletsMomoOtpSubtitle": "Enter the 6-digit code sent to +233********219",
