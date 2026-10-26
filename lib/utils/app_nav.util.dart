@@ -28,30 +28,13 @@ class AppNav {
   }) {
     final ctx = context;
     if (ctx != null) {
-      return showGeneralDialog<T>(
+      return showDialog<T>(
         context: ctx,
         useRootNavigator: true,
         barrierDismissible: barrierDismissible,
-        barrierColor: barrierColor ?? const Color(0x80000000),
-        barrierLabel: MaterialLocalizations.of(ctx).modalBarrierDismissLabel,
-        transitionDuration: const Duration(milliseconds: 180),
-        pageBuilder: (context, animation, secondaryAnimation) {
-          final dialog = Dialog(
-            clipBehavior: Clip.antiAlias,
-            child: builder(context),
-          );
-          return useSafeArea ? SafeArea(child: dialog) : dialog;
-        },
-        // Subtle fade — no slide or scale, so the dialog just eases in.
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            ),
-            child: child,
-          );
-        },
+        barrierColor: barrierColor,
+        useSafeArea: useSafeArea,
+        builder: builder,
       );
     }
     return Future.value(null);
