@@ -28,13 +28,39 @@ class AppNav {
   }) {
     final ctx = context;
     if (ctx != null) {
-      return showDialog<T>(
+      return showGeneralDialog<T>(
         context: ctx,
         useRootNavigator: true,
         barrierDismissible: barrierDismissible,
-        barrierColor: barrierColor,
-        useSafeArea: useSafeArea,
-        builder: builder,
+        barrierColor: barrierColor ?? const Color(0x80000000),
+        barrierLabel: MaterialLocalizations.of(ctx).modalBarrierDismissLabel,
+        transitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          final dialog = Dialog(
+            clipBehavior: Clip.antiAlias,
+            child: builder(context),
+          );
+          return useSafeArea ? SafeArea(child: dialog) : dialog;
+        },
+        // Smooth fade + slight rise — shared by the page → authenticator
+        // entrance and the authenticator → authenticator hand-off.
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.06),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
       );
     }
     return Future.value(null);

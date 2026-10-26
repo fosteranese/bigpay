@@ -115,9 +115,7 @@ class FormOtpInputState extends State<FormOtpInput>
     _showKeyboard();
   }
 
-  /// Pokes the soft keyboard open for the (already-focused) field, retrying
-  /// once a beat later so a preceding dialog's teardown (e.g. OTP → PIN)
-  /// doesn't swallow the first show.
+  /// Pokes the soft keyboard open for the (already-focused) field.
   void _showKeyboard() {
     if (!mounted) return;
     // Inside a dialog, focus can land without the OS actually raising the
@@ -125,9 +123,6 @@ class FormOtpInputState extends State<FormOtpInput>
     // next frame) so the PIN/OTP field is typeable without an extra tap.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pokeKeyboard();
-      Future.delayed(const Duration(milliseconds: 150), () {
-        _pokeKeyboard();
-      });
     });
   }
 
