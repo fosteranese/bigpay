@@ -34,7 +34,7 @@ class AppNav {
         barrierDismissible: barrierDismissible,
         barrierColor: barrierColor ?? const Color(0x80000000),
         barrierLabel: MaterialLocalizations.of(ctx).modalBarrierDismissLabel,
-        transitionDuration: const Duration(milliseconds: 250),
+        transitionDuration: const Duration(milliseconds: 180),
         pageBuilder: (context, animation, secondaryAnimation) {
           final dialog = Dialog(
             clipBehavior: Clip.antiAlias,
@@ -42,23 +42,14 @@ class AppNav {
           );
           return useSafeArea ? SafeArea(child: dialog) : dialog;
         },
-        // Smooth fade + slight rise — shared by the page → authenticator
-        // entrance and the authenticator → authenticator hand-off.
+        // Subtle fade — no slide or scale, so the dialog just eases in.
         transitionBuilder: (context, animation, secondaryAnimation, child) {
-          final curved = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-            reverseCurve: Curves.easeInCubic,
-          );
           return FadeTransition(
-            opacity: curved,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.06),
-                end: Offset.zero,
-              ).animate(curved),
-              child: child,
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
             ),
+            child: child,
           );
         },
       );
