@@ -1,0 +1,18 @@
+# Regenerate with: dart run flutter_native_splash:create
+# Dark values mirror the in-app splash (splash_screen.pg.dart) in dark theme.
+flutter_native_splash:
+  color: "#ffffff"
+  background_image: assets/app-img/splash_screen_bg.jpg
+  image: assets/app-img/splash_screen_icon.png
+
+  color_dark: "#1E1E2E"
+  background_image_dark: assets/app-img/splash_screen_bg_dark.jpg
+  image_dark: assets/app-img/splash_screen_icon.png
+
+  android_12:
+    image: assets/app-img/splash_screen_icon_12_1.png
+    color: "#ffffff"
+    image_dark: assets/app-img/splash_screen_icon_12_1.png
+    color_dark: "#1E1E2E"
+
+  web: false

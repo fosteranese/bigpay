@@ -19,6 +19,14 @@ abstract class Env {
   )
   static final int resendOtpAfterInSeconds = _Env.resendOtpAfterInSeconds;
 
+  /// Minutes of inactivity before an idle user is auto-signed-out. A value
+  /// of 0 disables the timeout.
+  @EnviedField(
+    varName: 'IDLE_TIMEOUT_MINUTES',
+    obfuscate: true,
+  )
+  static final int idleTimeoutMinutes = _Env.idleTimeoutMinutes;
+
   @EnviedField(
     varName: 'COUNTRY_FLAG_BASE_URL',
     obfuscate: true,
