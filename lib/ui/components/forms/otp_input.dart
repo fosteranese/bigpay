@@ -228,11 +228,11 @@ class FormOtpInputState extends State<FormOtpInput>
     return context.border;
   }
 
-  Widget _box(int index) {
+  Widget _box(int index, double width) {
     final text = _controller.text;
     final filled = index < text.length;
     return Container(
-      width: 48,
+      width: width,
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -261,9 +261,30 @@ class FormOtpInputState extends State<FormOtpInput>
     // the keyboard shows reliably and IME typing is normal — the old zero-size
     // offstage field + faked requestFocus dropped taps and glitched input.
     final boxes = IgnorePointer(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(widget.count, _box),
+      // The boxes were previously a fixed 48px wide with `spaceEvenly`, which
+      // overflowed the Row on phone-width dialogs once the PIN/OTP length
+      // became 6 (6 × 48 = 288px > the ~255px a 375pt dialog leaves for
+      // content). Size each box from the actual available width — capped at
+      // 48px so it still looks right on wide screens — and lay them out with
+      // a fixed gap so they can never overflow.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = 8.0;
+          const maxBoxWidth = 48.0;
+          final totalGap = gap * (widget.count - 1);
+          final boxWidth = ((constraints.maxWidth - totalGap) / widget.count)
+              .clamp(0.0, maxBoxWidth)
+              .toDouble();
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < widget.count; i++) ...[
+                if (i > 0) const SizedBox(width: gap),
+                _box(i, boxWidth),
+              ],
+            ],
+          );
+        },
       ),
     );
 
