@@ -176,7 +176,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
                     style: IconButton.styleFrom(
                       alignment: .center,
                       backgroundColor: ctx.divider,
-                      fixedSize: Size(44, 44),
+                      fixedSize: Size(40, 40),
                     ),
                     onPressed: () {
                       ctx.pop();
@@ -251,7 +251,7 @@ class _FormSelectInputState extends State<FormSelectInput> {
                       style: IconButton.styleFrom(
                         alignment: .center,
                         backgroundColor: ctx.divider,
-                        fixedSize: Size(44, 44),
+                        fixedSize: Size(40, 40),
                       ),
                       onPressed: () {
                         ctx.pop();

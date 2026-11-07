@@ -196,7 +196,7 @@ class _FormPayeeInputState extends State<FormPayeeInput> {
                           style: IconButton.styleFrom(
                             alignment: Alignment.center,
                             backgroundColor: sheetContext.divider,
-                            fixedSize: const Size(44, 44),
+                            fixedSize: const Size(40, 40),
                           ),
                           onPressed: () => sheetContext.pop(),
                           icon: Icon(
