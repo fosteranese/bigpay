@@ -207,9 +207,17 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(l10n.commonSelect, style: sheetContext.header1),
+                        Expanded(
+                          child: Text(
+                            l10n.commonSelect,
+                            style: sheetContext.header1,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         IconButton.filled(
                           tooltip: l10n.commonClose,
                           style: IconButton.styleFrom(

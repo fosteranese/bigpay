@@ -180,11 +180,14 @@ class _FormPayeeInputState extends State<FormPayeeInput> {
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Text(
                             '${l10n.commonSelect} ${widget.label ?? l10n.payeeRecipientFallback}',
                             style: sheetContext.header1,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 12),

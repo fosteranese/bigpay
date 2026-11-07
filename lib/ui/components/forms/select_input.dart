@@ -160,12 +160,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
             children: [
               Row(
                 mainAxisSize: .max,
-                crossAxisAlignment: .start,
+                crossAxisAlignment: .center,
                 children: [
                   Expanded(
                     child: Text(
                       widget.label ?? l10n.commonSelect,
                       style: ctx.header1,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -233,11 +235,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
               children: [
                 Row(
                   mainAxisSize: .max,
+                  crossAxisAlignment: .center,
                   children: [
                     Expanded(
                       child: Text(
                         widget.label ?? l10n.commonSelect,
                         style: ctx.header1,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 12),

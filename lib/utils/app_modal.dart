@@ -59,6 +59,8 @@ class AppModal {
                       child: Text(
                         label,
                         style: context.header1,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     ...actions,

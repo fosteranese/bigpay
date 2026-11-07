@@ -64,10 +64,17 @@ class _HelpPageState extends State<HelpPage> {
             mainAxisSize: .min,
             children: [
               Row(
-                mainAxisAlignment: .spaceBetween,
-                crossAxisAlignment: .start,
+                crossAxisAlignment: .center,
                 children: [
-                  Flexible(child: Text(title, style: ctx.header1)),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: ctx.header1,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   IconButton.filled(
                     tooltip: l10n.commonClose,
                     style: IconButton.styleFrom(
