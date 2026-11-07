@@ -57,10 +57,10 @@ void main() {
       expect(controller.text, isEmpty);
     });
 
-    testWidgets('an already-selected value is not overwritten', (
+    testWidgets('a selection already matching the single option is kept', (
       tester,
     ) async {
-      final controller = TextEditingController(text: 'existing');
+      final controller = TextEditingController(text: 'gh');
       var callCount = 0;
 
       await _pump(
@@ -71,8 +71,30 @@ void main() {
       );
       await tester.pump();
 
-      expect(controller.text, 'existing');
+      expect(controller.text, 'gh');
       expect(callCount, 0);
+    });
+
+    testWidgets('a stale selection is replaced by the single option', (
+      tester,
+    ) async {
+      // The controller still holds a value that's no longer in the (now
+      // single-option) list — it should be un-selected and the only valid
+      // option applied instead.
+      final controller = TextEditingController(text: 'existing');
+      String? changed;
+
+      await _pump(
+        tester,
+        controller: controller,
+        options: [FormSelectOption(id: 'gh', label: 'Ghana')],
+        onChanged: (value) => changed = value,
+      );
+      await tester.pump();
+
+      expect(controller.text, 'gh');
+      expect(find.text('Ghana'), findsOneWidget);
+      expect(changed, 'Ghana');
     });
 
     testWidgets('an empty options list is left unselected', (tester) async {
@@ -104,7 +126,7 @@ void main() {
       expect(find.text('Nigeria'), findsOneWidget);
     });
 
-    testWidgets('a pre-filled value with no matching option stays blank', (
+    testWidgets('a pre-filled value with no matching option is un-selected', (
       tester,
     ) async {
       final controller = TextEditingController(text: 'zz');
@@ -116,8 +138,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(controller.text, 'zz');
-      expect(find.text('Ghana'), findsNothing);
+      expect(controller.text, 'gh');
+      expect(find.text('Ghana'), findsOneWidget);
     });
   });
 }

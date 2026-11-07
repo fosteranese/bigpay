@@ -72,14 +72,17 @@ class _FormSelectInputState extends State<FormSelectInput> {
 
   /// A single-option field has nothing to actually choose, so it selects
   /// itself rather than making the user open a picker just to tap the one
-  /// row in it. Skipped once something's already selected — including
-  /// whatever this same auto-select just set on a prior call — so it never
-  /// clobbers a real (or already-applied) choice.
+  /// row in it. It also overwrites a stale selection — a value no longer in
+  /// the (now single-option) list, e.g. after a dependent field changed what
+  /// options are available — but leaves a correct, already-applied selection
+  /// alone.
   void _maybeAutoSelectOnlyOption() {
     if (widget.options.length != 1) return;
-    if (widget.controller.text.isNotEmpty) return;
 
     final option = widget.options.first;
+    // Already showing the single valid option — nothing to change.
+    if (widget.controller.text == option.id) return;
+
     _controller.text = option.label;
     widget.controller.text = option.id;
 
