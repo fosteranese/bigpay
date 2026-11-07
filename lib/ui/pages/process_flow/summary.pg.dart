@@ -208,6 +208,12 @@ class _SummaryPageState extends State<SummaryPage> {
       return;
     }
 
+    _authenticateAndProcess(payload);
+  }
+
+  /// Runs the transaction auth (if any) then processes. Extracted so a failed
+  /// process can re-open the auth flow for the user to retry.
+  void _authenticateAndProcess(Map<String, dynamic> payload) {
     final authModes = widget.verification?.authMode ?? const [];
 
     if (authModes.isNotEmpty) {
@@ -346,9 +352,13 @@ class _SummaryPageState extends State<SummaryPage> {
                 AppRouter.router.go(HistoryPage.route.path);
                 return;
               }
+              // A rejected transaction (e.g. wrong PIN/OTP) — re-open the auth
+              // flow so the user can retry, the dialogs starting cleared.
+              final retryPayload = _buildPayload();
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,
+                onOkPressed: () => _authenticateAndProcess(retryPayload),
               );
             }
           },

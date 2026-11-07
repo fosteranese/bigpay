@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:bigpay/blocs/process/process_bloc.dart';
 import 'package:bigpay/constants/activity_type.const.dart';
 import 'package:bigpay/constants/am_doing.const.dart';
+import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/data/models/general_flow/form_verification_response.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_category.dart';
@@ -240,12 +241,18 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   /// just working off this form's own data instead of a verification
   /// result.
   void _submitDirect() {
+    _authenticateAndProcess(_formData);
+  }
+
+  /// Runs the transaction auth (if any) then processes. Extracted so a failed
+  /// process can re-open the auth flow for the user to retry.
+  void _authenticateAndProcess(Map<String, dynamic> payload) {
     final authModes = _form.authMode ?? const [];
 
     if (authModes.isNotEmpty) {
       AuthenticationUtil.start(
         authModes: authModes,
-        payload: _formData,
+        payload: payload,
         onResendShortCode: () {
           final formId = _form.form?.formId;
           if (formId != null) {
@@ -267,7 +274,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       return;
     }
 
-    _process(payload: _formData);
+    _process(payload: payload);
   }
 
   void _process({
@@ -410,9 +417,18 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
             if (snapshot.hasError) {
               _processEvent = null;
+              final code = snapshot.error!.code;
+              final isPending = code == StatusCodeConstants.pending ||
+                  code == StatusCodeConstants.processing;
+              // A rejected transaction (e.g. wrong PIN/OTP) — re-open the auth
+              // flow so the user can retry, the dialogs starting cleared.
+              // Pending/processing keeps the existing error-dialog behavior.
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,
+                onOkPressed: isPending
+                    ? null
+                    : () => _authenticateAndProcess(_formData),
               );
             }
           },
