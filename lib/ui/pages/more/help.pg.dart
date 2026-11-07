@@ -79,10 +79,10 @@ class _HelpPageState extends State<HelpPage> {
                     tooltip: l10n.commonClose,
                     style: IconButton.styleFrom(
                       backgroundColor: ctx.divider,
-                      fixedSize: const Size(40, 40),
+                      fixedSize: const Size(36, 36),
                     ),
                     onPressed: () => ctx.pop(),
-                    icon: Icon(Icons.close, size: 17, color: ctx.textPrimary),
+                    icon: Icon(Icons.close, size: 16, color: ctx.textPrimary),
                   ),
                 ],
               ),

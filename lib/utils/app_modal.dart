@@ -84,7 +84,7 @@ class AppModal {
                       },
                       icon: Icon(
                         Icons.close,
-                        size: 17,
+                        size: 16,
                         color: context.textPrimary,
                       ),
                     ),

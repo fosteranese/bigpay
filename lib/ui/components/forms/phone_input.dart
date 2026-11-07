@@ -223,12 +223,12 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                           style: IconButton.styleFrom(
                             alignment: Alignment.center,
                             backgroundColor: sheetContext.divider,
-                            fixedSize: const Size(40, 40),
+                            fixedSize: const Size(36, 36),
                           ),
                           onPressed: () => sheetContext.pop(),
                           icon: Icon(
                             Icons.close,
-                            size: 17,
+                            size: 16,
                             color: sheetContext.textPrimary,
                           ),
                         ),
