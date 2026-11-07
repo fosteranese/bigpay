@@ -33,6 +33,7 @@ class OtpSignUpPage extends StatefulWidget {
 
 class _OtpSignUpPageState extends State<OtpSignUpPage> {
   final _otp = ValueNotifier('');
+  final _otpKey = GlobalKey<FormOtpInputState>();
   late VerifyUserData _data = widget.data;
   ExecuteProcessEvent? mainEvent;
   ExecuteProcessEvent? resentOtpEvent;
@@ -94,6 +95,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
             }
 
             if (snapshot.hasError) {
+              _otpKey.currentState?.clear();
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,
@@ -143,6 +145,7 @@ class _OtpSignUpPageState extends State<OtpSignUpPage> {
           child: Column(
             children: [
               FormOtpInput(
+                key: _otpKey,
                 count: _data.otpData?.length ?? 6,
                 enableAutofill: true,
                 onChanged: (value) {

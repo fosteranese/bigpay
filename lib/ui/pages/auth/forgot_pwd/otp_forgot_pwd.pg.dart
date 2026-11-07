@@ -29,6 +29,7 @@ class OtpForgotPasswordPage extends StatefulWidget {
 class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
   final _otp = ValueNotifier('');
   final _error = ValueNotifier<DataError?>(null);
+  final _otpKey = GlobalKey<FormOtpInputState>();
   ExecuteProcessEvent? mainEvent;
   ExecuteProcessEvent? resentOtpEvent;
 
@@ -92,6 +93,7 @@ class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
             }
 
             if (snapshot.hasError) {
+              _otpKey.currentState?.clear();
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,
@@ -144,6 +146,7 @@ class _OtpForgotPasswordPageState extends State<OtpForgotPasswordPage> {
                 valueListenable: _error,
                 builder: (context, error, child) {
                   return FormOtpInput(
+                    key: _otpKey,
                     error: error?.message,
                     count: _length,
                     enableAutofill: true,

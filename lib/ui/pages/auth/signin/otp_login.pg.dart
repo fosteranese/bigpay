@@ -34,6 +34,7 @@ class OtpLoginPage extends StatefulWidget {
 class _OtpLoginPageState extends State<OtpLoginPage> {
   final _otp = ValueNotifier('');
   final _error = ValueNotifier<DataError?>(null);
+  final _otpKey = GlobalKey<FormOtpInputState>();
   ExecuteProcessEvent? mainEvent;
   ExecuteProcessEvent? resentOtpEvent;
 
@@ -98,6 +99,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
             }
 
             if (snapshot.hasError) {
+              _otpKey.currentState?.clear();
               _error.value = snapshot.error;
               return;
             }
@@ -147,6 +149,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                 valueListenable: _error,
                 builder: (context, error, child) {
                   return FormOtpInput(
+                    key: _otpKey,
                     error: error?.message,
                     count: _length,
                     enableAutofill: true,

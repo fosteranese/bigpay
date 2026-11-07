@@ -203,6 +203,10 @@ class FormOtpInputState extends State<FormOtpInput>
   void clear() {
     _controller.clear();
     _focusNode.requestFocus();
+    // Re-poke the soft keyboard: the submit handler unfocuses before firing
+    // the verify action, so a plain requestFocus can leave the field focused
+    // with no keyboard on iOS.
+    _showKeyboard();
   }
 
   @override
