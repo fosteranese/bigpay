@@ -160,13 +160,15 @@ class _FormSelectInputState extends State<FormSelectInput> {
             children: [
               Row(
                 mainAxisSize: .max,
-                mainAxisAlignment: .spaceBetween,
                 crossAxisAlignment: .start,
                 children: [
-                  Text(
-                    widget.label ?? l10n.commonSelect,
-                    style: ctx.header1,
+                  Expanded(
+                    child: Text(
+                      widget.label ?? l10n.commonSelect,
+                      style: ctx.header1,
+                    ),
                   ),
+                  const SizedBox(width: 12),
                   IconButton.filled(
                     tooltip: l10n.commonClose,
                     style: IconButton.styleFrom(
@@ -231,12 +233,14 @@ class _FormSelectInputState extends State<FormSelectInput> {
               children: [
                 Row(
                   mainAxisSize: .max,
-                  mainAxisAlignment: .spaceBetween,
                   children: [
-                    Text(
-                      widget.label ?? l10n.commonSelect,
-                      style: ctx.header1,
+                    Expanded(
+                      child: Text(
+                        widget.label ?? l10n.commonSelect,
+                        style: ctx.header1,
+                      ),
                     ),
+                    const SizedBox(width: 12),
                     IconButton.filled(
                       tooltip: l10n.commonClose,
                       style: IconButton.styleFrom(

@@ -180,12 +180,14 @@ class _FormPayeeInputState extends State<FormPayeeInput> {
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '${l10n.commonSelect} ${widget.label ?? l10n.payeeRecipientFallback}',
-                          style: sheetContext.header1,
+                        Expanded(
+                          child: Text(
+                            '${l10n.commonSelect} ${widget.label ?? l10n.payeeRecipientFallback}',
+                            style: sheetContext.header1,
+                          ),
                         ),
+                        const SizedBox(width: 12),
                         IconButton.filled(
                           tooltip: l10n.commonClose,
                           style: IconButton.styleFrom(
