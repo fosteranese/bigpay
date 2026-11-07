@@ -221,9 +221,13 @@ class FormOtpInputState extends State<FormOtpInput>
     super.dispose();
   }
 
+  /// The box that would receive the next typed digit (or the last box once
+  /// full). Shared by [_borderColor] and [_box] so the focused border and the
+  /// active underline stay in sync.
+  int get _activeIndex => _controller.text.length.clamp(0, widget.count - 1);
+
   Color _borderColor(int index) {
-    final activeIndex = _controller.text.length.clamp(0, widget.count - 1);
-    if (_focusNode.hasFocus && index == activeIndex) return AppColors.tint;
+    if (_focusNode.hasFocus && index == _activeIndex) return AppColors.tint;
     if (index < _controller.text.length) return AppColors.primary;
     return context.border;
   }
@@ -239,11 +243,7 @@ class FormOtpInputState extends State<FormOtpInput>
         border: Border(
           bottom: BorderSide(
             color: _borderColor(index),
-            width:
-                _focusNode.hasFocus &&
-                    index == text.length.clamp(0, widget.count - 1)
-                ? 2
-                : 1,
+            width: _focusNode.hasFocus && index == _activeIndex ? 2 : 1,
           ),
         ),
       ),
@@ -272,6 +272,9 @@ class FormOtpInputState extends State<FormOtpInput>
         children: [
           for (var i = 0; i < widget.count; i++) ...[
             if (i > 0) const SizedBox(width: 8),
+            // Center loosens Expanded's tight cell so ConstrainedBox can cap the
+            // box at 48px on wide screens (a bare ConstrainedBox inside Expanded
+            // is forced to the full cell width).
             Expanded(
               child: Center(
                 child: ConstrainedBox(

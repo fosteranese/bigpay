@@ -138,5 +138,31 @@ void main() {
           .toList();
       expect(afterDelete.join(), '1');
     });
+
+    testWidgets('six boxes fit a phone-width dialog without overflowing', (
+      tester,
+    ) async {
+      // 6 × 48px = 288px used to overflow the ~255px a 375pt dialog leaves for
+      // content. With the flexed boxes, the row shrinks to fit instead.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 255,
+                child: FormOtpInput(
+                  count: 6,
+                  enableAutofill: false,
+                  autoFocus: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }
