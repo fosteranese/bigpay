@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
-import 'package:bigpay/constants/status.const.dart';
-import 'package:bigpay/data/models/auth_data/auth_data.dart';
 import 'package:bigpay/data/models/new_device_login_data.dart';
-import 'package:bigpay/models/actions/auth_action.dart';
-import 'package:bigpay/models/actions/login/existing_login_action.dart';
 import 'package:bigpay/models/actions/login/login_action.dart';
-import 'package:bigpay/models/actions/login/verify_otp_login_action.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -42,7 +37,6 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
   final _passwordFocusNode = FocusNode();
 
   ExecuteProcessEvent? newLoginEvent;
-  ExecuteProcessEvent? existingLoginEvent;
 
   @override
   void initState() {
@@ -105,46 +99,6 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
             }
 
             if (snapshot.hasError) {
-              MessageUtil.displayErrorDialog(
-                context,
-                message: snapshot.error!.message,
-              );
-              return;
-            }
-          },
-        ),
-        ProcessListenerConfig<AuthData>(
-          event: () => existingLoginEvent,
-          listener: (context, snapshot) {
-            if (snapshot.isLoading) {
-              MessageUtil.displayLoading(context);
-              return;
-            } else {
-              MessageUtil.close(context);
-            }
-
-            if (snapshot.hasData) {
-              // Existing-device login succeeded — hand the response to the
-              // app-level AuthAction listener (sets AppState.currentUser and
-              // navigates to the dashboard).
-              AuthAction.event = context.dispatchProcess(
-                AuthAction(
-                  payload: AuthActionPayload(
-                    dataResponse: snapshot.response!,
-                  ),
-                ),
-              );
-              return;
-            }
-
-            if (snapshot.hasError) {
-              if (snapshot.error?.code == StatusCodeConstants.newLogin) {
-                AppState.store.cache.remove(VerifyOtpLoginAction.path);
-                AppState.currentUser = null;
-                _passwordController.text = '';
-                SignIn.clear();
-              }
-
               MessageUtil.displayErrorDialog(
                 context,
                 message: snapshot.error!.message,
@@ -256,18 +210,6 @@ class _NewLoginPageState extends State<NewLoginPage> with RouteAware {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
-
-    if (_phone.text.text.trim() == AppState.savedPhoneNumber) {
-      existingLoginEvent = context.dispatchProcess(
-        ExistingLoginAction(
-          payload: ExistingLoginActionPayload(
-            isPassword: true,
-            password: _passwordController.text,
-          ),
-        ),
-      );
-      return;
-    }
 
     // A different user is signing in on this device — nothing of the
     // previous user's may carry over. Awaited, so the wipe can't race the new
