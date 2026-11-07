@@ -418,7 +418,8 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
             if (snapshot.hasError) {
               _processEvent = null;
               final code = snapshot.error!.code;
-              final isPending = code == StatusCodeConstants.pending ||
+              final isPending =
+                  code == StatusCodeConstants.pending ||
                   code == StatusCodeConstants.processing;
               // A rejected transaction (e.g. wrong PIN/OTP) — re-open the auth
               // flow so the user can retry, the dialogs starting cleared.
