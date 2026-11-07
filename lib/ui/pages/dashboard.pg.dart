@@ -13,6 +13,7 @@ import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/components/skeleton/skeleton.dart';
 import 'package:bigpay/ui/components/wallet/virtual_wallet_card.dart';
 import 'package:bigpay/ui/mixins/dashboard_data_refresh.dart';
+import 'package:bigpay/ui/pages/more/more.pg.dart';
 import 'package:bigpay/ui/pages/notifications/notifications.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service.pg.dart';
 import 'package:bigpay/ui/pages/process_flow/service_form.pg.dart';
@@ -283,40 +284,47 @@ class _DashboardPageState extends State<DashboardPage>
                           // The app-level listener already persists the fetched
                           // picture to AppState.currentUser — here just render it
                           // (no side effects in build).
-                          return CircleAvatar(
-                            radius: 18,
-                            backgroundColor: context.avatarBg,
-                            backgroundImage: avatarFromBase64(
-                              AppState.currentUser?.profilePicture,
+                          return GestureDetector(
+                            onTap: () => AppRouter.router.go(MorePage.route.path),
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: context.avatarBg,
+                              backgroundImage: avatarFromBase64(
+                                AppState.currentUser?.profilePicture,
+                              ),
                             ),
                           );
                         },
                       ),
                     ),
-                    title: Column(
-                      mainAxisSize: .min,
-                      mainAxisAlignment: .center,
-                      crossAxisAlignment: .start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.dashboardWelcomeBack,
-                          // Fixed, not theme-adaptive — like the name text
-                          // below it, this sits on the header's own blue
-                          // gradient regardless of app theme, not the
-                          // scaffold background. context.divider (a hairline
-                          // border color) went near-black in dark mode,
-                          // making this unreadable.
-                          style: context.caption.copyWith(
-                            color: AppColors.white.withValues(alpha: 0.7),
+                    title: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => AppRouter.router.go(MorePage.route.path),
+                      child: Column(
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .center,
+                        crossAxisAlignment: .start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.dashboardWelcomeBack,
+                            // Fixed, not theme-adaptive — like the name text
+                            // below it, this sits on the header's own blue
+                            // gradient regardless of app theme, not the
+                            // scaffold background. context.divider (a hairline
+                            // border color) went near-black in dark mode,
+                            // making this unreadable.
+                            style: context.caption.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.7),
+                            ),
                           ),
-                        ),
-                        Text(
-                          AppState.currentUser?.user?.displayFirstName ?? '',
-                          style: context.p1Medium.copyWith(
-                            color: AppColors.white,
+                          Text(
+                            AppState.currentUser?.user?.displayFirstName ?? '',
+                            style: context.p1Medium.copyWith(
+                              color: AppColors.white,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     actions: [
                       IconButton(
