@@ -1,11 +1,15 @@
-import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
+
+import 'package:bigpay/data/remote/card.remote.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
-import 'package:bigpay/models/wallet/add_card_action.dart';
+import 'package:bigpay/logger.dart';
 import 'package:bigpay/routes/app_router.dart';
+import 'package:bigpay/ui/components/card/card_3ds_webview.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
-import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -37,9 +41,8 @@ class _AddCardPageState extends State<AddCardPage>
   final _cvvFocus = FocusNode();
   final _expiryFocus = FocusNode();
 
-  /// The in-flight add-card request — correlates the submit with its result
-  /// (see [_onSaved]).
-  ExecuteProcessEvent? _saveEvent;
+  /// True while the 3-D Secure card verification is running.
+  bool _saving = false;
 
   /// Drives the front/back flip — forward while the CVV field has focus
   /// (real cards print the CVV on the back, next to the signature strip),
@@ -102,155 +105,249 @@ class _AddCardPageState extends State<AddCardPage>
         month <= 12;
   }
 
-  void _save() {
+  Future<void> _save() async {
     FocusScope.of(context).unfocus();
-    if (!_canSave) return;
+    if (!_canSave || _saving) return;
 
-    // MM/YY → split into the two fields the (assumed) backend expects.
-    final expiry = _expiryController.text.replaceAll('/', '');
-    final expiryMonth = expiry.substring(0, 2);
-    final expiryYear = expiry.substring(2);
+    setState(() => _saving = true);
+    MessageUtil.displayLoading(context);
+    try {
+      final initiate = await CardRemote.initiate(
+        cardNumber: _rawNumber,
+        expiry: _expiryController.text,
+        cvv: _cvvController.text,
+      );
 
-    _saveEvent = context.dispatchProcess(
-      AddCardAction(
-        payload: AddCardActionPayload(
-          cardNumber: _rawNumber,
-          cardHolderName: _nameController.text.trim(),
-          cvv: _cvvController.text,
-          expiryMonth: expiryMonth,
-          expiryYear: expiryYear,
-        ),
-      ),
+      // Device data collection (hidden headless webview).
+      await Card3DsWebview.collectDeviceData(
+        deviceDataCollectionUrl: initiate.deviceDataCollectionUrl,
+        accessToken: initiate.accessToken,
+      );
+
+      final enroll = await CardRemote.enroll(
+        initiate.id,
+        browser: await _browserInfo(),
+      );
+
+      // Frictionless — authenticated without a challenge.
+      if (enroll.completed) {
+        _finish(success: true, message: enroll.result?.message);
+        return;
+      }
+
+      final stepUpUrl = enroll.stepUpUrl;
+      if (stepUpUrl == null || stepUpUrl.isEmpty) {
+        _finish(success: false, message: 'Card verification failed');
+        return;
+      }
+
+      if (!mounted) return;
+      MessageUtil.close(context);
+      final challenge = await Card3DsWebview.showChallenge(
+        context,
+        stepUpUrl: stepUpUrl,
+        accessToken: enroll.accessToken ?? '',
+        md: initiate.id,
+      );
+      if (!mounted) return;
+
+      switch (challenge) {
+        case CardChallengeResult.completed:
+          MessageUtil.displayLoading(context);
+          final status = await CardRemote.status(initiate.id);
+          _finish(success: status.cardLinked, message: status.message);
+        case CardChallengeResult.failed:
+          _finish(
+            success: false,
+            message: '3-D Secure authentication failed',
+          );
+        case CardChallengeResult.cancelled:
+          _finish(
+            success: false,
+            message: '3-D Secure authentication cancelled',
+          );
+      }
+    } on CardRemoteException catch (e) {
+      _finish(success: false, message: e.message);
+    } catch (e, st) {
+      logger.e('Add-card verification failed', error: e, stackTrace: st);
+      _finish(
+        success: false,
+        message: 'Something went wrong. Please try again.',
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  /// The webview "browser" fields the 3-D Secure directory server requires on
+  /// the check-enrollment call.
+  Future<CardBrowser> _browserInfo() async {
+    final size = MediaQuery.sizeOf(context);
+    final locale = ui.PlatformDispatcher.instance.locale;
+    final language = (locale.countryCode ?? '').isEmpty
+        ? locale.languageCode
+        : '${locale.languageCode}-${locale.countryCode}';
+    return CardBrowser(
+      browserLanguage: language,
+      browserScreenWidth: size.width.round(),
+      browserScreenHeight: size.height.round(),
+      browserColorDepth: '24',
+      browserTimeZone: DateTime.now().timeZoneOffset.inMinutes.toString(),
+      browserJavaEnabled: false,
+      browserJavaScriptEnabled: true,
+      browserUserAgent: await _userAgent(),
+      browserAcceptHeader:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     );
   }
 
-  void _onSaved(BuildContext context, ProcessSnapshot<bool> snapshot) {
-    if (snapshot.isLoading) {
-      MessageUtil.displayLoading(context);
-      return;
+  /// The user-agent string the OS's embedded browser (WKWebView / WebView)
+  /// actually reports, built from device info rather than a hardcoded value —
+  /// the 3DS directory server uses it as a risk signal.
+  Future<String> _userAgent() async {
+    try {
+      final device = DeviceInfoPlugin();
+      if (Platform.isIOS) {
+        final ios = await device.iosInfo;
+        final os = ios.systemVersion.replaceAll('.', '_');
+        return ios.model.toLowerCase().contains('ipad')
+            ? 'Mozilla/5.0 (iPad; CPU OS $os like Mac OS X) '
+                'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+            : 'Mozilla/5.0 (iPhone; CPU iPhone OS $os like Mac OS X) '
+                'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
+      }
+      if (Platform.isAndroid) {
+        final android = await device.androidInfo;
+        return 'Mozilla/5.0 (Linux; Android ${android.version.release}; '
+            '${android.model}) AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/126.0.0.0 Mobile Safari/537.36';
+      }
+    } catch (_) {
+      // Fall through to a static default.
     }
-    MessageUtil.close(context);
+    return 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) '
+        'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
+  }
 
-    if (snapshot.isSuccessful) {
-      _saveEvent = null;
+  void _finish({required bool success, String? message}) {
+    if (!mounted) return;
+    // Dismiss the in-flight loading dialog before showing the result.
+    MessageUtil.close(context);
+    if (success) {
+      // The wallets list lives in a different shell-branch navigator than this
+      // pushed page, so a plain pop won't trigger its own refresh — bump the
+      // notifier so the newly linked card shows up without a manual reload.
       AppState.notifyDataChanged();
       MessageUtil.displaySuccessDialog(
         context,
         title: AppLocalizations.of(context)!.commonSuccess,
         message:
-            snapshot.message ??
-            AppLocalizations.of(context)!.walletsCardAddedMessage,
+            message ?? AppLocalizations.of(context)!.walletsCardAddedMessage,
         onOk: () => AppRouter.router.pop(),
       );
-    } else if (snapshot.hasError) {
-      _saveEvent = null;
-      MessageUtil.displayErrorDialog(
-        context,
-        message: snapshot.error!.message,
-      );
+    } else {
+      MessageUtil.displayErrorDialog(context, message: message);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return ProcessListener<bool>(
-      event: () => _saveEvent,
-      listener: _onSaved,
-      child: MainLayout(
-        miniTitle: l10n.walletsAddCardTitle,
-        bottomSize: 98 + 61 + 56,
-        subtitleWidget: SizedBox(
-          height: 189,
-          width: double.maxFinite,
-          child: AnimatedBuilder(
-            animation: _flipController,
-            builder: (context, child) {
-              // 0 -> pi over the animation; past the halfway point we're
-              // looking at the back of the card, so swap content and
-              // subtract pi from the remaining rotation — otherwise the back
-              // would keep turning through to pi and render mirror-flipped
-              // instead of settling face-on.
-              final angle = _flipController.value * 3.14159265;
-              final isBack = angle > 3.14159265 / 2;
-              return Transform(
-                alignment: .center,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(isBack ? angle - 3.14159265 : angle),
-                child: isBack
-                    ? _buildCardBack(context)
-                    : _buildCardFront(context),
-              );
-            },
-          ),
+    return MainLayout(
+      miniTitle: l10n.walletsAddCardTitle,
+      bottomSize: 98 + 61 + 56,
+      subtitleWidget: SizedBox(
+        height: 189,
+        width: double.maxFinite,
+        child: AnimatedBuilder(
+          animation: _flipController,
+          builder: (context, child) {
+            // 0 -> pi over the animation; past the halfway point we're
+            // looking at the back of the card, so swap content and
+            // subtract pi from the remaining rotation — otherwise the back
+            // would keep turning through to pi and render mirror-flipped
+            // instead of settling face-on.
+            final angle = _flipController.value * 3.14159265;
+            final isBack = angle > 3.14159265 / 2;
+            return Transform(
+              alignment: .center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(isBack ? angle - 3.14159265 : angle),
+              child: isBack
+                  ? _buildCardBack(context)
+                  : _buildCardFront(context),
+            );
+          },
         ),
+      ),
 
-        bottomNav: FormButton(
-          onPressed: _save,
-          enabled: _canSave,
-          text: l10n.commonSave,
-        ),
-        child: Column(
-          children: [
-            FormInput(
-              controller: _nameController,
-              label: l10n.walletsCardHolderNameLabel,
-              textInputAction: .next,
-              onChanged: (_) => setState(() {}),
-              next: (_) => _numberFocus.requestFocus(),
-            ),
-            const SizedBox(height: 10),
-            FormInput(
-              controller: _numberController,
-              label: l10n.walletsCardNumberLabel,
-              focusNode: _numberFocus,
-              keyboardType: .number,
-              inputFormatters: [_CardNumberFormatter()],
-              onChanged: (_) => setState(() {}),
-              next: (_) => _cvvFocus.requestFocus(),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: FormInput(
-                    controller: _cvvController,
-                    label: l10n.walletsCvvLabel,
-                    focusNode: _cvvFocus,
-                    keyboardType: .number,
-                    isPassword: true,
-                    // FormInput passes this straight through as
-                    // TextFormField's maxLines — left at its null default
-                    // that combines with obscureText: true to trip
-                    // TextFormField's own "obscured fields must be single
-                    // line" assertion.
-                    maxLines: 1,
-                    maxLength: 4,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    onChanged: (_) => setState(() {}),
-                    next: (_) => _expiryFocus.requestFocus(),
-                  ),
+      bottomNav: FormButton(
+        onPressed: _save,
+        enabled: _canSave && !_saving,
+        loading: _saving,
+        text: l10n.commonSave,
+      ),
+      child: Column(
+        children: [
+          FormInput(
+            controller: _nameController,
+            label: l10n.walletsCardHolderNameLabel,
+            textInputAction: .next,
+            onChanged: (_) => setState(() {}),
+            next: (_) => _numberFocus.requestFocus(),
+          ),
+          const SizedBox(height: 10),
+          FormInput(
+            controller: _numberController,
+            label: l10n.walletsCardNumberLabel,
+            focusNode: _numberFocus,
+            keyboardType: .number,
+            inputFormatters: [_CardNumberFormatter()],
+            onChanged: (_) => setState(() {}),
+            next: (_) => _expiryFocus.requestFocus(),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: FormInput(
+                  controller: _expiryController,
+                  label: l10n.walletsExpiryDateLabel,
+                  focusNode: _expiryFocus,
+                  keyboardType: .number,
+                  placeholder: 'MM/YY',
+                  inputFormatters: [_ExpiryDateFormatter()],
+                  onChanged: (_) => setState(() {}),
+                  next: (_) => _cvvFocus.requestFocus(),
                 ),
-                const SizedBox(width: Spacing.lg),
-                Expanded(
-                  child: FormInput(
-                    controller: _expiryController,
-                    label: l10n.walletsExpiryDateLabel,
-                    focusNode: _expiryFocus,
-                    keyboardType: .number,
-                    placeholder: 'MM/YY',
-                    inputFormatters: [_ExpiryDateFormatter()],
-                    onChanged: (_) => setState(() {}),
-                    next: (_) => _expiryFocus.unfocus(),
-                  ),
+              ),
+              const SizedBox(width: Spacing.lg),
+              Expanded(
+                child: FormInput(
+                  controller: _cvvController,
+                  label: l10n.walletsCvvLabel,
+                  focusNode: _cvvFocus,
+                  keyboardType: .number,
+                  isPassword: true,
+                  // FormInput passes this straight through as
+                  // TextFormField's maxLines — left at its null default
+                  // that combines with obscureText: true to trip
+                  // TextFormField's own "obscured fields must be single
+                  // line" assertion.
+                  maxLines: 1,
+                  maxLength: 4,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  onChanged: (_) => setState(() {}),
+                  next: (_) => _cvvFocus.unfocus(),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

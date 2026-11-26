@@ -18,6 +18,7 @@ dependencies:
   sliver_tools: ^0.2.12
   string_validator: ^1.2.0
   flutter_bloc: ^9.1.1
+  flutter_inappwebview: ^6.1.5
   equatable: ^3.0.0
   logger: ^2.7.0
   freezed_annotation: ^3.1.0

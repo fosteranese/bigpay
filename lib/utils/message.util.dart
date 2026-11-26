@@ -192,12 +192,7 @@ final class MessageUtil {
                   const SizedBox(height: 20),
                   FormButton(
                     height: 50,
-                    onPressed: () {
-                      Navigator.pop(context);
-                      if (onOk != null) {
-                        onOk();
-                      }
-                    },
+                    onPressed: () => Navigator.pop(context),
                     text: AppLocalizations.of(context)!.commonOk,
                   ),
                 ],
@@ -206,7 +201,7 @@ final class MessageUtil {
           ),
         ),
       ),
-    );
+    ).then((_) => onOk?.call());
   }
 
   static void displaySuccessFullDialog(
