@@ -1,8 +1,5 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-
-import 'package:bigpay/env/env.dart';
+import 'package:bigpay/constants/status.const.dart';
+import 'package:bigpay/data/remote/main.remote.dart';
 
 /// Thrown when the card (3-D Secure) backend returns a non-success status.
 class CardRemoteException implements Exception {
@@ -117,68 +114,35 @@ class CardBrowser {
   };
 }
 
-/// Plain-JSON client for the card add (3-D Secure) backend.
+/// 3-D Secure card client, served by the main BigPay backend.
 ///
-/// Unlike [MainRemote], this backend is a simple REST service (no
-/// request encryption or session envelope), so it gets its own thin client
-/// rather than being forced through the BigPay channel.
+/// The card endpoints were folded into the main backend under the
+/// `/AddCard/...` routes, so they ride the same [MainRemote] encryption
+/// envelope (RSA/AES + SSL pinning) as every other API call instead of the
+/// old plain-JSON service.
 class CardRemote {
   CardRemote._();
+
+  static final MainRemote _remote = MainRemote();
 
   static Future<Map<String, dynamic>> _post(
     String path,
     Map<String, dynamic> body,
   ) async {
-    final uri = Uri.parse('${Env.cardBaseUrl}/api/$path');
-    final response = await http
-        .post(
-          uri,
-          headers: {
-            'Content-Type': 'application/json',
-            // ngrok's free tier serves an interstitial unless this header is
-            // present. Harmless for a real host, so only send it when the
-            // configured base URL actually points at an ngrok tunnel.
-            if (_isNgrok) 'ngrok-skip-browser-warning': 'true',
-          },
-          body: json.encode(body),
-        )
-        .timeout(const Duration(seconds: 40));
+    final response = await _remote.post(
+      path: path,
+      body: body,
+      isAuthenticated: true,
+    );
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw CardRemoteException(_httpErrorMessage(response));
-    }
-
-    Map<String, dynamic> decoded;
-    try {
-      decoded = json.decode(response.body) as Map<String, dynamic>;
-    } catch (_) {
-      // Non-JSON body (proxy interstitial, HTML error page, ...).
-      throw CardRemoteException('Unexpected response from the card service');
-    }
-
-    final status = decoded['status']?.toString();
-    if (status != null && status != 'success') {
+    if (response.status != StatusConstants.success) {
+      final message = response.message.trim();
       throw CardRemoteException(
-        decoded['message']?.toString() ?? 'Request failed',
+        message.isEmpty || message == 'null' ? 'Request failed' : message,
       );
     }
-    return (decoded['data'] as Map<String, dynamic>?) ?? const {};
-  }
 
-  /// True when the card backend is reached through an ngrok tunnel.
-  static bool get _isNgrok => Env.cardBaseUrl.contains('ngrok');
-
-  /// Extracts a human-readable error from an HTTP failure, preferring a JSON
-  /// `message` field when the server returned one.
-  static String _httpErrorMessage(http.Response response) {
-    try {
-      final decoded = json.decode(response.body) as Map<String, dynamic>;
-      final message = decoded['message']?.toString();
-      if (message != null && message.isNotEmpty) return message;
-    } catch (_) {
-      // Fall through to the status-code message.
-    }
-    return 'Request failed (HTTP ${response.statusCode})';
+    return (response.data as Map<String, dynamic>?) ?? const {};
   }
 
   static Future<CardInitiateResult> initiate({
@@ -186,7 +150,7 @@ class CardRemote {
     required String expiry,
     required String cvv,
   }) async {
-    final data = await _post('card/initiate', {
+    final data = await _post('AddCard/initiate', {
       'cardNumber': cardNumber,
       'expiry': expiry,
       'cvv': cvv,
@@ -195,7 +159,7 @@ class CardRemote {
   }
 
   static Future<CardEnrollResult> enroll(String id, {CardBrowser? browser}) async {
-    final data = await _post('card/enroll', {
+    final data = await _post('AddCard/enroll', {
       'id': id,
       if (browser != null) 'browser': browser.toJson(),
     });
@@ -203,7 +167,7 @@ class CardRemote {
   }
 
   static Future<CardLinkResult> status(String id) async {
-    final data = await _post('card/status', {'id': id});
+    final data = await _post('AddCard/status', {'id': id});
     return CardLinkResult.fromJson(data);
   }
 }

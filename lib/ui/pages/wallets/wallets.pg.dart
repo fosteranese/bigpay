@@ -355,7 +355,13 @@ class _WalletsPageState extends State<WalletsPage> {
       child: ProcessBuilder<List<Account>>(
         event: () => mainEvent,
         builder: (context, snapshot) {
-          if (snapshot.isLoading && _accounts == null) {
+          // Show the skeleton until the first data lands — not just while
+          // `isLoading`. The very first build can happen before `ProcessBloc`
+          // emits this event's loading state (the wallets fetch can be queued
+          // behind other app-wide actions), which otherwise rendered an empty
+          // list (a blank page) for that stretch. Once `_accounts` is set it's
+          // retained across refreshes, so this only affects the first load.
+          if (_accounts == null && !snapshot.hasError) {
             return Column(
               children: List.generate(
                 4,
@@ -553,7 +559,21 @@ class WalletListItem extends StatelessWidget {
                   _subtitle!,
                   style: context.caption,
                 ),
-          trailing: FormRadioButton(selected: false),
+          trailing: ValueListenableBuilder<String?>(
+            valueListenable: AppState.defaultSourceNotifier,
+            builder: (context, defaultSource, _) {
+              final selected =
+                  source.value != null && source.value == defaultSource;
+              return InkResponse(
+                radius: 24,
+                onTap: () => AppState.setDefaultSource(source.value),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: FormRadioButton(selected: selected),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

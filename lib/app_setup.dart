@@ -28,6 +28,7 @@ void bootstrap() {
       await Database.init();
       await AppState.loadTheme();
       await AppState.loadLocale();
+      await AppState.loadDefaultSource();
       ConnectivityUtil.init();
 
       await init();

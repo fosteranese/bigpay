@@ -109,6 +109,34 @@ class AppState {
     } catch (_) {}
   }
 
+  /// The user's preferred default payment source (a `Source.value`), shown as
+  /// the selected radio in the wallets list.
+  ///
+  /// Persisted locally for now: the wallets API neither returns nor accepts a
+  /// "default" flag yet, so this is the single source of truth until a backend
+  /// endpoint lands — at which point [setDefaultSource] gains a network call
+  /// and [loadDefaultSource] reads the server value.
+  static final defaultSourceNotifier = ValueNotifier<String?>(null);
+  static const _defaultSourceKey = 'default-source';
+
+  static Future<void> loadDefaultSource() async {
+    try {
+      final raw = await db.readRaw(_defaultSourceKey);
+      defaultSourceNotifier.value = (raw == null || raw.isEmpty) ? null : raw;
+    } catch (_) {}
+  }
+
+  static Future<void> setDefaultSource(String? value) async {
+    defaultSourceNotifier.value = value;
+    try {
+      if (value == null || value.isEmpty) {
+        await db.delete(_defaultSourceKey);
+      } else {
+        await db.add(key: _defaultSourceKey, payload: value);
+      }
+    } catch (_) {}
+  }
+
   static const _localeKey = 'app-locale';
   static const supportedLocales = [
     Locale('en'),

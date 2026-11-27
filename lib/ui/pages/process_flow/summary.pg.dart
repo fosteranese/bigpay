@@ -124,8 +124,7 @@ class _SummaryPageState extends State<SummaryPage> {
       final existing = (name == null ? null : verified[name])?.toString();
       final text = (existing != null && existing.isNotEmpty)
           ? existing
-          : (payeePrefillValue(widget.payee, item) ??
-                (item.field?.defaultValue ?? ''));
+          : (payeePrefillValue(widget.payee, item) ?? initialFieldValue(item));
       final controller = TextEditingController(text: text)
         ..addListener(_recomputeCanContinue);
       return (item, controller, FocusNode());

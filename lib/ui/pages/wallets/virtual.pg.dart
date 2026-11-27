@@ -94,10 +94,15 @@ class _VirtualWalletViewState extends State<VirtualWalletView> {
   String get _balance => _source?.balance ?? '0.00';
 
   /// Space the wallet card takes under the app bar: VirtualWalletCard's
-  /// height (177, or 131 without the fund button) plus its 15 top margin
-  /// and a 10 gap before the sheet.
+  /// height (177, or 131 without the fund button, or 177 for a linked card)
+  /// plus its 15 top margin and a 10 gap before the sheet.
   double get _height {
-    return 15 + (_isVirtual ? 177 : 131) + 10;
+    final source = _source;
+    final isCard = '${widget.account?.mode} ${source?.mode}'
+        .toUpperCase()
+        .contains('CARD');
+    final nonVirtual = isCard ? 177 : 131;
+    return 15 + (_isVirtual ? 177 : nonVirtual) + 10;
   }
 
   @override

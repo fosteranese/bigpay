@@ -1,0 +1,15 @@
+# Build / tooling artifacts for the vendored plugin.
+.dart_tool/
+build/
+pubspec.lock
+
+android/.gradle/
+android/build/
+android/local.properties
+
+example/.dart_tool/
+example/build/
+example/pubspec.lock
+example/android/.gradle/
+example/android/build/
+example/android/local.properties

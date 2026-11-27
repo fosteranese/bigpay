@@ -6,6 +6,8 @@ import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/logger.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/card/card_3ds_webview.dart';
+import 'package:bigpay/ui/components/card/payment_card_face.dart';
+import 'package:bigpay/ui/components/confirm_sheet.dart';
 import 'package:bigpay/ui/components/forms/input.dart';
 import 'package:bigpay/utils/app_state.util.dart';
 import 'package:bigpay/utils/message.util.dart';
@@ -117,6 +119,11 @@ class _AddCardPageState extends State<AddCardPage>
         expiry: _expiryController.text,
         cvv: _cvvController.text,
       );
+      logger.i(
+        'AddCard initiate -> id=${initiate.id} '
+        'ddcUrl=${initiate.deviceDataCollectionUrl.isNotEmpty} '
+        'accessToken=${initiate.accessToken.isNotEmpty}',
+      );
 
       // Device data collection (hidden headless webview).
       await Card3DsWebview.collectDeviceData(
@@ -127,6 +134,12 @@ class _AddCardPageState extends State<AddCardPage>
       final enroll = await CardRemote.enroll(
         initiate.id,
         browser: await _browserInfo(),
+      );
+      logger.i(
+        'AddCard enroll -> completed=${enroll.completed} '
+        'stepUp=${enroll.stepUpUrl != null} '
+        'accessToken=${enroll.accessToken != null} '
+        'result=${enroll.result?.status}/${enroll.result?.cardLinked}',
       );
 
       // Frictionless — authenticated without a challenge.
@@ -143,6 +156,22 @@ class _AddCardPageState extends State<AddCardPage>
 
       if (!mounted) return;
       MessageUtil.close(context);
+      final l10n = AppLocalizations.of(context)!;
+      // Reassure the user before the bank's 3-D Secure challenge: the
+      // verification amount is a check only, never actually charged.
+      final proceed = await showConfirmSheet(
+        context,
+        icon: Icons.verified_user_outlined,
+        title: l10n.walletsCardVerifyTitle,
+        message: l10n.walletsCardVerifyNotice('\$1.00'),
+        confirmText: l10n.commonContinue,
+        destructive: false,
+      );
+      if (!proceed) {
+        _finish(success: false, message: l10n.walletsCardVerifyCancelled);
+        return;
+      }
+      if (!mounted) return;
       final challenge = await Card3DsWebview.showChallenge(
         context,
         stepUpUrl: stepUpUrl,
@@ -213,9 +242,9 @@ class _AddCardPageState extends State<AddCardPage>
         final os = ios.systemVersion.replaceAll('.', '_');
         return ios.model.toLowerCase().contains('ipad')
             ? 'Mozilla/5.0 (iPad; CPU OS $os like Mac OS X) '
-                'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+                  'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
             : 'Mozilla/5.0 (iPhone; CPU iPhone OS $os like Mac OS X) '
-                'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
+                  'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
       }
       if (Platform.isAndroid) {
         final android = await device.androidInfo;
@@ -352,120 +381,17 @@ class _AddCardPageState extends State<AddCardPage>
     );
   }
 
-  BoxDecoration get _cardDecoration => BoxDecoration(
-    borderRadius: .circular(14),
-    gradient: LinearGradient(
-      colors: [
-        AppColors.primary,
-        AppColors.tint,
-      ],
-      begin: .topLeft,
-      end: .bottomRight,
-      stops: [
-        0.4558, // 45.58%
-        1.1780, // 117.8% (Values > 1.0 extend the gradient smoothly off-screen)
-      ],
-    ),
-    image: DecorationImage(
-      image: AssetImage('assets/img/card-bg.webp'),
-      fit: .contain,
-      opacity: 0.05,
-      alignment: .center,
-      repeat: .noRepeat,
-      filterQuality: .high,
-    ),
-  );
-
   Widget _buildCardFront(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
-      padding: .symmetric(horizontal: 28, vertical: 19),
-      decoration: _cardDecoration,
-      child: Column(
-        mainAxisSize: .max,
-        crossAxisAlignment: .start,
-        children: [
-          Row(
-            mainAxisSize: .max,
-            mainAxisAlignment: .spaceBetween,
-            children: [
-              Text(
-                l10n.walletsDebitLabel,
-                style: context.caption.copyWith(
-                  fontSize: 15,
-                  color: AppColors.white,
-                ),
-              ),
-              SvgPicture.asset(
-                'assets/img/bigpay-icon.svg',
-                width: 23,
-                colorFilter: .mode(AppColors.white, .srcIn),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Column(
-            mainAxisSize: .min,
-            crossAxisAlignment: .start,
-            children: [
-              Text(
-                _numberController.text.isEmpty
-                    ? '••••    ••••    ••••    ••••'
-                    : _numberController.text,
-                textAlign: .left,
-                style: context.header1.copyWith(
-                  color: AppColors.white,
-                ),
-              ),
-
-              Row(
-                mainAxisSize: .min,
-                mainAxisAlignment: .start,
-                crossAxisAlignment: .end,
-                children: [
-                  Text(
-                    'VALID\nTHRU   ',
-                    style: context.small.copyWith(
-                      fontSize: 6,
-                      color: AppColors.cardOverlay,
-                    ),
-                  ),
-                  Text(
-                    _expiryController.text.isEmpty
-                        ? '__/__'
-                        : _expiryController.text,
-                    style: context.small.copyWith(
-                      fontSize: 15,
-                      color: AppColors.cardOverlay,
-                      textBaseline: .alphabetic,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const Spacer(),
-          Row(
-            mainAxisSize: .max,
-            mainAxisAlignment: .spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  _nameController.text.trim().isEmpty
-                      ? l10n.walletsCardNamePlaceholder
-                      : _nameController.text.trim().toUpperCase(),
-                  overflow: .ellipsis,
-                  style: context.caption.copyWith(
-                    color: AppColors.cardOverlay,
-                  ),
-                ),
-              ),
-              _brand.mark(context),
-            ],
-          ),
-        ],
-      ),
+    return PaymentCardFace(
+      number: _numberController.text.isEmpty
+          ? '••••    ••••    ••••    ••••'
+          : _numberController.text,
+      expiry: _expiryController.text.isEmpty ? '__/__' : _expiryController.text,
+      holder: _nameController.text.trim().isEmpty
+          ? l10n.walletsCardNamePlaceholder
+          : _nameController.text.trim(),
+      brand: _brand.mark(context),
     );
   }
 
@@ -476,7 +402,7 @@ class _AddCardPageState extends State<AddCardPage>
   Widget _buildCardBack(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      decoration: _cardDecoration,
+      decoration: paymentCardDecoration,
       child: Column(
         mainAxisSize: .max,
         crossAxisAlignment: .stretch,

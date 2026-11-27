@@ -116,7 +116,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
     _formItems = visible.map((item) {
       final controller = TextEditingController(
-        text: item.field?.defaultValue ?? '',
+        text: initialFieldValue(item),
       )..addListener(_recomputeCanSubmit);
       return (item, controller, FocusNode());
     }).toList();

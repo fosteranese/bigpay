@@ -379,6 +379,13 @@
     "description": "Confirmation message before removing a linked wallet",
     "placeholders": { "name": { "type": "String" } }
   },
+  "walletsCardVerifyTitle": "Verify your card",
+  "walletsCardVerifyNotice": "For your security, we'll verify this card with your bank ({amount}). This is not a charge — no money will be debited from your card.",
+  "@walletsCardVerifyNotice": {
+    "description": "Shown before the 3-D Secure challenge when adding a card, reassuring the user the verification amount is not charged",
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "walletsCardVerifyCancelled": "Card verification cancelled",
   "beneficiariesRemoveTitle": "Remove beneficiary",
   "beneficiariesRemoveConfirm": "Remove {name} from your beneficiaries?",
   "@beneficiariesRemoveConfirm": {

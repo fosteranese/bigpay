@@ -10,10 +10,6 @@ abstract class Env {
   @EnviedField(varName: 'MAIN_ROOT_PATH', obfuscate: true)
   static final String mainRootPath = _Env.mainRootPath;
 
-  /// Base URL of the card add (3-D Secure) backend.
-  @EnviedField(varName: 'CARD_BASE_URL', obfuscate: true)
-  static final String cardBaseUrl = _Env.cardBaseUrl;
-
   @EnviedField(varName: 'PIN_LENGTH', obfuscate: true)
   static final int pingLength = _Env.pingLength;
 

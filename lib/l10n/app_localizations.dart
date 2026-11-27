@@ -1276,6 +1276,24 @@ abstract class AppLocalizations {
   /// **'Remove {name} from your wallets?'**
   String walletsRemoveConfirm(String name);
 
+  /// No description provided for @walletsCardVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your card'**
+  String get walletsCardVerifyTitle;
+
+  /// Shown before the 3-D Secure challenge when adding a card, reassuring the user the verification amount is not charged
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, we\'ll verify this card with your bank ({amount}). This is not a charge — no money will be debited from your card.'**
+  String walletsCardVerifyNotice(String amount);
+
+  /// No description provided for @walletsCardVerifyCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Card verification cancelled'**
+  String get walletsCardVerifyCancelled;
+
   /// No description provided for @beneficiariesRemoveTitle.
   ///
   /// In en, this message translates to:

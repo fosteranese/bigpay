@@ -631,6 +631,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get walletsCardVerifyTitle => 'Verify your card';
+
+  @override
+  String walletsCardVerifyNotice(String amount) {
+    return 'For your security, we\'ll verify this card with your bank ($amount). This is not a charge — no money will be debited from your card.';
+  }
+
+  @override
+  String get walletsCardVerifyCancelled => 'Card verification cancelled';
+
+  @override
   String get beneficiariesRemoveTitle => 'Begünstigten entfernen';
 
   @override

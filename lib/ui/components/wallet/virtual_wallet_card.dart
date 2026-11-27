@@ -7,11 +7,13 @@ import 'package:bigpay/data/models/auth_data/activity.dart';
 import 'package:bigpay/data/models/auth_data/activity_datum.dart';
 import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/services/get_service_form_data_action.dart';
+import 'package:bigpay/ui/components/card/payment_card_face.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
 import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 
 /// The wallet balance card — used on the dashboard and the wallet details page.
 ///
@@ -114,12 +116,22 @@ class _VirtualWalletCardState extends State<VirtualWalletCard> {
     );
   }
 
+  /// Whether this card represents a linked payment card (vs. the virtual
+  /// wallet or a bank/mobile-money source).
+  bool get _isCard {
+    final source = widget.wallet?.sources?.firstOrNull;
+    return !widget.isVirtual &&
+        '${widget.wallet?.mode} ${source?.mode}'.toUpperCase().contains('CARD');
+  }
+
   double get _height {
-    return widget.isVirtual ? 177 : 177 - 46;
+    if (widget.isVirtual) return 177;
+    return _isCard ? 177 : 131;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isCard) return _linkedCard(context);
     final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.maxFinite,
@@ -220,12 +232,22 @@ class _VirtualWalletCardState extends State<VirtualWalletCard> {
                     },
                   )
                 else
-                  Text(
-                    widget.wallet?.sources?.firstOrNull?.tile ??
-                        widget.title ??
-                        '',
-                    style: context.display1.copyWith(
-                      color: AppColors.white,
+                  // The card description ("VISA •••• 2503 · exp 01/29") is
+                  // longer than a balance, so it can exceed the card width at
+                  // display1 on a phone and wrap to a second line — which then
+                  // overflows the fixed card height. Scale it down to one line
+                  // instead of wrapping.
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.wallet?.sources?.firstOrNull?.tile ??
+                          widget.title ??
+                          '',
+                      maxLines: 1,
+                      style: context.display1.copyWith(
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 const Spacer(),
@@ -267,5 +289,108 @@ class _VirtualWalletCardState extends State<VirtualWalletCard> {
         ],
       ),
     );
+  }
+
+  /// The linked-card face — the same card the add-card form previews, filled
+  /// with this card's brand, masked number and expiry.
+  Widget _linkedCard(BuildContext context) {
+    final source = widget.wallet?.sources?.firstOrNull;
+    final raw = source?.tile ?? widget.title ?? '';
+    final desc = _CardDescriptor.parse(raw);
+    return Container(
+      width: double.maxFinite,
+      height: _height,
+      margin: const .all(15),
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.25),
+            offset: const Offset(0, 8),
+            blurRadius: 24,
+            spreadRadius: -4,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: .circular(14),
+        child: PaymentCardFace(
+          number: desc.displayNumber ?? raw,
+          expiry: desc.expiry ?? '',
+          holder: AppState.currentUser?.user?.name ?? '',
+          brand: desc.brandMark(),
+        ),
+      ),
+    );
+  }
+}
+
+/// Parses the backend's one-line card descriptor — e.g.
+/// "VISA •••• 2503 · exp 01/29" — into the parts a card face renders.
+/// Anything that doesn't look like a card yields nulls, and the caller falls
+/// back to showing the raw line.
+class _CardDescriptor {
+  const _CardDescriptor({this.brand, this.number, this.expiry});
+
+  final String? brand;
+  final String? number;
+  final String? expiry;
+
+  static _CardDescriptor parse(String raw) {
+    final text = raw.trim();
+    if (text.isEmpty) return const _CardDescriptor();
+
+    final expiryMatch = RegExp(r'(\d{1,2})\s*/\s*(\d{2})').firstMatch(text);
+    final expiry = expiryMatch == null
+        ? null
+        : '${expiryMatch.group(1)!.padLeft(2, '0')}/${expiryMatch.group(2)}';
+
+    var rest = text;
+    if (expiryMatch != null) rest = rest.substring(0, expiryMatch.start);
+    rest = rest
+        .replaceAll(RegExp(r'\bexp\b.*$', caseSensitive: false), '')
+        .replaceAll(RegExp(r'[·•|\-]+\s*$'), '')
+        .trim();
+
+    // Brand = the leading alphabetic run (e.g. "VISA", "MASTER CARD").
+    final brandMatch = RegExp(
+      r'^([A-Za-z]+(?:\s+[A-Za-z]+)?)',
+    ).firstMatch(rest);
+    final brand = brandMatch?.group(1)?.trim();
+    var number = rest;
+    if (brandMatch != null) number = rest.substring(brandMatch.end);
+    number = number.replaceAll(RegExp(r'^[·•|\-\s]+'), '').trim();
+
+    return _CardDescriptor(
+      brand: (brand == null || brand.isEmpty) ? null : brand,
+      number: number.isEmpty ? null : number,
+      expiry: expiry,
+    );
+  }
+
+  /// "•••• •••• •••• 2503" when only a 4-digit tail is known, so the face
+  /// still reads like a card number; otherwise the number as given.
+  String? get displayNumber {
+    final n = number;
+    if (n == null) return null;
+    final digits = n.replaceAll(RegExp(r'\D'), '');
+    if (digits.length == 4) return '•••• •••• •••• $digits';
+    return n;
+  }
+
+  Widget? brandMark() {
+    final key = (brand ?? '').toUpperCase().replaceAll(RegExp(r'[^A-Z]'), '');
+    if (key.contains('VISA')) {
+      return SvgPicture.asset(SvgImages.visa, height: 20);
+    }
+    if (key.contains('MASTER')) {
+      return SvgPicture.asset(SvgImages.mastercard, height: 26);
+    }
+    if (key.contains('AMEX') || key.contains('AMERICANEXPRESS')) {
+      return SvgPicture.asset(SvgImages.amex, height: 26);
+    }
+    if (key.contains('DISCOVER')) {
+      return SvgPicture.asset(SvgImages.discover, height: 20);
+    }
+    return null;
   }
 }

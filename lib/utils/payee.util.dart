@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:bigpay/constants/field.const.dart';
 import 'package:bigpay/data/models/general_flow/general_flow_fields_datum.dart';
 import 'package:bigpay/data/models/payee/payee.dart';
+import 'package:bigpay/utils/app_state.util.dart';
 
 /// The saved value for [fieldName] in the payee's stored form data, matched
 /// case-insensitively: the form definition carries lower-camel field names
@@ -63,5 +64,29 @@ String? payeePrefillValue(Payee? payee, GeneralFlowFieldsDatum datum) {
               _isPayeeField(datum))
           ? payee.value
           : null);
+  return value;
+}
+
+/// The starting value for a form field's controller.
+///
+/// The form's own default wins. Otherwise, for the payment-source
+/// (`SourceAccount`) field, the user's default wallet is returned — so the
+/// source of funds / account to debit is already chosen when a transaction
+/// starts — provided that wallet is one of the sources this form allows.
+String initialFieldValue(GeneralFlowFieldsDatum datum) {
+  final value = datum.field?.defaultValue ?? '';
+  if (value.isNotEmpty) return value;
+
+  final isSource =
+      datum.field?.fieldDataType == FieldDataTypesConst.sourceAccount ||
+      datum.field?.fieldName == 'SourceAccount';
+  if (isSource) {
+    final defaultSource = AppState.defaultSourceNotifier.value;
+    if (defaultSource != null &&
+        (datum.lov ?? const []).any((l) => l.lovValue == defaultSource)) {
+      return defaultSource;
+    }
+  }
+
   return value;
 }
