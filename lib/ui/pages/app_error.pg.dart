@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:bigpay/blocs/process/process_bloc.dart';
+import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
 import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/forms.dart';
+import 'package:bigpay/ui/components/process_builder.dart';
 import 'package:bigpay/ui/layouts/main.lo.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
@@ -14,28 +17,29 @@ class AppErrorPage extends StatelessWidget {
   const AppErrorPage({
     super.key,
     required this.error,
-    this.title = 'App Error',
+    this.title,
   });
   static PageRouteDefinition route = PageRouteDefinition(
     path: '/app-error',
   );
 
-  final String title;
+  final String? title;
   final DataError error;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       showBackBtn: false,
-      bottomNav: BlocBuilder<ProcessBloc, ProcessState>(
-        buildWhen: (previous, current) => current.event == startUpEvent,
-        builder: (context, state) {
+      bottomNav: ProcessBuilder<InitializationData>(
+        event: () => startUpEvent,
+        builder: (context, snapshot) {
           return FormButton(
-            loading: state is ExecutingProcess && state.event == startUpEvent,
+            loading: snapshot.isLoading,
             onPressed: () {
               context.read<ProcessBloc>().add(startUpEvent);
             },
-            text: 'Retry',
+            text: l10n.commonRetry,
           );
         },
       ),
@@ -53,11 +57,11 @@ class AppErrorPage extends StatelessWidget {
                 size: 100,
                 color: AppColors.danger,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: Spacing.xl),
               Text(
-                title,
+                title ?? l10n.appErrorTitle,
                 textAlign: .center,
-                style: AppTypography.display2.copyWith(
+                style: context.display2.copyWith(
                   color: AppColors.danger,
                 ),
               ),
@@ -65,8 +69,8 @@ class AppErrorPage extends StatelessWidget {
               Text(
                 error.message,
                 textAlign: .center,
-                style: AppTypography.smallDetails.copyWith(
-                  color: AppColors.black,
+                style: context.smallDetails.copyWith(
+                  color: context.textPrimary,
                 ),
               ),
             ],

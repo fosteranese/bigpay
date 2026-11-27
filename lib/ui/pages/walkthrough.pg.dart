@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigpay/data/models/initialization_data/initialization_data.dart';
 import 'package:bigpay/data/models/initialization_data/walk_through.dart';
+import 'package:bigpay/l10n/app_localizations.dart';
 import 'package:bigpay/models/actions/startup_action.dart';
 import 'package:bigpay/routes/app_router.dart';
 import 'package:bigpay/ui/components/forms/button.dart';
@@ -14,6 +14,9 @@ import 'package:bigpay/ui/pages/auth/signup/signup.dart';
 import 'package:bigpay/ui/theme/app_theme.dart';
 import 'package:bigpay/ui/theme/app_typography.dart';
 import 'package:bigpay/ui/theme/assets/app_images.dart';
+import 'package:bigpay/ui/theme/responsive.dart';
+import 'package:bigpay/utils/app_state.util.dart';
+import 'package:bigpay/utils/walkthrough_images.util.dart';
 
 class WalkthroughPage extends StatefulWidget {
   const WalkthroughPage({super.key});
@@ -30,9 +33,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   int _currentPage = 0;
   List<WalkThrough> _walkThrough = const [];
   Timer? _timer;
-  bool _pause = false;
-  String baseUrl = '';
-  String imageDirectory = '';
+  // final bool _pause = false;
 
   Widget _buildPageIndicator() {
     List<Widget> list = [];
@@ -65,9 +66,9 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
           return;
         }
 
-        if (_pause) {
-          return;
-        }
+        // if (_pause) {
+        //   return;
+        // }
         if (_currentPage == _walkThrough.length - 1) {
           // _currentPage = 0;
           // _pageController.jumpToPage(_currentPage);
@@ -94,7 +95,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
       height: isActive ? activeSize : size,
       width: isActive ? activeSize : size,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.white : AppColors.flora,
+        color: isActive ? context.cardBg : context.textTertiary,
         borderRadius: .all(
           .circular(size),
         ),
@@ -111,32 +112,24 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   }
 
   Widget _slideImage(WalkThrough item) {
-    final fallback = Image.asset(
-      JpgImages.walkthrough1,
-      alignment: .center,
-      fit: .cover,
-    );
-
-    final url = '$baseUrl/$imageDirectory/${item.picture}';
-    if (item.picture == null) {
-      return fallback;
-    }
-
-    return CachedNetworkImage(
-      imageUrl: url,
-      placeholder: (context, url) => fallback,
-      errorWidget: (context, url, error) => fallback,
-    );
+    // Saved on the device during the splash (WalkthroughImages.prepare);
+    // anything not downloaded yet uses the bundled image.
+    final file = WalkthroughImages.fileFor(item);
+    return file != null
+        ? Image.file(file, alignment: .center, fit: .cover)
+        : Image.asset(JpgImages.walkthrough1, alignment: .center, fit: .cover);
   }
 
   @override
   Widget build(BuildContext context) {
     return ProcessBuilder<InitializationData>(
-      event: startUpEvent,
+      event: () => startUpEvent,
       builder: (context, snapshot) {
-        baseUrl = snapshot.data?.imageBaseUrl ?? '';
-        imageDirectory = snapshot.data?.imageDirectory ?? '';
-        _walkThrough = snapshot.data?.walkThrough ?? [];
+        // The background refresh after the cached startup emission passes
+        // through a loading state with no data — keep the last known slides
+        // (AppState.data) instead of rendering an empty, blank PageView.
+        _walkThrough =
+            (snapshot.data ?? AppState.data)?.walkThrough ?? _walkThrough;
 
         return _buildContent();
       },
@@ -160,8 +153,33 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
             children: _walkThrough
                 .map(
                   (item) => Stack(
+                    // fit: .expand — without it (the default is loose),
+                    // the slide image sizes to its own intrinsic pixel size
+                    // instead of filling the slide, exposing bare Scaffold
+                    // background around/behind it (worst on a wide or
+                    // book-mode window, where the gap is largest).
+                    fit: .expand,
                     children: [
                       _slideImage(item),
+                      // Darkens the top (title) and bottom (buttons) so the
+                      // white text stays readable over a light image.
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+                            colors: [
+                              Color(0xD9000000),
+                              Color(0x99000000),
+                              Color(0x00000000),
+                              Color(0x00000000),
+                              Color(0xA6000000),
+                              Color(0xE6000000),
+                            ],
+                          ),
+                        ),
+                      ),
                       Align(
                         alignment: .topCenter,
                         child: SafeArea(
@@ -170,22 +188,26 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                               horizontal: 20,
                               vertical: 40,
                             ),
-                            child: Column(
-                              mainAxisSize: .min,
-                              mainAxisAlignment: .start,
-                              crossAxisAlignment: .start,
-                              children: [
-                                Text(
-                                  item.title ?? '',
-                                  style: AppTypography.display1,
-                                ),
-                                Text(
-                                  item.description ?? '',
-                                  style: AppTypography.smallDetails.copyWith(
-                                    color: AppColors.white,
+                            child: BoundedContent(
+                              child: Column(
+                                mainAxisSize: .min,
+                                mainAxisAlignment: .start,
+                                crossAxisAlignment: .start,
+                                children: [
+                                  Text(
+                                    item.title ?? '',
+                                    style: context.display1.copyWith(
+                                      color: AppColors.white,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    item.description ?? '',
+                                    style: context.smallDetails.copyWith(
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -200,8 +222,8 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
                             end: .bottomCenter,
                             colors: [
                               Colors.transparent,
-                              AppColors.black.withAlpha(125),
-                              AppColors.black.withAlpha(240),
+                              context.textPrimary.withAlpha(125),
+                              context.textPrimary.withAlpha(240),
                             ],
                           ),
                         ),
@@ -217,46 +239,52 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
             child: SafeArea(
               child: Padding(
                 padding: const .all(20),
-                child: Column(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: .end,
-                  crossAxisAlignment: .center,
-                  children: [
-                    _buildPageIndicator(),
-                    FormButton(
-                      onPressed: () {
-                        AppRouter.router.push(
-                          StartSignUpPage.route.path,
-                        );
-                      },
-                      text: 'Create a New Account',
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        AppRouter.router.push(
-                          NewLoginPage.route.path,
-                        );
-                      },
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Already have an Account? ',
-                              style: AppTypography.smallDetails.copyWith(
-                                color: AppColors.offWhite,
+                child: BoundedContent(
+                  child: Column(
+                    mainAxisSize: .min,
+                    mainAxisAlignment: .end,
+                    crossAxisAlignment: .center,
+                    children: [
+                      _buildPageIndicator(),
+                      FormButton(
+                        onPressed: () {
+                          AppRouter.router.push(
+                            StartSignUpPage.route.path,
+                          );
+                        },
+                        text: AppLocalizations.of(
+                          context,
+                        )!.walkthroughCreateAccount,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          AppRouter.router.push(
+                            NewLoginPage.route.path,
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: AppLocalizations.of(
+                                  context,
+                                )!.walkthroughAlreadyHaveAccount,
+                                style: context.smallDetails.copyWith(
+                                  color: context.divider,
+                                ),
                               ),
-                            ),
-                            TextSpan(
-                              text: 'Sign In',
-                              style: AppTypography.buttons.copyWith(
-                                color: AppColors.secondary,
+                              TextSpan(
+                                text: AppLocalizations.of(context)!.authSignIn,
+                                style: context.buttons.copyWith(
+                                  color: AppColors.brightGreen,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -269,6 +297,7 @@ class _WalkthroughPageState extends State<WalkthroughPage> {
   @override
   dispose() {
     _timer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 }

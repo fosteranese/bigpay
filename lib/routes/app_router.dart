@@ -1,28 +1,51 @@
-import 'package:bigpay/routes/more_routes.dart';
-import 'package:bigpay/routes/wallet_routes.dart';
-import 'package:bigpay/ui/pages/splash_screen.pg.dart';
+import 'dart:async';
+
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoPage;
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bigpay/routes/auth_routes.dart';
 import 'package:bigpay/routes/kyc_routes.dart';
-import 'package:bigpay/routes/process_flow_routes.dart';
+import 'package:bigpay/routes/main_shell_routes.dart';
 import 'package:bigpay/routes/root_routes.dart';
+import 'package:bigpay/ui/pages/splash_screen.pg.dart';
+
+final appRouteObserver = RouteObserver<PageRoute<dynamic>>();
+
+/// The app's top-level navigator — the one the bottom-nav shell lives inside.
+/// A route pushed onto it (via `rootNavigator: true`) covers the shell, so it
+/// shows full-screen with no bottom nav bar.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: SplashScreenPage.route.path,
+    observers: [appRouteObserver],
     routes: [
       ...rootRoutes,
       authRoute,
       kycRoute,
-      processFlowRoute,
-      walletRoute,
-      moreRoute,
+      mainShellRoute,
     ],
   );
+}
+
+extension AppRouterNavigation on GoRouter {
+  void popUntilNamed(String name) {
+    while (name != AppRouter.router.state.name && AppRouter.router.canPop()) {
+      AppRouter.router.pop();
+    }
+  }
+
+  void popUntilNamedRoutes(List<String> paths) {
+    while (!paths.contains(AppRouter.router.state.path) &&
+        AppRouter.router.canPop()) {
+      AppRouter.router.pop();
+    }
+  }
 }
 
 class PageRouteDefinition {
@@ -39,11 +62,32 @@ class PageRouteDefinition {
 }
 
 extension GoRouteX on PageRouteDefinition {
-  GoRoute toGoRoute(Widget Function() page, {bool nested = false}) {
+  GoRoute toGoRoute(
+    Widget Function() page, {
+    bool nested = false,
+    bool rootNavigator = false,
+    FutureOr<bool> Function(BuildContext, GoRouterState)? onExit,
+  }) {
     return GoRoute(
       name: name,
       path: nested ? subPath : path,
-      builder: (context, state) => page(),
+      // Pushed onto the root navigator, so it covers the bottom-nav shell.
+      parentNavigatorKey: rootNavigator ? rootNavigatorKey : null,
+      // CupertinoPage (not the default MaterialPage) so the route gets the
+      // iOS back-swipe gesture. go_router 18.x builds its MaterialPage from
+      // the `material_ui` package, whose PageTransitionsTheme handling broke
+      // the CupertinoPageTransitionsBuilder gesture wiring.
+      pageBuilder: (context, state) => CupertinoPage(
+        key: state.pageKey,
+        name: state.name ?? state.path,
+        arguments: <String, String>{
+          ...state.pathParameters,
+          ...state.uri.queryParameters,
+        },
+        restorationId: state.pageKey.value,
+        child: page(),
+      ),
+      onExit: onExit,
     );
   }
 
@@ -51,11 +95,25 @@ extension GoRouteX on PageRouteDefinition {
   GoRoute toGoRouteWithState(
     Widget Function(GoRouterState state) page, {
     bool nested = false,
+    bool rootNavigator = false,
+    FutureOr<bool> Function(BuildContext, GoRouterState)? onExit,
   }) {
     return GoRoute(
       name: name,
       path: nested ? subPath : path,
-      builder: (context, state) => page(state),
+      parentNavigatorKey: rootNavigator ? rootNavigatorKey : null,
+      // See [toGoRoute] — CupertinoPage restores the iOS back-swipe.
+      pageBuilder: (context, state) => CupertinoPage(
+        key: state.pageKey,
+        name: state.name ?? state.path,
+        arguments: <String, String>{
+          ...state.pathParameters,
+          ...state.uri.queryParameters,
+        },
+        restorationId: state.pageKey.value,
+        child: page(state),
+      ),
+      onExit: onExit,
     );
   }
 }

@@ -1,3 +1,6 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:bigpay/constants/response.const.dart';
 import 'package:bigpay/constants/status.const.dart';
 import 'package:bigpay/data/cache/process_store.dart';
@@ -6,8 +9,6 @@ import 'package:bigpay/data/models/response/response.md.dart';
 import 'package:bigpay/models/actions/action.dart';
 import 'package:bigpay/utils/remote.util.dart';
 import 'package:bigpay/utils/response.util.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'process_event.dart';
 part 'process_state.dart';
@@ -16,7 +17,14 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
   ProcessBloc({
     required this.store,
   }) : super(const InitialProcess(event: ZeroProcessEvent())) {
-    on<ExecuteProcessEvent>(_onExecuteProcess);
+    // Serialize requests so a rapid second dispatch of the same action sees the
+    // first one's cache write (otherwise the concurrent default could make both
+    // miss the cache and double-fetch). bloc 9.x no longer ships `sequential()`
+    // inline, so this is the equivalent.
+    on<ExecuteProcessEvent>(
+      _onExecuteProcess,
+      transformer: (events, mapper) => events.asyncExpand(mapper),
+    );
   }
 
   final ProcessStore store;
@@ -43,9 +51,13 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
   ) async {
     bool isSilent = false;
 
-    var action = event.action;
+    var action = event.action.copyWith(
+      endpoint: event.action.endpointFunc == null
+          ? event.action.endpoint
+          : event.action.endpointFunc!.call(),
+    );
     if (event.useSaveActionPayload) {
-      final saved = store.inputs.read(event.action.endpoint);
+      final saved = store.inputs.read(action.endpoint);
       if (saved == null) {
         emit(
           ExecuteProcessError(
@@ -57,7 +69,9 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
         );
         return;
       }
-      action = event.action.copyWith(payload: saved.payload);
+      // Rebuild from the *resolved* action so the endpointFunc resolution
+      // isn't discarded.
+      action = action.copyWith(payload: saved.payload);
     }
 
     final cacheKey = ResponseCache.keyFor(action);
@@ -94,20 +108,24 @@ class ProcessBloc extends Bloc<ProcessEvent, ProcessState> {
       }
 
       if (event.saveActionPayload) {
-        store.inputs.write(event.action);
+        // Store the *resolved* action so a later useSaveActionPayload lookup
+        // under the same resolved endpoint finds it.
+        store.inputs.write(action);
       }
 
-      final response = await RemoteUtil.makeCall(action);
+      final response = action.noRemoteFunc == null
+          ? await RemoteUtil.makeCall(action)
+          : action.noRemoteFunc?.call(action.payload);
 
       if (event.saveActionResponse &&
-          response.status == StatusConstants.success) {
+          response!.status == StatusConstants.success) {
         store.cache.write(cacheKey, response, endpoint: action.endpoint);
       }
 
       emit(
         ProcessExecuted(
           event: event,
-          result: _parsed(action, response),
+          result: _parsed(action, response!),
           isCachedData: false,
           isSilent: isSilent,
         ),

@@ -7,7 +7,14 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:bigpay/logger.dart';
 
 class Database {
-  static late Box<dynamic> box;
+  static Box<dynamic>? _box;
+
+  /// The open box. Only valid after [init]/[checkBeforeOperation] — every
+  /// public operation below routes through [checkBeforeOperation] first.
+  static Box<dynamic> get box => _box!;
+
+  /// Lets tests inject a fake box (and the app assign the real one in [init]).
+  static set box(Box<dynamic> value) => _box = value;
 
   static const _boxName = 'bigpay-db.box';
   static const _keyName = 'bigpay-db-key';
@@ -48,34 +55,61 @@ class Database {
   /// Opens the box, generating and storing the key on first launch.
   ///
   /// If the key and the box ever diverge — a restored backup, a cleared
-  /// Keystore — every frame fails its checksum and Hive's `crashRecovery`
-  /// (on by default) truncates the box rather than throwing, so the app comes
-  /// up with an empty box instead of no box. That is the right outcome here:
-  /// everything stored is re-fetchable cache, and the alternative is refusing
-  /// to start. Verified against a deliberately mismatched key.
+  /// Keystore/Keychain — `crashRecovery` only heals a *truncated trailing*
+  /// frame; a box that can't be decoded with the current key makes hive_ce
+  /// throw instead (`Could not read the box. The encryption cipher may be
+  /// wrong or the box may be corrupted.`). To keep the app startable we
+  /// delete the unreadable box and retry, coming up empty. That is the right
+  /// outcome here: everything stored is re-fetchable cache, and the
+  /// alternative is refusing to start.
   static Future<void> init() async {
     try {
       final key = await _encryptionKey();
-
-      Database.box = await Hive.openBox(
-        _boxName,
-        encryptionCipher: HiveAesCipher(key),
-      );
+      await _open(key);
     } catch (ex) {
       logger.e(ex);
+
+      // A box that can't be decoded with the current key (diverged
+      // Keychain/Keystore, restored backup) never got registered, so it must
+      // be removed from disk before a fresh open can succeed.
+      try {
+        await Hive.deleteBoxFromDisk(_boxName);
+      } catch (_) {
+        // Nothing on disk — a fresh open below creates the box.
+      }
+      await _open(await _encryptionKey());
     }
   }
 
+  static Future<void> _open(List<int> key) async {
+    Database._box = await Hive.openBox(
+      _boxName,
+      encryptionCipher: HiveAesCipher(key),
+    );
+  }
+
   Future<void> deleteAll() async {
-    Database.box.clear();
+    await checkBeforeOperation();
+    await Database.box.clear();
+  }
+
+  /// Deletes every key except [keep].
+  Future<void> deleteAllExcept(Set<String> keep) async {
+    await checkBeforeOperation();
+    final doomed = Database.box.keys.where((k) => !keep.contains(k)).toList();
+    await Database.box.deleteAll(doomed);
   }
 
   Future<void> delete(String key) async {
+    await checkBeforeOperation();
     await Database.box.delete(key);
   }
 
+  /// Ensures the box is open before an operation. The box may never have been
+  /// assigned (init not yet run, or it caught an error) — check the nullable
+  /// backing field, not [box], or this guard itself would throw.
   Future<void> checkBeforeOperation() async {
-    if (!Database.box.isOpen) {
+    if (_box == null || !_box!.isOpen) {
       await Database.init();
     }
   }
@@ -114,7 +148,14 @@ class Database {
     try {
       await checkBeforeOperation();
       final record = await Database.box.get(key) as String?;
-      return record;
+      if (record == null) {
+        return null;
+      }
+
+      // add() always json.encode()s its payload (so a String payload comes
+      // back quoted, e.g. `"en"`) — decode here so callers get back exactly
+      // what they originally passed in.
+      return json.decode(record).toString();
     } catch (ex) {
       logger.e('DB readRaw error: $ex');
       return null;
